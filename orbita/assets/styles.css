@@ -1,0 +1,4 @@
+/* Web-only basic styles to align root background */
+html, body, #root {
+  background: #0E0F13;
+}
