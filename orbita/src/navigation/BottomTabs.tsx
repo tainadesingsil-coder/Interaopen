@@ -1,7 +1,7 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer, DefaultTheme, Theme } from '@react-navigation/native';
-import { FeedScreen } from '../screens/FeedScreen';
+import { FeedStack } from './FeedStack';
 import { CreateContentScreen } from '../screens/CreateContentScreen';
 import { WatchPartyScreen } from '../screens/WatchPartyScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
@@ -44,7 +44,7 @@ export function RootTabs() {
           },
         })}
       >
-        <Tab.Screen name="Feed" component={FeedScreen} />
+        <Tab.Screen name="Feed" component={FeedStack} />
         <Tab.Screen name="Criar Conteúdo" component={CreateContentScreen} />
         <Tab.Screen name="Watch Party" component={WatchPartyScreen} />
         <Tab.Screen name="Perfil" component={ProfileScreen} />
