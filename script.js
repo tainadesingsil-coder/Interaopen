@@ -326,129 +326,224 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(45, 2, 0.1, 100);
-  camera.position.set(0, 0.8, 5);
+  camera.position.set(0, 1.2, 6);
 
   // Lights
-  const hemi = new THREE.HemisphereLight(0x8ec5ff, 0x0b0f1a, 0.8);
+  const hemi = new THREE.HemisphereLight(0x8ec5ff, 0x0b0f1a, 0.9);
   scene.add(hemi);
-  const key = new THREE.DirectionalLight(0xffffff, 1.1);
-  key.position.set(3, 3, 2);
+  const key = new THREE.DirectionalLight(0xffffff, 1.0);
+  key.position.set(3, 4, 2);
   scene.add(key);
-  const rim = new THREE.PointLight(0x7c3aed, 1.2, 8);
-  rim.position.set(-2.4, 1.2, 2.2);
+  const rim = new THREE.PointLight(0x7c3aed, 1.0, 10);
+  rim.position.set(-3, 1.2, 2.2);
   scene.add(rim);
 
-  // Ground
+  // Ground ring
   const ground = new THREE.Mesh(
-    new THREE.CylinderGeometry(5, 5, 0.2, 64),
-    new THREE.MeshStandardMaterial({ color: 0x0f1020, metalness: 0.6, roughness: 0.8 })
+    new THREE.CylinderGeometry(7, 7, 0.15, 80),
+    new THREE.MeshStandardMaterial({ color: 0x0f1020, metalness: 0.4, roughness: 0.9 })
   );
-  ground.position.y = -1.1;
+  ground.position.y = -1.2;
   scene.add(ground);
 
-  // Robot made from primitives
-  const metal = new THREE.MeshPhysicalMaterial({ color: 0xbad7ff, metalness: 0.5, roughness: 0.2, clearcoat: 0.7 });
+  // Materials
+  const metal = new THREE.MeshPhysicalMaterial({ color: 0xbad7ff, metalness: 0.6, roughness: 0.25, clearcoat: 0.7 });
   const dark = new THREE.MeshStandardMaterial({ color: 0x1a2235, metalness: 0.2, roughness: 0.6 });
   const glow = new THREE.MeshStandardMaterial({ color: 0x7c3aed, emissive: 0x7c3aed, emissiveIntensity: 0.8 });
 
+  // Robot parts
+  const robot = new THREE.Group();
   const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.6, 1.0, 8, 16), metal);
   body.position.y = -0.1;
-
   const head = new THREE.Mesh(new THREE.SphereGeometry(0.38, 24, 24), dark);
   head.position.y = 0.9;
   const eye = new THREE.Mesh(new THREE.CapsuleGeometry(0.26, 0.02, 8, 16), glow);
   eye.rotation.z = Math.PI / 2;
   eye.position.set(0, 0.95, 0.32);
-
+  // Arms
   const armL = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.9, 12), metal);
   armL.position.set(-0.6, 0.2, 0);
   armL.rotation.z = 0.5;
   const armR = armL.clone();
   armR.position.x = 0.6; armR.rotation.z = -0.5;
+  // Legs
+  const legGeo = new THREE.CapsuleGeometry(0.1, 0.7, 6, 12);
+  const legL = new THREE.Mesh(legGeo, metal);
+  legL.position.set(-0.22, -0.8, 0);
+  const legR = new THREE.Mesh(legGeo, metal);
+  legR.position.set(0.22, -0.8, 0);
 
-  // Camera device in right hand
-  const camGroup = new THREE.Group();
-  const camBody = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.32, 0.25), dark);
-  const camLens = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.28, 24), metal);
-  camLens.rotation.x = Math.PI / 2;
-  camLens.position.z = 0.2;
-  const flash = new THREE.PointLight(0xffffff, 0, 5);
-  flash.position.set(0.2, 0.2, 0.1);
-  camGroup.add(camBody, camLens, flash);
-  camGroup.position.set(0.95, 0.45, 0.2);
+  // Phone in right hand
+  const phone = new THREE.Group();
+  const phoneBody = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.45, 0.04), dark);
+  const phoneScreen = new THREE.Mesh(new THREE.PlaneGeometry(0.22, 0.38), new THREE.MeshStandardMaterial({ color: 0x051017, emissive: 0x00d4ff, emissiveIntensity: 0.5 }));
+  phoneScreen.position.z = 0.0225;
+  phone.add(phoneBody, phoneScreen);
+  phone.position.set(0.92, 0.45, 0.2);
 
-  const robot = new THREE.Group();
-  robot.add(body, head, eye, armL, armR, camGroup);
+  robot.add(body, head, eye, armL, armR, legL, legR, phone);
   scene.add(robot);
 
-  // Floating storefronts (panels) around robot
-  const panelGeo = new THREE.PlaneGeometry(0.9, 0.6);
-  const panels = [];
-  const panelMats = [
-    new THREE.MeshStandardMaterial({ color: 0x16203a, metalness: 0.1, roughness: 0.8 }),
-    new THREE.MeshStandardMaterial({ color: 0x1d2748, metalness: 0.1, roughness: 0.8 }),
-    new THREE.MeshStandardMaterial({ color: 0x0f1a2e, metalness: 0.1, roughness: 0.8 })
-  ];
-  for (let i = 0; i < 6; i++) {
-    const p = new THREE.Mesh(panelGeo, panelMats[i % panelMats.length]);
-    p.position.set(Math.cos(i) * 2.2, 0.6 + Math.sin(i * 1.3) * 0.4, Math.sin(i) * 1.4);
-    p.rotation.y = -Math.atan2(p.position.z, p.position.x) + Math.PI / 2;
-    panels.push(p);
-    scene.add(p);
+  // Helper: make label texture
+  function makeLabelTexture(text, color) {
+    const pad = 16;
+    const font = 42;
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    ctx.font = `600 ${font}px Manrope, sans-serif`;
+    const w = Math.ceil(ctx.measureText(text).width) + pad * 2;
+    const h = font + pad * 1.5;
+    canvas.width = w; canvas.height = h;
+    // bg
+    ctx.fillStyle = 'rgba(12,16,28,0.8)';
+    ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+    ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.roundRect(1.5, 1.5, w-3, h-3, 14); ctx.fill(); ctx.stroke();
+    // text
+    ctx.fillStyle = `#${color.toString(16).padStart(6,'0')}`;
+    ctx.textBaseline = 'middle';
+    ctx.font = `800 ${font}px Manrope, sans-serif`;
+    ctx.fillText(text, pad, h/2);
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.anisotropy = 4;
+    return tex;
   }
 
-  // Particles
+  // Stores arranged on a ring
+  const storeRingRadius = 3.4;
+  const stores = [
+    { name: 'Padaria', color: 0xffd166, angle: 0.0 },
+    { name: 'Farmácia', color: 0x66ffb3, angle: 2.1 },
+    { name: 'Supermercado', color: 0x66c2ff, angle: 4.2 },
+  ];
+  const storeMeshes = [];
+  stores.forEach((s) => {
+    const tex = makeLabelTexture(s.name, s.color);
+    const sign = new THREE.Mesh(
+      new THREE.PlaneGeometry(1.4, 0.5),
+      new THREE.MeshBasicMaterial({ map: tex, transparent: true })
+    );
+    const x = Math.cos(s.angle) * storeRingRadius;
+    const z = Math.sin(s.angle) * storeRingRadius * 0.7; // ellipse look
+    sign.position.set(x, 0.5, z);
+    sign.lookAt(new THREE.Vector3(0, 0.5, 0));
+    sign.userData.store = s;
+    scene.add(sign);
+    storeMeshes.push(sign);
+
+    // A simple stand behind sign
+    const stand = new THREE.Mesh(
+      new THREE.BoxGeometry(0.02, 0.6, 0.02),
+      new THREE.MeshStandardMaterial({ color: 0x20314f, metalness: 0.2, roughness: 0.7 })
+    );
+    stand.position.set(x, 0.2, z);
+    scene.add(stand);
+  });
+
+  // Particles starfield
   const pts = new THREE.BufferGeometry();
   const count = 420;
   const pos = new Float32Array(count * 3);
   for (let i = 0; i < count; i++) {
-    pos[i*3+0] = (Math.random()-0.5) * 8;
+    pos[i*3+0] = (Math.random()-0.5) * 9;
     pos[i*3+1] = (Math.random()-0.2) * 5;
-    pos[i*3+2] = (Math.random()-0.5) * 6;
+    pos[i*3+2] = (Math.random()-0.5) * 7;
   }
   pts.setAttribute('position', new THREE.BufferAttribute(pos, 3));
   const ptsMat = new THREE.PointsMaterial({ color: 0x7dd3fc, size: 0.012, transparent: true, opacity: 0.8 });
-  const star = new THREE.Points(pts, ptsMat);
-  scene.add(star);
+  scene.add(new THREE.Points(pts, ptsMat));
 
-  let pointerX = 0, pointerY = 0;
-  window.addEventListener('pointermove', (e) => {
-    pointerX = (e.clientX / innerWidth - 0.5) * 2;
-    pointerY = (e.clientY / innerHeight - 0.5) * 2;
+  // Interaction
+  const raycaster = new THREE.Raycaster();
+  const pointer = new THREE.Vector2(2, 2);
+  let hoverMesh = null;
+  canvas.addEventListener('pointermove', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
   }, { passive: true });
+  canvas.addEventListener('mouseleave', () => { pointer.x = 2; pointer.y = 2; hoverMesh = null; canvas.style.cursor = 'default'; });
+
+  let targetIndex = 0;
+  function pickHover() {
+    raycaster.setFromCamera(pointer, camera);
+    const isects = raycaster.intersectObjects(storeMeshes, false);
+    const hit = isects[0]?.object || null;
+    if (hoverMesh !== hit) {
+      if (hoverMesh && hoverMesh.material) hoverMesh.material.opacity = 1;
+      hoverMesh = hit;
+      canvas.style.cursor = hoverMesh ? 'pointer' : 'default';
+      if (hoverMesh && hoverMesh.material) hoverMesh.material.opacity = 0.9;
+    }
+  }
+
+  canvas.addEventListener('click', () => {
+    if (!hoverMesh) return;
+    targetIndex = storeMeshes.indexOf(hoverMesh);
+    autoCycleTimer = 0; // pause auto cycle briefly
+  });
 
   function resize() {
     const w = canvas.clientWidth, h = canvas.clientHeight;
     if (!w || !h) return;
     renderer.setSize(w, h, false);
-    camera.aspect = w / h; camera.updateProjectionMatrix();
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
   }
   new ResizeObserver(resize).observe(canvas);
   resize();
 
+  // Movement
   const clock = new THREE.Clock();
-  let flashTimer = 0;
+  let autoCycleTimer = 0;
+  const tmpTarget = new THREE.Vector3();
 
   function animate() {
-    const t = clock.getElapsedTime();
-    robot.rotation.y = THREE.MathUtils.lerp(robot.rotation.y, pointerX * 0.5, 0.05);
-    head.rotation.y = pointerX * 0.6;
-    armR.rotation.z = -0.5 + Math.sin(t * 1.8) * 0.1;
-    camGroup.rotation.y = Math.sin(t * 1.2) * 0.2;
+    const dt = Math.min(clock.getDelta(), 0.03);
+    pickHover();
 
-    panels.forEach((p, i) => {
-      p.rotation.y += 0.002 * (i % 2 === 0 ? 1 : -1);
-      p.position.y = 0.6 + Math.sin(t * 1.1 + i) * 0.08;
-    });
+    // Desired target position near selected store
+    const s = stores[targetIndex];
+    const goalX = Math.cos(s.angle) * (storeRingRadius - 0.9);
+    const goalZ = Math.sin(s.angle) * (storeRingRadius * 0.7 - 0.3);
+    tmpTarget.set(goalX, -0.6, goalZ);
 
-    star.rotation.y += 0.0015;
+    // Move robot toward target
+    const speed = 1.1; // units/sec
+    const to = tmpTarget.clone().sub(robot.position);
+    const dist = to.length();
+    if (dist > 0.01) {
+      to.normalize();
+      robot.position.add(to.multiplyScalar(speed * dt));
+      // Look towards movement direction smoothly
+      const targetYaw = Math.atan2(to.x, to.z);
+      robot.rotation.y = THREE.MathUtils.lerp(robot.rotation.y, targetYaw, 0.1);
+    }
 
-    // Camera flash pulse
-    flashTimer += clock.getDelta();
-    if (flashTimer > 2.4) {
-      flash.intensity = 8; // flash
-      setTimeout(() => flash.intensity = 0, 80);
-      flashTimer = 0;
+    // Walk cycle
+    const walkPhase = performance.now() / 1000 * (dist > 0.02 ? 5.0 : 1.5);
+    const swing = Math.sin(walkPhase) * (dist > 0.02 ? 0.35 : 0.1);
+    const opp = Math.sin(walkPhase + Math.PI) * (dist > 0.02 ? 0.35 : 0.1);
+    armL.rotation.z = 0.5 + swing * 0.4;
+    armR.rotation.z = -0.5 + opp * 0.4;
+    legL.rotation.x = -swing * 0.7;
+    legR.rotation.x = -opp * 0.7;
+    body.position.y = -0.1 + Math.abs(Math.sin(walkPhase) * 0.04);
+
+    // Phone screen pulse when near store
+    const near = dist < 0.4;
+    const screenMat = phoneScreen.material;
+    if (near && screenMat.emissiveIntensity < 1.4) {
+      screenMat.emissiveIntensity = THREE.MathUtils.lerp(screenMat.emissiveIntensity, 1.4, 0.2);
+    } else if (!near) {
+      screenMat.emissiveIntensity = THREE.MathUtils.lerp(screenMat.emissiveIntensity, 0.5, 0.1);
+    }
+
+    // Auto cycle between stores every few seconds
+    autoCycleTimer += dt;
+    if (autoCycleTimer > 3.8 && dist < 0.15) {
+      targetIndex = (targetIndex + 1) % stores.length;
+      autoCycleTimer = 0;
     }
 
     renderer.render(scene, camera);
