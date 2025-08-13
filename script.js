@@ -171,7 +171,7 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
   const maxEdges = nodeCount * 3;
   const edgePositions = new Float32Array(maxEdges * 6);
   edgeGeo.setAttribute('position', new THREE.BufferAttribute(edgePositions, 3));
-  const edgeMat = new THREE.LineBasicMaterial({ color: 0x7c3aed, transparent: true, opacity: 0.45 });
+  const edgeMat = new THREE.LineBasicMaterial({ color: 0x2563eb, transparent: true, opacity: 0.35 });
   const edges = new THREE.LineSegments(edgeGeo, edgeMat);
   scene.add(edges);
 
@@ -202,6 +202,13 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
   const globe = new THREE.Mesh(new THREE.SphereGeometry(0.9, 48, 48), new THREE.MeshStandardMaterial({ map: globeTex, roughness: 0.9, metalness: 0.0 }));
   globe.position.set(0, 0.6, 0);
   scene.add(globe);
+  // Clouds (subtle)
+  try {
+    const cloudsTex = new THREE.TextureLoader().load('https://raw.githubusercontent.com/turban/webgl-earth/master/images/fair_clouds_4k.png');
+    const cloudsMat = new THREE.MeshPhongMaterial({ map: cloudsTex, transparent: true, opacity: 0.25, depthWrite: false });
+    const clouds = new THREE.Mesh(new THREE.SphereGeometry(0.905, 48, 48), cloudsMat);
+    globe.add(clouds);
+  } catch(_) {}
 
   // Girl sprite on top of globe (uses transparent PNG from fotos2)
   (function addGirlSprite(){
