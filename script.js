@@ -197,6 +197,49 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
   const holoGroup = new THREE.Group();
   scene.add(holoGroup);
 
+  // Girl wheel silhouette (large rotating) + green ring flow
+  const girlWheelGroup = new THREE.Group();
+  (function addGirlWheel(){
+    function pathToLine(points, color){
+      const flat=[];
+      for (let i=0;i<points.length-1;i++){ const a=points[i], b=points[i+1]; flat.push(a[0], a[1], 0, b[0], b[1], 0); }
+      const g=new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(flat),3));
+      return new THREE.LineSegments(g, new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0.95 }));
+    }
+    const S=1.6, y0=0.1;
+    const base=[
+      [-0.05, y0+0.08],[0.00, y0+0.12],
+      [ 0.00, y0+0.12],[0.05, y0+0.08],
+      [ 0.00, y0+0.08],[0.00, y0+0.00],
+      [ 0.00, y0+0.00],[-0.05, y0-0.055],
+      [ 0.00, y0+0.00],[0.06, y0-0.055],
+      [-0.05, y0-0.055],[0.05, y0-0.055],
+      [0.02, y0+0.02],[0.14, y0+0.02],
+      [0.14, y0+0.02],[0.14, y0-0.004]
+    ];
+    const scaled = base.map(p=>[p[0]*S, p[1]*S]);
+    const girl = pathToLine(scaled, 0x7c3aed);
+    girlWheelGroup.add(girl);
+    // Outer ring
+    const ringSeg=120, ringR=1.18; const arr=new Float32Array(ringSeg*3);
+    for(let i=0;i<ringSeg;i++){ const a=i/ringSeg*Math.PI*2; arr[i*3]=Math.cos(a)*ringR; arr[i*3+1]=Math.sin(a)*ringR; arr[i*3+2]=0; }
+    const ringGeo=new THREE.BufferGeometry(); ringGeo.setAttribute('position', new THREE.BufferAttribute(arr,3));
+    const ring=new THREE.LineLoop(ringGeo, new THREE.LineBasicMaterial({ color: 0x39ff88, transparent: true, opacity: 0.35 }));
+    girlWheelGroup.add(ring);
+  })();
+  girlWheelGroup.position.set(0, 0.72, 0);
+  holoGroup.add(girlWheelGroup);
+
+  // Ring flow particles around wheel
+  const wheelFlowCount = 260;
+  const wheelFlowGeo = new THREE.BufferGeometry();
+  const wheelFlowPos = new Float32Array(wheelFlowCount * 3);
+  const wheelFlowOffsets = new Float32Array(wheelFlowCount);
+  for (let i=0;i<wheelFlowCount;i++){ wheelFlowOffsets[i] = Math.random(); }
+  const wheelFlowMat = new THREE.PointsMaterial({ color: 0x39ff88, size: 0.02, transparent: true, opacity: 0.95 });
+  const wheelFlow = new THREE.Points(wheelFlowGeo, wheelFlowMat);
+  scene.add(wheelFlow);
+
   // Small cart + girl with laptop silhouette (minimal lines)
   const girlCartGroup = new THREE.Group();
   // Cart outline
