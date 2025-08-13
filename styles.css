@@ -165,9 +165,16 @@ ul { padding-left: 16px; color: var(--text-dim); }
 
 /* Services */
 .section-lead { margin-bottom: 28px; }
-.services-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; perspective: 1200px; }
+.services-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px; }
+@media (max-width: 900px){ .services-grid { grid-template-columns: 1fr; } }
 .service-card { background: transparent; border: none; outline: none; cursor: pointer; }
-.card-3d { position: relative; height: 200px; padding: 14px; border-radius: var(--radius-lg); background: color-mix(in srgb, var(--bg) 88%, transparent); border: 1px solid rgba(255,255,255,0.08); box-shadow: var(--shadow); transform-style: preserve-3d; transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease, background-color 220ms ease; display: grid; align-content: start; gap: 6px; }
+.card-3d { height: auto; padding: 16px; gap: 10px; }
+.card-3d .card-head { display: flex; align-items: center; gap: 10px; }
+.card-3d h3 { margin: 0; font-size: 18px; }
+.icon svg { filter: drop-shadow(0 0 8px rgba(124,58,237,0.45)); }
+.card-3d { transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease, background-color 220ms ease; }
+.card-3d { animation: fadeIn 400ms ease both; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px);} to { opacity: 1; transform: none; } }
 .card-3d > .icon { display: inline-flex; }
 .card-3d > h3 { display: inline-flex; align-items: center; gap: 8px; margin: 0 0 4px 8px; }
 .card-3d p { display: block; font-size: 13px; color: var(--text-dim); }
