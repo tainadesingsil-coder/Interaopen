@@ -1,17 +1,17 @@
 :root {
-  --bg: #0a0908; /* black-brown */
-  --bg-2: #0e0c0b;
+  --bg: #0b0f1a;
+  --bg-2: #0f1020;
   --surface: rgba(255, 255, 255, 0.06);
   --surface-strong: rgba(255, 255, 255, 0.12);
-  --text: #efe7dd; /* warm ivory */
-  --text-dim: #cbbfbc; /* soft beige */
-  --primary: #d4af37; /* gold */
-  --secondary: #b0722c; /* bronze */
-  --accent: #f1c27d; /* light gold */
+  --text: #e5e7eb;
+  --text-dim: #9ca3af;
+  --primary: #7c3aed; /* purple */
+  --secondary: #00d4ff; /* cyan */
+  --accent: #22d3ee; /* teal */
   --danger: #ef4444;
   --success: #10b981;
-  --gradient-1: linear-gradient(135deg, #d4af37 0%, #b0722c 100%);
-  --gradient-2: radial-gradient(80% 80% at 20% 10%, rgba(212, 175, 55, 0.35) 0%, rgba(176, 114, 44, 0.12) 35%, rgba(0, 0, 0, 0) 60%);
+  --gradient-1: linear-gradient(135deg, #7c3aed 0%, #00d4ff 100%);
+  --gradient-2: radial-gradient(80% 80% at 20% 10%, rgba(124, 58, 237, 0.6) 0%, rgba(34, 211, 238, 0.1) 35%, rgba(0, 0, 0, 0) 60%);
 
   --radius: 16px;
   --radius-lg: 22px;
@@ -28,9 +28,8 @@ html, body {
   padding: 0; margin: 0;
   background: #000; /* fundo preto */
   background-image:
-    radial-gradient(1200px 600px at 10% 0%, rgba(212,175,55,0.10), transparent 60%),
-    radial-gradient(1200px 600px at 90% 0%, rgba(176,114,44,0.08), transparent 60%),
-    url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120"><defs><pattern id="wood" patternUnits="userSpaceOnUse" width="120" height="120"><path d="M0 60 C30 40, 90 80, 120 60" fill="none" stroke="%232a1f1b" stroke-width="2"/><path d="M0 30 C50 20, 70 40, 120 30" fill="none" stroke="%23221a16" stroke-width="1"/><path d="M0 90 C40 110, 80 70, 120 90" fill="none" stroke="%231b1512" stroke-width="1"/></pattern></defs><rect width="100%" height="100%" fill="url(%23wood)"/></svg>');
+    radial-gradient(1200px 600px at 10% 0%, rgba(124,58,237,0.08), transparent 60%),
+    radial-gradient(1200px 600px at 90% 0%, rgba(0,212,255,0.07), transparent 60%);
   background-blend-mode: overlay;
   color: var(--text);
   font-family: Manrope, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
@@ -101,10 +100,10 @@ ul { padding-left: 16px; color: var(--text-dim); }
   font-weight: 800;
   letter-spacing: -0.02em;
   line-height: 0.92;
-  background: linear-gradient(90deg, #ffffff 0%, #f2ead8 35%, #d4af37 55%, #ffffff 100%);
+  background: linear-gradient(90deg, #ffffff 0%, #cbd5ff 35%, #7c3aed 50%, #00d4ff 65%, #ffffff 100%);
   background-size: 220% 100%;
   -webkit-background-clip: text; background-clip: text; color: transparent;
-  text-shadow: 0 12px 40px rgba(212,175,55,0.25);
+  text-shadow: 0 12px 40px rgba(124,58,237,0.28);
   animation: titleShimmer 8s linear infinite;
 }
 .hero-title::after {
@@ -114,7 +113,7 @@ ul { padding-left: 16px; color: var(--text-dim); }
   width: 100%;
   margin-top: 10px;
   border-radius: 999px;
-  background: linear-gradient(90deg, #d4af37 0%, #b0722c 100%);
+  background: linear-gradient(90deg, #7c3aed 0%, #00d4ff 100%);
   transform-origin: left;
   transform: scaleX(0);
   opacity: 0.85;
