@@ -137,7 +137,7 @@ ul { padding-left: 16px; color: var(--text-dim); }
 .hero-panel .hero-lead { color: var(--text); opacity: 0.9; }
 
 /* Subtle glass card behind text to avoid occluding 3D */
-.hero-content { background: rgba(0,0,0,0.35); backdrop-filter: blur(6px) saturate(1.1); -webkit-backdrop-filter: blur(6px) saturate(1.1); border: 1px solid rgba(255,255,255,0.08); border-radius: 18px; padding: 18px; }
+.hero-content { background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none; border: none; border-radius: 0; padding: 0; }
 .hero-cta { margin-top: 12px; }
 
 /* About */
