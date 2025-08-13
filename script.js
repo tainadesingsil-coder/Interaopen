@@ -385,6 +385,16 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
   }));
 })();
 
+/* Mini buttons prefill */
+(function miniButtonsPrefill(){
+  const btns = selectAll('.mini-btn');
+  const msg = select('#mensagem');
+  btns.forEach(b=> b.addEventListener('click', (e)=>{
+    const s = b.getAttribute('data-service')||b.textContent||'';
+    if (msg) msg.value = `Olá! Tenho interesse em ${s}. Podemos conversar?`;
+  }));
+})();
+
 /* About photo LinkedIn override */
 (function aboutPhotoOverride() {
   const url = new URL(location.href);
