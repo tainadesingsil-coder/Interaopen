@@ -374,3 +374,15 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
     select('#contato')?.scrollIntoView({ behavior: 'smooth' });
   }));
 })();
+
+/* About photo LinkedIn override */
+(function aboutPhotoOverride() {
+  const url = new URL(location.href);
+  const param = url.searchParams.get('linkedin');
+  const saved = localStorage.getItem('LINKEDIN_PHOTO_URL');
+  const final = param || saved;
+  if (param) localStorage.setItem('LINKEDIN_PHOTO_URL', param);
+  if (!final) return;
+  const photos = selectAll('.about-card');
+  photos.forEach(img => img.src = final);
+})();

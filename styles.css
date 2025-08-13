@@ -279,3 +279,9 @@ input:focus, textarea:focus { border-color: #a78bfa; box-shadow: 0 0 0 3px rgba(
 .quick-links { position: fixed; right: 18px; bottom: 18px; z-index: 1200; }
 .quick-toggle { padding: 10px 14px; border-radius: 999px; background: var(--gradient-1); color: #0b0f1a; border: none; font-weight: 800; cursor: pointer; box-shadow: var(--shadow-2); }
 .quick-panel { position: absolute; right: 0; bottom: 48px; display: grid; gap: 8px; background: color-mix(in srgb, var(--bg) 90%, transparent); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 10px; box-shadow: var(--shadow); }
+.tag { display: inline-block; padding: 6px 10px; border-radius: 999px; font-size: 12px; font-weight: 800; letter-spacing: 0.06em; color: #0b0f1a; background: var(--gradient-1); box-shadow: var(--shadow-2); margin: 6px 6px 0 0; }
+.tag-ia { background: linear-gradient(135deg, #22d3ee, #00d4ff); }
+.tag-design { background: linear-gradient(135deg, #a78bfa, #7c3aed); }
+.tag-perf { background: linear-gradient(135deg, #34d399, #22d3ee); }
+.hero-tags { margin-top: 8px; }
+.services-badges { margin: 12px 0 6px; }
