@@ -1,21 +1,20 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { View, StyleSheet, Text } from 'react-native';
 import { colors, spacing } from '../theme/theme';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { LogoMark } from './LogoMark';
 
 export function Header() {
   return (
     <View style={styles.container}>
       <View style={styles.row}>
-        <LogoMark />
-        <View style={{ flexDirection: 'row', gap: spacing.lg, marginLeft: 'auto' }}>
-          <MaterialCommunityIcons name="magnify" size={22} color={colors.text} />
+        <View style={styles.side}>
+          <MaterialCommunityIcons name="camera-outline" size={22} color={colors.text} />
+        </View>
+        <Text style={styles.wordmark}>ORBI</Text>
+        <View style={[styles.side, { justifyContent: 'flex-end' }]}>
           <MaterialCommunityIcons name="bell-outline" size={22} color={colors.text} />
         </View>
       </View>
-      <LinearGradient colors={["#6EA8FE", "#7CD4FD", "#34D399"] as [string, string, ...string[]]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.accent} />
     </View>
   );
 }
@@ -25,8 +24,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.lg,
     paddingBottom: spacing.md,
-    gap: spacing.sm,
   },
-  row: { flexDirection: 'row', alignItems: 'center' },
-  accent: { height: 3, borderRadius: 3 },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  side: {
+    width: 48,
+    alignItems: 'flex-start',
+  },
+  wordmark: {
+    flex: 1,
+    textAlign: 'center',
+    color: colors.text,
+    fontSize: 22,
+    fontWeight: '800',
+    letterSpacing: 2,
+  },
 });
