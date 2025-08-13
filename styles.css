@@ -246,3 +246,13 @@ input:focus, textarea:focus { border-color: #a78bfa; box-shadow: 0 0 0 3px rgba(
 .msg.bot { background: var(--surface); border: 1px solid rgba(255,255,255,0.08); }
 .chatp-form { display: flex; gap: 8px; padding: 10px; border-top: 1px solid rgba(255,255,255,0.08); }
 .chatp-form input { flex: 1; }
+
+.kern-pair { display: inline-block; position: relative; }
+.kern-pair.na { padding-left: 0.02em; }
+.kern-pair.ve { padding-left: 0.01em; }
+.hero-title .kern-pair.na, .hero-title .kern-pair.ve { animation: kernPulse 5s ease-in-out infinite; }
+@keyframes kernPulse {
+  0%, 100% { transform: translateX(0); letter-spacing: 0; }
+  40% { transform: translateX(0.01em); letter-spacing: -0.01em; }
+  60% { transform: translateX(-0.005em); letter-spacing: 0.005em; }
+}
