@@ -12,6 +12,9 @@ const config: ExpoConfig = {
   },
   extra: {
     YOUTUBE_API_KEY: process.env.YOUTUBE_API_KEY || null,
+    eas: {
+      projectId: '957e80f4-818c-4770-95ed-bdeebb392f5e',
+    },
   },
 };
 
