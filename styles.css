@@ -103,8 +103,10 @@ ul { padding-left: 16px; color: var(--text-dim); }
   background: linear-gradient(90deg, #ffffff 0%, #cbd5ff 35%, #7c3aed 50%, #00d4ff 65%, #ffffff 100%);
   background-size: 220% 100%;
   -webkit-background-clip: text; background-clip: text; color: transparent;
-  text-shadow: 0 12px 40px rgba(124,58,237,0.28);
+  text-shadow: 0 12px 40px rgba(124,58,237,0.28), 0 2px 0 rgba(0,0,0,0.3);
   animation: titleShimmer 8s linear infinite;
+  font-family: 'Sora', Manrope, system-ui, sans-serif;
+  font-size: clamp(36px, 6vw, 56px);
 }
 .hero-title::after {
   content: "";
