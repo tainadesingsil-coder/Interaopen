@@ -33,14 +33,21 @@ export function ReelsScreen() {
     const isActive = index === activeIndex;
     return (
       <View style={styles.slide}>
-        <Video
-          style={styles.video}
-          source={{ uri: item.uri }}
-          resizeMode={ResizeMode.COVER}
-          shouldPlay={isActive}
-          isLooping
-          isMuted={false}
-        />
+        {!isActive ? (
+          <Pressable style={styles.cover}>
+            <Image source={{ uri: 'https://images.unsplash.com/photo-1520975682031-ae7b0b96c5d8?q=80&w=1200&auto=format&fit=crop' }} style={{ width: '100%', height: '100%' }} />
+            <View style={styles.centerPlay}><MaterialCommunityIcons name="play-circle" size={72} color="rgba(255,255,255,0.9)" /></View>
+          </Pressable>
+        ) : (
+          <Video
+            style={styles.video}
+            source={{ uri: item.uri }}
+            resizeMode={ResizeMode.COVER}
+            shouldPlay
+            isLooping
+            isMuted={false}
+          />
+        )}
         <Animated.View entering={FadeIn.duration(250)} exiting={FadeOut.duration(120)} style={styles.overlay}>
           <Text style={styles.title}>{item.title}</Text>
           <View style={styles.rightColumn}>
@@ -91,6 +98,8 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     justifyContent: 'space-between',
   },
+  cover: { width: '100%', height: '100%', position: 'relative' },
+  centerPlay: { position: 'absolute', top: '40%', left: '42%' }
   title: {
     color: colors.text,
     fontSize: 16,
