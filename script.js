@@ -147,12 +147,11 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
   // Lighting
   scene.add(new THREE.HemisphereLight(0xbcd9ff, 0x0b0f1a, 0.9));
   const key = new THREE.DirectionalLight(0xffffff, 1.0); key.position.set(2, 3.6, 2.5); scene.add(key);
-  const accentA = new THREE.PointLight(0x7c3aed, 0.9, 18); accentA.position.set(-2.4, 1.0, 2.2); scene.add(accentA);
-  const accentB = new THREE.PointLight(0x00d4ff, 0.8, 18); accentB.position.set(2.2, 1.2, 2.0); scene.add(accentB);
+  const accentA = new THREE.PointLight(0x2563eb, 0.9, 18); accentA.position.set(-2.4, 1.0, 2.2); scene.add(accentA);
+  const accentB = new THREE.PointLight(0x38bdf8, 0.8, 18); accentB.position.set(2.2, 1.2, 2.0); scene.add(accentB);
 
-  // Ground gradient plane (subtle)
-  const ground = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), new THREE.MeshStandardMaterial({ color: 0x0e1322, roughness: 0.95 }));
-  ground.rotation.x = -Math.PI/2; ground.position.y = -1.1; scene.add(ground);
+  // Remove ground plane for clean black
+  
 
   // Neural lattice: points connected by edges forming a dynamic graph
   const nodeCount = 200;
