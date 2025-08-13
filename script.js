@@ -197,19 +197,37 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
   const holoGroup = new THREE.Group();
   // Geometric TS: T (top bar and stem), S (arc segments)
   function makeTSLines() {
+    const points = [];
+    const push = (x1, y1, x2, y2) => { points.push(x1, y1, 0, x2, y2, 0); };
+    // T with chiseled corners
+    const topLeft = -0.52, topRight = 0.52, topY = 0.42, chamfer = 0.08;
+    push(topLeft + chamfer, topY, topRight - chamfer, topY); // top bar
+    push(topLeft + chamfer, topY, topLeft, topY - chamfer); // left chamfer
+    push(topRight - chamfer, topY, topRight, topY - chamfer); // right chamfer
+    // Stem
+    push(0, topY, 0, -0.44);
+
+    // S with cubic Bezier arcs (condensed)
+    function addCubic(p0, p1, p2, p3, segments = 20) {
+      let prev = p0;
+      for (let i = 1; i <= segments; i++) {
+        const t = i / segments; const mt = 1 - t;
+        const x = mt*mt*mt*p0[0] + 3*mt*mt*t*p1[0] + 3*mt*t*t*p2[0] + t*t*t*p3[0];
+        const y = mt*mt*mt*p0[1] + 3*mt*mt*t*p1[1] + 3*mt*t*t*p2[1] + t*t*t*p3[1];
+        push(prev[0], prev[1], x, y);
+        prev = [x, y];
+      }
+    }
+    // Top arc
+    addCubic([0.16, 0.34], [0.46, 0.34], [0.46, 0.18], [0.16, 0.18], 22);
+    // Bridge
+    push(0.16, 0.18, 0.16, -0.02);
+    // Bottom arc
+    addCubic([0.16, -0.02], [0.46, -0.02], [0.46, -0.34], [0.16, -0.34], 22);
+
     const g = new THREE.BufferGeometry();
-    const pts = [];
-    // T
-    pts.push(-0.5, 0.4, 0, 0.5, 0.4, 0); // top
-    pts.push(0, 0.4, 0, 0, -0.4, 0); // stem
-    // S (approx with polyline)
-    const sPts = [
-      [0.2, 0.35],[0.5, 0.35],[0.5, 0.15],[0.2, 0.15],[0.2, -0.05],[0.5, -0.05],[0.5, -0.35],[0.2, -0.35]
-    ];
-    for (let i=0;i<sPts.length-1;i++){ const a=sPts[i], b=sPts[i+1]; pts.push(a[0], a[1], 0, b[0], b[1], 0); }
-    const arr = new Float32Array(pts);
-    g.setAttribute('position', new THREE.BufferAttribute(arr, 3));
-    return new THREE.LineSegments(g, new THREE.LineBasicMaterial({ color: 0x7c3aed, transparent: true, opacity: 0.9 }));
+    g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(points), 3));
+    return new THREE.LineSegments(g, new THREE.LineBasicMaterial({ color: 0x7c3aed, transparent: true, opacity: 0.92 }));
   }
   const tsLines = makeTSLines();
   holoGroup.add(tsLines);
