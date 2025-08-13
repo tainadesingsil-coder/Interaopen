@@ -109,150 +109,13 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
 })();
 
 /* Portfolio dynamic loader */
-(async function loadPortfolio() {
-  const grid = select('#portfolio-grid');
-  if (!grid) return;
-  const urlParam = new URLSearchParams(location.search).get('portfolio');
-  const source = urlParam || grid.dataset.source || '/workspace/portfolio.json';
-  try {
-    const res = await fetch(source, { headers: { 'Accept': 'application/json' } });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
-    const items = Array.isArray(data) ? data : (data.items || []);
-    if (!items.length) throw new Error('Manifesto vazio');
-
-    const frag = document.createDocumentFragment();
-    items.forEach((item) => {
-      const type = item.type === 'video' ? 'video' : 'image';
-      const a = document.createElement('a');
-      a.className = 'portfolio-item reveal in';
-      a.href = item.src;
-      a.dataset.type = type;
-      if (item.category) a.dataset.category = item.category;
-      a.setAttribute('aria-label', item.title || 'Item do portfólio');
-
-      if (type === 'video') {
-        const thumb = document.createElement('div');
-        thumb.className = 'thumb video-thumb';
-        const play = document.createElement('span');
-        play.className = 'play';
-        play.textContent = '▶';
-        const img = document.createElement('img');
-        img.src = item.thumb || item.poster || item.src;
-        img.alt = item.title || 'Vídeo do portfólio';
-        thumb.appendChild(play);
-        thumb.appendChild(img);
-        a.appendChild(thumb);
-        // hover preview small muted inline video
-        const v = document.createElement('video');
-        v.className = 'hover-preview';
-        v.src = item.src;
-        v.muted = true;
-        v.loop = true;
-        v.playsInline = true;
-        a.appendChild(v);
-        a.addEventListener('mouseenter', () => v.play());
-        a.addEventListener('mouseleave', () => { v.pause(); v.currentTime = 0; });
-      } else {
-        const thumb = document.createElement('div');
-        thumb.className = 'thumb';
-        thumb.style.backgroundImage = `url('${item.thumb || item.src}')`;
-        a.appendChild(thumb);
-      }
-      const caption = document.createElement('span');
-      caption.className = 'caption';
-      caption.textContent = item.title || '';
-      a.appendChild(caption);
-      frag.appendChild(a);
-    });
-    grid.innerHTML = '';
-    grid.appendChild(frag);
-  } catch (err) {
-    grid.innerHTML = '<p style="color: var(--text-dim)">Não foi possível carregar o portfólio automaticamente.</p>';
-  }
-})();
+// (portfolio removed)
 
 /* Portfolio filters */
-(function initFilters() {
-  const grid = select('#portfolio-grid');
-  const buttons = selectAll('.filter-btn');
-  if (!grid || !buttons.length) return;
-  const setActive = (btn) => {
-    buttons.forEach(b => { b.classList.toggle('active', b === btn); b.setAttribute('aria-selected', String(b === btn)); });
-  };
-  const applyFilter = (key) => {
-    const items = selectAll('.portfolio-item', grid);
-    items.forEach((el) => {
-      const cat = el.dataset.category || 'design';
-      const type = el.dataset.type;
-      const match = key === 'all' || key === cat || key === type;
-      el.style.display = match ? '' : 'none';
-    });
-  };
-  buttons.forEach((btn) => btn.addEventListener('click', () => {
-    setActive(btn);
-    applyFilter(btn.dataset.filter);
-  }));
-})();
+// (portfolio removed)
 
 /* Lightbox with navigation */
-(function enhanceLightbox() {
-  const lightbox = select('#lightbox');
-  const content = select('#lightbox-content');
-  const prev = select('.lightbox-prev');
-  const next = select('.lightbox-next');
-  if (!lightbox || !content || !prev || !next) return;
-  let list = [];
-  let index = 0;
-
-  const rebuildList = () => {
-    list = selectAll('.portfolio-item');
-  };
-  rebuildList();
-
-  const openByIndex = (i) => {
-    rebuildList();
-    if (!list.length) return;
-    index = (i + list.length) % list.length;
-    const node = list[index];
-    const href = node.getAttribute('href');
-    const type = node.dataset.type || 'image';
-    content.innerHTML = '';
-    if (type === 'video') {
-      const video = document.createElement('video');
-      video.src = href;
-      video.controls = true;
-      video.autoplay = true;
-      video.playsInline = true;
-      content.appendChild(video);
-    } else {
-      const img = document.createElement('img');
-      img.src = href;
-      img.alt = node.querySelector('.caption')?.textContent || 'Imagem do portfólio';
-      content.appendChild(img);
-    }
-    lightbox.classList.add('open');
-    lightbox.setAttribute('aria-hidden', 'false');
-  };
-
-  document.addEventListener('click', (e) => {
-    const a = e.target.closest && e.target.closest('.portfolio-item');
-    if (!a) return;
-    if (!a.closest('#portfolio')) return;
-    e.preventDefault();
-    const all = selectAll('.portfolio-item');
-    const idx = all.indexOf(a);
-    openByIndex(idx);
-  });
-
-  prev.addEventListener('click', () => openByIndex(index - 1));
-  next.addEventListener('click', () => openByIndex(index + 1));
-  window.addEventListener('keydown', (e) => {
-    if (!lightbox.classList.contains('open')) return;
-    if (e.key === 'ArrowLeft') openByIndex(index - 1);
-    if (e.key === 'ArrowRight') openByIndex(index + 1);
-  });
-})();
+// (portfolio removed)
 
 /* Chatbot UI with optional OpenAI API in browser */
 (function initChat() {
@@ -281,10 +144,21 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
     log.scrollTop = log.scrollHeight;
   };
 
+  // Lightweight memory (localStorage) of Q&A context
+  const memoryKey = 'CHAT_MEMORY_TAINA';
+  const defaultMemory = [
+    { q: 'serviços', a: 'Ofereço marketing digital (tráfego, conteúdo), design (identidade, social), e automação/IA.' },
+    { q: 'prazo', a: 'Prazos típicos: identidade 2–3 semanas; landing 1–2 semanas; campanha 1 semana.' },
+    { q: 'investimento', a: 'Projetos sob medida; estimativas após briefing. Faço propostas modulares.' },
+    { q: 'foco', a: 'Integração de estética, dados e IA para performance com identidade forte.' },
+  ];
+  const memory = JSON.parse(localStorage.getItem(memoryKey) || 'null') || defaultMemory;
+  const saveMemory = () => localStorage.setItem(memoryKey, JSON.stringify(memory));
+
   const apiKey = localStorage.getItem('OPENAI_API_KEY') || '';
-  if (!apiKey) {
-    addMsg('Dica: salve sua chave OpenAI no localStorage como OPENAI_API_KEY para ativar o chat.');
-  }
+  if (!apiKey) addMsg('Dica: salve sua chave OpenAI no localStorage como OPENAI_API_KEY para ativar respostas inteligentes.');
+
+  const systemPrompt = 'Você é o assistente do site da Taina Silveira. Seja objetivo e profissional. Use a memória interna (Q&A) quando pertinente: ' + memory.map(m => `(${m.q} -> ${m.a})`).join(' ');
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -292,31 +166,41 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
     if (!q) return;
     addMsg(q, 'user');
     input.value = '';
+
     try {
-      if (!apiKey) { addMsg('Chat offline: descreva seu projeto que retorno por e-mail.'); return; }
+      if (!apiKey) {
+        // Fallback retrieval from memory
+        const hit = memory.find(m => q.toLowerCase().includes(m.q));
+        addMsg(hit ? hit.a : 'Posso te ajudar com marketing, design e IA. Dê mais detalhes.', 'bot');
+        // store brief pair
+        memory.push({ q, a: hit ? hit.a : 'Aguardando mais detalhes...' }); saveMemory();
+        return;
+      }
       const res = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
         body: JSON.stringify({
           model: 'gpt-4o-mini',
           messages: [
-            { role: 'system', content: 'Você é o assistente do site da Taina Silveira, responda de forma objetiva sobre serviços, prazos e portfólio.' },
+            { role: 'system', content: systemPrompt },
+            ...memory.slice(-6).map(m => ({ role: 'system', content: `Memória: ${m.q} -> ${m.a}` })),
             { role: 'user', content: q }
           ],
-          temperature: 0.7,
-          max_tokens: 250
+          temperature: 0.6,
+          max_tokens: 300
         })
       });
       const data = await res.json();
-      const text = data?.choices?.[0]?.message?.content || 'Não foi possível responder agora.';
+      const text = data?.choices?.[0]?.message?.content || 'Não consegui responder agora.';
       addMsg(text, 'bot');
+      memory.push({ q, a: text }); saveMemory();
     } catch (err) {
       addMsg('Erro de conexão com o assistente.');
     }
   });
 })();
 
-/* HERO 3D upgrade: robot photographer scene */
+/* HERO 3D: more realistic motion (idle + walk), abstract environment */
 (function heroRobot3D() {
   const canvas = select('#hero-canvas');
   if (!canvas || prefersReducedMotion || !window.THREE) return;
@@ -326,227 +210,99 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(45, 2, 0.1, 100);
-  camera.position.set(0, 1.2, 6);
+  camera.position.set(0, 1.4, 6.6);
 
   // Lights
-  const hemi = new THREE.HemisphereLight(0x8ec5ff, 0x0b0f1a, 0.9);
-  scene.add(hemi);
-  const key = new THREE.DirectionalLight(0xffffff, 1.0);
-  key.position.set(3, 4, 2);
-  scene.add(key);
-  const rim = new THREE.PointLight(0x7c3aed, 1.0, 10);
-  rim.position.set(-3, 1.2, 2.2);
-  scene.add(rim);
+  scene.add(new THREE.HemisphereLight(0x9fd0ff, 0x0b0f1a, 0.95));
+  const dl = new THREE.DirectionalLight(0xffffff, 1.0); dl.position.set(3, 4, 2); scene.add(dl);
+  const rim = new THREE.PointLight(0x7c3aed, 0.9, 12); rim.position.set(-3, 1.2, 2.2); scene.add(rim);
 
-  // Ground ring
-  const ground = new THREE.Mesh(
-    new THREE.CylinderGeometry(7, 7, 0.15, 80),
-    new THREE.MeshStandardMaterial({ color: 0x0f1020, metalness: 0.4, roughness: 0.9 })
-  );
-  ground.position.y = -1.2;
-  scene.add(ground);
+  // Stage
+  const stage = new THREE.Mesh(new THREE.CylinderGeometry(8, 8, 0.12, 80), new THREE.MeshStandardMaterial({ color: 0x0f1020, roughness: 0.9 }));
+  stage.position.y = -1.25; scene.add(stage);
 
   // Materials
-  const metal = new THREE.MeshPhysicalMaterial({ color: 0xbad7ff, metalness: 0.6, roughness: 0.25, clearcoat: 0.7 });
-  const dark = new THREE.MeshStandardMaterial({ color: 0x1a2235, metalness: 0.2, roughness: 0.6 });
-  const glow = new THREE.MeshStandardMaterial({ color: 0x7c3aed, emissive: 0x7c3aed, emissiveIntensity: 0.8 });
+  const metal = new THREE.MeshPhysicalMaterial({ color: 0xbad7ff, metalness: 0.65, roughness: 0.25, clearcoat: 0.8 });
+  const dark = new THREE.MeshStandardMaterial({ color: 0x1a2235, metalness: 0.25, roughness: 0.6 });
+  const glow = new THREE.MeshStandardMaterial({ color: 0x7c3aed, emissive: 0x7c3aed, emissiveIntensity: 0.9 });
 
-  // Robot parts
+  // Robot rig (primitives, smooth motion)
   const robot = new THREE.Group();
-  const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.6, 1.0, 8, 16), metal);
-  body.position.y = -0.1;
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.38, 24, 24), dark);
-  head.position.y = 0.9;
-  const eye = new THREE.Mesh(new THREE.CapsuleGeometry(0.26, 0.02, 8, 16), glow);
-  eye.rotation.z = Math.PI / 2;
-  eye.position.set(0, 0.95, 0.32);
-  // Arms
-  const armL = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.9, 12), metal);
-  armL.position.set(-0.6, 0.2, 0);
-  armL.rotation.z = 0.5;
-  const armR = armL.clone();
-  armR.position.x = 0.6; armR.rotation.z = -0.5;
-  // Legs
-  const legGeo = new THREE.CapsuleGeometry(0.1, 0.7, 6, 12);
-  const legL = new THREE.Mesh(legGeo, metal);
-  legL.position.set(-0.22, -0.8, 0);
-  const legR = new THREE.Mesh(legGeo, metal);
-  legR.position.set(0.22, -0.8, 0);
+  const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.62, 1.15, 12, 20), metal);
+  body.position.y = -0.05;
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.4, 28, 28), dark); head.position.y = 0.98;
+  const visor = new THREE.Mesh(new THREE.CapsuleGeometry(0.28, 0.02, 10, 18), glow); visor.rotation.z = Math.PI/2; visor.position.set(0, 1.02, 0.34);
+  const armL = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.92, 14), metal); armL.position.set(-0.64, 0.22, 0); armL.rotation.z = 0.5;
+  const armR = armL.clone(); armR.position.x = 0.64; armR.rotation.z = -0.5;
+  const legGeo = new THREE.CapsuleGeometry(0.11, 0.78, 8, 14);
+  const legL = new THREE.Mesh(legGeo, metal); legL.position.set(-0.22, -0.86, 0);
+  const legR = new THREE.Mesh(legGeo, metal); legR.position.set(0.22, -0.86, 0);
+  const phone = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.46, 0.05), dark); phone.position.set(0.95, 0.45, 0.2);
 
-  // Phone in right hand
-  const phone = new THREE.Group();
-  const phoneBody = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.45, 0.04), dark);
-  const phoneScreen = new THREE.Mesh(new THREE.PlaneGeometry(0.22, 0.38), new THREE.MeshStandardMaterial({ color: 0x051017, emissive: 0x00d4ff, emissiveIntensity: 0.5 }));
-  phoneScreen.position.z = 0.0225;
-  phone.add(phoneBody, phoneScreen);
-  phone.position.set(0.92, 0.45, 0.2);
-
-  robot.add(body, head, eye, armL, armR, legL, legR, phone);
+  robot.add(body, head, visor, armL, armR, legL, legR, phone);
   scene.add(robot);
 
-  // Helper: make label texture
-  function makeLabelTexture(text, color) {
-    const pad = 16;
-    const font = 42;
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    ctx.font = `600 ${font}px Manrope, sans-serif`;
-    const w = Math.ceil(ctx.measureText(text).width) + pad * 2;
-    const h = font + pad * 1.5;
-    canvas.width = w; canvas.height = h;
-    // bg
-    ctx.fillStyle = 'rgba(12,16,28,0.8)';
-    ctx.strokeStyle = 'rgba(255,255,255,0.15)';
-    ctx.lineWidth = 3;
-    ctx.beginPath(); ctx.roundRect(1.5, 1.5, w-3, h-3, 14); ctx.fill(); ctx.stroke();
-    // text
-    ctx.fillStyle = `#${color.toString(16).padStart(6,'0')}`;
-    ctx.textBaseline = 'middle';
-    ctx.font = `800 ${font}px Manrope, sans-serif`;
-    ctx.fillText(text, pad, h/2);
-    const tex = new THREE.CanvasTexture(canvas);
-    tex.anisotropy = 4;
-    return tex;
+  // Floating abstract panels for parallax (no store labels)
+  const panels = [];
+  for (let i = 0; i < 7; i++) {
+    const g = new THREE.PlaneGeometry(1.2, 0.7);
+    const m = new THREE.MeshStandardMaterial({ color: 0x101b30 + i*0x030303, metalness: 0.15, roughness: 0.85 });
+    const p = new THREE.Mesh(g, m);
+    p.position.set(Math.cos(i) * 2.3, 0.6 + Math.sin(i * 1.1) * 0.4, Math.sin(i) * 1.6);
+    p.rotation.y = -Math.atan2(p.position.z, p.position.x) + Math.PI/2;
+    panels.push(p); scene.add(p);
   }
 
-  // Stores arranged on a ring
-  const storeRingRadius = 3.4;
-  const stores = [
-    { name: 'Padaria', color: 0xffd166, angle: 0.0 },
-    { name: 'Farmácia', color: 0x66ffb3, angle: 2.1 },
-    { name: 'Supermercado', color: 0x66c2ff, angle: 4.2 },
-  ];
-  const storeMeshes = [];
-  stores.forEach((s) => {
-    const tex = makeLabelTexture(s.name, s.color);
-    const sign = new THREE.Mesh(
-      new THREE.PlaneGeometry(1.4, 0.5),
-      new THREE.MeshBasicMaterial({ map: tex, transparent: true })
-    );
-    const x = Math.cos(s.angle) * storeRingRadius;
-    const z = Math.sin(s.angle) * storeRingRadius * 0.7; // ellipse look
-    sign.position.set(x, 0.5, z);
-    sign.lookAt(new THREE.Vector3(0, 0.5, 0));
-    sign.userData.store = s;
-    scene.add(sign);
-    storeMeshes.push(sign);
+  // Particles
+  const pts = new THREE.BufferGeometry(); const count = 520; const pos = new Float32Array(count*3);
+  for (let i=0;i<count;i++){ pos[i*3]= (Math.random()-0.5)*9; pos[i*3+1]=(Math.random()-0.2)*5; pos[i*3+2]=(Math.random()-0.5)*7; }
+  pts.setAttribute('position', new THREE.BufferAttribute(pos,3));
+  scene.add(new THREE.Points(pts, new THREE.PointsMaterial({ color: 0x7dd3fc, size: 0.012, transparent: true, opacity: 0.8 })));
 
-    // A simple stand behind sign
-    const stand = new THREE.Mesh(
-      new THREE.BoxGeometry(0.02, 0.6, 0.02),
-      new THREE.MeshStandardMaterial({ color: 0x20314f, metalness: 0.2, roughness: 0.7 })
-    );
-    stand.position.set(x, 0.2, z);
-    scene.add(stand);
-  });
+  // Interaction cursor affects heading subtly
+  let cursorX = 0, cursorY = 0;
+  canvas.addEventListener('pointermove', (e)=>{ cursorX = (e.clientX/innerWidth-0.5)*2; cursorY = (e.clientY/innerHeight-0.5)*2; }, {passive:true});
 
-  // Particles starfield
-  const pts = new THREE.BufferGeometry();
-  const count = 420;
-  const pos = new Float32Array(count * 3);
-  for (let i = 0; i < count; i++) {
-    pos[i*3+0] = (Math.random()-0.5) * 9;
-    pos[i*3+1] = (Math.random()-0.2) * 5;
-    pos[i*3+2] = (Math.random()-0.5) * 7;
-  }
-  pts.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-  const ptsMat = new THREE.PointsMaterial({ color: 0x7dd3fc, size: 0.012, transparent: true, opacity: 0.8 });
-  scene.add(new THREE.Points(pts, ptsMat));
+  function resize(){ const w=canvas.clientWidth,h=canvas.clientHeight; if(!w||!h) return; renderer.setSize(w,h,false); camera.aspect=w/h; camera.updateProjectionMatrix(); }
+  new ResizeObserver(resize).observe(canvas); resize();
 
-  // Interaction
-  const raycaster = new THREE.Raycaster();
-  const pointer = new THREE.Vector2(2, 2);
-  let hoverMesh = null;
-  canvas.addEventListener('pointermove', (e) => {
-    const rect = canvas.getBoundingClientRect();
-    pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-    pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-  }, { passive: true });
-  canvas.addEventListener('mouseleave', () => { pointer.x = 2; pointer.y = 2; hoverMesh = null; canvas.style.cursor = 'default'; });
-
-  let targetIndex = 0;
-  function pickHover() {
-    raycaster.setFromCamera(pointer, camera);
-    const isects = raycaster.intersectObjects(storeMeshes, false);
-    const hit = isects[0]?.object || null;
-    if (hoverMesh !== hit) {
-      if (hoverMesh && hoverMesh.material) hoverMesh.material.opacity = 1;
-      hoverMesh = hit;
-      canvas.style.cursor = hoverMesh ? 'pointer' : 'default';
-      if (hoverMesh && hoverMesh.material) hoverMesh.material.opacity = 0.9;
-    }
-  }
-
-  canvas.addEventListener('click', () => {
-    if (!hoverMesh) return;
-    targetIndex = storeMeshes.indexOf(hoverMesh);
-    autoCycleTimer = 0; // pause auto cycle briefly
-  });
-
-  function resize() {
-    const w = canvas.clientWidth, h = canvas.clientHeight;
-    if (!w || !h) return;
-    renderer.setSize(w, h, false);
-    camera.aspect = w / h;
-    camera.updateProjectionMatrix();
-  }
-  new ResizeObserver(resize).observe(canvas);
-  resize();
-
-  // Movement
+  // Animation: idle + walk loop target drifting
   const clock = new THREE.Clock();
-  let autoCycleTimer = 0;
-  const tmpTarget = new THREE.Vector3();
+  let tGoal = 0;
+  const target = new THREE.Vector3(1.2, -0.6, 0.8);
 
-  function animate() {
+  function animate(){
     const dt = Math.min(clock.getDelta(), 0.03);
-    pickHover();
+    tGoal += dt;
+    // Drift target smoothly in a loop
+    const R = 1.6;
+    target.set(Math.cos(tGoal*0.6)*R, -0.6, Math.sin(tGoal*0.7)*R*0.6);
 
-    // Desired target position near selected store
-    const s = stores[targetIndex];
-    const goalX = Math.cos(s.angle) * (storeRingRadius - 0.9);
-    const goalZ = Math.sin(s.angle) * (storeRingRadius * 0.7 - 0.3);
-    tmpTarget.set(goalX, -0.6, goalZ);
-
-    // Move robot toward target
-    const speed = 1.1; // units/sec
-    const to = tmpTarget.clone().sub(robot.position);
+    // Move robot towards target with smoothing
+    const to = target.clone().sub(robot.position);
     const dist = to.length();
-    if (dist > 0.01) {
-      to.normalize();
-      robot.position.add(to.multiplyScalar(speed * dt));
-      // Look towards movement direction smoothly
-      const targetYaw = Math.atan2(to.x, to.z);
-      robot.rotation.y = THREE.MathUtils.lerp(robot.rotation.y, targetYaw, 0.1);
-    }
+    const speed = 1.0;
+    if (dist>0.01){ to.normalize(); robot.position.add(to.multiplyScalar(speed*dt)); }
 
-    // Walk cycle
-    const walkPhase = performance.now() / 1000 * (dist > 0.02 ? 5.0 : 1.5);
-    const swing = Math.sin(walkPhase) * (dist > 0.02 ? 0.35 : 0.1);
-    const opp = Math.sin(walkPhase + Math.PI) * (dist > 0.02 ? 0.35 : 0.1);
-    armL.rotation.z = 0.5 + swing * 0.4;
-    armR.rotation.z = -0.5 + opp * 0.4;
-    legL.rotation.x = -swing * 0.7;
-    legR.rotation.x = -opp * 0.7;
-    body.position.y = -0.1 + Math.abs(Math.sin(walkPhase) * 0.04);
+    // Heading & head aim
+    const yaw = Math.atan2(to.x, to.z);
+    robot.rotation.y = THREE.MathUtils.lerp(robot.rotation.y, yaw + cursorX*0.15, 0.08);
+    head.rotation.y = THREE.MathUtils.lerp(head.rotation.y || 0, cursorX*0.4, 0.12);
 
-    // Phone screen pulse when near store
-    const near = dist < 0.4;
-    const screenMat = phoneScreen.material;
-    if (near && screenMat.emissiveIntensity < 1.4) {
-      screenMat.emissiveIntensity = THREE.MathUtils.lerp(screenMat.emissiveIntensity, 1.4, 0.2);
-    } else if (!near) {
-      screenMat.emissiveIntensity = THREE.MathUtils.lerp(screenMat.emissiveIntensity, 0.5, 0.1);
-    }
+    // Walk cycle with breathing
+    const walk = performance.now()/1000 * (dist>0.02? 4.8 : 1.2);
+    const swing = Math.sin(walk)*(dist>0.02? 0.32 : 0.1);
+    const opp = Math.sin(walk+Math.PI)*(dist>0.02? 0.32 : 0.1);
+    armL.rotation.z = 0.5 + swing*0.45;
+    armR.rotation.z = -0.5 + opp*0.45;
+    legL.rotation.x = -swing*0.75;
+    legR.rotation.x = -opp*0.75;
+    body.position.y = -0.05 + Math.abs(Math.sin(walk)*0.045); // breathing bounce
 
-    // Auto cycle between stores every few seconds
-    autoCycleTimer += dt;
-    if (autoCycleTimer > 3.8 && dist < 0.15) {
-      targetIndex = (targetIndex + 1) % stores.length;
-      autoCycleTimer = 0;
-    }
+    // Panels parallax
+    panels.forEach((p,i)=>{ p.rotation.y += 0.0015*(i%2?1:-1); p.position.y = 0.6 + Math.sin(tGoal*1.1+i)*0.06; });
 
-    renderer.render(scene, camera);
+    renderer.render(scene,camera);
     requestAnimationFrame(animate);
   }
   animate();
