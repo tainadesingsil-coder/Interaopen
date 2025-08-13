@@ -212,10 +212,7 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
     return new THREE.LineSegments(g, new THREE.LineBasicMaterial({ color: 0x7c3aed, transparent: true, opacity: 0.9 }));
   }
   const tsLines = makeTSLines();
-  const holoMat = new THREE.MeshStandardMaterial({ color: 0x7c3aed, emissive: 0x7c3aed, emissiveIntensity: 1.0, transparent: true, opacity: 0.7 });
-  const altShape = new THREE.Mesh(new THREE.IcosahedronGeometry(0.9, 1), holoMat);
-  altShape.visible = false;
-  holoGroup.add(tsLines, altShape);
+  holoGroup.add(tsLines);
   holoGroup.position.set(0, 0.7, 0);
   scene.add(holoGroup);
 
@@ -252,11 +249,12 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
     }
     flowGeo.setAttribute('position', new THREE.BufferAttribute(flowPos,3));
 
-    // Morph hologram (blend visibility)
-    const phase = (Math.sin(t*0.6)+1)/2; // 0..1
-    tsLines.visible = phase < 0.7; altShape.visible = !tsLines.visible;
-    holoGroup.rotation.y += 0.003; holoGroup.rotation.x += 0.0018;
-    holoGroup.position.y = 0.7 + Math.sin(t*1.6)*0.06;
+    // Minimal TS: animate stroke pulse and subtle rotation
+    const pulse = 0.75 + Math.sin(t*1.2)*0.25;
+    tsLines.material.opacity = 0.6 + Math.sin(t*2.0)*0.3;
+    tsLines.material.color.setHex(0x7c3aed);
+    holoGroup.rotation.y += 0.0025; holoGroup.rotation.x += 0.0012;
+    holoGroup.position.y = 0.7 + Math.sin(t*1.4)*0.05;
 
     // Subtle camera movement and light pulse
     camera.position.x = cx*0.4; camera.position.y = 1.2 + cy*0.18; camera.lookAt(0,0.4,0);
