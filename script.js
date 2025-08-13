@@ -197,6 +197,54 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
   const holoGroup = new THREE.Group();
   scene.add(holoGroup);
 
+  // Small cart + girl with laptop silhouette (minimal lines)
+  const girlCartGroup = new THREE.Group();
+  // Cart outline
+  (function addCart(){
+    const w = 0.28, h = 0.14;
+    const cartGeo = new THREE.BufferGeometry();
+    const pos = new Float32Array([
+      -w/2, -h/2, 0,  w/2, -h/2, 0,
+       w/2, -h/2, 0,  w/2,  h/2, 0,
+       w/2,  h/2, 0, -w/2,  h/2, 0,
+      -w/2,  h/2, 0, -w/2, -h/2, 0,
+    ]);
+    cartGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    const cart = new THREE.LineSegments(cartGeo, new THREE.LineBasicMaterial({ color: 0x00d4ff, transparent: true, opacity: 0.8 }));
+    girlCartGroup.add(cart);
+  })();
+
+  // Girl silhouette and laptop using line segments
+  (function addGirl(){
+    function pathToLine(points, color){
+      const flat = [];
+      for (let i = 0; i < points.length - 1; i++) {
+        const a = points[i], b = points[i+1];
+        flat.push(a[0], a[1], 0, b[0], b[1], 0);
+      }
+      const g = new THREE.BufferGeometry();
+      g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(flat), 3));
+      return new THREE.LineSegments(g, new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0.9 }));
+    }
+    const y0 = -0.005; // local baseline inside cart
+    const girl = pathToLine([
+      [-0.05, y0+0.08], [0.00, y0+0.12],
+      [ 0.00, y0+0.12], [0.05, y0+0.08],
+      [ 0.00, y0+0.08], [0.00, y0+0.00],
+      [ 0.00, y0+0.00], [-0.05, y0-0.055],
+      [ 0.00, y0+0.00], [0.06, y0-0.055],
+      // crossed legs line
+      [-0.05, y0-0.055], [0.05, y0-0.055],
+      // laptop rectangle open
+      [0.02, y0+0.02], [0.12, y0+0.02],
+      [0.12, y0+0.02], [0.12, y0-0.004]
+    ], 0x7c3aed);
+    girlCartGroup.add(girl);
+  })();
+
+  girlCartGroup.position.set(0, 0.62, 0);
+  holoGroup.add(girlCartGroup);
+
   // Interaction
   let cx=0, cy=0; canvas.addEventListener('pointermove', (e)=>{ cx=(e.clientX/innerWidth-0.5)*2; cy=(e.clientY/innerHeight-0.5)*2; }, {passive:true});
 
@@ -230,9 +278,10 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
     }
     flowGeo.setAttribute('position', new THREE.BufferAttribute(flowPos,3));
 
-    // Gentle float only
+    // Gentle float only + subtle sway for cart
     holoGroup.rotation.y += 0.0015;
     holoGroup.position.y = 0.68 + Math.sin(t*1.2)*0.05;
+    girlCartGroup.rotation.z = Math.sin(t*1.7)*0.03;
 
     // Subtle camera movement and light pulse
     camera.position.x = cx*0.4; camera.position.y = 1.2 + cy*0.18; camera.lookAt(0,0.4,0);
