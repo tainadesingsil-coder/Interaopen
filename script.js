@@ -34,6 +34,13 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
     if (e.target === toggle || toggle.contains(e.target)) return;
     if (!panel.contains(e.target)) { panel.hidden = true; toggle.setAttribute('aria-expanded','false'); }
   });
+  panel.addEventListener('click', (e)=>{
+    const a = e.target.closest('a');
+    if (a) { panel.hidden = true; toggle.setAttribute('aria-expanded','false'); }
+  });
+  window.addEventListener('keydown', (e)=>{
+    if (e.key === 'Escape') { panel.hidden = true; toggle.setAttribute('aria-expanded','false'); }
+  });
 })();
 
 /* Footer year */
@@ -511,16 +518,24 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
   function getServiceCopy(service){
     const copies = {
       'Marketing Digital': 'Por que importa: atrair e converter demanda previsível. Para negócios locais, e-commerce e marcas pessoais. Como fazemos: mídia paga (Meta/Google), funis e criativos orientados por dados.',
-      'Design Gráfico': 'Por que importa: confiança visual e clareza. Identidades, peças para anúncios e interfaces que elevam percepção e conversão.',
+      'Design e Identidade Visual': 'Por que importa: confiança visual e clareza. Identidades, peças para anúncios e interfaces que elevam percepção e conversão.',
       'Automação com IA': 'Por que importa: escala e eficiência 24/7. Chatbots, captação, conteúdo e análise integrados ao seu fluxo (CRM, planilhas, e-mail).',
-      'Consultoria': 'Por que importa: direção estratégica e priorização. Diagnóstico, plano de 90 dias e acompanhamento para destravar crescimento.'
+      'Consultoria Estratégica': 'Por que importa: direção estratégica e priorização. Diagnóstico, plano de 90 dias e acompanhamento para destravar crescimento.'
     };
     return copies[service] || 'Informações sobre o serviço.';
   }
   document.addEventListener('click', (e)=>{
-    const close = e.target.closest('[data-close]');
-    if (close) select('#service-modal')?.setAttribute('aria-hidden','true');
-    if (e.target === select('.modal-backdrop')) select('#service-modal')?.setAttribute('aria-hidden','true');
+    const modal = select('#service-modal');
+    if (!modal) return;
+    const close = e.target.closest && e.target.closest('[data-close]');
+    if (close || e.target === select('.modal-backdrop')) {
+      modal.setAttribute('aria-hidden','true');
+    }
+  });
+  window.addEventListener('keydown', (e)=>{
+    if (e.key === 'Escape') {
+      select('#service-modal')?.setAttribute('aria-hidden','true');
+    }
   });
 })();
 
