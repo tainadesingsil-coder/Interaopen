@@ -126,6 +126,7 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
 
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  try { select('#hero-fallback')?.style && (select('#hero-fallback').style.display = 'none'); } catch(_) {}
 
   const scene = new THREE.Scene();
   scene.fog = new THREE.FogExp2(0x0b0f1a, 0.045);
@@ -348,7 +349,7 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
     renderScene();
     requestAnimationFrame(animate);
   }
-  animate();
+  try { animate(); } catch (e) { const fb = select('#hero-fallback'); if (fb) fb.style.display = 'block'; }
 })();
 
 /* Cycle hero bullets */
