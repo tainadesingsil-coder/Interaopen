@@ -19,6 +19,23 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
   selectAll('#site-menu a').forEach((link) => link.addEventListener('click', () => setOpen(false)));
 })();
 
+/* Quick links toggle */
+(function initQuickLinks(){
+  const toggle = select('.quick-toggle');
+  const panel = select('#quick-panel');
+  if (!toggle || !panel) return;
+  toggle.addEventListener('click', ()=>{
+    const open = panel.hasAttribute('hidden') ? true : panel.hidden;
+    panel.hidden = !open;
+    toggle.setAttribute('aria-expanded', String(open));
+  });
+  document.addEventListener('click', (e)=>{
+    if (!panel || !toggle) return;
+    if (e.target === toggle || toggle.contains(e.target)) return;
+    if (!panel.contains(e.target)) { panel.hidden = true; toggle.setAttribute('aria-expanded','false'); }
+  });
+})();
+
 /* Footer year */
 (function updateYear() {
   const yearNode = select('#year');

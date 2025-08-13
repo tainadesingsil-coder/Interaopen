@@ -199,9 +199,10 @@
 
     <!-- Quick Links Bubble -->
     <div class="quick-links">
-      <div class="quick-inline" role="group" aria-label="Links rápidos">
-        <a href="https://wa.me/5538991121521" target="_blank" rel="noopener" class="quick-btn">WhatsApp</a>
-        <a href="https://linktr.ee/" target="_blank" rel="noopener" class="quick-btn alt">Linktree</a>
+      <button class="quick-toggle" aria-expanded="false" aria-controls="quick-panel">Links</button>
+      <div id="quick-panel" class="quick-panel" hidden>
+        <a href="https://wa.me/5538991121521" target="_blank" rel="noopener" class="btn btn-primary">WhatsApp</a>
+        <a href="https://linktr.ee/" target="_blank" rel="noopener" class="btn btn-ghost">Linktree</a>
       </div>
     </div>
 
