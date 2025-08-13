@@ -210,20 +210,37 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
     globe.add(clouds);
   } catch(_) {}
 
-  // Girl sprite on top of globe (uses transparent PNG from fotos2)
-  (function addGirlSprite(){
-    const GIRL_SPRITE_URL = 'https://tainasilveira.my.canva.site/fotos2/_assets/media/ec554cb552f24eba90afbb7dc63af7ae.png';
-    const loader = new THREE.TextureLoader();
-    try { loader.setCrossOrigin('anonymous'); } catch(_) {}
-    loader.load(GIRL_SPRITE_URL, (tex)=>{
-      tex.colorSpace = THREE.SRGBColorSpace;
-      const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false });
-      const sprite = new THREE.Sprite(mat);
-      const targetHeight = 0.9; // relative to globe size
-      const aspect = tex.image.width / tex.image.height || 0.7;
-      sprite.scale.set(targetHeight*aspect, targetHeight, 1);
-      sprite.position.set(0, 0.9 + 0.28, 0);
-      globe.add(sprite);
+  // Network arcs on globe
+  (function addNetwork(){
+    const arcMat = new THREE.LineBasicMaterial({ color: 0x00d4ff, transparent: true, opacity: 0.4 });
+    const arcs = new THREE.Group();
+    function arc(lat1, lon1, lat2, lon2){
+      const R=0.9, steps=32, pts=[];
+      function toXYZ(lat,lon,r){ const la=THREE.MathUtils.degToRad(lat), lo=THREE.MathUtils.degToRad(lon); return new THREE.Vector3( r*Math.cos(la)*Math.cos(lo), r*Math.sin(la), r*Math.cos(la)*Math.sin(lo) ); }
+      const a=toXYZ(lat1,lon1,R), b=toXYZ(lat2,lon2,R);
+      for(let i=0;i<=steps;i++){
+        const t=i/steps; const p=new THREE.Vector3().copy(a).lerp(b,t);
+        p.normalize().multiplyScalar(R+Math.sin(Math.PI*t)*0.08);
+        pts.push(p.x,p.y,p.z);
+      }
+      const g=new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(pts),3));
+      const l=new THREE.Line(g, arcMat); arcs.add(l);
+    }
+    const anchors=[[37.77,-122.4],[51.5,-0.12],[-23.55,-46.63],[35.68,139.69],[48.85,2.35]];
+    for(let i=0;i<anchors.length;i++){
+      const a=anchors[i], b=anchors[(i+2)%anchors.length]; arc(a[0],a[1],b[0],b[1]);
+    }
+    globe.add(arcs);
+  })();
+
+  // Optional: load GLTF model of girl if provided
+  (function loadGirl(){
+    const url = window.GIRL_GLTF_URL || '';
+    if (!url || !THREE.GLTFLoader) return;
+    const loader = new THREE.GLTFLoader();
+    loader.load(url, (gltf)=>{
+      const model = gltf.scene; model.scale.set(0.35,0.35,0.35); model.position.set(0,1.0,0);
+      globe.add(model);
     });
   })();
 
@@ -272,7 +289,7 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
     girlCartGroup.add(girl);
   })();
 
-  girlCartGroup.position.set(0, 0.62, 0);
+  girlCartGroup.visible = false;
   holoGroup.add(girlCartGroup);
 
   // Interaction
