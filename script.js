@@ -292,6 +292,16 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
   animate();
 })();
 
+/* Cycle hero bullets */
+(function cycleBullets(){
+  const items = selectAll('.bullet');
+  if (!items.length) return;
+  let i=0; setInterval(()=>{
+    items.forEach((el,idx)=>el.classList.toggle('active', idx===i));
+    i=(i+1)%items.length;
+  }, 2500);
+})();
+
 /* Contact form */
 (function initForm() {
   const form = select('#contact-form');
