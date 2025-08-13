@@ -5,6 +5,7 @@ import { ScreenContainer } from '../components/ScreenContainer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
 import { ProfileSuggestionCard, ProfileSuggestion } from '../components/ProfileSuggestionCard';
+import { useFonts, PlayfairDisplay_700Bold } from '@expo-google-fonts/playfair-display';
 
 const STORAGE_KEY = 'profile.v1';
 
@@ -21,10 +22,12 @@ export function ProfileScreen() {
   const [memoryOn, setMemoryOn] = useState(true);
 
   const [editing, setEditing] = useState(false);
-  const [name, setName] = useState('');
+  const [name, setName] = useState('Taina Silveira');
   const [bio, setBio] = useState('');
   const [avatar, setAvatar] = useState<string | null>(null);
   const [instagram, setInstagram] = useState('');
+
+  const [fontsLoaded] = useFonts({ PlayfairDisplay_700Bold });
 
   useEffect(() => {
     (async () => {
@@ -32,7 +35,7 @@ export function ProfileScreen() {
         const raw = await AsyncStorage.getItem(STORAGE_KEY);
         if (raw) {
           const saved = JSON.parse(raw);
-          setName(saved.name ?? '');
+          setName(saved.name ?? 'Taina Silveira');
           setBio(saved.bio ?? '');
           setAvatar(saved.avatar ?? null);
           setInstagram(saved.instagram ?? '');
@@ -64,7 +67,7 @@ export function ProfileScreen() {
 
   return (
     <ScreenContainer>
-      <View style={{ backgroundColor: '#0F1117' }}>
+      <View style={{ backgroundColor: '#0F121A' }}>
         <Image source={{ uri: 'https://images.unsplash.com/photo-1517976487492-57688fef6f5b?q=80&w=1600&auto=format&fit=crop' }} style={{ width: '100%', height: 96 }} />
       </View>
       <View style={styles.wrapper}>
@@ -87,7 +90,7 @@ export function ProfileScreen() {
               </>
             ) : (
               <>
-                <Text style={styles.name}>{name || 'Seu nome'}</Text>
+                <Text style={[styles.name, fontsLoaded && { fontFamily: 'PlayfairDisplay_700Bold' }]}>{name || 'Seu nome'}</Text>
                 <Text style={styles.bio}>{bio || 'Toque em editar para adicionar uma bio.'}</Text>
                 {instagram ? (
                   <Pressable onPress={openInstagram}><Text style={styles.link}>@{instagram}</Text></Pressable>
@@ -109,11 +112,6 @@ export function ProfileScreen() {
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Privacidade</Text>
-          <View style={styles.rowBetween}><Text style={styles.itemText}>Conta privada</Text><Switch value={privateAccount} onValueChange={setPrivateAccount} /></View>
-        </View>
-
-        <View style={styles.card}>
           <Text style={styles.cardTitle}>Sugestões para seguir</Text>
           <View style={{ gap: spacing.md }}>
             {SUGGESTED.map((p) => (
@@ -132,9 +130,9 @@ const styles = StyleSheet.create({
   wrapper: { padding: spacing.lg, gap: spacing.lg },
   header: { flexDirection: 'row', gap: spacing.lg, alignItems: 'center' },
   avatar: { width: 72, height: 72, borderRadius: 36 },
-  name: { color: colors.text, fontSize: 18, fontWeight: '700' },
+  name: { color: colors.text, fontSize: 22, fontWeight: '700' },
   bio: { color: colors.textMuted, marginTop: 4, lineHeight: 20 },
-  link: { color: '#7CD4FD', marginTop: 4 },
+  link: { color: '#70C6FF', marginTop: 4 },
   nameInput: { color: colors.text, fontSize: 18, fontWeight: '700' },
   bioInput: { color: colors.text, marginTop: 4, lineHeight: 20 },
   editBtn: { backgroundColor: colors.surfaceAlt, borderRadius: radius.md, paddingVertical: spacing.sm, paddingHorizontal: spacing.md },

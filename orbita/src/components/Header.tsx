@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: colors.text,
     fontSize: 22,
-    fontWeight: '800',
-    letterSpacing: 2,
+    fontWeight: '900',
+    letterSpacing: 3,
   },
 });
