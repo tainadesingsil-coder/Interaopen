@@ -589,7 +589,7 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
   };
 
   function normalize(q){
-    return (q||'').toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu,'');
+    return (q||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
   }
 
   async function askAI(question){
@@ -701,7 +701,7 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
       if (ai) { render(ai, ''); return; }
     }
     const { html, service } = buildAnswerLocal(q);
-    render(html, service);
+    render(html || 'Posso te ajudar com Marketing, Design, IA e Consultoria. Conte seu objetivo e indico o melhor caminho.', service);
   });
   document.addEventListener('click', (e)=>{
     const ex = e.target.closest && e.target.closest('.assistant-example');
