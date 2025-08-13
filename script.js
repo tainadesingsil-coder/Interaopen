@@ -403,3 +403,98 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
   const photos = selectAll('.about-card');
   photos.forEach(img => img.src = final);
 })();
+
+/* Hero Services Assistant */
+(function initHeroAssistant(){
+  const form = select('#assistant-form');
+  const input = select('#assistant-input');
+  const box = select('#assistant-response');
+  if (!form || !input || !box) return;
+
+  const serviceInfo = {
+    marketing: {
+      title: 'Marketing Digital',
+      text: 'Gestão de tráfego (Meta/Google), conteúdo e funis de aquisição orientados por dados para escalar resultados com eficiência.'
+    },
+    design: {
+      title: 'Design Gráfico',
+      text: 'Identidade visual, social media, peças para anúncios e UI com estética forte e clareza na comunicação.'
+    },
+    ia: {
+      title: 'Automação com IA',
+      text: 'Workflows inteligentes para atendimento, conteúdo e análise de dados. Chatbots, automações e integrações sob medida.'
+    },
+    consultoria: {
+      title: 'Consultoria',
+      text: 'Diagnóstico, estratégia e implementação focados no seu momento de negócio, com plano de ação claro.'
+    }
+  };
+
+  function normalize(q){
+    return (q||'').toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu,'');
+  }
+
+  function buildAnswer(q){
+    const n = normalize(q);
+    const hits = [];
+    if (/(marketing|trafego|ads|anuncio|meta|google)/.test(n)) hits.push('marketing');
+    if (/(design|identidade|branding|ui|ux|social)/.test(n)) hits.push('design');
+    if (/(ia|inteligencia|automacao|chatbot|assistente|gpt|workflow|zap|whatsapp)/.test(n)) hits.push('ia');
+    if (/(consultoria|diagnostico|estrategia|plano|mentoria)/.test(n)) hits.push('consultoria');
+    if (!n || /(ajuda|servico|servicos|o que faz|o que voce faz)/.test(n)) {
+      return {
+        html: `<strong>Posso ajudar nestes serviços:</strong><br>
+          • Marketing Digital — ${serviceInfo.marketing.text}<br>
+          • Design Gráfico — ${serviceInfo.design.text}<br>
+          • Automação com IA — ${serviceInfo.ia.text}<br>
+          • Consultoria — ${serviceInfo.consultoria.text}`,
+        service: ''
+      };
+    }
+    if (/(preco|valor|orcamento|quanto custa)/.test(n)) {
+      return {
+        html: `Posso montar um orçamento com base no seu objetivo e escopo. Me conte sobre o projeto no formulário de contato abaixo que retorno em seguida.`,
+        service: ''
+      };
+    }
+    if (hits.length) {
+      const first = hits[0];
+      const s = serviceInfo[first];
+      return {
+        html: `<strong>${s.title}</strong><br>${s.text}`,
+        service: s.title
+      };
+    }
+    return {
+      html: `Entendi. Posso te ajudar com Marketing Digital, Design, Automação com IA ou Consultoria. Se quiser, descreva seu objetivo (ex.: “quero aumentar leads com anúncios”) que eu indico o melhor caminho.`,
+      service: ''
+    };
+  }
+
+  function setMessagePrefill(service){
+    if (!service) return;
+    const msg = select('#mensagem');
+    if (msg) msg.value = `Olá! Tenho interesse em ${service}. Podemos conversar?`;
+  }
+
+  function render(html, service){
+    box.innerHTML = `${html}`;
+    const actions = document.createElement('div');
+    actions.className = 'actions';
+    const contactBtn = document.createElement('a');
+    contactBtn.href = '#contato';
+    contactBtn.className = 'btn-mini';
+    contactBtn.textContent = 'Falar sobre isso';
+    contactBtn.addEventListener('click', ()=> setMessagePrefill(service));
+    actions.appendChild(contactBtn);
+    box.appendChild(actions);
+    box.hidden = false;
+  }
+
+  form.addEventListener('submit', (e)=>{
+    e.preventDefault();
+    const q = input.value.trim();
+    const { html, service } = buildAnswer(q);
+    render(html, service);
+  });
+})();

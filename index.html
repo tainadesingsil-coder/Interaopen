@@ -52,6 +52,13 @@
         <div class="hero-content container hero-panel">
           <div>
             <p class="hero-lead animate-in">Estrategista criativa unindo estética, dados e automação para impulsionar marcas com experiências memoráveis.</p>
+            <form class="assistant-form" id="assistant-form" autocomplete="off">
+              <input id="assistant-input" class="assistant-input" type="text" inputmode="text" placeholder="Em que posso ajudar?" aria-label="Em que posso ajudar?" />
+              <button type="submit" class="assistant-send" aria-label="Enviar pergunta">
+                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M2 21 23 12 2 3v7l15 2-15 2v7Z"/></svg>
+              </button>
+            </form>
+            <div id="assistant-response" class="assistant-response" aria-live="polite" hidden></div>
           </div>
         </div>
 
