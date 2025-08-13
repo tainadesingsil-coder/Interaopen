@@ -70,7 +70,7 @@ ul { padding-left: 16px; color: var(--text-dim); }
   border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 .header-inner { display: flex; align-items: center; justify-content: space-between; height: 100%; }
-.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); font-weight: 600; }
+.brand { display: flex; align-items: center; gap: 14px; text-decoration: none; color: var(--text); font-weight: 600; }
 .brand-mark { display: none; }
 .brand-mark img { width: 100%; height: 100%; object-fit: cover; }
 .brand-label { display: grid; line-height: 1; }
@@ -153,6 +153,7 @@ ul { padding-left: 16px; color: var(--text-dim); }
 
 /* Improve top icon visibility */
 .site-header { background: rgba(0,0,0,0.6); }
+.site-header::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(90deg, rgba(124,58,237,0.12), rgba(0,212,255,0.12)); opacity: 0.4; }
 .brand-mark { background: linear-gradient(135deg, #7c3aed 0%, #00d4ff 100%); border: 1px solid rgba(255,255,255,0.18); }
 
 /* About stacked photos */
@@ -351,3 +352,7 @@ input:focus, textarea:focus { border-color: #a78bfa; box-shadow: 0 0 0 3px rgba(
 .modal-close { position: absolute; top: 8px; right: 8px; width: 32px; height: 32px; border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; background: transparent; color: var(--text); cursor: pointer; }
 .modal-body { color: var(--text); font-size: 14px; }
 .modal-actions { margin-top: 12px; display: flex; justify-content: end; }
+
+/* Neon ask chip */
+.ask-chip { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 12px; border: 1px solid rgba(56,189,248,0.34); background: rgba(0,0,0,0.35); color: var(--text); box-shadow: 0 0 18px rgba(56,189,248,0.28), inset 0 0 10px rgba(124,58,237,0.18); font-size: 12px; animation: neonGlow 3s ease-in-out infinite alternate; }
+@keyframes neonGlow { from { box-shadow: 0 0 12px rgba(56,189,248,0.2), inset 0 0 6px rgba(124,58,237,0.12);} to { box-shadow: 0 0 24px rgba(56,189,248,0.4), inset 0 0 14px rgba(124,58,237,0.22);} }
