@@ -403,28 +403,10 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
   const ctx = c.getContext('2d');
   function resize(){ c.width = c.clientWidth || innerWidth; c.height = c.clientHeight || innerHeight; }
   new ResizeObserver(resize).observe(c); resize();
-  let t=0; function loop(){
-    if (select('#hero-canvas')) {
-      const webglVisible = getComputedStyle(select('#hero-canvas')).display !== 'none';
-      if (webglVisible) { c.style.display='none'; requestAnimationFrame(loop); return; }
-    }
-    c.style.display='block'; if (select('#hero-fallback')) select('#hero-fallback').style.display='none';
-    t+=0.01; ctx.clearRect(0,0,c.width,c.height);
-    ctx.translate(c.width/2, c.height/2);
-    const R = Math.min(c.width,c.height)*0.28;
-    // globe circle
-    ctx.strokeStyle = 'rgba(0,212,255,0.25)'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(0,0,R,0,Math.PI*2); ctx.stroke();
-    // rotating arcs
-    for(let i=0;i<6;i++){
-      ctx.save(); ctx.rotate(t + i*Math.PI/3);
-      ctx.strokeStyle = 'rgba(124,58,237,0.35)'; ctx.beginPath(); ctx.arc(0,0,R+8, -0.6, 0.6); ctx.stroke(); ctx.restore();
-    }
-    // particles
-    for(let i=0;i<60;i++){
-      const a = i/60*Math.PI*2 + t; const r = R + 20 + (i%10);
-      const x = Math.cos(a)*r, y=Math.sin(a)*r*0.6; ctx.fillStyle='rgba(0,212,255,0.25)'; ctx.fillRect(x,y,2,2);
-    }
-    ctx.setTransform(1,0,0,1,0,0);
+  // Keep 2D fallback hidden and do not draw to maintain pure black background
+  function loop(){
+    c.style.display='none'; if (select('#hero-fallback')) select('#hero-fallback').style.display='none';
+    ctx.clearRect(0,0,c.width,c.height);
     requestAnimationFrame(loop);
   }
   requestAnimationFrame(loop);
