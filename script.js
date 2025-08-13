@@ -564,6 +564,11 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
   const box = select('#assistant-response');
   if (!form || !input || !box) return;
 
+  const urlCfg = new URL(location.href);
+  const qpProxy = urlCfg.searchParams.get('aiProxy');
+  if (qpProxy) localStorage.setItem('AI_PROXY_URL', qpProxy);
+  const AI_PROXY_URL = localStorage.getItem('AI_PROXY_URL') || '';
+
   const serviceInfo = {
     marketing: {
       title: 'Marketing Digital',
@@ -587,7 +592,39 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
     return (q||'').toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu,'');
   }
 
-  function buildAnswer(q){
+  async function askAI(question){
+    if (!AI_PROXY_URL) return null;
+    try {
+      const ctrl = new AbortController();
+      const t = setTimeout(()=>ctrl.abort(), 10000);
+      const res = await fetch(AI_PROXY_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          question,
+          context: {
+            services: [
+              { name: serviceInfo.marketing.title, desc: serviceInfo.marketing.text },
+              { name: serviceInfo.design.title, desc: serviceInfo.design.text },
+              { name: serviceInfo.ia.title, desc: serviceInfo.ia.text },
+              { name: serviceInfo.consultoria.title, desc: serviceInfo.consultoria.text }
+            ],
+            instructions: 'Responda de forma objetiva sobre os serviços: Marketing Digital, Design/Identidade, Automação com IA e Consultoria. Sempre sugira próximos passos práticos e convide para contato.'
+          }
+        }),
+        signal: ctrl.signal
+      });
+      clearTimeout(t);
+      if (!res.ok) return null;
+      const json = await res.json();
+      if (json && json.answer) return String(json.answer);
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function buildAnswerLocal(q){
     const n = normalize(q);
     const hits = [];
     if (/(marketing|trafego|ads|anuncio|meta|google|lead|roas|e[- ]?commerce|loja)/.test(n)) hits.push('marketing');
@@ -655,10 +692,15 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
     box.hidden = false;
   }
 
-  form.addEventListener('submit', (e)=>{
+  form.addEventListener('submit', async (e)=>{
     e.preventDefault();
     const q = input.value.trim();
-    const { html, service } = buildAnswer(q);
+    box.hidden = false; box.innerHTML = 'Pensando...';
+    if (AI_PROXY_URL) {
+      const ai = await askAI(q);
+      if (ai) { render(ai, ''); return; }
+    }
+    const { html, service } = buildAnswerLocal(q);
     render(html, service);
   });
   document.addEventListener('click', (e)=>{
@@ -667,7 +709,6 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
     e.preventDefault();
     const q = ex.getAttribute('data-q') || ex.textContent || '';
     input.value = q;
-    const { html, service } = buildAnswer(q);
-    render(html, service);
+    form.dispatchEvent(new Event('submit'));
   });
 })();
