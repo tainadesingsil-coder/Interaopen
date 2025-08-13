@@ -159,7 +159,8 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
   try { select('#hero-fallback')?.style && (select('#hero-fallback').style.display = 'none'); } catch(_) {}
 
   const scene = new THREE.Scene();
-  scene.fog = new THREE.FogExp2(0x0b0f1a, 0.045);
+  // Remove fog for perfectly black background
+  // scene.fog disabled
   const camera = new THREE.PerspectiveCamera(48, 2, 0.1, 200);
   camera.position.set(0, 1.2, 6.5);
   let girlModel = null;
@@ -205,6 +206,8 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
   const flow = new THREE.Points(flowGeo, flowMat);
   scene.add(flow);
   nodeGroup.visible = false; edges.visible = false; flow.visible = false; /* only globe visible */
+  // Ensure arcs are subtle neon
+  try { if (globe && globe.children) globe.children.forEach((ch)=>{ if (ch.isLine) { ch.material.opacity = 0.28; ch.material.color.set(0x00d4ff); } }); } catch(_) {}
 
   const flowCurve = new THREE.CatmullRomCurve3([
     new THREE.Vector3(-2.4, 0.0, 1.6),
@@ -225,6 +228,16 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
   const globe = new THREE.Mesh(new THREE.SphereGeometry(0.9, 32, 32), new THREE.MeshStandardMaterial({ map: globeTex, roughness: 0.9, metalness: 0.0 }));
   globe.position.set(0, 0.6, 0);
   scene.add(globe);
+
+  // Subtle neon ring under the globe
+  (function addNeonRing(){
+    const ringGeo = new THREE.RingGeometry(1.0, 1.2, 64);
+    const ringMat = new THREE.MeshBasicMaterial({ color: 0x00d4ff, transparent: true, opacity: 0.22, side: THREE.DoubleSide });
+    const ring = new THREE.Mesh(ringGeo, ringMat);
+    ring.rotation.x = -Math.PI / 2;
+    ring.position.set(0, 0.05, 0);
+    scene.add(ring);
+  })();
   // Clouds (subtle)
   try {
     const cloudsTex = new THREE.TextureLoader().load('https://threejs.org/examples/textures/planets/earth_clouds_1024.png');
@@ -353,26 +366,25 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
     }
     flowGeo.setAttribute('position', new THREE.BufferAttribute(flowPos,3));
 
-    // Gentle float only + globe spin
+    // Only globe spin
     globe.rotation.y += 0.004;
-    particles.rotation.y -= 0.0008;
-    holoGroup.rotation.y += 0.0015;
-    holoGroup.position.y = 0.68 + Math.sin(t*1.2)*0.05;
+    // Keep other elements static
+    holoGroup.rotation.y = 0;
+    holoGroup.position.y = 0.68;
     if (girlModel) {
-      girlModel.rotation.y += 0.003;
-      girlModel.position.y = 1.05 + Math.sin(t*1.4)*0.02;
+      girlModel.rotation.y = girlModel.rotation.y;
+      girlModel.position.y = 1.05;
     }
 
-    // Subtle camera movement and light pulse
-    camera.position.x = cx*0.4; camera.position.y = 1.2 + cy*0.18; camera.lookAt(0,0.4,0);
-    accentA.intensity = 0.9 + Math.sin(t*3.0)*0.15; accentB.intensity = 0.8 + Math.cos(t*2.7)*0.15;
+    // Keep camera and lights fixed for calm look
+    camera.position.x = 0; camera.position.y = 1.2; camera.lookAt(0,0.4,0);
+    accentA.intensity = 0.9; accentB.intensity = 0.8;
 
     // Sync slogan text pulse
     const sl = document.getElementById('slogan');
     if (sl) {
-      const p = 0.8 + Math.sin(t*1.2)*0.2;
-      sl.style.opacity = String(p);
-      sl.style.letterSpacing = `${6 + Math.sin(t*1.2)*2}px`;
+      sl.style.opacity = '1';
+      sl.style.letterSpacing = 'normal';
     }
 
     renderScene();
