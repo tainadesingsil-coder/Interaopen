@@ -132,50 +132,43 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
   const camera = new THREE.PerspectiveCamera(50, 2, 0.1, 200);
   camera.position.set(0, 1.55, 6.8);
 
-  // Lights: neon ambience + key
+  // Postprocessing (bloom) for high-end look
+  let composer = null;
+  try {
+    const size = { width: 0, height: 0 };
+    const rtParams = { stencilBuffer: false }; // perf
+    const effectComposer = new THREE.EffectComposer(renderer, new THREE.WebGLRenderTarget(size.width, size.height, rtParams));
+    const renderPass = new THREE.RenderPass(scene, camera);
+    const bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(1, 1), 0.8, 0.4, 0.85);
+    effectComposer.addPass(renderPass);
+    effectComposer.addPass(bloomPass);
+    composer = effectComposer;
+  } catch (_) {
+    composer = null;
+  }
+
+  function renderScene() {
+    if (composer) composer.render(); else renderer.render(scene, camera);
+  }
+
+  // Lights
   const hemi = new THREE.HemisphereLight(0xaecbff, 0x0b0f1a, 0.95); scene.add(hemi);
   const key = new THREE.DirectionalLight(0xffffff, 1.05); key.position.set(2.2, 4, 3.2); scene.add(key);
   const magenta = new THREE.PointLight(0x7c3aed, 1.0, 16); magenta.position.set(-3, 1.6, 2.5); scene.add(magenta);
   const cyan = new THREE.PointLight(0x00d4ff, 1.0, 16); cyan.position.set(3, 1.4, 2.0); scene.add(cyan);
 
-  // Helpers: noise bump texture and sign texture
-  function makeNoiseTexture(w=256, h=256) {
-    const c = document.createElement('canvas'); c.width=w; c.height=h; const ctx = c.getContext('2d');
-    const img = ctx.createImageData(w, h); const d = img.data;
-    for (let i=0;i<w*h;i++){ const v = (Math.random()*255)|0; d[i*4]=v; d[i*4+1]=v; d[i*4+2]=v; d[i*4+3]=255; }
-    ctx.putImageData(img, 0, 0);
-    const tex = new THREE.CanvasTexture(c); tex.wrapS = tex.wrapT = THREE.RepeatWrapping; tex.repeat.set(4,4); return tex;
-  }
-  function makeSignTexture(label, colorHex) {
-    const padX=28, padY=18, font=44;
-    const c = document.createElement('canvas'); const ctx = c.getContext('2d');
-    ctx.font = `700 ${font}px Plus Jakarta Sans, Manrope, sans-serif`;
-    const textW = ctx.measureText(label).width; const w = Math.ceil(textW)+padX*2; const h = font+padY*2; c.width=w; c.height=h;
-    // background
-    const grd = ctx.createLinearGradient(0,0,w,0);
-    grd.addColorStop(0, 'rgba(12,16,28,0.15)'); grd.addColorStop(1, 'rgba(12,16,28,0.35)');
-    ctx.fillStyle = grd; ctx.fillRect(0,0,w,h);
-    // glow
-    ctx.shadowColor = `#${colorHex.toString(16).padStart(6,'0')}`; ctx.shadowBlur = 18;
-    // text
-    ctx.fillStyle = `#${colorHex.toString(16).padStart(6,'0')}`; ctx.textBaseline='middle'; ctx.font = `800 ${font}px Plus Jakarta Sans, Manrope, sans-serif`;
-    ctx.fillText(label, padX, h/2);
-    const tex = new THREE.CanvasTexture(c); tex.anisotropy = 4; tex.needsUpdate = true; return tex;
-  }
+  // Helpers
+  function makeNoiseTexture(w=256, h=256) { const c = document.createElement('canvas'); c.width=w; c.height=h; const ctx = c.getContext('2d'); const img = ctx.createImageData(w,h); const d=img.data; for (let i=0;i<w*h;i++){ const v=(Math.random()*255)|0; d[i*4]=v; d[i*4+1]=v; d[i*4+2]=v; d[i*4+3]=255; } ctx.putImageData(img,0,0); const tex=new THREE.CanvasTexture(c); tex.wrapS=tex.wrapT=THREE.RepeatWrapping; tex.repeat.set(4,4); return tex; }
+  function makeSignTexture(label, colorHex) { const padX=28,padY=18,font=44; const c=document.createElement('canvas'); const ctx=c.getContext('2d'); ctx.font=`700 ${font}px Plus Jakarta Sans, Manrope, sans-serif`; const textW=ctx.measureText(label).width; const w=Math.ceil(textW)+padX*2; const h=font+padY*2; c.width=w; c.height=h; const grd=ctx.createLinearGradient(0,0,w,0); grd.addColorStop(0,'rgba(12,16,28,0.15)'); grd.addColorStop(1,'rgba(12,16,28,0.35)'); ctx.fillStyle=grd; ctx.fillRect(0,0,w,h); ctx.shadowColor=`#${colorHex.toString(16).padStart(6,'0')}`; ctx.shadowBlur=18; ctx.fillStyle=`#${colorHex.toString(16).padStart(6,'0')}`; ctx.textBaseline='middle'; ctx.font=`800 ${font}px Plus Jakarta Sans, Manrope, sans-serif`; ctx.fillText(label,padX,h/2); const tex=new THREE.CanvasTexture(c); tex.anisotropy=4; tex.needsUpdate=true; return tex; }
   const noiseTex = makeNoiseTexture();
 
-  // Ground road with emissive lanes
-  const road = new THREE.Mesh(
-    new THREE.PlaneGeometry(20, 60, 1, 1),
-    new THREE.MeshStandardMaterial({ color: 0x0f1424, roughness: 0.95, bumpMap: noiseTex, bumpScale: 0.02 })
-  );
-  road.rotation.x = -Math.PI/2; road.position.z = -10; scene.add(road);
+  // Ground & lanes
+  const road = new THREE.Mesh(new THREE.PlaneGeometry(20, 60), new THREE.MeshStandardMaterial({ color: 0x0f1424, roughness: 0.95, bumpMap: noiseTex, bumpScale: 0.02 })); road.rotation.x=-Math.PI/2; road.position.z=-10; scene.add(road);
   const laneMat = new THREE.MeshStandardMaterial({ color: 0x0f1424, emissive: 0x00d4ff, emissiveIntensity: 1.0 });
-  const lane = new THREE.Mesh(new THREE.PlaneGeometry(0.08, 60), laneMat);
-  lane.rotation.x = -Math.PI/2; lane.position.set(-0.7, 0.001, -10); scene.add(lane);
-  const lane2 = new THREE.Mesh(new THREE.PlaneGeometry(0.08, 60), laneMat.clone()); lane2.rotation.x=-Math.PI/2; lane2.position.set(0.7, 0.001, -10); scene.add(lane2);
+  const lane = new THREE.Mesh(new THREE.PlaneGeometry(0.08,60), laneMat); lane.rotation.x=-Math.PI/2; lane.position.set(-0.7,0.001,-10); scene.add(lane);
+  const lane2 = new THREE.Mesh(new THREE.PlaneGeometry(0.08,60), laneMat.clone()); lane2.rotation.x=-Math.PI/2; lane2.position.set(0.7,0.001,-10); scene.add(lane2);
 
-  // City blocks (extrusions) + emissive billboards with store names
+  // City blocks with labeled signs
   const blocks = new THREE.Group();
   const blockMat = new THREE.MeshStandardMaterial({ color: 0x101b33, metalness: 0.25, roughness: 0.82, bumpMap: noiseTex, bumpScale: 0.02 });
   const storeNames = ['Padaria', 'Farmácia', 'Mercado', 'Café', 'Restaurante'];
@@ -183,77 +176,94 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
     const w = 0.9 + Math.random()*0.8; const h = 1.9 + Math.random()*2.2; const d = 1 + Math.random()*1.5;
     const g = new THREE.BoxGeometry(w, h, d); const m = new THREE.Mesh(g, blockMat);
     const side = i%2===0 ? -1.9 : 1.9; m.position.set(side, h/2-0.05, -i*3.6 - 2); blocks.add(m);
-    // Billboard with label
-    const name = storeNames[i % storeNames.length];
-    const color = (name==='Padaria')?0xffd166: (name==='Farmácia')?0x66ffb3: (name==='Mercado')?0x66c2ff: (i%2?0x7c3aed:0x00d4ff);
+    const name = storeNames[i % storeNames.length]; const color = (name==='Padaria')?0xffd166: (name==='Farmácia')?0x66ffb3: (name==='Mercado')?0x66c2ff: (i%2?0x7c3aed:0x00d4ff);
     const tex = makeSignTexture(name, color);
-    const signEM = new THREE.MeshStandardMaterial({ color: 0xffffff, map: tex, emissive: color, emissiveMap: tex, emissiveIntensity: 1.1, transparent: true });
-    const sign = new THREE.Mesh(new THREE.PlaneGeometry(0.95*w, 0.42), signEM);
-    const offset = side<0 ? 0.52*w : -0.52*w;
-    sign.position.set(side+offset, h*0.72, -i*3.6 - 2 + (side<0? 0.46 : -0.46)); sign.rotation.y = side<0 ? Math.PI/2 : -Math.PI/2;
-    blocks.add(sign);
+    const sign = new THREE.Mesh(new THREE.PlaneGeometry(0.95*w, 0.42), new THREE.MeshStandardMaterial({ color: 0xffffff, map: tex, emissive: color, emissiveMap: tex, emissiveIntensity: 1.15, transparent: true }));
+    const offset = side<0 ? 0.52*w : -0.52*w; sign.position.set(side+offset, h*0.72, -i*3.6 - 2 + (side<0? 0.46 : -0.46)); sign.rotation.y = side<0 ? Math.PI/2 : -Math.PI/2; blocks.add(sign);
   }
   scene.add(blocks);
 
-  // Humanoid robot with more realistic proportions and PBR details
-  const metal = new THREE.MeshPhysicalMaterial({ color: 0xd6e4ff, metalness: 0.8, roughness: 0.22, clearcoat: 0.85, bumpMap: noiseTex, bumpScale: 0.02 });
-  const dark = new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.35, roughness: 0.6, bumpMap: noiseTex, bumpScale: 0.01 });
-  const glow = new THREE.MeshStandardMaterial({ color: 0x7c3aed, emissive: 0x7c3aed, emissiveIntensity: 1.0 });
+  // Try loading a high-fidelity humanoid robot glTF
+  let bot = null, mixer = null; let fallbackRig = null;
+  const loader = (window.THREE && THREE.GLTFLoader) ? new THREE.GLTFLoader() : null;
+  const modelURL = 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/RobotExpressive/glTF/RobotExpressive.gltf';
 
-  const bot = new THREE.Group();
-  // pelvis/hips
-  const hips = new THREE.Group(); hips.position.y = 0.4; bot.add(hips);
-  // torso
-  const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.4, 1.2, 14, 22), metal); torso.position.y = 0.55; hips.add(torso);
-  // shoulders group for natural sway
-  const shoulders = new THREE.Group(); shoulders.position.y = 1.15; hips.add(shoulders);
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.31, 26, 26), dark); head.position.y = 1.55; hips.add(head);
-  const visor = new THREE.Mesh(new THREE.CapsuleGeometry(0.22, 0.02, 10, 16), glow); visor.rotation.z = Math.PI/2; visor.position.set(0, 1.58, 0.24); hips.add(visor);
-  // arms
-  const armGeo = new THREE.CylinderGeometry(0.075,0.075,0.9,14);
-  const armL = new THREE.Mesh(armGeo, metal); armL.position.set(-0.45, 0.95, 0); shoulders.add(armL);
-  const armR = new THREE.Mesh(armGeo, metal); armR.position.set(0.45, 0.95, 0); shoulders.add(armR);
-  // legs + feet
-  const legGeo = new THREE.CapsuleGeometry(0.1, 0.88, 10, 16);
-  const legL = new THREE.Mesh(legGeo, metal); legL.position.set(-0.18, -0.05, 0); hips.add(legL);
-  const legR = new THREE.Mesh(legGeo, metal); legR.position.set(0.18, -0.05, 0); hips.add(legR);
-  const footGeo = new THREE.BoxGeometry(0.18, 0.08, 0.28);
-  const footL = new THREE.Mesh(footGeo, dark); footL.position.set(-0.18, -0.5, 0.08); hips.add(footL);
-  const footR = new THREE.Mesh(footGeo, dark); footR.position.set(0.18, -0.5, 0.08); hips.add(footR);
-  // Phone in right hand
-  const phone = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.36, 0.04), dark); phone.position.set(0.62, 0.95, 0.08); shoulders.add(phone);
+  function buildFallbackRig() {
+    const metal = new THREE.MeshPhysicalMaterial({ color: 0xd6e4ff, metalness: 0.8, roughness: 0.22, clearcoat: 0.85, bumpMap: noiseTex, bumpScale: 0.02 });
+    const dark = new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.35, roughness: 0.6, bumpMap: noiseTex, bumpScale: 0.01 });
+    const glow = new THREE.MeshStandardMaterial({ color: 0x7c3aed, emissive: 0x7c3aed, emissiveIntensity: 1.0 });
+    const rig = new THREE.Group();
+    const hips = new THREE.Group(); hips.position.y = 0.4; rig.add(hips);
+    const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.4, 1.2, 14, 22), metal); torso.position.y = 0.55; hips.add(torso);
+    const shoulders = new THREE.Group(); shoulders.position.y = 1.15; hips.add(shoulders);
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.31, 26, 26), dark); head.position.y = 1.55; hips.add(head);
+    const visor = new THREE.Mesh(new THREE.CapsuleGeometry(0.22, 0.02, 10, 16), glow); visor.rotation.z = Math.PI/2; visor.position.set(0, 1.58, 0.24); hips.add(visor);
+    const armGeo = new THREE.CylinderGeometry(0.075,0.075,0.9,14);
+    const armL = new THREE.Mesh(armGeo, metal); armL.position.set(-0.45, 0.95, 0); shoulders.add(armL);
+    const armR = new THREE.Mesh(armGeo, metal); armR.position.set(0.45, 0.95, 0); shoulders.add(armR);
+    const legGeo = new THREE.CapsuleGeometry(0.1, 0.88, 10, 16);
+    const legL = new THREE.Mesh(legGeo, metal); legL.position.set(-0.18, -0.05, 0); hips.add(legL);
+    const legR = new THREE.Mesh(legGeo, metal); legR.position.set(0.18, -0.05, 0); hips.add(legR);
+    const footGeo = new THREE.BoxGeometry(0.18, 0.08, 0.28);
+    const footL = new THREE.Mesh(footGeo, dark); footL.position.set(-0.18, -0.5, 0.08); hips.add(footL);
+    const footR = new THREE.Mesh(footGeo, dark); footR.position.set(0.18, -0.5, 0.08); hips.add(footR);
+    const phone = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.36, 0.04), dark); phone.position.set(0.62, 0.95, 0.08); shoulders.add(phone);
+    return { rig, parts: { hips, shoulders, torso, head, armL, armR, legL, legR, footL, footR } };
+  }
 
-  bot.position.set(0, 0.0, 2.6);
-  scene.add(bot);
+  function placeBot(object3d) {
+    bot = object3d; bot.position.set(0, 0, 2.6); scene.add(bot);
+  }
 
-  // Animation controls
+  if (loader) {
+    loader.load(modelURL, (gltf) => {
+      const model = gltf.scene;
+      model.traverse((o)=>{ if (o.isMesh) { o.castShadow=false; o.receiveShadow=false; o.material.metalness = 0.5; o.material.roughness = 0.35; }});
+      model.scale.set(1.2,1.2,1.2);
+      placeBot(model);
+      if (gltf.animations && gltf.animations.length) {
+        mixer = new THREE.AnimationMixer(model);
+        const clip = THREE.AnimationClip.findByName(gltf.animations, 'Walk') || gltf.animations[0];
+        const action = mixer.clipAction(clip); action.play(); action.timeScale = 1.1;
+      }
+    }, undefined, () => {
+      const fb = buildFallbackRig(); fallbackRig = fb; placeBot(fb.rig);
+    });
+  } else {
+    const fb = buildFallbackRig(); fallbackRig = fb; placeBot(fb.rig);
+  }
+
+  // Interaction and loop
   let cx=0, cy=0; canvas.addEventListener('pointermove', (e)=>{ cx=(e.clientX/innerWidth-0.5)*2; cy=(e.clientY/innerHeight-0.5)*2; }, {passive:true});
   const clock = new THREE.Clock();
 
-  function resize(){ const w=canvas.clientWidth,h=canvas.clientHeight; if(!w||!h) return; renderer.setSize(w,h,false); camera.aspect=w/h; camera.updateProjectionMatrix(); }
+  function resize(){ const w=canvas.clientWidth,h=canvas.clientHeight; if(!w||!h) return; renderer.setSize(w,h,false); camera.aspect=w/h; camera.updateProjectionMatrix(); if (composer) composer.setSize(w,h); }
   new ResizeObserver(resize).observe(canvas); resize();
 
   function animate(){
-    const t = clock.getElapsedTime();
-    // Walk forward in a straight line, loop
-    bot.position.z -= 0.024; if (bot.position.z < -42) bot.position.z = 2.6;
-    const phase = t*4.4; const swing = Math.sin(phase)*0.33; const opp = Math.sin(phase+Math.PI)*0.33;
-    // arm/leg swings
-    armL.rotation.z = 0.20 + swing*0.55; armR.rotation.z = -0.20 + opp*0.55;
-    legL.rotation.x = -swing*0.85; legR.rotation.x = -opp*0.85;
-    footL.rotation.x = Math.max(0, -swing*0.3); footR.rotation.x = Math.max(0, -opp*0.3);
-    // body sway
-    hips.rotation.y = Math.sin(phase)*0.06; shoulders.rotation.y = -Math.sin(phase)*0.05;
-    torso.position.y = 0.55 + Math.abs(Math.sin(phase)*0.045); head.rotation.y = cx*0.35;
+    const dt = Math.min(clock.getDelta(), 0.033);
+    const t = clock.elapsedTime;
 
-    // Parallax camera and light flicker
-    camera.position.x = cx*0.45; camera.position.y = 1.55 + cy*0.18; camera.lookAt(0, 0.9, bot.position.z-2);
+    // Move bot forward; loop
+    if (bot) { bot.position.z -= 0.024; if (bot.position.z < -42) bot.position.z = 2.6; }
+    if (mixer) mixer.update(dt);
+
+    if (fallbackRig) {
+      const { hips, shoulders, torso, head, armL, armR, legL, legR, footL, footR } = fallbackRig.parts;
+      const phase = t*4.4; const swing = Math.sin(phase)*0.33; const opp = Math.sin(phase+Math.PI)*0.33;
+      armL.rotation.z = 0.20 + swing*0.55; armR.rotation.z = -0.20 + opp*0.55;
+      legL.rotation.x = -swing*0.85; legR.rotation.x = -opp*0.85;
+      footL.rotation.x = Math.max(0, -swing*0.3); footR.rotation.x = Math.max(0, -opp*0.3);
+      hips.rotation.y = Math.sin(phase)*0.06; shoulders.rotation.y = -Math.sin(phase)*0.05;
+      torso.position.y = 0.55 + Math.abs(Math.sin(phase)*0.045); head.rotation.y = cx*0.35;
+    }
+
+    // Camera and lights
+    camera.position.x = cx*0.45; camera.position.y = 1.55 + cy*0.18; camera.lookAt(0, 0.9, (bot?.position.z||0)-2);
     magenta.intensity = 0.95 + Math.sin(t*3.2)*0.2; cyan.intensity = 0.95 + Math.cos(t*2.9)*0.2;
-
-    // Subtle emissive pulse on lanes
     const pulse = 1.0 + Math.sin(t*3.5)*0.2; lane.material.emissiveIntensity = pulse; lane2.material.emissiveIntensity = pulse;
 
-    renderer.render(scene, camera);
+    renderScene();
     requestAnimationFrame(animate);
   }
   animate();
