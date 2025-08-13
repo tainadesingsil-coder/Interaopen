@@ -195,12 +195,27 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
 
   // Morphing hologram logo (stylized “TS” nodes)
   const holoGroup = new THREE.Group();
-  const holoMat = new THREE.MeshStandardMaterial({ color: 0x7c3aed, emissive: 0x7c3aed, emissiveIntensity: 1.2, transparent: true, opacity: 0.8, metalness: 0.2, roughness: 0.2 });
-  const shapeA = new THREE.IcosahedronGeometry(0.9, 1);
-  const shapeB = new THREE.TorusKnotGeometry(0.7, 0.18, 120, 16);
-  const holoA = new THREE.Mesh(shapeA, holoMat);
-  const holoB = new THREE.Mesh(shapeB, holoMat.clone()); holoB.visible = false;
-  holoGroup.add(holoA, holoB);
+  // Geometric TS: T (top bar and stem), S (arc segments)
+  function makeTSLines() {
+    const g = new THREE.BufferGeometry();
+    const pts = [];
+    // T
+    pts.push(-0.5, 0.4, 0, 0.5, 0.4, 0); // top
+    pts.push(0, 0.4, 0, 0, -0.4, 0); // stem
+    // S (approx with polyline)
+    const sPts = [
+      [0.2, 0.35],[0.5, 0.35],[0.5, 0.15],[0.2, 0.15],[0.2, -0.05],[0.5, -0.05],[0.5, -0.35],[0.2, -0.35]
+    ];
+    for (let i=0;i<sPts.length-1;i++){ const a=sPts[i], b=sPts[i+1]; pts.push(a[0], a[1], 0, b[0], b[1], 0); }
+    const arr = new Float32Array(pts);
+    g.setAttribute('position', new THREE.BufferAttribute(arr, 3));
+    return new THREE.LineSegments(g, new THREE.LineBasicMaterial({ color: 0x7c3aed, transparent: true, opacity: 0.9 }));
+  }
+  const tsLines = makeTSLines();
+  const holoMat = new THREE.MeshStandardMaterial({ color: 0x7c3aed, emissive: 0x7c3aed, emissiveIntensity: 1.0, transparent: true, opacity: 0.7 });
+  const altShape = new THREE.Mesh(new THREE.IcosahedronGeometry(0.9, 1), holoMat);
+  altShape.visible = false;
+  holoGroup.add(tsLines, altShape);
   holoGroup.position.set(0, 0.7, 0);
   scene.add(holoGroup);
 
@@ -239,13 +254,21 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
 
     // Morph hologram (blend visibility)
     const phase = (Math.sin(t*0.6)+1)/2; // 0..1
-    holoA.visible = phase < 0.7; holoB.visible = !holoA.visible;
+    tsLines.visible = phase < 0.7; altShape.visible = !tsLines.visible;
     holoGroup.rotation.y += 0.003; holoGroup.rotation.x += 0.0018;
     holoGroup.position.y = 0.7 + Math.sin(t*1.6)*0.06;
 
     // Subtle camera movement and light pulse
     camera.position.x = cx*0.4; camera.position.y = 1.2 + cy*0.18; camera.lookAt(0,0.4,0);
     accentA.intensity = 0.9 + Math.sin(t*3.0)*0.15; accentB.intensity = 0.8 + Math.cos(t*2.7)*0.15;
+
+    // Sync slogan text pulse
+    const sl = document.getElementById('slogan');
+    if (sl) {
+      const p = 0.8 + Math.sin(t*1.2)*0.2;
+      sl.style.opacity = String(p);
+      sl.style.letterSpacing = `${6 + Math.sin(t*1.2)*2}px`;
+    }
 
     renderScene();
     requestAnimationFrame(animate);
