@@ -47,6 +47,7 @@
     <main>
       <!-- HERO 3D -->
       <section id="hero" class="hero-section" aria-label="Apresentação">
+        <canvas id="hero-canvas" class="hero-canvas" aria-hidden="true"></canvas>
 
         <div class="hero-content container hero-panel">
           <div>
@@ -70,7 +71,11 @@
       <section id="sobre" class="section about-section">
         <div class="container about-grid">
           <div class="about-media" aria-hidden="true">
-            <img class="about-photo" src="https://tainasilveira.my.canva.site/_assets/media/41a98f94bc4cf10b90803cb37902c5b5.jpg" alt="Foto de Taina Silveira" />
+            <div class="about-photos" id="about-photos">
+              <img class="about-card" src="https://tainasilveira.my.canva.site/_assets/media/f744fc0b0db350eaee3b400fd54a8252.jpg" alt="Taina em pé 1" />
+              <img class="about-card" src="https://tainasilveira.my.canva.site/_assets/media/f744fc0b0db350eaee3b400fd54a8252.jpg" alt="Taina em pé 2" />
+              <img class="about-card" src="https://tainasilveira.my.canva.site/_assets/media/f744fc0b0db350eaee3b400fd54a8252.jpg" alt="Taina em pé 3" />
+            </div>
           </div>
           <div class="about-copy">
             <h2>Sobre</h2>
@@ -185,5 +190,14 @@
         <p><a class="btn btn-primary" href="https://tainasilveira.my.canva.site/" target="_blank" rel="noopener">Ver Portfólio no Canva</a></p>
       </div>
     </section>
+
+    <!-- Quick Links Bubble -->
+    <div class="quick-links">
+      <button class="quick-toggle" aria-expanded="false" aria-controls="quick-panel">Links</button>
+      <div id="quick-panel" class="quick-panel" hidden>
+        <a href="https://wa.me/5538991121521" target="_blank" rel="noopener" class="btn btn-primary">WhatsApp</a>
+        <a href="https://linktr.ee/" target="_blank" rel="noopener" class="btn btn-ghost">Linktree</a>
+      </div>
+    </div>
   </body>
 </html>
