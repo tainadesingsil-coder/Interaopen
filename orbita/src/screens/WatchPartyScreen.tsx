@@ -4,6 +4,7 @@ import { colors, radius, spacing } from '../theme/theme';
 import { ScreenContainer } from '../components/ScreenContainer';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Video, ResizeMode } from 'expo-av';
+import { WebView } from 'react-native-webview';
 
 function getBotReply(text: string): string {
   const t = text.toLowerCase();
@@ -60,6 +61,11 @@ export function WatchPartyScreen() {
               resizeMode={ResizeMode.CONTAIN}
               shouldPlay={joined}
             />
+            {joined ? (
+              <View style={{ height: 360 }}>
+                <WebView source={{ uri: 'https://www.tiktok.com/@sciencenews/live' }} style={{ flex: 1 }} />
+              </View>
+            ) : null}
             <View style={styles.participantsPill}>
               <MaterialCommunityIcons name="account-group-outline" size={16} color={colors.text} />
               <Text style={styles.participantsText}>{participants} conectados</Text>

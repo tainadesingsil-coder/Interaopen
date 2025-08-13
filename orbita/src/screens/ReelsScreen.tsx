@@ -1,5 +1,5 @@
 import React, { useCallback, useRef, useState } from 'react';
-import { View, StyleSheet, Dimensions, FlatList, Text, Pressable } from 'react-native';
+import { View, StyleSheet, Dimensions, FlatList, Text, Pressable, Image } from 'react-native';
 import { Video, ResizeMode } from 'expo-av';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { colors, radius, spacing } from '../theme/theme';
@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   cover: { width: '100%', height: '100%', position: 'relative' },
-  centerPlay: { position: 'absolute', top: '40%', left: '42%' }
+  centerPlay: { position: 'absolute', top: '40%', left: '42%' },
   title: {
     color: colors.text,
     fontSize: 16,

@@ -9,6 +9,7 @@ import { Stories } from '../components/Stories';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { fetchTrendingBrazil, YouTubeVideo } from '../services/youtube';
 import { YouTubeCard } from '../components/YouTubeCard';
+import { TikTokCard } from '../components/TikTokCard';
 
 const LOCAL_FEED = [
   {
@@ -33,11 +34,17 @@ export function FeedScreen() {
     fetchTrendingBrazil(6).then(setYt).catch(() => setYt([]));
   }, []);
 
+  const data = [
+    ...yt.map((v) => ({ type: 'yt', data: v } as const)),
+    { type: 'tt' as const, data: { url: 'https://www.tiktok.com/@sciencemadesimple/video/726838965', title: 'TikTok de ciência' } },
+    ...LOCAL_FEED.map((v) => ({ type: 'local', data: v } as const)),
+  ];
+
   return (
     <ScreenContainer>
       <FlatList
-        data={[...yt.map((v) => ({ type: 'yt', data: v } as const)), ...LOCAL_FEED.map((v) => ({ type: 'local', data: v } as const))]}
-        keyExtractor={(item, idx) => (item.type === 'yt' ? `yt-${item.data.id}` : `local-${item.data.id}-${idx}`)}
+        data={data}
+        keyExtractor={(item, idx) => (item.type === 'yt' ? `yt-${(item as any).data.id}` : `${item.type}-${idx}`)}
         contentContainerStyle={{ padding: spacing.md, paddingTop: 0 }}
         ListHeaderComponent={
           <>
@@ -47,14 +54,17 @@ export function FeedScreen() {
         }
         renderItem={({ item }) => {
           if (item.type === 'yt') {
-            return <YouTubeCard id={item.data.id} title={item.data.title} thumbnail={item.data.thumbnail} channel={item.data.channel} duration={item.data.duration} />;
+            return <YouTubeCard id={(item as any).data.id} title={(item as any).data.title} thumbnail={(item as any).data.thumbnail} channel={(item as any).data.channel} duration={(item as any).data.duration} />;
+          }
+          if (item.type === 'tt') {
+            return <TikTokCard url={(item as any).data.url} title={(item as any).data.title} />;
           }
           return (
             <VideoCard
-              id={item.data.id}
-              title={item.data.title}
-              duration={item.data.duration}
-              videoUrl={item.data.videoUrl}
+              id={(item as any).data.id}
+              title={(item as any).data.title}
+              duration={(item as any).data.duration}
+              videoUrl={(item as any).data.videoUrl}
             />
           );
         }}
