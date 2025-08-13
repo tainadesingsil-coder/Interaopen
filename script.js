@@ -415,13 +415,35 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
 (function serviceClicks() {
   const cards = selectAll('.service-card[role="button"]');
   const form = select('#contact-form');
-  if (!cards.length || !form) return;
+  if (!cards.length) return;
   cards.forEach(c => c.addEventListener('click', () => {
     const s = c.getAttribute('data-service') || '';
-    const msg = select('#mensagem');
-    if (msg) msg.value = `Olá! Tenho interesse em ${s}. Podemos conversar?`;
-    select('#contato')?.scrollIntoView({ behavior: 'smooth' });
+    openServiceModal(s);
   }));
+
+  function openServiceModal(service){
+    const modal = select('#service-modal');
+    const title = select('#modal-title');
+    const body = select('#modal-body');
+    if (!modal || !title || !body) return;
+    title.textContent = service || 'Serviço';
+    body.innerHTML = getServiceCopy(service);
+    modal.setAttribute('aria-hidden', 'false');
+  }
+  function getServiceCopy(service){
+    const copies = {
+      'Marketing Digital': 'Por que importa: atrair e converter demanda previsível. Para negócios locais, e-commerce e marcas pessoais. Como fazemos: mídia paga (Meta/Google), funis e criativos orientados por dados.',
+      'Design Gráfico': 'Por que importa: confiança visual e clareza. Identidades, peças para anúncios e interfaces que elevam percepção e conversão.',
+      'Automação com IA': 'Por que importa: escala e eficiência 24/7. Chatbots, captação, conteúdo e análise integrados ao seu fluxo (CRM, planilhas, e-mail).',
+      'Consultoria': 'Por que importa: direção estratégica e priorização. Diagnóstico, plano de 90 dias e acompanhamento para destravar crescimento.'
+    };
+    return copies[service] || 'Informações sobre o serviço.';
+  }
+  document.addEventListener('click', (e)=>{
+    const close = e.target.closest('[data-close]');
+    if (close) select('#service-modal')?.setAttribute('aria-hidden','true');
+    if (e.target === select('.modal-backdrop')) select('#service-modal')?.setAttribute('aria-hidden','true');
+  });
 })();
 
 /* Mini buttons prefill */
