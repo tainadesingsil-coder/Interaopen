@@ -315,16 +315,8 @@ input:focus, textarea:focus { border-color: #a78bfa; box-shadow: 0 0 0 3px rgba(
   text-shadow: 0 6px 20px rgba(124,58,237,0.24), 0 1px 0 rgba(0,0,0,0.25);
   display: inline-block;
 }
-.about-section h2::before, .services-section h2::before, .contact-section h2::before {
-  content: "";
-  display: inline-block;
-  width: 16px; height: 16px; margin-right: 10px;
-  border-radius: 4px;
-  background: linear-gradient(135deg, #7c3aed 0%, #00d4ff 100%);
-  border: 1px solid rgba(255,255,255,0.2);
-  box-shadow: var(--shadow-2);
-  vertical-align: text-top;
-}
+/* Remove square marker before section titles */
+.about-section h2::before, .services-section h2::before, .contact-section h2::before { content: none !important; display: none !important; }
 .about-section h2::after, .services-section h2::after, .contact-section h2::after {
   content: "";
   display: block;
