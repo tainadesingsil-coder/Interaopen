@@ -155,7 +155,7 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
   }
 
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1.5, 2.25));
   try { select('#hero-fallback')?.style && (select('#hero-fallback').style.display = 'none'); } catch(_) {}
 
   const scene = new THREE.Scene();
@@ -225,7 +225,8 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
 
   // Realistic globe (center) for context
   const globeTex = new THREE.TextureLoader().load('https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg');
-  const globe = new THREE.Mesh(new THREE.SphereGeometry(0.9, 32, 32), new THREE.MeshStandardMaterial({ map: globeTex, roughness: 0.9, metalness: 0.0 }));
+  globeTex.anisotropy = Math.min(renderer.capabilities.getMaxAnisotropy?.() || 8, 16);
+  const globe = new THREE.Mesh(new THREE.SphereGeometry(0.9, 64, 64), new THREE.MeshStandardMaterial({ map: globeTex, roughness: 0.85, metalness: 0.0 }));
   globe.position.set(0, 0.6, 0);
   scene.add(globe);
 
@@ -245,7 +246,7 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
   try {
     const cloudsTex = new THREE.TextureLoader().load('https://threejs.org/examples/textures/planets/earth_clouds_1024.png');
     const cloudsMat = new THREE.MeshPhongMaterial({ map: cloudsTex, transparent: true, opacity: 0.25, depthWrite: false });
-    const clouds = new THREE.Mesh(new THREE.SphereGeometry(0.905, 48, 48), cloudsMat);
+    const clouds = new THREE.Mesh(new THREE.SphereGeometry(0.905, 64, 64), cloudsMat);
     globe.add(clouds);
   } catch(_) {}
 
