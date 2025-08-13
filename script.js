@@ -131,6 +131,7 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
   scene.fog = new THREE.FogExp2(0x0b0f1a, 0.045);
   const camera = new THREE.PerspectiveCamera(48, 2, 0.1, 200);
   camera.position.set(0, 1.2, 6.5);
+  let girlModel = null;
 
   // Postprocessing (bloom)
   let composer = null;
@@ -235,12 +236,18 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
 
   // Optional: load GLTF model of girl if provided
   (function loadGirl(){
-    const url = window.GIRL_GLTF_URL || '';
-    if (!url || !THREE.GLTFLoader) return;
+    const DEFAULT_GIRL_URL = 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/CesiumMan/glTF-Binary/CesiumMan.glb';
+    const url = window.GIRL_GLTF_URL || DEFAULT_GIRL_URL;
+    if (!THREE.GLTFLoader) return;
     const loader = new THREE.GLTFLoader();
     loader.load(url, (gltf)=>{
-      const model = gltf.scene; model.scale.set(0.35,0.35,0.35); model.position.set(0,1.0,0);
+      const model = gltf.scene;
+      model.scale.set(0.35,0.35,0.35);
+      model.position.set(0, 1.05, 0);
+      model.rotation.y = Math.PI * 0.5;
+      model.traverse((o)=>{ if (o.isMesh) { o.castShadow=false; o.receiveShadow=false; } });
       globe.add(model);
+      girlModel = model;
     });
   })();
 
@@ -330,6 +337,10 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
     particles.rotation.y -= 0.0008;
     holoGroup.rotation.y += 0.0015;
     holoGroup.position.y = 0.68 + Math.sin(t*1.2)*0.05;
+    if (girlModel) {
+      girlModel.rotation.y += 0.003;
+      girlModel.position.y = 1.05 + Math.sin(t*1.4)*0.02;
+    }
 
     // Subtle camera movement and light pulse
     camera.position.x = cx*0.4; camera.position.y = 1.2 + cy*0.18; camera.lookAt(0,0.4,0);
