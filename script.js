@@ -310,6 +310,7 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
 
     // Gentle float only + globe spin
     globe.rotation.y += 0.004;
+    particles.rotation.y -= 0.0008;
     holoGroup.rotation.y += 0.0015;
     holoGroup.position.y = 0.68 + Math.sin(t*1.2)*0.05;
 

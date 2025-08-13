@@ -5,13 +5,13 @@
   --surface-strong: rgba(255, 255, 255, 0.12);
   --text: #e6ebf2;
   --text-dim: #aab6c5;
-  --primary: #2563eb; /* trust blue */
-  --secondary: #38bdf8; /* sky */
-  --accent: #22d3ee; /* teal */
+  --primary: #7c3aed;
+  --secondary: #00d4ff;
+  --accent: #c084fc;
   --danger: #ef4444;
   --success: #10b981;
-  --gradient-1: linear-gradient(135deg, #2563eb 0%, #38bdf8 100%);
-  --gradient-2: radial-gradient(80% 80% at 20% 10%, rgba(37, 99, 235, 0.5) 0%, rgba(56, 189, 248, 0.12) 35%, rgba(0, 0, 0, 0) 60%);
+  --gradient-1: linear-gradient(135deg, #7c3aed 0%, #00d4ff 100%);
+  --gradient-2: radial-gradient(80% 80% at 20% 10%, rgba(124, 58, 237, 0.5) 0%, rgba(0, 212, 255, 0.12) 35%, rgba(0, 0, 0, 0) 60%);
 
   --radius: 16px;
   --radius-lg: 22px;
@@ -28,7 +28,7 @@ html, body {
   padding: 0; margin: 0;
   background: #000;
   color: var(--text);
-  font-family: Manrope, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+  font-family: Inter, Manrope, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
   line-height: 1.5;
   scroll-behavior: smooth;
 }
@@ -45,7 +45,7 @@ img, svg { display: block; }
 }
 
 h1, h2, h3 {
-  font-family: "Plus Jakarta Sans", Manrope, system-ui, sans-serif;
+  font-family: 'Exo 2', Inter, system-ui, sans-serif;
   line-height: 1.08;
   letter-spacing: -0.015em;
   margin: 0 0 16px;
