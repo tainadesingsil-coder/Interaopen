@@ -374,19 +374,23 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
   const serviceInfo = {
     marketing: {
       title: 'Marketing Digital',
-      text: 'Gestão de tráfego (Meta/Google), conteúdo e funis orientados por dados. Exemplos: captação de leads para clínicas locais, campanhas de lançamento (PLF), always-on para e-commerce com ROAS otimizado.'
+      text: 'Gestão de tráfego (Meta/Google), conteúdo e funis orientados por dados. Exemplos: captação de leads para clínicas locais, campanhas de lançamento (PLF), always-on para e-commerce com ROAS otimizado.',
+      niches: ['clínica', 'salão', 'restaurante', 'e-commerce', 'infoproduto', 'imobiliária']
     },
     design: {
       title: 'Design Gráfico',
-      text: 'Identidade visual, social media, peças para anúncios e UI com estética forte e clareza. Exemplos: identidade para cafeteria/artista, carrosséis de alta performance, landing pages com conversão.'
+      text: 'Identidade visual, social media, peças para anúncios e UI com estética forte e clareza. Exemplos: identidade para cafeteria/artista, carrosséis de alta performance, landing pages com conversão.',
+      niches: ['cafeteria', 'artista', 'startup', 'evento', 'educação']
     },
     ia: {
       title: 'Automação com IA',
-      text: 'Workflows inteligentes para atendimento, conteúdo e análise. Exemplos: chatbot de WhatsApp para pré-venda, geração assistida de conteúdo, integração CRM + planilhas + e-mail.'
+      text: 'Workflows inteligentes para atendimento, conteúdo e análise. Exemplos: chatbot de WhatsApp para pré-venda, geração assistida de conteúdo, integração CRM + planilhas + e-mail.',
+      niches: ['whatsapp', 'crm', 'conteúdo', 'suporte', 'atendimento']
     },
     consultoria: {
       title: 'Consultoria',
-      text: 'Diagnóstico, estratégia e implementação conforme seu momento. Exemplos: revisão de funil, plano de mídia trimestral, roadmap de branding e jornada digital.'
+      text: 'Diagnóstico, estratégia e implementação conforme seu momento. Exemplos: revisão de funil, plano de mídia trimestral, roadmap de branding e jornada digital.',
+      niches: ['estratégia', 'funil', 'branding', 'posicionamento']
     }
   };
 
@@ -397,38 +401,42 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
   function buildAnswer(q){
     const n = normalize(q);
     const hits = [];
-    if (/(marketing|trafego|ads|anuncio|meta|google)/.test(n)) hits.push('marketing');
-    if (/(design|identidade|branding|ui|ux|social)/.test(n)) hits.push('design');
-    if (/(ia|inteligencia|automacao|chatbot|assistente|gpt|workflow|zap|whatsapp)/.test(n)) hits.push('ia');
-    if (/(consultoria|diagnostico|estrategia|plano|mentoria)/.test(n)) hits.push('consultoria');
-    if (!n || /(ajuda|servico|servicos|o que faz|o que voce faz)/.test(n)) {
-      return {
-        html: `<strong>Posso ajudar nestes serviços:</strong><br>
-          • Marketing Digital — ${serviceInfo.marketing.text}<br>
-          • Design Gráfico — ${serviceInfo.design.text}<br>
-          • Automação com IA — ${serviceInfo.ia.text}<br>
-          • Consultoria — ${serviceInfo.consultoria.text}`,
-        service: ''
-      };
+    if (/(marketing|trafego|ads|anuncio|meta|google|lead|roas|e[- ]?commerce|loja)/.test(n)) hits.push('marketing');
+    if (/(design|identidade|branding|ui|ux|social|logo|landing|site)/.test(n)) hits.push('design');
+    if (/(ia|inteligencia|automacao|chatbot|assistente|gpt|workflow|zap|whatsapp|crm)/.test(n)) hits.push('ia');
+    if (/(consultoria|diagnostico|estrategia|plano|mentoria|posicionamento|funil)/.test(n)) hits.push('consultoria');
+
+    // niche detection
+    const nicheWords = ['clinica','salão','salao','restaurante','e-commerce','loja','imobiliaria','infoproduto','cafeteria','artista','startup','evento','educacao'];
+    const niche = nicheWords.find(w => n.includes(w));
+
+    if (!n || /(ajuda|servico|servicos|o que faz|o que voce faz|pode ajudar)/.test(n)) {
+      return { html: `<strong>Posso ajudar nestes serviços:</strong><br>
+        • Marketing Digital — ${serviceInfo.marketing.text}<br>
+        • Design Gráfico — ${serviceInfo.design.text}<br>
+        • Automação com IA — ${serviceInfo.ia.text}<br>
+        • Consultoria — ${serviceInfo.consultoria.text}`, service: '' };
     }
+
     if (/(preco|valor|orcamento|quanto custa)/.test(n)) {
-      return {
-        html: `Posso montar um orçamento com base no seu objetivo e escopo. Me conte sobre o projeto no formulário de contato abaixo que retorno em seguida.`,
-        service: ''
-      };
+      return { html: `Preparo orçamento conforme objetivo, prazo e escopo. Conte o contexto (ex.: nicho, canais, meta) e envio uma proposta alinhada.`, service: '' };
     }
+
     if (hits.length) {
       const first = hits[0];
       const s = serviceInfo[first];
-      return {
-        html: `<strong>${s.title}</strong><br>${s.text}`,
-        service: s.title
-      };
+      let extra = '';
+      if (niche) {
+        if (first==='marketing' && /(clinica|salao|restaurante)/.test(niche)) extra = ' Ex.: captação de pacientes, agenda por WhatsApp e campanhas locais.';
+        if (first==='marketing' && /(e[- ]?commerce|loja)/.test(niche)) extra = ' Ex.: estrutura de campanhas (TOF/MOF/BOF), catálogos e remarketing dinâmico.';
+        if (first==='design' && /(cafeteria|artista|startup|evento)/.test(niche)) extra = ' Ex.: identidade e materiais de lançamento/coleta de leads.';
+        if (first==='ia') extra = ' Ex.: chatbot para dúvidas frequentes e qualificação de leads com integração ao CRM.';
+        if (first==='consultoria') extra = ' Ex.: auditoria do funil atual e plano de 90 dias.';
+      }
+      return { html: `<strong>${s.title}</strong><br>${s.text}${extra}`, service: s.title };
     }
-    return {
-      html: `Entendi. Posso te ajudar com Marketing Digital, Design, Automação com IA ou Consultoria. Se quiser, descreva seu objetivo (ex.: “quero aumentar leads com anúncios”) que eu indico o melhor caminho.`,
-      service: ''
-    };
+
+    return { html: `Consigo orientar em Marketing, Design, Automação com IA e Consultoria. Diga seu nicho e objetivo (ex.: "clínica — captar 200 leads/mês") para eu sugerir a melhor abordagem.`, service: '' };
   }
 
   function setMessagePrefill(service){
