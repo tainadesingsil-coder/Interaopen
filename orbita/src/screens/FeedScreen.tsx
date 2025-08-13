@@ -41,7 +41,7 @@ export function FeedScreen() {
         ListHeaderComponent={<Header />}
         renderItem={({ item }) => {
           if (item.type === 'yt') {
-            return <YouTubeCard id={item.data.id} title={item.data.title} duration={item.data.duration} />;
+            return <YouTubeCard id={item.data.id} title={item.data.title} thumbnail={item.data.thumbnail} channel={item.data.channel} duration={item.data.duration} />;
           }
           return (
             <VideoCard
