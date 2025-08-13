@@ -696,13 +696,14 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
   form.addEventListener('submit', async (e)=>{
     e.preventDefault();
     const q = input.value.trim();
-    box.hidden = false; box.innerHTML = 'Pensando...';
+    // Local answer first (instant)
+    const local = buildAnswerLocal(q);
+    render(local.html || 'Posso te ajudar com Marketing, Design, IA e Consultoria. Conte seu objetivo e indico o melhor caminho.', local.service);
+    // Try AI in background, replace if available
     if (AI_PROXY_URL) {
       const ai = await askAI(q);
-      if (ai) { render(ai, ''); return; }
+      if (ai) { render(ai, local.service || ''); }
     }
-    const { html, service } = buildAnswerLocal(q);
-    render(html || 'Posso te ajudar com Marketing, Design, IA e Consultoria. Conte seu objetivo e indico o melhor caminho.', service);
   });
   document.addEventListener('click', (e)=>{
     const ex = e.target.closest && e.target.closest('.assistant-example');
