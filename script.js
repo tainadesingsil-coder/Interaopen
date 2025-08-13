@@ -661,4 +661,13 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
     const { html, service } = buildAnswer(q);
     render(html, service);
   });
+  document.addEventListener('click', (e)=>{
+    const ex = e.target.closest && e.target.closest('.assistant-example');
+    if (!ex) return;
+    e.preventDefault();
+    const q = ex.getAttribute('data-q') || ex.textContent || '';
+    input.value = q;
+    const { html, service } = buildAnswer(q);
+    render(html, service);
+  });
 })();
