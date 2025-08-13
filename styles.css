@@ -285,6 +285,11 @@ input:focus, textarea:focus { border-color: #a78bfa; box-shadow: 0 0 0 3px rgba(
 .quick-links { position: fixed; right: 18px; bottom: 18px; z-index: 1200; }
 .quick-toggle { padding: 10px 14px; border-radius: 999px; background: var(--gradient-1); color: #0b0f1a; border: none; font-weight: 800; cursor: pointer; box-shadow: var(--shadow-2); }
 .quick-panel { position: absolute; right: 0; bottom: 48px; display: grid; gap: 8px; background: color-mix(in srgb, var(--bg) 90%, transparent); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 10px; box-shadow: var(--shadow); }
+/* Minimal inline variant */
+.quick-inline { display: inline-flex; gap: 8px; background: color-mix(in srgb, var(--bg) 90%, transparent); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 6px; box-shadow: var(--shadow); }
+.quick-btn { display: inline-flex; align-items: center; gap: 6px; padding: 6px 8px; font-size: 12px; border-radius: 8px; text-decoration: none; color: var(--text); border: 1px solid rgba(255,255,255,0.12); background: rgba(0,0,0,0.3); }
+.quick-btn.alt { background: rgba(255,255,255,0.06); }
+.quick-btn:hover { box-shadow: 0 0 16px rgba(56,189,248,0.25); border-color: rgba(56,189,248,0.25); }
 .tag { display: inline-block; padding: 6px 10px; border-radius: 999px; font-size: 12px; font-weight: 800; letter-spacing: 0.06em; color: #0b0f1a; background: var(--gradient-1); box-shadow: var(--shadow-2); margin: 6px 6px 0 0; }
 .tag-ia { background: linear-gradient(135deg, #7c3aed, #00d4ff); }
 .tag-design { background: linear-gradient(135deg, #7c3aed, #00d4ff); }
