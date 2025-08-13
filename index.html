@@ -11,10 +11,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
-    <link rel="stylesheet" href="/workspace/styles.css" />
+    <link rel="stylesheet" href="styles.css" />
 
     <script src="https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.min.js" defer></script>
-    <script src="/workspace/script.js" defer></script>
+    <script src="script.js" defer></script>
   </head>
   <body>
     <noscript>Ative o JavaScript para vivenciar todas as animações e interações.</noscript>
@@ -133,35 +133,7 @@
         <div class="container">
           <h2>Portfólio</h2>
           <p class="section-lead">Seleção de projetos recentes. Clique para ampliar.</p>
-          <div class="portfolio-grid">
-            <a class="portfolio-item" href="https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=1200&auto=format&fit=crop" data-type="image" aria-label="Projeto 1">
-              <div class="thumb" style="background-image:url('https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=800&auto=format&fit=crop');"></div>
-              <span class="caption">Landing page SaaS</span>
-            </a>
-            <a class="portfolio-item" href="https://images.unsplash.com/photo-1545239351-1141bd82e8a6?q=80&w=1200&auto=format&fit=crop" data-type="image" aria-label="Projeto 2">
-              <div class="thumb" style="background-image:url('https://images.unsplash.com/photo-1545239351-1141bd82e8a6?q=80&w=800&auto=format&fit=crop');"></div>
-              <span class="caption">Branding minimalista</span>
-            </a>
-            <a class="portfolio-item" href="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" data-type="video" aria-label="Projeto 3 (vídeo)">
-              <div class="thumb video-thumb">
-                <span class="play" aria-hidden="true">▶</span>
-                <img src="https://images.unsplash.com/photo-1520975922284-0d2466b22adf?q=80&w=800&auto=format&fit=crop" alt="Capa do vídeo" />
-              </div>
-              <span class="caption">Animação motion</span>
-            </a>
-            <a class="portfolio-item" href="https://images.unsplash.com/photo-1515879218367-8466d910aaa4?q=80&w=1200&auto=format&fit=crop" data-type="image" aria-label="Projeto 4">
-              <div class="thumb" style="background-image:url('https://images.unsplash.com/photo-1515879218367-8466d910aaa4?q=80&w=800&auto=format&fit=crop');"></div>
-              <span class="caption">UI App Finance</span>
-            </a>
-            <a class="portfolio-item" href="https://images.unsplash.com/photo-1529336953121-a0ce66fba796?q=80&w=1200&auto=format&fit=crop" data-type="image" aria-label="Projeto 5">
-              <div class="thumb" style="background-image:url('https://images.unsplash.com/photo-1529336953121-a0ce66fba796?q=80&w=800&auto=format&fit=crop');"></div>
-              <span class="caption">Campanha Social</span>
-            </a>
-            <a class="portfolio-item" href="https://images.unsplash.com/photo-1492724441997-5dc865305da7?q=80&w=1200&auto=format&fit=crop" data-type="image" aria-label="Projeto 6">
-              <div class="thumb" style="background-image:url('https://images.unsplash.com/photo-1492724441997-5dc865305da7?q=80&w=800&auto=format&fit=crop');"></div>
-              <span class="caption">E-commerce Moda</span>
-            </a>
-          </div>
+          <div class="portfolio-grid" id="portfolio-grid" data-source="portfolio.json"></div>
         </div>
 
         <div id="lightbox" class="lightbox" aria-hidden="true" role="dialog" aria-label="Visualização de mídia">

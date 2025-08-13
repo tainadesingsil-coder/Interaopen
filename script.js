@@ -62,13 +62,13 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
 
 /* Lightbox for portfolio */
 (function initLightbox() {
-  const items = selectAll('.portfolio-item');
   const lightbox = select('#lightbox');
   const content = select('#lightbox-content');
   const closeBtn = select('.lightbox-close');
-  if (!items.length || !lightbox || !content) return;
+  if (!lightbox || !content) return;
 
   const open = (node) => {
+    if (!node) return;
     content.innerHTML = '';
     const href = node.getAttribute('href');
     const type = node.dataset.type || 'image';
@@ -95,16 +95,70 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
     content.innerHTML = '';
   };
 
-  items.forEach((a) => {
-    a.addEventListener('click', (e) => {
-      e.preventDefault();
-      open(a);
-    });
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest && e.target.closest('.portfolio-item');
+    if (!a) return;
+    if (!a.closest('#portfolio')) return; // ensure within portfolio section
+    e.preventDefault();
+    open(a);
   });
 
   closeBtn?.addEventListener('click', close);
   lightbox.addEventListener('click', (e) => { if (e.target === lightbox) close(); });
   window.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+})();
+
+/* Portfolio dynamic loader */
+(async function loadPortfolio() {
+  const grid = select('#portfolio-grid');
+  if (!grid) return;
+  const urlParam = new URLSearchParams(location.search).get('portfolio');
+  const source = urlParam || grid.dataset.source || '/workspace/portfolio.json';
+  try {
+    const res = await fetch(source, { headers: { 'Accept': 'application/json' } });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    const items = Array.isArray(data) ? data : (data.items || []);
+    if (!items.length) throw new Error('Manifesto vazio');
+
+    const frag = document.createDocumentFragment();
+    items.forEach((item) => {
+      const type = item.type === 'video' ? 'video' : 'image';
+      const a = document.createElement('a');
+      a.className = 'portfolio-item reveal in';
+      a.href = item.src;
+      a.dataset.type = type;
+      a.setAttribute('aria-label', item.title || 'Item do portfólio');
+
+      if (type === 'video') {
+        const thumb = document.createElement('div');
+        thumb.className = 'thumb video-thumb';
+        const play = document.createElement('span');
+        play.className = 'play';
+        play.textContent = '▶';
+        const img = document.createElement('img');
+        img.src = item.thumb || item.poster || item.src;
+        img.alt = item.title || 'Vídeo do portfólio';
+        thumb.appendChild(play);
+        thumb.appendChild(img);
+        a.appendChild(thumb);
+      } else {
+        const thumb = document.createElement('div');
+        thumb.className = 'thumb';
+        thumb.style.backgroundImage = `url('${item.thumb || item.src}')`;
+        a.appendChild(thumb);
+      }
+      const caption = document.createElement('span');
+      caption.className = 'caption';
+      caption.textContent = item.title || '';
+      a.appendChild(caption);
+      frag.appendChild(a);
+    });
+    grid.innerHTML = '';
+    grid.appendChild(frag);
+  } catch (err) {
+    grid.innerHTML = '<p style="color: var(--text-dim)">Não foi possível carregar o portfólio automaticamente.</p>';
+  }
 })();
 
 /* Contact form */
