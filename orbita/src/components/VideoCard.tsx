@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useState } from 'react';
-import { StyleSheet, Text, View, Pressable } from 'react-native';
+import { StyleSheet, Text, View, Pressable, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { colors, radius, spacing } from '../theme/theme';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -13,9 +13,10 @@ export type VideoCardProps = {
   thumbnailUrl?: string; // kept for compatibility if needed in future
   duration: string;
   videoUrl: string;
+  author?: { name: string; handle: string; avatar: string; verified?: boolean };
 };
 
-export function VideoCard({ id, title, videoUrl, duration }: VideoCardProps) {
+export function VideoCard({ id, title, videoUrl, duration, author }: VideoCardProps) {
   const videoRef = useRef<Video>(null);
   const navigation = useNavigation();
   const [isPlaying, setIsPlaying] = useState(false);
@@ -60,6 +61,16 @@ export function VideoCard({ id, title, videoUrl, duration }: VideoCardProps) {
 
   return (
     <View style={styles.card}>
+      {author ? (
+        <View style={styles.headerRow}>
+          <Image source={{ uri: author.avatar }} style={styles.headerAvatar} />
+          <View style={{ flex: 1 }}>
+            <Text style={styles.headerName}>{author.name} {author.verified ? '✓' : ''}</Text>
+            <Text style={styles.headerHandle}>@{author.handle}</Text>
+          </View>
+          <MaterialCommunityIcons name="dots-horizontal" size={18} color={colors.textMuted} />
+        </View>
+      ) : null}
       <Pressable style={styles.mediaWrapper} onPress={onMediaPress}>
         <Video
           ref={videoRef}
@@ -198,4 +209,8 @@ const styles = StyleSheet.create({
   actionText: { color: colors.text },
   shareBtn: { backgroundColor: colors.primary },
   shareText: { color: '#0A0B0E', fontWeight: '800' },
+  headerRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: spacing.md, paddingTop: spacing.md, gap: spacing.md },
+  headerAvatar: { width: 28, height: 28, borderRadius: 14 },
+  headerName: { color: colors.text, fontWeight: '700' },
+  headerHandle: { color: colors.textMuted, fontSize: 12 },
 });

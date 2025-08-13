@@ -13,9 +13,10 @@ export type YouTubeCardProps = {
   thumbnail: string;
   channel: string;
   duration?: string;
+  authorAvatar?: string;
 };
 
-export function YouTubeCard({ id, title, thumbnail, channel, duration }: YouTubeCardProps) {
+export function YouTubeCard({ id, title, thumbnail, channel, duration, authorAvatar }: YouTubeCardProps) {
   const [playing, setPlaying] = useState(false);
   const navigation = useNavigation();
   const [liked, setLiked] = useState(false);
@@ -27,6 +28,14 @@ export function YouTubeCard({ id, title, thumbnail, channel, duration }: YouTube
 
   return (
     <View style={styles.card}>
+      <View style={styles.headerRow}>
+        <Image source={{ uri: authorAvatar || thumbnail }} style={styles.headerAvatar} />
+        <View style={{ flex: 1 }}>
+          <Text style={styles.headerName}>{channel} ✓</Text>
+          <Text style={styles.headerHandle}>YouTube</Text>
+        </View>
+        <MaterialCommunityIcons name="dots-horizontal" size={18} color={colors.textMuted} />
+      </View>
       <View style={styles.mediaWrapper}>
         {playing ? (
           <YoutubePlayer height={360} play={true} videoId={id} onChangeState={onStateChange} />
@@ -90,6 +99,10 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     marginBottom: spacing.lg,
   },
+  headerRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: spacing.md, paddingTop: spacing.md, gap: spacing.md },
+  headerAvatar: { width: 28, height: 28, borderRadius: 14 },
+  headerName: { color: colors.text, fontWeight: '700' },
+  headerHandle: { color: colors.textMuted, fontSize: 12 },
   mediaWrapper: {
     position: 'relative',
     backgroundColor: 'black',

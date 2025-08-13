@@ -5,6 +5,7 @@ import { RootTabs } from './src/navigation/BottomTabs';
 import { useFonts, Inter_400Regular, Inter_600SemiBold, Inter_700Bold } from '@expo-google-fonts/inter';
 import { View, ActivityIndicator } from 'react-native';
 import { colors } from './src/theme/theme';
+import { AssistantOrbi } from './src/components/AssistantOrbi';
 
 export default function App() {
   const [loaded] = useFonts({ Inter_400Regular, Inter_600SemiBold, Inter_700Bold });
@@ -21,6 +22,7 @@ export default function App() {
     <>
       <StatusBar style="light" />
       <RootTabs />
+      <AssistantOrbi />
     </>
   );
 }

@@ -1,20 +1,15 @@
 import React, { useCallback, useRef, useState } from 'react';
 import { View, StyleSheet, Dimensions, FlatList, Text, Pressable, Image } from 'react-native';
-import { Video, ResizeMode } from 'expo-av';
+import YoutubePlayer from 'react-native-youtube-iframe';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { colors, radius, spacing } from '../theme/theme';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { fetchTrendingBrazil } from '../services/youtube';
+import { CommentsTicker } from '../components/CommentsTicker';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
-const REELS = [
-  { id: 'r1', title: 'Órbita de Saturno em 30s', uri: 'https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4' },
-  { id: 'r2', title: 'Como foguetes pousam?', uri: 'https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4' },
-  { id: 'r3', title: 'Buracos negros e jatos relativísticos', uri: 'https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4' },
-  { id: 'r4', title: 'Telescópios James Webb: 3 fatos', uri: 'https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4' },
-  { id: 'r5', title: 'Vida em Marte? Evidências', uri: 'https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4' },
-  { id: 'r6', title: 'Computação Quântica em 1 min', uri: 'https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4' },
-];
+const YT_IDS = ['dQw4w9WgXcQ', '9bZkp7q19f0', '3JZ_D3ELwOQ', 'kJQP7kiw5Fk'];
 
 export function ReelsScreen() {
   const listRef = useRef<FlatList>(null);
@@ -29,27 +24,13 @@ export function ReelsScreen() {
 
   const viewabilityConfig = { itemVisiblePercentThreshold: 80 };
 
-  const renderItem = useCallback(({ item, index }: { item: any; index: number }) => {
+  const renderItem = useCallback(({ item, index }: { item: string; index: number }) => {
     const isActive = index === activeIndex;
     return (
       <View style={styles.slide}>
-        {!isActive ? (
-          <Pressable style={styles.cover}>
-            <Image source={{ uri: 'https://images.unsplash.com/photo-1520975682031-ae7b0b96c5d8?q=80&w=1200&auto=format&fit=crop' }} style={{ width: '100%', height: '100%' }} />
-            <View style={styles.centerPlay}><MaterialCommunityIcons name="play-circle" size={72} color="rgba(255,255,255,0.9)" /></View>
-          </Pressable>
-        ) : (
-          <Video
-            style={styles.video}
-            source={{ uri: item.uri }}
-            resizeMode={ResizeMode.COVER}
-            shouldPlay
-            isLooping
-            isMuted={false}
-          />
-        )}
+        <YoutubePlayer height={SCREEN_HEIGHT} play={isActive} videoId={item} />
         <Animated.View entering={FadeIn.duration(250)} exiting={FadeOut.duration(120)} style={styles.overlay}>
-          <Text style={styles.title}>{item.title}</Text>
+          <Text style={styles.title}>Reels YouTube • {item}</Text>
           <View style={styles.rightColumn}>
             <Pressable style={styles.iconBtn}>
               <MaterialCommunityIcons name="heart-outline" size={26} color={colors.text} />
@@ -62,6 +43,9 @@ export function ReelsScreen() {
             </Pressable>
           </View>
         </Animated.View>
+        <View style={styles.commentsBox}>
+          <CommentsTicker comments={MOCK_COMMENTS} />
+        </View>
       </View>
     );
   }, [activeIndex]);
@@ -70,8 +54,8 @@ export function ReelsScreen() {
     <View style={styles.container}>
       <FlatList
         ref={listRef}
-        data={REELS}
-        keyExtractor={(i) => i.id}
+        data={YT_IDS}
+        keyExtractor={(i) => i}
         renderItem={renderItem}
         pagingEnabled
         showsVerticalScrollIndicator={false}
@@ -85,10 +69,17 @@ export function ReelsScreen() {
   );
 }
 
+const MOCK_COMMENTS = [
+  { id: 'c1', author: 'Ana', text: 'Uau, que trilha!', highlighted: true },
+  { id: 'c2', author: 'João', text: 'Aprendi algo novo agora.' },
+  { id: 'c3', author: 'Bianca', text: 'Cadê a parte 2?' },
+  { id: 'c4', author: 'Leo', text: 'Muito bom! 🔥', highlighted: true },
+  { id: 'c5', author: 'Rafa', text: 'Recomenda mais canais assim?' },
+];
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: 'black' },
   slide: { width: '100%', height: SCREEN_HEIGHT, backgroundColor: 'black' },
-  video: { width: '100%', height: '100%', backgroundColor: '#000' },
   overlay: {
     position: 'absolute',
     left: spacing.lg,
@@ -98,27 +89,9 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     justifyContent: 'space-between',
   },
-  cover: { width: '100%', height: '100%', position: 'relative' },
-  centerPlay: { position: 'absolute', top: '40%', left: '42%' },
-  title: {
-    color: colors.text,
-    fontSize: 16,
-    fontWeight: '700',
-    flex: 1,
-    marginRight: spacing.lg,
-  },
-  rightColumn: {
-    alignItems: 'center',
-    gap: spacing.lg,
-  },
-  iconBtn: {
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    padding: spacing.md,
-    borderRadius: radius.pill,
-  },
-  iconFab: {
-    backgroundColor: colors.primary,
-    padding: spacing.md,
-    borderRadius: radius.pill,
-  },
+  title: { color: colors.text, fontSize: 16, fontWeight: '700', flex: 1, marginRight: spacing.lg },
+  rightColumn: { alignItems: 'center', gap: spacing.lg },
+  iconBtn: { backgroundColor: 'rgba(0,0,0,0.4)', padding: spacing.md, borderRadius: radius.pill },
+  iconFab: { backgroundColor: colors.primary, padding: spacing.md, borderRadius: radius.pill },
+  commentsBox: { position: 'absolute', left: spacing.lg, right: spacing.lg, bottom: 90 },
 });
