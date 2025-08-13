@@ -193,48 +193,9 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
   const flowOffsets = new Float32Array(flowCount);
   for (let i=0;i<flowCount;i++){ flowOffsets[i] = Math.random(); }
 
-  // Minimal globe + silhouette with laptop
+  // Hologram group cleared (keep lattice only)
   const holoGroup = new THREE.Group();
-  // Globe
-  const globeGeom = new THREE.SphereGeometry(0.48, 24, 24);
-  const globeMat = new THREE.MeshStandardMaterial({ color: 0x0c1223, metalness: 0.2, roughness: 0.7, emissive: 0x214b6b, emissiveIntensity: 0.15 });
-  const globe = new THREE.Mesh(globeGeom, globeMat);
-  globe.position.set(0, 0.6, 0);
-  holoGroup.add(globe);
-  // Latitude/Longitude lines
-  const linesMat = new THREE.LineBasicMaterial({ color: 0x00d4ff, transparent: true, opacity: 0.35 });
-  function ring(r, y){
-    const g = new THREE.BufferGeometry();
-    const seg = 64; const arr = new Float32Array(seg*3);
-    for(let i=0;i<seg;i++){ const a=i/seg*Math.PI*2; arr[i*3]=Math.cos(a)*r; arr[i*3+1]=y; arr[i*3+2]=Math.sin(a)*r; }
-    g.setAttribute('position', new THREE.BufferAttribute(arr,3));
-    return new THREE.LineLoop(g, linesMat);
-  }
-  for (let i=-3;i<=3;i++){ holoGroup.add(ring(0.48*Math.cos(i*Math.PI/10), 0.6+0.48*Math.sin(i*Math.PI/10))); }
-  for (let i=0;i<6;i++){ const l = ring(0.48, 0.6); l.rotation.x = i*Math.PI/12; holoGroup.add(l); }
-  // Silhouette (simple lines)
-  const silMat = new THREE.LineBasicMaterial({ color: 0x7c3aed, transparent: true, opacity: 0.8 });
-  function path(points){
-    const flat=[]; for(let i=0;i<points.length-1;i++){ flat.push(points[i].x, points[i].y, 0, points[i+1].x, points[i+1].y, 0); }
-    const g=new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(flat),3));
-    return new THREE.LineSegments(g, silMat);
-  }
-  const y0=1.12; // sitting height above ground
-  const girl = path([
-    new THREE.Vector3(-0.08,y0+0.16,0), new THREE.Vector3(0.0,y0+0.22,0),
-    new THREE.Vector3(0.0,y0+0.22,0), new THREE.Vector3(0.08,y0+0.16,0),
-    new THREE.Vector3(0.0,y0+0.16,0), new THREE.Vector3(0.0,y0+0.06,0),
-    new THREE.Vector3(0.0,y0+0.06,0), new THREE.Vector3(-0.08,y0,0),
-    new THREE.Vector3(0.0,y0+0.06,0), new THREE.Vector3(0.1,y0,0),
-    // crossed legs arc
-    new THREE.Vector3(-0.08,y0,0), new THREE.Vector3(0.08,y0,0),
-    // laptop
-    new THREE.Vector3(0.02,y0+0.12,0), new THREE.Vector3(0.16,y0+0.12,0),
-    new THREE.Vector3(0.16,y0+0.12,0), new THREE.Vector3(0.16,y0.08,0)
-  ]);
-  holoGroup.add(girl);
   scene.add(holoGroup);
-  holoGroup.position.set(0, 0, 0);
 
   // Interaction
   let cx=0, cy=0; canvas.addEventListener('pointermove', (e)=>{ cx=(e.clientX/innerWidth-0.5)*2; cy=(e.clientY/innerHeight-0.5)*2; }, {passive:true});
@@ -269,8 +230,7 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
     }
     flowGeo.setAttribute('position', new THREE.BufferAttribute(flowPos,3));
 
-    // Animate globe spin and gentle float
-    globe.rotation.y += 0.004;
+    // Gentle float only
     holoGroup.rotation.y += 0.0015;
     holoGroup.position.y = 0.68 + Math.sin(t*1.2)*0.05;
 
@@ -414,19 +374,19 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
   const serviceInfo = {
     marketing: {
       title: 'Marketing Digital',
-      text: 'Gestão de tráfego (Meta/Google), conteúdo e funis de aquisição orientados por dados para escalar resultados com eficiência.'
+      text: 'Gestão de tráfego (Meta/Google), conteúdo e funis orientados por dados. Exemplos: captação de leads para clínicas locais, campanhas de lançamento (PLF), always-on para e-commerce com ROAS otimizado.'
     },
     design: {
       title: 'Design Gráfico',
-      text: 'Identidade visual, social media, peças para anúncios e UI com estética forte e clareza na comunicação.'
+      text: 'Identidade visual, social media, peças para anúncios e UI com estética forte e clareza. Exemplos: identidade para cafeteria/artista, carrosséis de alta performance, landing pages com conversão.'
     },
     ia: {
       title: 'Automação com IA',
-      text: 'Workflows inteligentes para atendimento, conteúdo e análise de dados. Chatbots, automações e integrações sob medida.'
+      text: 'Workflows inteligentes para atendimento, conteúdo e análise. Exemplos: chatbot de WhatsApp para pré-venda, geração assistida de conteúdo, integração CRM + planilhas + e-mail.'
     },
     consultoria: {
       title: 'Consultoria',
-      text: 'Diagnóstico, estratégia e implementação focados no seu momento de negócio, com plano de ação claro.'
+      text: 'Diagnóstico, estratégia e implementação conforme seu momento. Exemplos: revisão de funil, plano de mídia trimestral, roadmap de branding e jornada digital.'
     }
   };
 
