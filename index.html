@@ -25,7 +25,7 @@
     <header class="site-header" id="topo">
       <div class="container header-inner">
         <a href="#topo" class="brand" aria-label="Taina Silveira Home">
-          <span class="brand-mark" aria-hidden="true">TS</span>
+          <span class="brand-mark" aria-hidden="true"><img src="assets/logo.svg" alt="TS" width="28" height="28"/></span>
           <span class="brand-text">Taina Silveira</span>
         </a>
 
@@ -184,5 +184,19 @@
       </div>
     </footer>
 
+    <div id="chat-portfolio" class="chat-portfolio">
+      <button class="chatp-toggle" aria-expanded="false" aria-controls="chatp-panel">Portfólio</button>
+      <div id="chatp-panel" class="chatp-panel" hidden>
+        <div class="chatp-header">
+          <span>Portfólio</span>
+          <button class="chatp-close" aria-label="Fechar">✕</button>
+        </div>
+        <div class="chatp-messages" id="chatp-messages" role="log"></div>
+        <form id="chatp-form" class="chatp-form">
+          <input id="chatp-input" type="text" placeholder="Ex.: Quer ver Branding, UI, Vídeo?" autocomplete="off" />
+          <button type="submit" class="btn btn-primary">Enviar</button>
+        </form>
+      </div>
+    </div>
   </body>
 </html>
