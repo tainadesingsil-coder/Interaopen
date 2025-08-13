@@ -182,6 +182,7 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
   const flowMat = new THREE.PointsMaterial({ color: 0x39ff88, size: 0.02, transparent: true, opacity: 0.95 });
   const flow = new THREE.Points(flowGeo, flowMat);
   scene.add(flow);
+  nodeGroup.visible = false; edges.visible = false; flow.visible = false;
 
   const flowCurve = new THREE.CatmullRomCurve3([
     new THREE.Vector3(-2.4, 0.0, 1.6),
