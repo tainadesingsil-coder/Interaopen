@@ -104,6 +104,17 @@ ul { padding-left: 16px; color: var(--text-dim); }
 
 .scroll-indicator { position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%); background: var(--surface); border: 1px solid rgba(255,255,255,0.08); color: var(--text); border-radius: 999px; width: 42px; height: 42px; display: grid; place-items: center; cursor: pointer; z-index: 2; }
 
+/* Hero info panel side alignment */
+.hero-panel { display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px; align-items: center; }
+@media (max-width: 1000px) { .hero-panel { grid-template-columns: 1fr; } }
+.hero-panel .hero-title { font-weight: 800; }
+.hero-panel .hero-subtitle { opacity: 0.95; }
+.hero-panel .hero-lead { color: var(--text); opacity: 0.9; }
+
+/* Subtle glass card behind text to avoid occluding 3D */
+.hero-content { backdrop-filter: blur(6px) saturate(1.1); -webkit-backdrop-filter: blur(6px) saturate(1.1); background: linear-gradient(180deg, rgba(10,14,24,0.35), rgba(10,14,24,0.2)); border: 1px solid rgba(255,255,255,0.08); border-radius: 18px; padding: 18px; }
+.hero-cta { margin-top: 12px; }
+
 /* About */
 .about-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 48px; align-items: center; }
 .about-media { position: relative; min-height: 380px; }

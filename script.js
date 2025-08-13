@@ -119,8 +119,8 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
 
 /* Chat disabled as requested */
 
-/* HERO 3D: realistic tech modeling scene */
-(function heroTech3D() {
+/* HERO 3D: futuristic city street with humanoid robot silhouette */
+(function heroCityRobot() {
   const canvas = select('#hero-canvas');
   if (!canvas || prefersReducedMotion || !window.THREE) return;
 
@@ -129,82 +129,96 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
 
   const scene = new THREE.Scene();
   scene.fog = new THREE.FogExp2(0x0b0f1a, 0.06);
-  const camera = new THREE.PerspectiveCamera(45, 2, 0.1, 100);
-  camera.position.set(0, 1.4, 6.2);
+  const camera = new THREE.PerspectiveCamera(50, 2, 0.1, 200);
+  camera.position.set(0, 1.6, 6.5);
 
-  // Environment lighting
-  const hemi = new THREE.HemisphereLight(0xbcd9ff, 0x0b0f1a, 0.85); scene.add(hemi);
-  const key = new THREE.DirectionalLight(0xffffff, 1.1); key.position.set(3, 4, 2); scene.add(key);
-  const rim = new THREE.PointLight(0x7c3aed, 1.0, 14); rim.position.set(-3, 1.2, 2.2); scene.add(rim);
+  // Lights: neon ambience + key
+  const hemi = new THREE.HemisphereLight(0xaecbff, 0x0b0f1a, 0.9); scene.add(hemi);
+  const key = new THREE.DirectionalLight(0xffffff, 1.0); key.position.set(2, 4, 3); scene.add(key);
+  const magenta = new THREE.PointLight(0x7c3aed, 1.0, 16); magenta.position.set(-3, 1.6, 2.5); scene.add(magenta);
+  const cyan = new THREE.PointLight(0x00d4ff, 1.0, 16); cyan.position.set(3, 1.4, 2.0); scene.add(cyan);
 
-  // Base platform (brushed metal)
-  const base = new THREE.Mesh(
-    new THREE.CylinderGeometry(8, 8, 0.12, 100),
-    new THREE.MeshPhysicalMaterial({ color: 0x0e1322, metalness: 0.9, roughness: 0.5, clearcoat: 0.5 })
+  // Ground road with emissive lanes
+  const road = new THREE.Mesh(
+    new THREE.PlaneGeometry(20, 60, 1, 1),
+    new THREE.MeshStandardMaterial({ color: 0x0f1424, roughness: 0.95 })
   );
-  base.position.y = -1.25; scene.add(base);
-
-  // Neon ring
-  const ringGeo = new THREE.TorusGeometry(3.2, 0.05, 24, 120);
-  const ringMat = new THREE.MeshStandardMaterial({ color: 0x00d4ff, emissive: 0x00d4ff, emissiveIntensity: 1.4, metalness: 0.2, roughness: 0.2 });
-  const ring = new THREE.Mesh(ringGeo, ringMat); ring.rotation.x = Math.PI/2; ring.position.y = -0.4; scene.add(ring);
-
-  // Central chip (tech block)
-  const chip = new THREE.Group();
-  const chipBody = new THREE.Mesh(
-    new THREE.BoxGeometry(1.8, 0.5, 1.8),
-    new THREE.MeshPhysicalMaterial({ color: 0x1a2235, metalness: 0.6, roughness: 0.2, clearcoat: 1.0 })
+  road.rotation.x = -Math.PI/2; road.position.z = -10; scene.add(road);
+  const lane = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.08, 60),
+    new THREE.MeshStandardMaterial({ color: 0x0f1424, emissive: 0x00d4ff, emissiveIntensity: 0.9 })
   );
-  const chipTop = new THREE.Mesh(
-    new THREE.BoxGeometry(1.6, 0.12, 1.6),
-    new THREE.MeshStandardMaterial({ color: 0x0c1426, metalness: 0.4, roughness: 0.3 })
-  );
-  chipTop.position.y = 0.32;
+  lane.rotation.x = -Math.PI/2; lane.position.set(-0.7, 0.001, -10); scene.add(lane);
+  const lane2 = lane.clone(); lane2.position.x = 0.7; scene.add(lane2);
 
-  // Pins around
-  const pinMat = new THREE.MeshStandardMaterial({ color: 0xbad7ff, metalness: 0.9, roughness: 0.25 });
-  const pins = new THREE.Group();
-  for (let i=0; i<28; i++) {
-    const g = new THREE.CylinderGeometry(0.03, 0.03, 0.18, 10);
-    const m = new THREE.Mesh(g, pinMat);
-    const a = (i/28) * Math.PI * 2;
-    const r = 1.05;
-    m.position.set(Math.cos(a)*r, -0.16, Math.sin(a)*r);
-    pins.add(m);
+  // City blocks (simple extrusions with emissive billboards)
+  const blocks = new THREE.Group();
+  const blockMat = new THREE.MeshStandardMaterial({ color: 0x101b33, metalness: 0.2, roughness: 0.85 });
+  for (let i=0;i<14;i++){
+    const w = 0.9 + Math.random()*0.8;
+    const h = 1.6 + Math.random()*2.2;
+    const d = 1 + Math.random()*1.5;
+    const g = new THREE.BoxGeometry(w, h, d);
+    const m = new THREE.Mesh(g, blockMat);
+    const side = i%2===0 ? -1.8 : 1.8;
+    m.position.set(side, h/2-0.05, -i*3.6 - 2);
+    blocks.add(m);
+
+    // Billboard
+    const signG = new THREE.PlaneGeometry(0.9*w, 0.4);
+    const signM = new THREE.MeshStandardMaterial({ color: 0x0b0f1a, emissive: i%2?0x7c3aed:0x00d4ff, emissiveIntensity: 1.2 });
+    const sign = new THREE.Mesh(signG, signM);
+    const offset = side<0 ? 0.5*w : -0.5*w;
+    sign.position.set(side+offset, h*0.7, -i*3.6 - 2 + (side<0? 0.45 : -0.45));
+    sign.rotation.y = side<0 ? Math.PI/2 : -Math.PI/2;
+    blocks.add(sign);
   }
-  chip.add(chipBody, chipTop, pins);
-  scene.add(chip);
+  scene.add(blocks);
 
-  // Hologram: floating polygonal frame
-  const holoGeo = new THREE.IcosahedronGeometry(0.9, 1);
-  const holoMat = new THREE.MeshStandardMaterial({ color: 0x7c3aed, wireframe: true, emissive: 0x7c3aed, emissiveIntensity: 0.9, transparent: true, opacity: 0.8 });
-  const holo = new THREE.Mesh(holoGeo, holoMat); holo.position.y = 0.9; scene.add(holo);
+  // Humanoid robot silhouette (stylized, performance-friendly)
+  const metal = new THREE.MeshPhysicalMaterial({ color: 0xd6e4ff, metalness: 0.75, roughness: 0.25, clearcoat: 0.8 });
+  const dark = new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.3, roughness: 0.6 });
+  const glow = new THREE.MeshStandardMaterial({ color: 0x7c3aed, emissive: 0x7c3aed, emissiveIntensity: 0.9 });
 
-  // Particle dust
-  const dGeo = new THREE.BufferGeometry(); const count = 700; const pos = new Float32Array(count*3);
-  for (let i=0;i<count;i++){ pos[i*3]= (Math.random()-0.5)*10; pos[i*3+1]=(Math.random()-0.2)*6; pos[i*3+2]=(Math.random()-0.5)*8; }
-  dGeo.setAttribute('position', new THREE.BufferAttribute(pos,3));
-  scene.add(new THREE.Points(dGeo, new THREE.PointsMaterial({ color: 0x7dd3fc, size: 0.012, transparent: true, opacity: 0.85 })));
+  const bot = new THREE.Group();
+  const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.45, 1.1, 12, 20), metal); torso.position.y = 0.5;
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.32, 24, 24), dark); head.position.y = 1.3;
+  const visor = new THREE.Mesh(new THREE.CapsuleGeometry(0.22, 0.02, 10, 16), glow); visor.rotation.z = Math.PI/2; visor.position.set(0, 1.34, 0.26);
+  const armL = new THREE.Mesh(new THREE.CylinderGeometry(0.08,0.08,0.85,12), metal); armL.position.set(-0.5, 0.6, 0);
+  const armR = armL.clone(); armR.position.x = 0.5;
+  const legG = new THREE.CapsuleGeometry(0.1, 0.8, 8, 14);
+  const legL = new THREE.Mesh(legG, metal); legL.position.set(-0.18, 0.0, 0);
+  const legR = new THREE.Mesh(legG, metal); legR.position.set(0.18, 0.0, 0);
+  // Phone in right hand
+  const phone = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.36, 0.04), dark); phone.position.set(0.62, 0.75, 0.08);
 
-  // Subtle camera dolly and parallax
-  let cx = 0, cy = 0;
-  canvas.addEventListener('pointermove', (e)=>{ cx = (e.clientX/innerWidth-0.5)*2; cy = (e.clientY/innerHeight-0.5)*2; }, {passive:true});
+  bot.add(torso, head, visor, armL, armR, legL, legR, phone);
+  bot.position.set(0, 0.4, 2.5);
+  scene.add(bot);
+
+  // Animation controls
+  let cx=0, cy=0; canvas.addEventListener('pointermove', (e)=>{ cx=(e.clientX/innerWidth-0.5)*2; cy=(e.clientY/innerHeight-0.5)*2; }, {passive:true});
+  const clock = new THREE.Clock();
 
   function resize(){ const w=canvas.clientWidth,h=canvas.clientHeight; if(!w||!h) return; renderer.setSize(w,h,false); camera.aspect=w/h; camera.updateProjectionMatrix(); }
   new ResizeObserver(resize).observe(canvas); resize();
 
-  const clock = new THREE.Clock();
   function animate(){
     const t = clock.getElapsedTime();
-    // Chip levitation and rotation
-    chip.position.y = Math.sin(t*1.3)*0.06;
-    chip.rotation.y += 0.003;
-    ring.material.emissiveIntensity = 1.1 + Math.sin(t*2.0)*0.3;
-    holo.rotation.x += 0.0022; holo.rotation.y += 0.0028;
-    holo.position.y = 0.9 + Math.sin(t*1.6)*0.08;
+    // Walk forward in a straight line
+    bot.position.z -= 0.02; if (bot.position.z < -40) bot.position.z = 2.5;
+    const swing = Math.sin(t*4.8)*0.32; const opp = Math.sin(t*4.8+Math.PI)*0.32;
+    armL.rotation.z = 0.25 + swing*0.5; armR.rotation.z = -0.25 + opp*0.5;
+    legL.rotation.x = -swing*0.8; legR.rotation.x = -opp*0.8;
+    torso.position.y = 0.5 + Math.abs(Math.sin(t*4.8)*0.04); // breathing bounce
+    head.rotation.y = cx*0.3;
 
-    // Camera
-    camera.position.x = cx*0.35; camera.position.y = 1.4 + cy*0.2; camera.lookAt(0,0.2,0);
+    // Parallax camera
+    camera.position.x = cx*0.4; camera.position.y = 1.6 + cy*0.15; camera.lookAt(0, 0.7, bot.position.z-2);
+
+    // Neon flicker/billboards
+    magenta.intensity = 0.9 + Math.sin(t*3.2)*0.2;
+    cyan.intensity = 0.9 + Math.cos(t*2.9)*0.2;
 
     renderer.render(scene, camera);
     requestAnimationFrame(animate);
