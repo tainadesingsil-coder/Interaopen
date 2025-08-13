@@ -117,91 +117,10 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
 /* Lightbox with navigation */
 // (portfolio removed)
 
-/* Chatbot UI with optional OpenAI API in browser */
-(function initChat() {
-  const toggle = select('.chat-toggle');
-  const panel = select('#chat-panel');
-  const close = select('.chat-close');
-  const form = select('#chat-form');
-  const input = select('#chat-input');
-  const log = select('#chat-messages');
-  if (!toggle || !panel || !form) return;
+/* Chat disabled as requested */
 
-  const setOpen = (open) => {
-    panel.hidden = !open;
-    toggle.setAttribute('aria-expanded', String(open));
-    if (open) input?.focus();
-  };
-
-  toggle.addEventListener('click', () => setOpen(panel.hidden));
-  close?.addEventListener('click', () => setOpen(false));
-
-  const addMsg = (text, who = 'bot') => {
-    const div = document.createElement('div');
-    div.className = `msg ${who}`;
-    div.textContent = text;
-    log.appendChild(div);
-    log.scrollTop = log.scrollHeight;
-  };
-
-  // Lightweight memory (localStorage) of Q&A context
-  const memoryKey = 'CHAT_MEMORY_TAINA';
-  const defaultMemory = [
-    { q: 'serviços', a: 'Ofereço marketing digital (tráfego, conteúdo), design (identidade, social), e automação/IA.' },
-    { q: 'prazo', a: 'Prazos típicos: identidade 2–3 semanas; landing 1–2 semanas; campanha 1 semana.' },
-    { q: 'investimento', a: 'Projetos sob medida; estimativas após briefing. Faço propostas modulares.' },
-    { q: 'foco', a: 'Integração de estética, dados e IA para performance com identidade forte.' },
-  ];
-  const memory = JSON.parse(localStorage.getItem(memoryKey) || 'null') || defaultMemory;
-  const saveMemory = () => localStorage.setItem(memoryKey, JSON.stringify(memory));
-
-  const apiKey = localStorage.getItem('OPENAI_API_KEY') || '';
-  if (!apiKey) addMsg('Dica: salve sua chave OpenAI no localStorage como OPENAI_API_KEY para ativar respostas inteligentes.');
-
-  const systemPrompt = 'Você é o assistente do site da Taina Silveira. Seja objetivo e profissional. Use a memória interna (Q&A) quando pertinente: ' + memory.map(m => `(${m.q} -> ${m.a})`).join(' ');
-
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const q = input.value.trim();
-    if (!q) return;
-    addMsg(q, 'user');
-    input.value = '';
-
-    try {
-      if (!apiKey) {
-        // Fallback retrieval from memory
-        const hit = memory.find(m => q.toLowerCase().includes(m.q));
-        addMsg(hit ? hit.a : 'Posso te ajudar com marketing, design e IA. Dê mais detalhes.', 'bot');
-        // store brief pair
-        memory.push({ q, a: hit ? hit.a : 'Aguardando mais detalhes...' }); saveMemory();
-        return;
-      }
-      const res = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [
-            { role: 'system', content: systemPrompt },
-            ...memory.slice(-6).map(m => ({ role: 'system', content: `Memória: ${m.q} -> ${m.a}` })),
-            { role: 'user', content: q }
-          ],
-          temperature: 0.6,
-          max_tokens: 300
-        })
-      });
-      const data = await res.json();
-      const text = data?.choices?.[0]?.message?.content || 'Não consegui responder agora.';
-      addMsg(text, 'bot');
-      memory.push({ q, a: text }); saveMemory();
-    } catch (err) {
-      addMsg('Erro de conexão com o assistente.');
-    }
-  });
-})();
-
-/* HERO 3D: more realistic motion (idle + walk), abstract environment */
-(function heroRobot3D() {
+/* HERO 3D: realistic tech modeling scene */
+(function heroTech3D() {
   const canvas = select('#hero-canvas');
   if (!canvas || prefersReducedMotion || !window.THREE) return;
 
@@ -209,100 +128,85 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
   const scene = new THREE.Scene();
+  scene.fog = new THREE.FogExp2(0x0b0f1a, 0.06);
   const camera = new THREE.PerspectiveCamera(45, 2, 0.1, 100);
-  camera.position.set(0, 1.4, 6.6);
+  camera.position.set(0, 1.4, 6.2);
 
-  // Lights
-  scene.add(new THREE.HemisphereLight(0x9fd0ff, 0x0b0f1a, 0.95));
-  const dl = new THREE.DirectionalLight(0xffffff, 1.0); dl.position.set(3, 4, 2); scene.add(dl);
-  const rim = new THREE.PointLight(0x7c3aed, 0.9, 12); rim.position.set(-3, 1.2, 2.2); scene.add(rim);
+  // Environment lighting
+  const hemi = new THREE.HemisphereLight(0xbcd9ff, 0x0b0f1a, 0.85); scene.add(hemi);
+  const key = new THREE.DirectionalLight(0xffffff, 1.1); key.position.set(3, 4, 2); scene.add(key);
+  const rim = new THREE.PointLight(0x7c3aed, 1.0, 14); rim.position.set(-3, 1.2, 2.2); scene.add(rim);
 
-  // Stage
-  const stage = new THREE.Mesh(new THREE.CylinderGeometry(8, 8, 0.12, 80), new THREE.MeshStandardMaterial({ color: 0x0f1020, roughness: 0.9 }));
-  stage.position.y = -1.25; scene.add(stage);
+  // Base platform (brushed metal)
+  const base = new THREE.Mesh(
+    new THREE.CylinderGeometry(8, 8, 0.12, 100),
+    new THREE.MeshPhysicalMaterial({ color: 0x0e1322, metalness: 0.9, roughness: 0.5, clearcoat: 0.5 })
+  );
+  base.position.y = -1.25; scene.add(base);
 
-  // Materials
-  const metal = new THREE.MeshPhysicalMaterial({ color: 0xbad7ff, metalness: 0.65, roughness: 0.25, clearcoat: 0.8 });
-  const dark = new THREE.MeshStandardMaterial({ color: 0x1a2235, metalness: 0.25, roughness: 0.6 });
-  const glow = new THREE.MeshStandardMaterial({ color: 0x7c3aed, emissive: 0x7c3aed, emissiveIntensity: 0.9 });
+  // Neon ring
+  const ringGeo = new THREE.TorusGeometry(3.2, 0.05, 24, 120);
+  const ringMat = new THREE.MeshStandardMaterial({ color: 0x00d4ff, emissive: 0x00d4ff, emissiveIntensity: 1.4, metalness: 0.2, roughness: 0.2 });
+  const ring = new THREE.Mesh(ringGeo, ringMat); ring.rotation.x = Math.PI/2; ring.position.y = -0.4; scene.add(ring);
 
-  // Robot rig (primitives, smooth motion)
-  const robot = new THREE.Group();
-  const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.62, 1.15, 12, 20), metal);
-  body.position.y = -0.05;
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.4, 28, 28), dark); head.position.y = 0.98;
-  const visor = new THREE.Mesh(new THREE.CapsuleGeometry(0.28, 0.02, 10, 18), glow); visor.rotation.z = Math.PI/2; visor.position.set(0, 1.02, 0.34);
-  const armL = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.92, 14), metal); armL.position.set(-0.64, 0.22, 0); armL.rotation.z = 0.5;
-  const armR = armL.clone(); armR.position.x = 0.64; armR.rotation.z = -0.5;
-  const legGeo = new THREE.CapsuleGeometry(0.11, 0.78, 8, 14);
-  const legL = new THREE.Mesh(legGeo, metal); legL.position.set(-0.22, -0.86, 0);
-  const legR = new THREE.Mesh(legGeo, metal); legR.position.set(0.22, -0.86, 0);
-  const phone = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.46, 0.05), dark); phone.position.set(0.95, 0.45, 0.2);
+  // Central chip (tech block)
+  const chip = new THREE.Group();
+  const chipBody = new THREE.Mesh(
+    new THREE.BoxGeometry(1.8, 0.5, 1.8),
+    new THREE.MeshPhysicalMaterial({ color: 0x1a2235, metalness: 0.6, roughness: 0.2, clearcoat: 1.0 })
+  );
+  const chipTop = new THREE.Mesh(
+    new THREE.BoxGeometry(1.6, 0.12, 1.6),
+    new THREE.MeshStandardMaterial({ color: 0x0c1426, metalness: 0.4, roughness: 0.3 })
+  );
+  chipTop.position.y = 0.32;
 
-  robot.add(body, head, visor, armL, armR, legL, legR, phone);
-  scene.add(robot);
-
-  // Floating abstract panels for parallax (no store labels)
-  const panels = [];
-  for (let i = 0; i < 7; i++) {
-    const g = new THREE.PlaneGeometry(1.2, 0.7);
-    const m = new THREE.MeshStandardMaterial({ color: 0x101b30 + i*0x030303, metalness: 0.15, roughness: 0.85 });
-    const p = new THREE.Mesh(g, m);
-    p.position.set(Math.cos(i) * 2.3, 0.6 + Math.sin(i * 1.1) * 0.4, Math.sin(i) * 1.6);
-    p.rotation.y = -Math.atan2(p.position.z, p.position.x) + Math.PI/2;
-    panels.push(p); scene.add(p);
+  // Pins around
+  const pinMat = new THREE.MeshStandardMaterial({ color: 0xbad7ff, metalness: 0.9, roughness: 0.25 });
+  const pins = new THREE.Group();
+  for (let i=0; i<28; i++) {
+    const g = new THREE.CylinderGeometry(0.03, 0.03, 0.18, 10);
+    const m = new THREE.Mesh(g, pinMat);
+    const a = (i/28) * Math.PI * 2;
+    const r = 1.05;
+    m.position.set(Math.cos(a)*r, -0.16, Math.sin(a)*r);
+    pins.add(m);
   }
+  chip.add(chipBody, chipTop, pins);
+  scene.add(chip);
 
-  // Particles
-  const pts = new THREE.BufferGeometry(); const count = 520; const pos = new Float32Array(count*3);
-  for (let i=0;i<count;i++){ pos[i*3]= (Math.random()-0.5)*9; pos[i*3+1]=(Math.random()-0.2)*5; pos[i*3+2]=(Math.random()-0.5)*7; }
-  pts.setAttribute('position', new THREE.BufferAttribute(pos,3));
-  scene.add(new THREE.Points(pts, new THREE.PointsMaterial({ color: 0x7dd3fc, size: 0.012, transparent: true, opacity: 0.8 })));
+  // Hologram: floating polygonal frame
+  const holoGeo = new THREE.IcosahedronGeometry(0.9, 1);
+  const holoMat = new THREE.MeshStandardMaterial({ color: 0x7c3aed, wireframe: true, emissive: 0x7c3aed, emissiveIntensity: 0.9, transparent: true, opacity: 0.8 });
+  const holo = new THREE.Mesh(holoGeo, holoMat); holo.position.y = 0.9; scene.add(holo);
 
-  // Interaction cursor affects heading subtly
-  let cursorX = 0, cursorY = 0;
-  canvas.addEventListener('pointermove', (e)=>{ cursorX = (e.clientX/innerWidth-0.5)*2; cursorY = (e.clientY/innerHeight-0.5)*2; }, {passive:true});
+  // Particle dust
+  const dGeo = new THREE.BufferGeometry(); const count = 700; const pos = new Float32Array(count*3);
+  for (let i=0;i<count;i++){ pos[i*3]= (Math.random()-0.5)*10; pos[i*3+1]=(Math.random()-0.2)*6; pos[i*3+2]=(Math.random()-0.5)*8; }
+  dGeo.setAttribute('position', new THREE.BufferAttribute(pos,3));
+  scene.add(new THREE.Points(dGeo, new THREE.PointsMaterial({ color: 0x7dd3fc, size: 0.012, transparent: true, opacity: 0.85 })));
+
+  // Subtle camera dolly and parallax
+  let cx = 0, cy = 0;
+  canvas.addEventListener('pointermove', (e)=>{ cx = (e.clientX/innerWidth-0.5)*2; cy = (e.clientY/innerHeight-0.5)*2; }, {passive:true});
 
   function resize(){ const w=canvas.clientWidth,h=canvas.clientHeight; if(!w||!h) return; renderer.setSize(w,h,false); camera.aspect=w/h; camera.updateProjectionMatrix(); }
   new ResizeObserver(resize).observe(canvas); resize();
 
-  // Animation: idle + walk loop target drifting
   const clock = new THREE.Clock();
-  let tGoal = 0;
-  const target = new THREE.Vector3(1.2, -0.6, 0.8);
-
   function animate(){
-    const dt = Math.min(clock.getDelta(), 0.03);
-    tGoal += dt;
-    // Drift target smoothly in a loop
-    const R = 1.6;
-    target.set(Math.cos(tGoal*0.6)*R, -0.6, Math.sin(tGoal*0.7)*R*0.6);
+    const t = clock.getElapsedTime();
+    // Chip levitation and rotation
+    chip.position.y = Math.sin(t*1.3)*0.06;
+    chip.rotation.y += 0.003;
+    ring.material.emissiveIntensity = 1.1 + Math.sin(t*2.0)*0.3;
+    holo.rotation.x += 0.0022; holo.rotation.y += 0.0028;
+    holo.position.y = 0.9 + Math.sin(t*1.6)*0.08;
 
-    // Move robot towards target with smoothing
-    const to = target.clone().sub(robot.position);
-    const dist = to.length();
-    const speed = 1.0;
-    if (dist>0.01){ to.normalize(); robot.position.add(to.multiplyScalar(speed*dt)); }
+    // Camera
+    camera.position.x = cx*0.35; camera.position.y = 1.4 + cy*0.2; camera.lookAt(0,0.2,0);
 
-    // Heading & head aim
-    const yaw = Math.atan2(to.x, to.z);
-    robot.rotation.y = THREE.MathUtils.lerp(robot.rotation.y, yaw + cursorX*0.15, 0.08);
-    head.rotation.y = THREE.MathUtils.lerp(head.rotation.y || 0, cursorX*0.4, 0.12);
-
-    // Walk cycle with breathing
-    const walk = performance.now()/1000 * (dist>0.02? 4.8 : 1.2);
-    const swing = Math.sin(walk)*(dist>0.02? 0.32 : 0.1);
-    const opp = Math.sin(walk+Math.PI)*(dist>0.02? 0.32 : 0.1);
-    armL.rotation.z = 0.5 + swing*0.45;
-    armR.rotation.z = -0.5 + opp*0.45;
-    legL.rotation.x = -swing*0.75;
-    legR.rotation.x = -opp*0.75;
-    body.position.y = -0.05 + Math.abs(Math.sin(walk)*0.045); // breathing bounce
-
-    // Panels parallax
-    panels.forEach((p,i)=>{ p.rotation.y += 0.0015*(i%2?1:-1); p.position.y = 0.6 + Math.sin(tGoal*1.1+i)*0.06; });
-
-    renderer.render(scene,camera);
+    renderer.render(scene, camera);
     requestAnimationFrame(animate);
   }
   animate();
