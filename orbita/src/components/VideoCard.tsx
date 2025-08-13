@@ -1,11 +1,12 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { StyleSheet, Text, View, Pressable } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { colors, radius, spacing } from '../theme/theme';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { AIExplainModal } from './AIExplainModal';
 import { Video, ResizeMode } from 'expo-av';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
-
+import { shareLink } from '../utils/share';
 export type VideoCardProps = {
   id: string;
   title: string;
@@ -16,6 +17,7 @@ export type VideoCardProps = {
 
 export function VideoCard({ id, title, videoUrl, duration }: VideoCardProps) {
   const videoRef = useRef<Video>(null);
+  const navigation = useNavigation();
   const [isPlaying, setIsPlaying] = useState(false);
   const [liked, setLiked] = useState(false);
   const [showHeart, setShowHeart] = useState(false);
@@ -91,11 +93,11 @@ export function VideoCard({ id, title, videoUrl, duration }: VideoCardProps) {
           <MaterialCommunityIcons name={liked ? 'heart' : 'heart-outline'} size={20} color={liked ? '#ff3b5c' : colors.text} />
           <Text style={styles.actionText}>{liked ? 'Curtido' : 'Curtir'}</Text>
         </Pressable>
-        <Pressable style={styles.actionBtn} onPress={() => {}}>
+        <Pressable style={styles.actionBtn} onPress={() => navigation.navigate('Watch' as never)}>
           <MaterialCommunityIcons name="comment-outline" size={20} color={colors.text} />
           <Text style={styles.actionText}>Comentar</Text>
         </Pressable>
-        <Pressable style={[styles.actionBtn, styles.shareBtn]} onPress={() => {}}>
+        <Pressable style={[styles.actionBtn, styles.shareBtn]} onPress={() => shareLink(videoUrl, title)}>
           <MaterialCommunityIcons name="share-variant" size={20} color="#0A0B0E" />
           <Text style={styles.shareText}>Compartilhar</Text>
         </Pressable>

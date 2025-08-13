@@ -1,13 +1,21 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { colors, spacing } from '../theme/theme';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { LogoMark } from './LogoMark';
 
 export function Header() {
   return (
     <View style={styles.container}>
-      <Text style={styles.logo}>Órbita</Text>
-      <LinearGradient colors={["#6EA8FE", "#7CD4FD", "#34D399"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.accent} />
+      <View style={styles.row}>
+        <LogoMark />
+        <View style={{ flexDirection: 'row', gap: spacing.lg, marginLeft: 'auto' }}>
+          <MaterialCommunityIcons name="magnify" size={22} color={colors.text} />
+          <MaterialCommunityIcons name="bell-outline" size={22} color={colors.text} />
+        </View>
+      </View>
+      <LinearGradient colors={["#6EA8FE", "#7CD4FD", "#34D399"] as [string, string, ...string[]]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.accent} />
     </View>
   );
 }
@@ -19,11 +27,6 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.md,
     gap: spacing.sm,
   },
-  logo: {
-    color: colors.text,
-    fontSize: 24,
-    fontWeight: '800',
-    letterSpacing: 0.5,
-  },
+  row: { flexDirection: 'row', alignItems: 'center' },
   accent: { height: 3, borderRadius: 3 },
 });

@@ -11,6 +11,9 @@ const REELS = [
   { id: 'r1', title: 'Órbita de Saturno em 30s', uri: 'https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4' },
   { id: 'r2', title: 'Como foguetes pousam?', uri: 'https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4' },
   { id: 'r3', title: 'Buracos negros e jatos relativísticos', uri: 'https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4' },
+  { id: 'r4', title: 'Telescópios James Webb: 3 fatos', uri: 'https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4' },
+  { id: 'r5', title: 'Vida em Marte? Evidências', uri: 'https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4' },
+  { id: 'r6', title: 'Computação Quântica em 1 min', uri: 'https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4' },
 ];
 
 export function ReelsScreen() {

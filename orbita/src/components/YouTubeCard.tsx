@@ -1,11 +1,12 @@
 import React, { useCallback, useState } from 'react';
 import { View, StyleSheet, Text, Pressable, Image } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import YoutubePlayer from 'react-native-youtube-iframe';
 import { colors, radius, spacing } from '../theme/theme';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { AIExplainModal } from './AIExplainModal';
 import { LinearGradient } from 'expo-linear-gradient';
-
+import { shareLink } from '../utils/share';
 export type YouTubeCardProps = {
   id: string;
   title: string;
@@ -16,6 +17,7 @@ export type YouTubeCardProps = {
 
 export function YouTubeCard({ id, title, thumbnail, channel, duration }: YouTubeCardProps) {
   const [playing, setPlaying] = useState(false);
+  const navigation = useNavigation();
   const [liked, setLiked] = useState(false);
   const [showExplain, setShowExplain] = useState(false);
 
@@ -57,9 +59,13 @@ export function YouTubeCard({ id, title, thumbnail, channel, duration }: YouTube
           <MaterialCommunityIcons name={liked ? 'heart' : 'heart-outline'} size={20} color={liked ? '#ff3b5c' : colors.text} />
           <Text style={styles.actionText}>{liked ? 'Curtido' : 'Curtir'}</Text>
         </Pressable>
-        <Pressable style={styles.actionBtn} onPress={() => setShowExplain(true)}>
-          <MaterialCommunityIcons name="robot-outline" size={20} color={colors.primary} />
-          <Text style={styles.actionText}>Por que vi isso?</Text>
+        <Pressable style={styles.actionBtn} onPress={() => navigation.navigate('Watch' as never)}>
+          <MaterialCommunityIcons name="comment-outline" size={20} color={colors.text} />
+          <Text style={styles.actionText}>Comentar</Text>
+        </Pressable>
+        <Pressable style={styles.actionBtn} onPress={() => shareLink(`https://youtube.com/watch?v=${id}`, title)}>
+          <MaterialCommunityIcons name="share-variant" size={20} color={colors.text} />
+          <Text style={styles.actionText}>Compartilhar</Text>
         </Pressable>
       </View>
 

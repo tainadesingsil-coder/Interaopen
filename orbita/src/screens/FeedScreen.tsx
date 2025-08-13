@@ -5,6 +5,7 @@ import { ScreenContainer } from '../components/ScreenContainer';
 import { VideoCard } from '../components/VideoCard';
 import { spacing } from '../theme/theme';
 import { Header } from '../components/Header';
+import { Stories } from '../components/Stories';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { fetchTrendingBrazil, YouTubeVideo } from '../services/youtube';
 import { YouTubeCard } from '../components/YouTubeCard';
@@ -38,7 +39,12 @@ export function FeedScreen() {
         data={[...yt.map((v) => ({ type: 'yt', data: v } as const)), ...LOCAL_FEED.map((v) => ({ type: 'local', data: v } as const))]}
         keyExtractor={(item, idx) => (item.type === 'yt' ? `yt-${item.data.id}` : `local-${item.data.id}-${idx}`)}
         contentContainerStyle={{ padding: spacing.md, paddingTop: 0 }}
-        ListHeaderComponent={<Header />}
+        ListHeaderComponent={
+          <>
+            <Header />
+            <Stories />
+          </>
+        }
         renderItem={({ item }) => {
           if (item.type === 'yt') {
             return <YouTubeCard id={item.data.id} title={item.data.title} thumbnail={item.data.thumbnail} channel={item.data.channel} duration={item.data.duration} />;
