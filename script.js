@@ -203,6 +203,23 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
   globe.position.set(0, 0.6, 0);
   scene.add(globe);
 
+  // Girl sprite on top of globe (uses transparent PNG from fotos2)
+  (function addGirlSprite(){
+    const GIRL_SPRITE_URL = 'https://tainasilveira.my.canva.site/fotos2/_assets/media/ec554cb552f24eba90afbb7dc63af7ae.png';
+    const loader = new THREE.TextureLoader();
+    try { loader.setCrossOrigin('anonymous'); } catch(_) {}
+    loader.load(GIRL_SPRITE_URL, (tex)=>{
+      tex.colorSpace = THREE.SRGBColorSpace;
+      const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false });
+      const sprite = new THREE.Sprite(mat);
+      const targetHeight = 0.9; // relative to globe size
+      const aspect = tex.image.width / tex.image.height || 0.7;
+      sprite.scale.set(targetHeight*aspect, targetHeight, 1);
+      sprite.position.set(0, 0.9 + 0.28, 0);
+      globe.add(sprite);
+    });
+  })();
+
   // Small cart + girl with laptop silhouette (minimal lines)
   const girlCartGroup = new THREE.Group();
   // Cart outline
