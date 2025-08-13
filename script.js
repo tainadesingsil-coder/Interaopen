@@ -666,8 +666,9 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
       };
     }
 
+    // fallback básico explícito
     return {
-      html: `Posso orientar em Marketing, Design, Automação com IA e Consultoria. Diga seu nicho e objetivo (ex.: "clínica — captar 200 leads/mês") que eu sugiro o melhor caminho.`,
+      html: `Trabalho com: <strong>${serviceInfo.marketing.title}</strong>, <strong>${serviceInfo.design.title}</strong>, <strong>${serviceInfo.ia.title}</strong> e <strong>${serviceInfo.consultoria.title}</strong>.<br>Me diga seu objetivo (ex.: anúncios para captar clientes, criar identidade, chatbot no WhatsApp) que te mostro o melhor caminho e próximos passos.`,
       service: ''
     };
   }
