@@ -122,7 +122,7 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
 /* HERO 3D: Abstract AI lattice + data flow (professional) */
 (function heroAILattice() {
   const canvas = select('#hero-canvas');
-  if (!canvas || prefersReducedMotion || !window.THREE) return;
+  if (!canvas || !window.THREE) return;
 
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
