@@ -258,9 +258,8 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
 
   // Optional: load GLTF model of girl if provided
   (function loadGirl(){
-    const DEFAULT_GIRL_URL = 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/CesiumMan/glTF-Binary/CesiumMan.glb';
-    const url = window.GIRL_GLTF_URL || DEFAULT_GIRL_URL;
-    if (!THREE.GLTFLoader) return;
+    const url = window.GIRL_GLTF_URL || '';
+    if (!url || !THREE.GLTFLoader) return;
     const loader = new THREE.GLTFLoader();
     loader.load(url, (gltf)=>{
       const model = gltf.scene;
@@ -318,7 +317,7 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
     girlCartGroup.add(girl);
   })();
 
-  girlCartGroup.visible = false;
+  girlCartGroup.visible = false; girlModel = null;
   holoGroup.add(girlCartGroup);
 
   // Interaction
