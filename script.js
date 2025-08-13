@@ -229,15 +229,18 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
   globe.position.set(0, 0.6, 0);
   scene.add(globe);
 
-  // Subtle neon ring under the globe
+  // Subtle neon ring under the globe (faint by default, brighter on hover)
+  let neonRingMaterial = null;
   (function addNeonRing(){
-    const ringGeo = new THREE.RingGeometry(1.0, 1.2, 64);
-    const ringMat = new THREE.MeshBasicMaterial({ color: 0x00d4ff, transparent: true, opacity: 0.22, side: THREE.DoubleSide });
-    const ring = new THREE.Mesh(ringGeo, ringMat);
+    const ringGeo = new THREE.RingGeometry(1.0, 1.22, 96);
+    neonRingMaterial = new THREE.MeshBasicMaterial({ color: 0x00d4ff, transparent: true, opacity: 0.06, side: THREE.DoubleSide });
+    const ring = new THREE.Mesh(ringGeo, neonRingMaterial);
     ring.rotation.x = -Math.PI / 2;
     ring.position.set(0, 0.05, 0);
     scene.add(ring);
   })();
+  canvas.addEventListener('pointerenter', ()=>{ if (neonRingMaterial) neonRingMaterial.opacity = 0.24; }, {passive:true});
+  canvas.addEventListener('pointerleave', ()=>{ if (neonRingMaterial) neonRingMaterial.opacity = 0.06; }, {passive:true});
   // Clouds (subtle)
   try {
     const cloudsTex = new THREE.TextureLoader().load('https://threejs.org/examples/textures/planets/earth_clouds_1024.png');
@@ -336,7 +339,7 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
   // Interaction
   let cx=0, cy=0; canvas.addEventListener('pointermove', (e)=>{ cx=(e.clientX/innerWidth-0.5)*2; cy=(e.clientY/innerHeight-0.5)*2; }, {passive:true});
 
-  function resize(){ const w=canvas.clientWidth,h=canvas.clientHeight; if(!w||!h) return; renderer.setSize(w,h,false); camera.aspect=w/h; camera.updateProjectionMatrix(); if (composer) composer.setSize(w,h); }
+  function resize(){ const w=canvas.clientWidth,h=canvas.clientHeight; if(!w||!h) return; renderer.setSize(w,h,false); camera.aspect=w/h; camera.updateProjectionMatrix(); if (typeof composer !== 'undefined' && composer) composer.setSize(w,h); }
   new ResizeObserver(resize).observe(canvas); resize();
 
   const clock = new THREE.Clock();
