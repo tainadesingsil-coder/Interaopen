@@ -1,32 +1,103 @@
-import React, { useState } from 'react';
-import { Image, StyleSheet, Text, View, Pressable } from 'react-native';
+import React, { useMemo, useRef, useState } from 'react';
+import { StyleSheet, Text, View, Pressable } from 'react-native';
 import { colors, radius, spacing } from '../theme/theme';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { AIExplainModal } from './AIExplainModal';
+import { Video, ResizeMode } from 'expo-av';
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 
 export type VideoCardProps = {
   id: string;
   title: string;
-  thumbnailUrl: string;
+  thumbnailUrl?: string; // kept for compatibility if needed in future
   duration: string;
+  videoUrl: string;
 };
 
-export function VideoCard({ id, title, thumbnailUrl, duration }: VideoCardProps) {
+export function VideoCard({ id, title, videoUrl, duration }: VideoCardProps) {
+  const videoRef = useRef<Video>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [liked, setLiked] = useState(false);
+  const [showHeart, setShowHeart] = useState(false);
   const [showExplain, setShowExplain] = useState(false);
+  const lastTapRef = useRef<number>(0);
+
+  const togglePlay = async () => {
+    try {
+      if (isPlaying) {
+        await videoRef.current?.pauseAsync();
+        setIsPlaying(false);
+      } else {
+        await videoRef.current?.playAsync();
+        setIsPlaying(true);
+      }
+    } catch {}
+  };
+
+  const onMediaPress = () => {
+    const now = Date.now();
+    if (now - lastTapRef.current < 300) {
+      setLiked(true);
+      setShowHeart(true);
+      setTimeout(() => setShowHeart(false), 700);
+    } else {
+      togglePlay();
+    }
+    lastTapRef.current = now;
+  };
+
+  const playIcon = useMemo(() => (
+    <View style={styles.centerIcon}>
+      <MaterialCommunityIcons
+        name={isPlaying ? 'pause-circle' : 'play-circle'}
+        size={56}
+        color="rgba(255,255,255,0.8)"
+      />
+    </View>
+  ), [isPlaying]);
 
   return (
     <View style={styles.card}>
-      <View style={styles.mediaWrapper}>
-        <Image source={{ uri: thumbnailUrl }} style={styles.thumbnail} resizeMode="cover" />
+      <Pressable style={styles.mediaWrapper} onPress={onMediaPress}>
+        <Video
+          ref={videoRef}
+          style={styles.video}
+          source={{ uri: videoUrl }}
+          resizeMode={ResizeMode.COVER}
+          shouldPlay={false}
+          isLooping
+        />
+        {!isPlaying && playIcon}
+        {showHeart && (
+          <Animated.View entering={FadeIn.duration(120)} exiting={FadeOut.duration(300)} style={styles.heartOverlay}>
+            <MaterialCommunityIcons name="heart" size={72} color="#ff3b5c" />
+          </Animated.View>
+        )}
         <View style={styles.durationPill}>
           <MaterialCommunityIcons name="clock-outline" color={colors.text} size={14} />
           <Text style={styles.durationText}>{duration}</Text>
         </View>
-      </View>
+      </Pressable>
+
       <View style={styles.row}>
         <Text numberOfLines={2} style={styles.title}>{title}</Text>
         <Pressable style={styles.aiButton} onPress={() => setShowExplain(true)}>
           <MaterialCommunityIcons name="robot-love-outline" size={20} color={colors.primary} />
+        </Pressable>
+      </View>
+
+      <View style={styles.actionsRow}>
+        <Pressable style={styles.actionBtn} onPress={() => setLiked((v) => !v)}>
+          <MaterialCommunityIcons name={liked ? 'heart' : 'heart-outline'} size={20} color={liked ? '#ff3b5c' : colors.text} />
+          <Text style={styles.actionText}>{liked ? 'Curtido' : 'Curtir'}</Text>
+        </Pressable>
+        <Pressable style={styles.actionBtn} onPress={() => {}}>
+          <MaterialCommunityIcons name="comment-outline" size={20} color={colors.text} />
+          <Text style={styles.actionText}>Comentar</Text>
+        </Pressable>
+        <Pressable style={[styles.actionBtn, styles.shareBtn]} onPress={() => {}}>
+          <MaterialCommunityIcons name="share-variant" size={20} color="#0A0B0E" />
+          <Text style={styles.shareText}>Compartilhar</Text>
         </Pressable>
       </View>
 
@@ -56,9 +127,20 @@ const styles = StyleSheet.create({
     aspectRatio: 9 / 16,
     backgroundColor: colors.surfaceAlt,
   },
-  thumbnail: {
+  video: {
     width: '100%',
     height: '100%',
+    backgroundColor: 'black',
+  },
+  centerIcon: {
+    position: 'absolute',
+    top: '45%',
+    left: '45%',
+  },
+  heartOverlay: {
+    position: 'absolute',
+    top: '40%',
+    left: '40%',
   },
   durationPill: {
     position: 'absolute',
@@ -95,4 +177,23 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     backgroundColor: colors.surfaceAlt,
   },
+  actionsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    paddingHorizontal: spacing.md,
+    paddingBottom: spacing.md,
+  },
+  actionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 8,
+    paddingHorizontal: spacing.md,
+    borderRadius: radius.md,
+    backgroundColor: colors.surfaceAlt,
+  },
+  actionText: { color: colors.text },
+  shareBtn: { backgroundColor: colors.primary },
+  shareText: { color: '#0A0B0E', fontWeight: '800' },
 });

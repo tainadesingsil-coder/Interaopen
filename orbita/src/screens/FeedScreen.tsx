@@ -11,18 +11,35 @@ const MOCK_FEED = [
     title: 'Buracos negros: como eles dobram o espaço-tempo',
     thumbnailUrl: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=1200&auto=format&fit=crop',
     duration: '0:45',
+    videoUrl: 'https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4',
   },
   {
     id: '2',
     title: 'O que é computação quântica em 60 segundos',
     thumbnailUrl: 'https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?q=80&w=1200&auto=format&fit=crop',
     duration: '1:00',
+    videoUrl: 'https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4',
   },
   {
     id: '3',
     title: 'Vida em Marte? Evidências e hipóteses atuais',
     thumbnailUrl: 'https://images.unsplash.com/photo-1580424917961-3f65cf3a998b?q=80&w=1200&auto=format&fit=crop',
     duration: '0:30',
+    videoUrl: 'https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4',
+  },
+  {
+    id: '4',
+    title: 'Telescópios: como enxergamos o invisível',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?q=80&w=1200&auto=format&fit=crop',
+    duration: '0:50',
+    videoUrl: 'https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4',
+  },
+  {
+    id: '5',
+    title: 'Física de foguetes: empuxo e gravidade',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1580424917961-3f65cf3a998b?q=80&w=1200&auto=format&fit=crop',
+    duration: '0:40',
+    videoUrl: 'https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4',
   },
 ];
 
@@ -40,6 +57,7 @@ export function FeedScreen() {
             title={item.title}
             thumbnailUrl={item.thumbnailUrl}
             duration={item.duration}
+            videoUrl={item.videoUrl}
           />
         )}
       />

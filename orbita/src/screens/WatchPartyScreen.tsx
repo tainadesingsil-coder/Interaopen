@@ -5,6 +5,17 @@ import { ScreenContainer } from '../components/ScreenContainer';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Video, ResizeMode } from 'expo-av';
 
+function getBotReply(text: string): string {
+  const t = text.toLowerCase();
+  if (/^oi|ol[aá]|hey|e[aá]i/.test(t)) return 'Oi! Aqui é o Órbita Bot. Pronto para a Watch Party! 🚀';
+  if (t.includes('foguet') || t.includes('rocket')) return 'Foguetes funcionam pelo princípio da ação e reação (3ª lei de Newton) — empuxo vence a gravidade.';
+  if (t.includes('marte')) return 'Sobre Marte: missões recentes buscam bioassinaturas em sedimentos antigos de crateras como Jezero.';
+  if (t.includes('buraco') || t.includes('negro')) return 'Buracos negros deformam o espaço-tempo; discos de acreção podem emitir jatos relativísticos.';
+  if (t.includes('telesc')) return 'Telescópios modernos usam óptica adaptativa e interferometria para “ver” mais longe e com mais detalhe.';
+  if (t.endsWith('?')) return 'Boa pergunta! Vamos investigar juntos durante a sessão. 😉';
+  return 'Legal! Se quiser, compartilhe o link para chamar mais gente. 👍';
+}
+
 export function WatchPartyScreen() {
   const [joined, setJoined] = useState(false);
   const [participants, setParticipants] = useState(12);
@@ -26,9 +37,13 @@ export function WatchPartyScreen() {
   };
 
   const sendMessage = () => {
-    if (!message.trim()) return;
-    setMessages((m) => [{ id: String(Date.now()), author: 'Você', text: message.trim() }, ...m]);
+    const text = message.trim();
+    if (!text) return;
+    setMessages((m) => [{ id: String(Date.now()), author: 'Você', text }, ...m]);
     setMessage('');
+    setTimeout(() => {
+      setMessages((m) => [{ id: String(Date.now() + 1), author: 'Órbita Bot', text: getBotReply(text) }, ...m]);
+    }, 600);
   };
 
   const Layout = useMemo(() => (isWide ? RowLayout : ColumnLayout), [isWide]);
