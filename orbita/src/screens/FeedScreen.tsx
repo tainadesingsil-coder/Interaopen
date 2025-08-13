@@ -4,6 +4,8 @@ import { useNavigation } from '@react-navigation/native';
 import { ScreenContainer } from '../components/ScreenContainer';
 import { VideoCard } from '../components/VideoCard';
 import { spacing } from '../theme/theme';
+import { Header } from '../components/Header';
+import { PrimaryButton } from '../components/PrimaryButton';
 
 const MOCK_FEED = [
   {
@@ -50,7 +52,8 @@ export function FeedScreen() {
       <FlatList
         data={MOCK_FEED}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={{ padding: spacing.md }}
+        contentContainerStyle={{ padding: spacing.md, paddingTop: 0 }}
+        ListHeaderComponent={<Header />}
         renderItem={({ item }) => (
           <VideoCard
             id={item.id}
@@ -62,9 +65,7 @@ export function FeedScreen() {
         )}
       />
       <View style={{ height: spacing.xxl }} />
-      <Pressable style={styles.fab} onPress={() => navigation.navigate('Reels' as never)}>
-        <Text style={styles.fabText}>Reels</Text>
-      </Pressable>
+      <PrimaryButton title="Abrir Reels" iconName="play-circle" onPress={() => navigation.navigate('Reels' as never)} style={styles.fab} />
     </ScreenContainer>
   );
 }
@@ -74,12 +75,5 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: spacing.lg,
     bottom: spacing.xxl,
-    backgroundColor: '#0F1117',
-    borderColor: '#202531',
-    borderWidth: StyleSheet.hairlineWidth,
-    borderRadius: 999,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
   },
-  fabText: { color: '#E6EAF2', fontWeight: '700' },
 });
