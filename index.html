@@ -9,7 +9,7 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
     <link rel="stylesheet" href="styles.css" />
 
@@ -132,7 +132,14 @@
       <section id="portfolio" class="section portfolio-section">
         <div class="container">
           <h2>Portfólio</h2>
-          <p class="section-lead">Seleção de projetos recentes. Clique para ampliar.</p>
+          <p class="section-lead">Filtre por categoria e clique para explorar. Passe o mouse para pré-visualizar.</p>
+          <div class="portfolio-filters" role="tablist" aria-label="Filtros do portfólio">
+            <button class="filter-btn active" data-filter="all" role="tab" aria-selected="true">Tudo</button>
+            <button class="filter-btn" data-filter="design" role="tab" aria-selected="false">Design</button>
+            <button class="filter-btn" data-filter="marketing" role="tab" aria-selected="false">Marketing</button>
+            <button class="filter-btn" data-filter="ia" role="tab" aria-selected="false">IA</button>
+            <button class="filter-btn" data-filter="video" role="tab" aria-selected="false">Vídeo</button>
+          </div>
           <div class="portfolio-grid" id="portfolio-grid" data-source="portfolio.json"></div>
         </div>
 
@@ -141,6 +148,10 @@
             <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M19 6.4 17.6 5 12 10.6 6.4 5 5 6.4 10.6 12 5 17.6 6.4 19 12 13.4 17.6 19 19 17.6 13.4 12 19 6.4Z"/></svg>
           </button>
           <div class="lightbox-content" id="lightbox-content"></div>
+          <div class="lightbox-nav">
+            <button class="lightbox-prev" aria-label="Anterior">◀</button>
+            <button class="lightbox-next" aria-label="Próximo">▶</button>
+          </div>
         </div>
       </section>
 
@@ -195,5 +206,20 @@
         </div>
       </div>
     </footer>
+
+    <div id="chatbot" class="chatbot" aria-live="polite" aria-label="Assistente Taina IA">
+      <button class="chat-toggle" aria-expanded="false" aria-controls="chat-panel">IA</button>
+      <div id="chat-panel" class="chat-panel" hidden>
+        <div class="chat-header">
+          <span>Assistente IA</span>
+          <button class="chat-close" aria-label="Fechar">✕</button>
+        </div>
+        <div class="chat-messages" id="chat-messages" role="log"></div>
+        <form id="chat-form" class="chat-form">
+          <input id="chat-input" type="text" placeholder="Pergunte sobre serviços, prazos, etc." autocomplete="off" />
+          <button type="submit" class="btn btn-primary">Enviar</button>
+        </form>
+      </div>
+    </div>
   </body>
 </html>
