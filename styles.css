@@ -304,3 +304,33 @@ input:focus, textarea:focus { border-color: #a78bfa; box-shadow: 0 0 0 3px rgba(
 
 .animate-in { opacity: 0; transform: translateY(6px); animation: fadeUp 800ms ease 200ms forwards; }
 @keyframes fadeUp { to { opacity: 1; transform: none; } }
+
+/* Match section headings to brand style */
+.about-section h2, .services-section h2, .contact-section h2 {
+  font-family: 'Sora', Manrope, system-ui, sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  background: linear-gradient(90deg, #ffffff 0%, #cbd5ff 35%, #7c3aed 50%, #00d4ff 65%, #ffffff 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  text-shadow: 0 6px 20px rgba(124,58,237,0.24), 0 1px 0 rgba(0,0,0,0.25);
+  display: inline-block;
+}
+.about-section h2::before, .services-section h2::before, .contact-section h2::before {
+  content: "";
+  display: inline-block;
+  width: 16px; height: 16px; margin-right: 10px;
+  border-radius: 4px;
+  background: linear-gradient(135deg, #7c3aed 0%, #00d4ff 100%);
+  border: 1px solid rgba(255,255,255,0.2);
+  box-shadow: var(--shadow-2);
+  vertical-align: text-top;
+}
+.about-section h2::after, .services-section h2::after, .contact-section h2::after {
+  content: "";
+  display: block;
+  height: 2px; width: 100%; max-width: 180px;
+  margin-top: 6px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #7c3aed 0%, #00d4ff 100%);
+  opacity: 0.85;
+}
