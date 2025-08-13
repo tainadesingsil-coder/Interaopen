@@ -361,3 +361,16 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
     } catch (_) {}
   });
 })();
+
+/* Services: click-to-contact prefill */
+(function serviceClicks() {
+  const cards = selectAll('.service-card[role="button"]');
+  const form = select('#contact-form');
+  if (!cards.length || !form) return;
+  cards.forEach(c => c.addEventListener('click', () => {
+    const s = c.getAttribute('data-service') || '';
+    const msg = select('#mensagem');
+    if (msg) msg.value = `Olá! Tenho interesse em ${s}. Podemos conversar?`;
+    select('#contato')?.scrollIntoView({ behavior: 'smooth' });
+  }));
+})();
