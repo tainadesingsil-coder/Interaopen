@@ -91,7 +91,7 @@ ul { padding-left: 16px; color: var(--text-dim); }
 }
 
 /* Hero */
-.hero-section { position: relative; min-height: max(92vh, 620px); display: grid; place-items: center; padding-top: 72px; overflow: hidden; background: linear-gradient(180deg, #3aa2ff 0%, #0b0f1a 70%); }
+.hero-section { position: relative; min-height: max(92vh, 620px); display: grid; place-items: center; padding-top: 72px; overflow: hidden; }
 .hero-canvas { position: absolute; inset: -10% -10% -10% -10%; width: 120%; height: 120%; filter: saturate(1.1) contrast(1.05); image-rendering: -webkit-optimize-contrast; }
 .hero-fallback { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.15; display: none; }
 .hero-2d { position: absolute; inset: 0; width: 100%; height: 100%; display: none; opacity: 0.2; }
