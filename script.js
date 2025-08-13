@@ -122,7 +122,13 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
 /* HERO 3D: Abstract AI lattice + data flow (professional) */
 (function heroAILattice() {
   const canvas = select('#hero-canvas');
-  if (!canvas || !window.THREE) return;
+  if (!canvas) return;
+  const hasWebGL = (function(){ try { const test = document.createElement('canvas').getContext('webgl') || document.createElement('canvas').getContext('experimental-webgl'); return !!test; } catch(e){ return false; } })();
+  if (!hasWebGL || !window.THREE) {
+    const fb = select('#hero-fallback'); if (fb) fb.style.display = 'block';
+    const c2d = select('#hero-2d'); if (c2d) c2d.style.display = 'block';
+    return;
+  }
 
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
