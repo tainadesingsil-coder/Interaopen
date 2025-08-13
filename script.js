@@ -171,8 +171,8 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
   // Lighting
   scene.add(new THREE.HemisphereLight(0xbcd9ff, 0x0b0f1a, 0.9));
   const key = new THREE.DirectionalLight(0xffffff, 1.0); key.position.set(2, 3.6, 2.5); scene.add(key);
-  const accentA = new THREE.PointLight(0x2563eb, 0.9, 18); accentA.position.set(-2.4, 1.0, 2.2); scene.add(accentA);
-  const accentB = new THREE.PointLight(0x38bdf8, 0.8, 18); accentB.position.set(2.2, 1.2, 2.0); scene.add(accentB);
+      const accentA = new THREE.PointLight(0x7c3aed, 0.9, 18); accentA.position.set(-2.4, 1.0, 2.2); scene.add(accentA);
+    const accentB = new THREE.PointLight(0x9966ff, 0.7, 18); accentB.position.set(2.2, 1.2, 2.0); scene.add(accentB);
 
   // Remove ground plane for clean black
   
@@ -223,35 +223,39 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
   const holoGroup = new THREE.Group();
   scene.add(holoGroup);
 
-  // Realistic globe (center) for context
-  const globeTex = new THREE.TextureLoader().load('https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg');
-  globeTex.anisotropy = Math.min(renderer.capabilities.getMaxAnisotropy?.() || 8, 16);
-  const globe = new THREE.Mesh(new THREE.SphereGeometry(0.9, 64, 64), new THREE.MeshStandardMaterial({ map: globeTex, roughness: 0.85, metalness: 0.0 }));
+  // Purple neon globe (no texture)
+  const globe = new THREE.Mesh(
+    new THREE.SphereGeometry(0.9, 64, 64),
+    new THREE.MeshPhongMaterial({ color: 0x7c3aed, emissive: 0x7c3aed, emissiveIntensity: 0.85, shininess: 30, specular: 0x9966ff })
+  );
   globe.position.set(0, 0.6, 0);
   scene.add(globe);
+  // Outer glow shell
+  try {
+    const glowShell = new THREE.Mesh(
+      new THREE.SphereGeometry(0.96, 64, 64),
+      new THREE.MeshBasicMaterial({ color: 0x7c3aed, transparent: true, opacity: 0.12, blending: THREE.AdditiveBlending, depthWrite: false })
+    );
+    globe.add(glowShell);
+  } catch(_) {}
 
-  // Subtle neon ring under the globe (faint by default, brighter on hover)
+  // Subtle neon ring under the globe (purple)
   let neonRingMaterial = null;
   (function addNeonRing(){
     const ringGeo = new THREE.RingGeometry(1.0, 1.22, 96);
-    neonRingMaterial = new THREE.MeshBasicMaterial({ color: 0x00d4ff, transparent: true, opacity: 0.16, side: THREE.DoubleSide });
+    neonRingMaterial = new THREE.MeshBasicMaterial({ color: 0x7c3aed, transparent: true, opacity: 0.16, side: THREE.DoubleSide });
     const ring = new THREE.Mesh(ringGeo, neonRingMaterial);
     ring.rotation.x = -Math.PI / 2;
     ring.position.set(0, 0.05, 0);
     scene.add(ring);
   })();
   // Neon is constant (no hover interaction)
-  // Clouds (subtle)
-  try {
-    const cloudsTex = new THREE.TextureLoader().load('https://threejs.org/examples/textures/planets/earth_clouds_1024.png');
-    const cloudsMat = new THREE.MeshPhongMaterial({ map: cloudsTex, transparent: true, opacity: 0.25, depthWrite: false });
-    const clouds = new THREE.Mesh(new THREE.SphereGeometry(0.905, 64, 64), cloudsMat);
-    globe.add(clouds);
-  } catch(_) {}
+  // No clouds for clean neon look
+  try { /* clouds disabled */ } catch(_) {}
 
   // Network arcs on globe
   (function addNetwork(){
-    const arcMat = new THREE.LineBasicMaterial({ color: 0x00d4ff, transparent: true, opacity: 0.4 });
+    const arcMat = new THREE.LineBasicMaterial({ color: 0x7c3aed, transparent: true, opacity: 0.18 });
     const arcs = new THREE.Group();
     function arc(lat1, lon1, lat2, lon2){
       const R=0.9, steps=32, pts=[];
