@@ -124,7 +124,7 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
   const canvas = select('#hero-canvas');
   if (!canvas || !window.THREE) return;
 
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
   const scene = new THREE.Scene();
@@ -134,16 +134,7 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
   let girlModel = null;
 
   // Postprocessing (bloom)
-  let composer = null;
-  try {
-    const effectComposer = new THREE.EffectComposer(renderer);
-    const renderPass = new THREE.RenderPass(scene, camera);
-    const bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(1, 1), 0.95, 0.4, 0.85);
-    effectComposer.addPass(renderPass);
-    effectComposer.addPass(bloomPass);
-    composer = effectComposer;
-  } catch (_) { composer = null; }
-  const renderScene = () => composer ? composer.render() : renderer.render(scene, camera);
+  const renderScene = () => renderer.render(scene, camera);
 
   // Lighting
   scene.add(new THREE.HemisphereLight(0xbcd9ff, 0x0b0f1a, 0.9));
@@ -199,13 +190,13 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
   scene.add(holoGroup);
 
   // Realistic globe (center) for context
-  const globeTex = new THREE.TextureLoader().load('https://tile.openstreetmap.org/0/0/0.png');
-  const globe = new THREE.Mesh(new THREE.SphereGeometry(0.9, 48, 48), new THREE.MeshStandardMaterial({ map: globeTex, roughness: 0.9, metalness: 0.0 }));
+  const globeTex = new THREE.TextureLoader().load('https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg');
+  const globe = new THREE.Mesh(new THREE.SphereGeometry(0.9, 32, 32), new THREE.MeshStandardMaterial({ map: globeTex, roughness: 0.9, metalness: 0.0 }));
   globe.position.set(0, 0.6, 0);
   scene.add(globe);
   // Clouds (subtle)
   try {
-    const cloudsTex = new THREE.TextureLoader().load('https://raw.githubusercontent.com/turban/webgl-earth/master/images/fair_clouds_4k.png');
+    const cloudsTex = new THREE.TextureLoader().load('https://threejs.org/examples/textures/planets/earth_clouds_1024.png');
     const cloudsMat = new THREE.MeshPhongMaterial({ map: cloudsTex, transparent: true, opacity: 0.25, depthWrite: false });
     const clouds = new THREE.Mesh(new THREE.SphereGeometry(0.905, 48, 48), cloudsMat);
     globe.add(clouds);
