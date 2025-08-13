@@ -336,54 +336,28 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
   });
 })();
 
-/* Portfolio chat widget */
-(function chatPortfolio() {
-  const wrap = select('#chat-portfolio');
-  if (!wrap) return;
-  const toggle = select('.chatp-toggle');
-  const panel = select('#chatp-panel');
-  const close = select('.chatp-close');
-  const log = select('#chatp-messages');
-  const form = select('#chatp-form');
-  const input = select('#chatp-input');
+/* Lead capture to email (Web3Forms) */
+(function leadCapture() {
+  const form = select('#contact-form');
+  if (!form) return;
+  // Add hidden inputs for service
+  const access = document.createElement('input');
+  access.type='hidden'; access.name='access_key'; access.value='a5f5d0d0-0000-4000-8000-000000000000'; // TODO: replace with your Web3Forms key
+  const subject = document.createElement('input');
+  subject.type='hidden'; subject.name='subject'; subject.value='Novo lead do site de Taina';
+  const reply = document.createElement('input');
+  reply.type='hidden'; reply.name='replyto'; reply.value='{{email}}';
+  form.append(access, subject, reply);
 
-  const setOpen = (open) => { panel.hidden = !open; toggle.setAttribute('aria-expanded', String(open)); if (open) input?.focus(); };
-  toggle.addEventListener('click', () => setOpen(panel.hidden));
-  close?.addEventListener('click', () => setOpen(false));
-
-  const add = (text, who='bot') => { const d = document.createElement('div'); d.className = `msg ${who}`; d.textContent = text; log.appendChild(d); log.scrollTop = log.scrollHeight; };
-
-  const state = { step: 0, interest: '', link: '' };
-  const greetings = [
-    'Oi! Vamos montar seu portfólio aqui no site.',
-    'Me diga: você quer destacar Branding, UI/UX, Social Media, Vídeo ou Tudo?'
-  ];
-  greetings.forEach(t => add(t, 'bot'));
-
-  const validators = {
-    url: (v) => /^https?:\/\//i.test(v) && v.includes('canva'),
-  };
-
-  form.addEventListener('submit', (e) => {
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const text = input.value.trim(); if (!text) return; add(text, 'user'); input.value='';
-
-    if (state.step === 0) {
-      state.interest = text;
-      add('Perfeito. Agora cole o link do seu portfólio no Canva (ou pasta com as peças).', 'bot');
-      state.step = 1; return;
-    }
-    if (state.step === 1) {
-      if (!validators.url(text)) { add('Parece que não é um link válido do Canva. Envie um link começando com https:// e contendo canva.', 'bot'); return; }
-      state.link = text;
-      add('Recebi seu link. Vou integrar as peças e organizar por categorias. Você quer ordem cronológica ou por destaque?', 'bot');
-      state.step = 2; return;
-    }
-    if (state.step === 2) {
-      add('Anotado. Em minutos preparo a seção portfólio com miniaturas interativas e vídeos. Se quiser, pode me enviar outro link adicional.', 'bot');
-      state.step = 3; return;
-    }
-    // default
-    add('Se desejar, envie mais links ou diga "publicar" para acompanharmos o deploy.', 'bot');
+    const data = new FormData(form);
+    try {
+      const res = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: data });
+      const json = await res.json();
+      if (json.success) {
+        select('#form-success')?.removeAttribute('hidden');
+      }
+    } catch (_) {}
   });
 })();
