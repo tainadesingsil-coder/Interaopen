@@ -206,8 +206,8 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
   const flow = new THREE.Points(flowGeo, flowMat);
   scene.add(flow);
   nodeGroup.visible = false; edges.visible = false; flow.visible = false; /* only globe visible */
-  // Ensure arcs are subtle neon
-  try { if (globe && globe.children) globe.children.forEach((ch)=>{ if (ch.isLine) { ch.material.opacity = 0.28; ch.material.color.set(0x00d4ff); } }); } catch(_) {}
+  // Hide network arcs; keep only ring neon
+  try { if (globe && globe.children) globe.children.forEach((ch)=>{ if (ch.isLine) { ch.visible = false; } }); } catch(_) {}
 
   const flowCurve = new THREE.CatmullRomCurve3([
     new THREE.Vector3(-2.4, 0.0, 1.6),
@@ -234,14 +234,13 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
   let neonRingMaterial = null;
   (function addNeonRing(){
     const ringGeo = new THREE.RingGeometry(1.0, 1.22, 96);
-    neonRingMaterial = new THREE.MeshBasicMaterial({ color: 0x00d4ff, transparent: true, opacity: 0.06, side: THREE.DoubleSide });
+    neonRingMaterial = new THREE.MeshBasicMaterial({ color: 0x00d4ff, transparent: true, opacity: 0.16, side: THREE.DoubleSide });
     const ring = new THREE.Mesh(ringGeo, neonRingMaterial);
     ring.rotation.x = -Math.PI / 2;
     ring.position.set(0, 0.05, 0);
     scene.add(ring);
   })();
-  canvas.addEventListener('pointerenter', ()=>{ if (neonRingMaterial) neonRingMaterial.opacity = 0.24; }, {passive:true});
-  canvas.addEventListener('pointerleave', ()=>{ if (neonRingMaterial) neonRingMaterial.opacity = 0.06; }, {passive:true});
+  // Neon is constant (no hover interaction)
   // Clouds (subtle)
   try {
     const cloudsTex = new THREE.TextureLoader().load('https://threejs.org/examples/textures/planets/earth_clouds_1024.png');
