@@ -757,7 +757,7 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
     ctx.clearRect(0,0,w,h);
 
     // 1) Draw slightly rotated whole image (clockwise) to avoid seam
-    const baseAng = elapsed * (Math.PI * 2 / 64); // very slow CW
+    const baseAng = elapsed * (Math.PI * 2 / 28); // faster CW for visibility
     ctx.save();
     ctx.translate(w/2, h/2);
     const breathe = 1 + Math.sin(elapsed*0.6) * 0.0025;
@@ -771,7 +771,7 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
     ctx.save();
     ctx.beginPath(); ctx.arc(cx, cy, globeR, 0, Math.PI*2); ctx.clip();
     ctx.translate(cx, cy);
-    const globeAng = -elapsed * (Math.PI * 2 / 12); // faster CCW
+    const globeAng = -elapsed * (Math.PI * 2 / 6); // much faster CCW for visibility
     ctx.rotate(globeAng);
     ctx.translate(-cx, -cy);
     // Draw from the same rotated base to keep edges consistent
@@ -782,8 +782,8 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
     // 2b) Subtle typing motion localized near keyboard/hands, sampled from rotated base
     const handsX = w*0.58, handsY = h*0.36; // approximate relative to current framing
     const handsRX = globeR*0.28, handsRY = globeR*0.12;
-    const jitterX = Math.sin(elapsed*3.0) * 0.8;
-    const jitterY = Math.cos(elapsed*2.4) * 0.5;
+    const jitterX = Math.sin(elapsed*5.0) * 1.2;
+    const jitterY = Math.cos(elapsed*4.2) * 0.9;
     ctx.save();
     ctx.beginPath(); ctx.ellipse(handsX, handsY, handsRX, handsRY, 0, 0, Math.PI*2); ctx.clip();
     // sample from same rotated+breathing base
