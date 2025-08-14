@@ -736,7 +736,7 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
   resize();
 
   const baseImg = new Image();
-  baseImg.crossOrigin = 'anonymous';
+  /* no CORS needed */
   baseImg.src = imgEl.getAttribute('src') || '';
   baseImg.decoding = 'sync';
   baseImg.onload = () => { start(); };
@@ -776,6 +776,19 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
     ctx.translate(-cx, -cy);
     // Draw from the same rotated base to keep edges consistent
     ctx.translate(w/2, h/2); ctx.rotate(baseAng); ctx.translate(-w/2, -h/2);
+    ctx.drawImage(baseImg, 0, 0, w, h);
+    ctx.restore();
+
+    // 2b) Subtle typing motion localized near keyboard/hands, sampled from rotated base
+    const handsX = w*0.58, handsY = h*0.36; // approximate relative to current framing
+    const handsRX = globeR*0.28, handsRY = globeR*0.12;
+    const jitterX = Math.sin(elapsed*3.0) * 0.8;
+    const jitterY = Math.cos(elapsed*2.4) * 0.5;
+    ctx.save();
+    ctx.beginPath(); ctx.ellipse(handsX, handsY, handsRX, handsRY, 0, 0, Math.PI*2); ctx.clip();
+    // sample from same rotated+breathing base
+    ctx.translate(w/2, h/2); ctx.rotate(baseAng); ctx.scale(breathe, breathe); ctx.translate(-w/2, -h/2);
+    ctx.translate(jitterX, jitterY);
     ctx.drawImage(baseImg, 0, 0, w, h);
     ctx.restore();
 
