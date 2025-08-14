@@ -758,12 +758,15 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
 
     // 1) Draw slightly rotated whole image (clockwise) to avoid seam
     const baseAng = elapsed * (Math.PI * 2 / 28); // faster CW for visibility
+    const floatAmp = globeR * 0.04; // gentle float amplitude
+    const floatY = Math.sin(elapsed * 0.5) * floatAmp; // ~12.5s period
     ctx.save();
     ctx.translate(w/2, h/2);
     const breathe = 1 + Math.sin(elapsed*0.6) * 0.0025;
     ctx.scale(breathe, breathe);
     ctx.rotate(baseAng);
     ctx.translate(-w/2, -h/2);
+    ctx.translate(0, floatY);
     ctx.drawImage(baseImg, 0, 0, w, h);
     ctx.restore();
 
@@ -775,7 +778,8 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
     ctx.rotate(globeAng);
     ctx.translate(-cx, -cy);
     // Draw from the same rotated base to keep edges consistent
-    ctx.translate(w/2, h/2); ctx.rotate(baseAng); ctx.translate(-w/2, -h/2);
+    ctx.translate(w/2, h/2); ctx.rotate(baseAng); ctx.scale(breathe, breathe); ctx.translate(-w/2, -h/2);
+    ctx.translate(0, floatY);
     ctx.drawImage(baseImg, 0, 0, w, h);
     ctx.restore();
 
@@ -788,6 +792,7 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
     ctx.beginPath(); ctx.ellipse(handsX, handsY, handsRX, handsRY, 0, 0, Math.PI*2); ctx.clip();
     // sample from same rotated+breathing base
     ctx.translate(w/2, h/2); ctx.rotate(baseAng); ctx.scale(breathe, breathe); ctx.translate(-w/2, -h/2);
+    ctx.translate(0, floatY);
     ctx.translate(jitterX, jitterY);
     ctx.drawImage(baseImg, 0, 0, w, h);
     ctx.restore();
