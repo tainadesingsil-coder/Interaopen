@@ -755,20 +755,31 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
     const cy = globeCenterNorm.y * h;
 
     ctx.clearRect(0,0,w,h);
-    // Draw full base image (static)
-    ctx.drawImage(baseImg, 0, 0, w, h);
 
-    // Center-only rotation (counterclockwise), soft edge
+    // 1) Draw slightly rotated whole image (clockwise) to avoid seam
+    const baseAng = elapsed * (Math.PI * 2 / 64); // very slow CW
     ctx.save();
-    ctx.beginPath(); ctx.arc(cx, cy, globeR, 0, Math.PI*2); ctx.clip();
-    ctx.translate(cx, cy);
-    const ang = -elapsed * (Math.PI * 2 / 16); // ~16s per full turn
-    ctx.rotate(ang);
-    ctx.translate(-cx, -cy);
+    ctx.translate(w/2, h/2);
+    const breathe = 1 + Math.sin(elapsed*0.6) * 0.0025;
+    ctx.scale(breathe, breathe);
+    ctx.rotate(baseAng);
+    ctx.translate(-w/2, -h/2);
     ctx.drawImage(baseImg, 0, 0, w, h);
     ctx.restore();
 
-    // Very soft vignette at the edge of the rotating disk
+    // 2) Counter-rotate only the globe area (stronger CCW) so final effect = globe rotates smoothly
+    ctx.save();
+    ctx.beginPath(); ctx.arc(cx, cy, globeR, 0, Math.PI*2); ctx.clip();
+    ctx.translate(cx, cy);
+    const globeAng = -elapsed * (Math.PI * 2 / 12); // faster CCW
+    ctx.rotate(globeAng);
+    ctx.translate(-cx, -cy);
+    // Draw from the same rotated base to keep edges consistent
+    ctx.translate(w/2, h/2); ctx.rotate(baseAng); ctx.translate(-w/2, -h/2);
+    ctx.drawImage(baseImg, 0, 0, w, h);
+    ctx.restore();
+
+    // 3) Very soft vignette at the edge of the rotating disk
     const grad = ctx.createRadialGradient(cx, cy, globeR*0.9, cx, cy, globeR);
     grad.addColorStop(0, 'rgba(0,0,0,0)'); grad.addColorStop(1, 'rgba(0,0,0,0.06)');
     ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(cx, cy, globeR, 0, Math.PI*2); ctx.fill();

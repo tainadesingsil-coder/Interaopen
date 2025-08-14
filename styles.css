@@ -110,7 +110,7 @@ ul { padding-left: 16px; color: var(--text-dim); }
 }
 
 /* Canvas that renders animated image with shader, aligned like the GIF */
-#hero-image-canvas { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -52%); max-width: 86vw; max-height: 76vh; width: auto; height: auto; z-index: 1; pointer-events: none; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges; }
+#hero-image-canvas { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -52%); max-width: 86vw; max-height: 76vh; width: auto; height: auto; z-index: 2; pointer-events: none; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges; }
 
 /* ====== KEYFRAMES ====== */
 /* Rotação contínua do globo */
