@@ -108,6 +108,9 @@ ul { padding-left: 16px; color: var(--text-dim); }
 @media (prefers-reduced-motion: reduce) {
   .hero-gif { animation: none !important; }
 }
+
+/* Canvas that renders animated image with shader, aligned like the GIF */
+#hero-image-canvas { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -52%); max-width: 86vw; max-height: 76vh; width: auto; height: auto; z-index: 1; pointer-events: none; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges; }
 /* Make hero title more minimal/small */
 .hero-title { font-size: clamp(28px, 5vw, 44px); letter-spacing: -0.015em; }
 .hero-title::after {

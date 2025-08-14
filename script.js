@@ -715,3 +715,122 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
     form.dispatchEvent(new Event('submit'));
   });
 })();
+
+/* Image micro-animation (globe spin ccw, subtle typing, breathing, blinks) */
+(function animateHeroImage(){
+  const imgEl = document.getElementById('hero-gif');
+  const canvas = document.getElementById('hero-image-canvas');
+  if (!imgEl || !canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  // Ensure canvas matches CSS box (keep proportional rendering)
+  function resize(){
+    const br = imgEl.getBoundingClientRect();
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.round(br.width * dpr);
+    canvas.height = Math.round(br.height * dpr);
+    canvas.style.width = `${Math.round(br.width)}px`;
+    canvas.style.height = `${Math.round(br.height)}px`;
+  }
+  new ResizeObserver(resize).observe(imgEl);
+  resize();
+
+  // Load base image
+  const baseImg = new Image();
+  baseImg.crossOrigin = 'anonymous';
+  baseImg.src = imgEl.getAttribute('src') || '';
+  baseImg.decoding = 'sync';
+  baseImg.onload = () => { start(); };
+
+  let timeStart = performance.now();
+  function start(){
+    requestAnimationFrame(loop);
+  }
+
+  // Parameters
+  const globeCenterNorm = { x: 0.5, y: 0.68 }; // normalized center from previous tuning
+  const globeRadiusNorm = 0.19; // ~ of shortest side
+  const breathAmp = 0.004; // torso scale amplitude
+  const typeAmpPx = 1.2; // hands subtle jitter
+  const typeSpeed = 1.8; // typing frequency
+  const blinkEvery = 3.8; // seconds average
+  const blinkDur = 0.12; // seconds
+  let nextBlinkAt = 0;
+
+  function loop(now){
+    const t = (now || performance.now());
+    const elapsed = (t - timeStart) / 1000;
+
+    // Schedule blinking pseudo-randomly around blinkEvery
+    if (elapsed > nextBlinkAt) {
+      nextBlinkAt = elapsed + blinkEvery * (0.7 + Math.random()*0.6);
+    }
+    const inBlink = elapsed > (nextBlinkAt - blinkDur) && elapsed < nextBlinkAt;
+
+    // Clear
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    // Draw base image slightly breathing (torso subtle scale around globe center y)
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const w = canvas.width, h = canvas.height;
+    const shortest = Math.min(w,h);
+    const globeR = globeRadiusNorm * shortest;
+    const cx = globeCenterNorm.x * w;
+    const cy = globeCenterNorm.y * h;
+
+    // Breathing scale matrix
+    const breath = 1 + Math.sin(elapsed*1.1) * breathAmp;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.scale(1, breath);
+    ctx.translate(-cx, -cy);
+    ctx.drawImage(baseImg, 0, 0, w, h);
+    ctx.restore();
+
+    // Draw rotating globe region from the same image (counterclockwise)
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cx, cy, globeR, 0, Math.PI*2);
+    ctx.clip();
+    ctx.translate(cx, cy);
+    const ang = -elapsed * (Math.PI * 2 / 14); // ~14s per turn CCW
+    ctx.rotate(ang);
+    ctx.translate(-cx, -cy);
+    ctx.drawImage(baseImg, 0, 0, w, h);
+    ctx.restore();
+
+    // Soft mask around globe edge to avoid hard seam
+    const grad = ctx.createRadialGradient(cx, cy, globeR*0.88, cx, cy, globeR);
+    grad.addColorStop(0, 'rgba(0,0,0,0)');
+    grad.addColorStop(1, 'rgba(0,0,0,0.08)');
+    ctx.fillStyle = grad;
+    ctx.beginPath(); ctx.arc(cx, cy, globeR, 0, Math.PI*2); ctx.fill();
+
+    // Simulated subtle typing: localized tiny offsets near hands area
+    // Approximate hands area near laptop: use small elliptical area offsets
+    const handsX = cx + globeR*0.15, handsY = cy - globeR*0.5;
+    const jitterX = Math.sin(elapsed*typeSpeed*2) * typeAmpPx * dpr;
+    const jitterY = Math.cos(elapsed*typeSpeed*1.7) * (typeAmpPx*0.6) * dpr;
+    ctx.save();
+    ctx.beginPath();
+    ctx.ellipse(handsX, handsY, globeR*0.28, globeR*0.12, 0, 0, Math.PI*2);
+    ctx.clip();
+    ctx.translate(jitterX, jitterY);
+    ctx.drawImage(baseImg, 0, 0, w, h);
+    ctx.restore();
+
+    // Occasional blink: darken small horizontal band at eyes location briefly
+    if (inBlink) {
+      const eyesX = cx, eyesY = cy - globeR*0.95;
+      const bandH = globeR*0.06;
+      const g = ctx.createLinearGradient(0, eyesY-bandH, 0, eyesY+bandH);
+      g.addColorStop(0, 'rgba(0,0,0,0)');
+      g.addColorStop(0.5, 'rgba(0,0,0,0.4)');
+      g.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, eyesY-bandH, w, bandH*2);
+    }
+
+    requestAnimationFrame(loop);
+  }
+})();
