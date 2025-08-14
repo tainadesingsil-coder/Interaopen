@@ -152,7 +152,12 @@
               <li><a href="mailto:tainadesingsil@gmail.com" class="contact-link">tainadesingsil@gmail.com</a></li>
             </ul>
           </div>
-          <form class="contact-form" id="contact-form" novalidate>
+          <form class="contact-form" id="contact-form" method="POST" action="https://formsubmit.co/tainadesingsil@gmail.com" target="_self" novalidate>
+            <input type="hidden" name="_subject" value="Novo lead do site (INTERAOPEN)" />
+            <input type="hidden" name="_captcha" value="false" />
+            <input type="hidden" name="_template" value="table" />
+            <input type="hidden" name="_autoresponse" value="Obrigada por entrar em contato! Vou te responder em breve." />
+            <input type="hidden" name="_next" value="https://interaopen.pages.dev/#contato?ok=1" />
             <div class="form-field">
               <label for="nome">Nome</label>
               <input type="text" id="nome" name="nome" placeholder="Seu nome" required />

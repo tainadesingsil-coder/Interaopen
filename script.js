@@ -450,23 +450,11 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
     node.addEventListener('blur', () => validateField(node));
   });
 
+  // Let the native form submit to FormSubmit; only block if invalid
   form.addEventListener('submit', (e) => {
-    e.preventDefault();
     const inputs = selectAll('input, textarea', form);
     const allValid = inputs.every(validateField);
-    if (!allValid) return;
-
-    // Simulate async submit
-    form.querySelector('button[type="submit"]').disabled = true;
-    setTimeout(() => {
-      form.reset();
-      inputs.forEach((i) => showError(i, ''));
-      if (success) {
-        success.hidden = false;
-        success.focus?.();
-      }
-      form.querySelector('button[type="submit"]').disabled = false;
-    }, 600);
+    if (!allValid) { e.preventDefault(); return; }
   });
 })();
 
@@ -474,26 +462,7 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
 (function leadCapture() {
   const form = select('#contact-form');
   if (!form) return;
-  // Add hidden inputs for service
-  const access = document.createElement('input');
-  access.type='hidden'; access.name='access_key'; access.value='a5f5d0d0-0000-4000-8000-000000000000'; // TODO: replace with your Web3Forms key
-  const subject = document.createElement('input');
-  subject.type='hidden'; subject.name='subject'; subject.value='Novo lead do site de Taina';
-  const reply = document.createElement('input');
-  reply.type='hidden'; reply.name='replyto'; reply.value='{{email}}';
-  form.append(access, subject, reply);
-
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const data = new FormData(form);
-    try {
-      const res = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: data });
-      const json = await res.json();
-      if (json.success) {
-        select('#form-success')?.removeAttribute('hidden');
-      }
-    } catch (_) {}
-  });
+  // Web3Forms disabled in favor of FormSubmit
 })();
 
 /* Services: click-to-contact prefill */
