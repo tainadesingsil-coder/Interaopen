@@ -720,6 +720,8 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
 (function animateHeroImage(){
   const imgEl = document.getElementById('hero-gif');
   const canvas = document.getElementById('hero-image-canvas');
+  const cssGlobe = document.querySelector('.globe-container');
+  if (cssGlobe) { return; }
   if (!imgEl || !canvas) return;
   const ctx = canvas.getContext('2d');
 

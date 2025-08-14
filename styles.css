@@ -111,6 +111,20 @@ ul { padding-left: 16px; color: var(--text-dim); }
 
 /* Canvas that renders animated image with shader, aligned like the GIF */
 #hero-image-canvas { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -52%); max-width: 86vw; max-height: 76vh; width: auto; height: auto; z-index: 1; pointer-events: none; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges; }
+
+/* ====== KEYFRAMES ====== */
+/* Rotação contínua do globo */
+@keyframes rotateGlobe { 0% { transform: rotateY(0deg); } 100% { transform: rotateY(360deg); } }
+/* Movimento sutil da personagem (digitando + respiração) */
+@keyframes typingMotion { 0%,100% { transform: translateY(0); } 25% { transform: translateY(-0.5px); } 50% { transform: translateY(0); } 75% { transform: translateY(0.5px); } }
+/* Piscar de olhos */
+@keyframes blinkEyes { 0%,92%,100% { opacity: 1; } 94%,96% { opacity: 0; } }
+
+/* ====== ESTILOS DE ANIMAÇÃO ====== */
+.globe-container { animation: rotateGlobe 40s linear infinite; transform-style: preserve-3d; }
+.character { animation: typingMotion 2s ease-in-out infinite; }
+.character-eyes { animation: blinkEyes 6s ease-in-out infinite; }
+
 /* Make hero title more minimal/small */
 .hero-title { font-size: clamp(28px, 5vw, 44px); letter-spacing: -0.015em; }
 .hero-title::after {
