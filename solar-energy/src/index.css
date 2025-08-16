@@ -6,24 +6,25 @@
 	--blue: #007BFF;
 	--yellow: #FFC107;
 	--orange: #FF5722;
-	--text: #111111;
-	--muted: #6B7280;
-	--bg: #FFFFFF;
-	--bg-muted: #F7F7F7;
-	--blue-dark: #0B3B8F;
+	--text: #0F172A; /* for header (dark text) */
+	--muted: #CBD5E1; /* light muted for dark bg */
 }
 
 html { scroll-behavior: smooth; }
 
 body {
-	@apply font-sans bg-[var(--bg)] text-[var(--text)];
+	@apply font-sans text-white;
+	background:
+		radial-gradient(1400px 600px at -10% -10%, rgba(0,123,255,0.18), transparent 60%),
+		radial-gradient(1200px 600px at 110% -10%, rgba(255,193,7,0.12), transparent 60%),
+		linear-gradient(180deg, #0B1F3A 0%, #07172C 50%, #081423 100%);
 }
 
 .container-section { @apply container mx-auto px-4; }
 .section-title { @apply text-3xl md:text-5xl font-extrabold tracking-tight; }
 .section-subtitle { @apply text-base md:text-lg text-[var(--muted)]; }
 
-/* Primary button (uniform across site) */
+/* Primary button (uniform) */
 .btn-yellow {
 	@apply inline-flex items-center justify-center rounded-full px-7 py-3 text-sm font-semibold transition transform focus:outline-none focus:ring-2;
 	background: var(--yellow);
@@ -31,42 +32,44 @@ body {
 }
 .btn-yellow:hover { background: var(--orange); transform: scale(1.03); box-shadow: 0 12px 26px rgba(255,87,34,0.25); }
 
-/* Keep secondary but align hover feel (not widely used) */
 .btn-blue {
 	@apply inline-flex items-center justify-center rounded-full px-7 py-3 text-sm font-semibold text-white transition transform focus:outline-none focus:ring-2;
 	background: var(--blue);
 }
 .btn-blue:hover { background: var(--blue); transform: scale(1.03); box-shadow: 0 12px 26px rgba(0,123,255,0.25); }
 
+/* Inputs on dark bg */
 .input {
-	@apply w-full rounded-md border border-gray-200 bg-white px-4 py-3 outline-none focus:ring-2;
+	@apply w-full rounded-md border px-4 py-3 outline-none focus:ring-2;
+	background: rgba(255,255,255,0.08);
+	border-color: rgba(255,255,255,0.18);
+	color: #FFFFFF;
 }
+.input::placeholder { color: rgba(255,255,255,0.6); }
 
-/* Unified card style */
+/* Glass cards on dark bg */
 .card,
-.card-aggressive { border: 2px solid #E5E7EB; box-shadow: 0 20px 40px rgba(0,0,0,0.10); }
-.card { @apply rounded-2xl bg-white p-6 transition transform; }
-.card-aggressive { @apply rounded-2xl bg-white p-6 transition transform; }
+.card-aggressive {
+	border: 1px solid rgba(255,255,255,0.16);
+	background: rgba(255,255,255,0.06);
+	backdrop-filter: blur(8px);
+	box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+}
+.card { @apply rounded-2xl p-6 transition transform; }
+.card-aggressive { @apply rounded-2xl p-6 transition transform; }
 .card:hover,
-.card-aggressive:hover { transform: translateY(-4px) scale(1.02); box-shadow: 0 30px 60px rgba(0,0,0,0.16); }
-.icon-large { width: 32px; height: 32px; color: var(--muted); transition: color 200ms ease; }
+.card-aggressive:hover { transform: translateY(-4px) scale(1.02); box-shadow: 0 30px 60px rgba(0,0,0,0.35); }
+.icon-large { width: 32px; height: 32px; color: #94A3B8; transition: color 200ms ease; }
 .card-aggressive:hover .icon-large,
-.card:hover .icon-large { color: var(--blue); }
+.card:hover .icon-large { color: var(--yellow); }
 
-/* Header */
-.header { @apply fixed top-0 z-40 w-full bg-white/90 backdrop-blur border-b border-gray-200; box-shadow: 0 6px 20px rgba(0,0,0,0.06); }
+/* Header stays light */
+.header { @apply fixed top-0 z-40 w-full bg-white/95 backdrop-blur border-b border-white; box-shadow: 0 6px 20px rgba(0,0,0,0.12); }
 
-/* Sections */
-.section-blue { background: var(--blue-dark); color: #FFFFFF; }
-.footer { @apply bg-[var(--bg-muted)] text-[var(--text)]; }
-
-/* Lines for steps */
-.steps-rail { position: absolute; top: 36px; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, rgba(0,123,255,0.2), rgba(0,123,255,0.6)); border-radius: 999px; overflow: hidden; }
-.steps-rail .mask { width: 0%; height: 100%; background: rgba(255,255,255,0.9); opacity: 0.25; }
-.step-circle { @apply flex items-center justify-center rounded-full text-white font-bold; width: 48px; height: 48px; background: var(--blue); border: 4px solid #E5E7EB; }
-
-/* Gradient backgrounds */
-.gradient-blue-white { background: linear-gradient(180deg, #E8F1FF 0%, #FFFFFF 60%); }
+/* Steps */
+.steps-rail { position: absolute; top: 36px; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, rgba(0,123,255,0.35), rgba(0,123,255,0.8)); border-radius: 999px; overflow: hidden; }
+.steps-rail .mask { width: 0%; height: 100%; background: rgba(255,255,255,0.6); }
+.step-circle { @apply flex items-center justify-center rounded-full text-black font-bold; width: 48px; height: 48px; background: var(--yellow); border: 4px solid rgba(255,255,255,0.2); }
 
 /* Sticky CTA mobile */
-.sticky-cta { @apply fixed bottom-0 left-0 right-0 z-40 md:hidden border-t border-gray-200 bg-white/95 backdrop-blur; }
+.sticky-cta { @apply fixed bottom-0 left-0 right-0 z-40 md:hidden border-t border-white/20 bg-black/40 backdrop-blur; }
