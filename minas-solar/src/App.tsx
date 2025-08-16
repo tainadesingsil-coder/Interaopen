@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowRight, Building2, Check, Leaf, PiggyBank, Shield, MessageCircle } from 'lucide-react'
 import './index.css'
 
@@ -389,18 +389,78 @@ function Parceiros() {
     'https://dummyimage.com/140x40/ffffff/000000.png&text=Construtora+F',
   ]
   const row = [...logos, ...logos]
+
+  const pages = [
+    {
+      key: 'comercio',
+      title: 'Comércios',
+      desc: 'Lojas, restaurantes e escritórios que reduziram custos e ganharam previsibilidade.',
+      bullets: ['Pagamento facilitado', 'Payback acelerado', 'Suporte dedicado'],
+    },
+    {
+      key: 'residencial',
+      title: 'Residenciais',
+      desc: 'Famílias em todo MG com energia limpa e conta mais baixa, sem dor de cabeça.',
+      bullets: ['Projeto sob medida', 'Monitoramento via app', 'Garantia estendida'],
+    },
+    {
+      key: 'agro',
+      title: 'Agro & Rural',
+      desc: 'Tecnologia robusta para fazendas e sítios, com crédito especial.',
+      bullets: ['Estruturas reforçadas', 'Baixa manutenção', 'Financiamento parceiro'],
+    },
+  ]
+  const [active, setActive] = useState(0)
+
   return (
     <section id="parceiros" className="py-16 md:py-24">
       <div className="container-section grid md:grid-cols-2 gap-10 items-center">
         <div>
           <div className="rounded-2xl overflow-hidden border border-white/10 bg-white/5">
-            <div className="aspect-[4/3] w-full bg-[url('https://images.unsplash.com/photo-1520974692973-ac47dfb7fd89?q=80&w=1822&auto=format&fit=crop')] bg-cover bg-center" />
+            <div className="aspect-[4/3] w-full bg-[url('https://i.postimg.cc/W4fSVNV5/Captura-de-tela-2025-08-15-213908.png')] bg-cover bg-center" />
           </div>
         </div>
         <div>
           <h2 className="section-title">Empresas e clientes que confiam na Solar Energy</h2>
           <p className="section-subtitle mt-2">Mais de 500 projetos entregues para residências, comércios e propriedades rurais.</p>
           <p className="mt-4 text-solar-gray-light">Parceiros que acreditam em um futuro mais sustentável e rentável.</p>
+
+          <div className="mt-5 flex flex-wrap gap-2">
+            {pages.map((p, i) => (
+              <button key={p.key} onClick={() => setActive(i)} className={i === active ? 'btn-gradient' : 'btn-secondary'}>
+                {p.title}
+              </button>
+            ))}
+          </div>
+
+          <div className="mt-5 relative overflow-hidden rounded-xl border border-white/10 bg-white/5 p-5 min-h-[180px]">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={pages[active].key}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.35 }}
+                className="grid md:grid-cols-2 gap-4 items-center"
+              >
+                <div>
+                  <h3 className="text-xl font-semibold">{pages[active].title}</h3>
+                  <p className="mt-1 text-solar-gray-light">{pages[active].desc}</p>
+                  <ul className="mt-3 space-y-2 text-sm">
+                    {pages[active].bullets.map(b => (
+                      <li key={b} className="flex items-center gap-2"><Check className="h-4 w-4 text-[var(--brand-primary)]" /> {b}</li>
+                    ))}
+                  </ul>
+                  <button onClick={() => openWhatsApp(`Quero ser parceiro (${pages[active].title}) da Solar Energy.`)} className="btn-gradient mt-4">Quero ser parceiro</button>
+                </div>
+                <div className="hidden md:block">
+                  <div className="rounded-lg overflow-hidden border border-white/10">
+                    <div className="aspect-video w-full bg-[url('https://i.postimg.cc/7hX5v686/Captura-de-tela-2025-08-15-213919.png')] bg-cover bg-center" />
+                  </div>
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
 
           <div className="mt-6 relative overflow-hidden">
             <motion.div
@@ -415,8 +475,6 @@ function Parceiros() {
               ))}
             </motion.div>
           </div>
-
-          <button onClick={() => openWhatsApp('Quero ser parceiro da Solar Energy.')} className="btn-gradient mt-6">Quero ser parceiro</button>
         </div>
       </div>
     </section>
