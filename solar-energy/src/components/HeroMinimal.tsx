@@ -60,13 +60,6 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
             transition={{ duration: 0.8, ease: "easeOut" }}
             className="relative order-2 md:order-2"
           >
-            <div
-              className="pointer-events-none absolute -inset-6 rounded-3xl"
-              style={{
-                background:
-                  "radial-gradient(closest-side, rgba(0,183,255,0.25), transparent 70%)",
-              }}
-            />
             <div className="relative overflow-hidden shadow-2xl">
               <div className="relative w-full aspect-video">
                 <AnimatePresence mode="wait">

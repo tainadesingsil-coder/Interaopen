@@ -35,7 +35,7 @@ function Beneficios() {
     { icon: Leaf, title: 'Simples, claro e garantido', desc: 'Sem burocracia.', detail: 'Cadastro em minutos e contrato digital. Transparência total para você pagar menos.' },
   ]
   return (
-    <section className="py-12 md:py-16">
+    <section className="py-10 md:py-14">
       <div className="container-section grid md:grid-cols-3 gap-6">
         {items.map((it,i)=> {
           const Icon = it.icon
@@ -82,7 +82,7 @@ function Simulador(){
   const {e,p,n,r}=useCalc(conta,area,cidade)
   const brl=(v:number)=>v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
   return (
-    <section className="py-12 md:py-16">
+    <section className="py-10 md:py-14">
       <div className="container-section">
         <h2 className="text-2xl md:text-3xl font-bold">Veja agora quanto volta para você todo mês</h2>
         <p className="section-subtitle mt-1">Você paga menos, economiza na fatura. Simule em segundos.</p>
@@ -118,7 +118,7 @@ function Steps(){
     {n:3,t:'Conta reduzida, simples assim',d:'Economia de 20% garantida.',detail:'Você sente a diferença no bolso e pode cancelar quando quiser, sem dor de cabeça.'},
   ]
   return (
-    <section className="py-12 md:py-16">
+    <section className="py-10 md:py-14">
       <div className="container-section relative">
         <div ref={railRef} className="steps-rail"><div className="mask"/></div>
         <div className="grid md:grid-cols-3 gap-6">
@@ -152,7 +152,7 @@ function Depoimentos(){
     {t:'Economizei 20% sem dor de cabeça. Atendimento rápido em MG.',a:'Carlos, Contagem',img:'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200&auto=format&fit=crop'},
   ]
   return (
-    <section className="py-12 md:py-16">
+    <section className="py-10 md:py-14">
       <div className="container-section grid gap-4">
         {items.map((d,i)=> (
           <div key={i} className="card flex items-center gap-4">
@@ -176,7 +176,7 @@ function FAQ(){
   ]
   const [open,setOpen]=useState<number|null>(0)
   return (
-    <section className="py-12 md:py-16">
+    <section className="py-10 md:py-14">
       <div className="container-section">
         <div className="grid gap-3">
           {qas.map((x,i)=> (
@@ -202,7 +202,7 @@ function FAQ(){
 
 function CTAFinal(){
   return (
-    <section id="cta" className="section-blue py-14 md:py-16">
+    <section id="cta" className="section-blue py-12 md:py-14">
       <div className="container-section grid md:grid-cols-2 gap-6 items-center">
         <div>
           <h2 className="text-2xl md:text-3xl font-bold">Pare de pagar mais. 20% de desconto hoje mesmo.</h2>
@@ -229,7 +229,7 @@ function Plates3D(){
   const logos=['https://dummyimage.com/100x40/ffffff/000000.png&text=Parceiro+A','https://dummyimage.com/120x40/ffffff/000000.png&text=Parceiro+B','https://dummyimage.com/90x40/ffffff/000000.png&text=Parceiro+C','https://dummyimage.com/140x40/ffffff/000000.png&text=Parceiro+D']
   const track=[...logos,...logos]
   return (
-    <section className="py-12 md:py-16">
+    <section className="py-10 md:py-14">
       <div className="container-section">
         <div className="lead-thin max-w-xl">
           <input placeholder="Seu e-mail" />
