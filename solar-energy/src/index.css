@@ -61,7 +61,7 @@ body {
 .card-aggressive:hover .icon-large,
 .card:hover .icon-large { color: var(--yellow); }
 
-/* Header - dark glass, uniform with site */
+/* Header - dark glass */
 .header { @apply fixed top-0 z-40 w-full backdrop-blur border-b; background: rgba(8,20,35,0.7); border-color: rgba(255,255,255,0.15); box-shadow: 0 6px 20px rgba(0,0,0,0.25); }
 
 /* Steps */
@@ -80,3 +80,7 @@ body {
 .logo-track { @apply flex items-center gap-10 min-w-max; }
 
 .footer-neon-line { height: 2px; background: radial-gradient(closest-side, rgba(0,183,255,0.6), transparent 70%); filter: blur(0.3px); }
+
+/* Social icon button */
+.social { @apply inline-flex items-center justify-center rounded-full transition; width: 32px; height: 32px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.06); }
+.social:hover { box-shadow: 0 0 12px rgba(0,183,255,0.25); border-color: rgba(0,183,255,0.4); }
