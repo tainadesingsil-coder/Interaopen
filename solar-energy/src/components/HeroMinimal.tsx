@@ -25,7 +25,7 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
       </div>
 
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center pt-32 md:pt-44 pb-16 md:pb-24">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center pt-24 md:pt-32 pb-14 md:pb-20">
           <motion.div
             initial={{ opacity: 0, y: 14 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -33,7 +33,7 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
             transition={{ duration: 0.6 }}
             className="order-1"
           >
-            <div className="max-w-xl mx-auto text-center mt-20 md:mt-24">
+            <div className="max-w-lg mx-auto text-center mt-8 md:mt-10">
               <h1 className="text-white text-4xl md:text-6xl font-extrabold leading-tight">
                 20% de desconto na sua conta de luz
               </h1>
