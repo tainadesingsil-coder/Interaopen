@@ -10,8 +10,8 @@ export default function HeroMinimal({ imageUrl }: HeroMinimalProps) {
       className="relative overflow-hidden"
       style={{ background: "linear-gradient(180deg, #0E3A6F 0%, #001B36 100%)" }}
     >
-      <div className="absolute top-5 left-5 z-10 text-white/80 text-sm font-semibold tracking-tight">
-        Solar Energy
+      <div className="absolute top-5 left-5 z-10">
+        <img src="/logo.svg" alt="Solar Energy" className="h-6 w-auto opacity-90" />
       </div>
 
       <div className="container mx-auto px-4">
