@@ -20,8 +20,7 @@ function Hero() {
   const [email, setEmail] = useState('')
   return (
     <section className="relative pt-24 md:pt-32 pb-12 md:pb-16">
-      <div className="absolute inset-0 -z-10 bg-[url('https://i.postimg.cc/DyvnZXMj/Chat-GPT-Image-16-de-ago-de-2025-00-22-32.png')] bg-cover bg-center" />
-      <div className="absolute inset-0 -z-10 bg-white/50" />
+      {/* Uniform dark background (no banner image) */}
       <div className="container-section relative">
         <motion.h1 initial={{opacity:0,y:12}} whileInView={{opacity:1,y:0}} viewport={{once:true}} transition={{duration:0.6}} className="section-title text-center md:text-left">
           Reduza sua conta de luz em até 20% com energia solar.
@@ -83,7 +82,7 @@ function Simulador(){
   const {e,p,n,r}=useCalc(conta,area,cidade)
   const brl=(v:number)=>v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
   return (
-    <section className="py-12 md:py-16 gradient-blue-white">
+    <section className="py-12 md:py-16">
       <div className="container-section">
         <h2 className="text-2xl md:text-3xl font-bold">Simule sua economia</h2>
         <p className="section-subtitle mt-1">Vê na hora quanto pode economizar.</p>
@@ -94,7 +93,7 @@ function Simulador(){
             <input className="input" value={cidade} onChange={e=>setCidade(e.target.value)} placeholder="Cidade" />
           </div>
           <div className="md:col-span-2 grid gap-3">
-            <div className="card"><p className="text-[var(--muted)] text-sm">Economia estimada</p><p className="mt-1 text-xl font-bold text-[var(--blue)]">{brl(e)} ({p.toFixed(0)}%)</p></div>
+            <div className="card"><p className="text-[var(--muted)] text-sm">Economia estimada</p><p className="mt-1 text-xl font-bold text-[var(--yellow)]">{brl(e)} ({p.toFixed(0)}%)</p></div>
             <div className="card"><p className="text-[var(--muted)] text-sm">Nova conta</p><p className="mt-1 text-xl font-semibold">{brl(n)}</p></div>
             <div className="card"><p className="text-[var(--muted)] text-sm">ROI estimado</p><p className="mt-1 text-xl font-semibold">{r>0? `${r.toFixed(1)} anos`:'-'}</p></div>
           </div>
@@ -142,12 +141,12 @@ function Depoimentos(){
     {t:'A economia veio logo no primeiro mês.',a:'Rogério, Contagem',img:'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200&auto=format&fit=crop'},
   ]
   return (
-    <section className="py-12 md:py-16 gradient-blue-white">
+    <section className="py-12 md:py-16">
       <div className="container-section grid gap-4">
         {items.map((d,i)=> (
           <div key={i} className="card flex items-center gap-4">
             <img src={d.img} alt={d.a} className="h-12 w-12 rounded-full object-cover" />
-            <Quote className="h-5 w-5 text-[var(--blue)]" />
+            <Quote className="h-5 w-5 text-[var(--yellow)]" />
             <p className="italic">“{d.t}”</p>
             <span className="ml-auto text-sm text-[var(--muted)]">— {d.a}</span>
           </div>
