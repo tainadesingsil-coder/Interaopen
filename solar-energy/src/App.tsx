@@ -207,10 +207,49 @@ function CTAFinal(){
   )
 }
 
+function Plates3D(){
+  const logos=['https://dummyimage.com/100x40/ffffff/000000.png&text=Parceiro+A','https://dummyimage.com/120x40/ffffff/000000.png&text=Parceiro+B','https://dummyimage.com/90x40/ffffff/000000.png&text=Parceiro+C','https://dummyimage.com/140x40/ffffff/000000.png&text=Parceiro+D']
+  const track=[...logos,...logos]
+  return (
+    <section className="py-12 md:py-16">
+      <div className="container-section">
+        <div className="lead-thin max-w-xl">
+          <input placeholder="Seu e-mail" />
+          <button className="btn-yellow">Quero economizar</button>
+        </div>
+        <div className="mt-8 grid md:grid-cols-3 gap-6">
+          <div className="plate-3d rounded-2xl p-6">
+            <h3 className="text-lg font-bold">Economia garantida</h3>
+            <p className="mt-1 text-[var(--muted)] text-sm">Visual limpo, destaque em conteúdo, foco no resultado.</p>
+          </div>
+          <div className="plate-3d rounded-2xl p-6">
+            <h3 className="text-lg font-bold">Tecnologia e confiança</h3>
+            <p className="mt-1 text-[var(--muted)] text-sm">Design que inspira ação, com sutis efeitos 3D.</p>
+          </div>
+          <div className="plate-3d rounded-2xl p-6">
+            <h3 className="text-lg font-bold">Atendimento em MG</h3>
+            <p className="mt-1 text-[var(--muted)] text-sm">Suporte local, proposta em até 24h.</p>
+          </div>
+        </div>
+        <div className="logo-marquee mt-10">
+          <motion.div className="logo-track" animate={{ x: ['0%','-50%'] }} transition={{ duration: 25, repeat: Infinity, ease: 'linear' }}>
+            {track.map((src,i)=> (
+              <div key={src+i} className="neon-soft rounded-md border border-white/10 bg-white/5 p-3">
+                <img src={src} className="h-8 w-auto opacity-90" />
+              </div>
+            ))}
+          </motion.div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
 function Footer(){
   return (
     <footer className="footer py-8">
-      <div className="container-section flex flex-col items-center gap-2">
+      <div className="footer-neon-line" />
+      <div className="container-section flex flex-col items-center gap-2 mt-4">
         <div className="font-semibold">Solar Energy</div>
         <div className="text-sm text-[var(--muted)]">+55 31 99999-9999 • contato@solarenergy.com.br</div>
         <div className="text-xs text-[var(--muted)]">© {new Date().getFullYear()} Solar Energy. Todos os direitos reservados.</div>
@@ -229,6 +268,7 @@ export default function App(){
       <Steps/>
       <Depoimentos/>
       <FAQ/>
+      <Plates3D/>
       <CTAFinal/>
       <Footer/>
       <div className="sticky-cta md:hidden">
