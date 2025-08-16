@@ -8,18 +8,18 @@ function Header() {
   return (
     <header className="header">
       <div className="container-section flex items-center justify-between py-3">
-        <a href="#" className="flex items-center">
+        <a href="#" className="logo-wrap">
           <img src="/logo.png" alt="Solar Energy" className="h-[77px] w-auto" />
         </a>
         <div className="flex items-center gap-2">
           <a href="#" aria-label="Instagram" className="social">
-            <Instagram size={14} strokeWidth={1.2} className="text-white" />
+            <Instagram size={12} strokeWidth={1.2} className="text-white" />
           </a>
           <a href="#" aria-label="Facebook" className="social">
-            <Facebook size={14} strokeWidth={1.2} className="text-white" />
+            <Facebook size={12} strokeWidth={1.2} className="text-white" />
           </a>
           <a href="#" aria-label="YouTube" className="social">
-            <Youtube size={14} strokeWidth={1.2} className="text-white" />
+            <Youtube size={12} strokeWidth={1.2} className="text-white" />
           </a>
         </div>
       </div>
