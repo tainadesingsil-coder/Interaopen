@@ -20,7 +20,7 @@ function Hero() {
   const [email, setEmail] = useState('')
   return (
     <section className="relative pt-24 md:pt-32 pb-12 md:pb-16">
-      <div className="absolute inset-0 -z-10 bg-[url('https://i.postimg.cc/vmFXZQSh/Chat-GPT-Image-15-de-ago-de-2025-23-40-27.png')] bg-cover bg-center" />
+      <div className="absolute inset-0 -z-10 bg-[url('https://i.postimg.cc/DyvnZXMj/Chat-GPT-Image-16-de-ago-de-2025-00-22-32.png')] bg-cover bg-center" />
       <div className="absolute inset-0 -z-10 bg-white/50" />
       <div className="container-section relative">
         <motion.h1 initial={{opacity:0,y:12}} whileInView={{opacity:1,y:0}} viewport={{once:true}} transition={{duration:0.6}} className="section-title text-center md:text-left">
