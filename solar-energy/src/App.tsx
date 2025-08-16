@@ -12,14 +12,14 @@ function Header() {
           <img src="/logo.png" alt="Solar Energy" className="h-[77px] w-auto" />
         </a>
         <div className="flex items-center gap-3">
-          <a href="#" aria-label="Instagram" className="text-[#FFC107] hover:text-[#FFD54D] transition">
-            <Instagram size={20} strokeWidth={1.6} />
+          <a href="#" aria-label="Instagram" className="text-white/85 hover:text-white transition">
+            <Instagram size={16} strokeWidth={1.2} />
           </a>
-          <a href="#" aria-label="Facebook" className="text-[#FFC107] hover:text-[#FFD54D] transition">
-            <Facebook size={20} strokeWidth={1.6} />
+          <a href="#" aria-label="Facebook" className="text-white/85 hover:text-white transition">
+            <Facebook size={16} strokeWidth={1.2} />
           </a>
-          <a href="#" aria-label="YouTube" className="text-[#FFC107] hover:text-[#FFD54D] transition">
-            <Youtube size={20} strokeWidth={1.6} />
+          <a href="#" aria-label="YouTube" className="text-white/85 hover:text-white transition">
+            <Youtube size={16} strokeWidth={1.2} />
           </a>
         </div>
       </div>
