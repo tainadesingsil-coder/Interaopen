@@ -244,14 +244,21 @@ function Beneficios() {
         <h2 className="section-title">Por que escolher a Solar Energy</h2>
         <p className="section-subtitle mt-2">Soluções completas para reduzir custos e aumentar sua segurança energética.</p>
         <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {items.map(({ icon: Icon, title, desc }) => (
-            <div key={title} className="card-gradient rounded-xl hover-lift">
+          {items.map(({ icon: Icon, title, desc }, idx) => (
+            <motion.div
+              key={title}
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.4 }}
+              transition={{ duration: 0.5, delay: idx * 0.05 }}
+              className="card-gradient rounded-xl hover-lift"
+            >
               <div className="rounded-[0.70rem] border border-white/10 bg-white/5 p-6">
                 <Icon className="h-7 w-7 text-[var(--brand-primary)]" />
                 <h3 className="mt-4 text-xl font-semibold">{title}</h3>
                 <p className="mt-1 text-solar-gray-light">{desc}</p>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>
@@ -272,13 +279,20 @@ function ComoFunciona() {
         <p className="section-subtitle mt-2">Do diagnóstico à energia gerando, acompanhamos cada etapa.</p>
         <div className="mt-10 grid md:grid-cols-3 gap-6">
           {steps.map((s, i) => (
-            <div key={s.title} className="rounded-xl border border-white/10 bg-white/5 p-6">
+            <motion.div
+              key={s.title}
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.4 }}
+              transition={{ duration: 0.5, delay: i * 0.05 }}
+              className="rounded-xl border border-white/10 bg-white/5 p-6"
+            >
               <div className="flex items-center gap-3 text-[var(--brand-primary)]">
                 <div className="h-8 w-8 rounded-full border border-[var(--brand-primary)] flex items-center justify-center font-bold">{i + 1}</div>
                 <span className="font-semibold">{s.title}</span>
               </div>
               <p className="mt-3 text-solar-gray-light">{s.desc}</p>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>
@@ -310,8 +324,15 @@ function Planos() {
         <h2 className="section-title">Planos e financiamento</h2>
         <p className="section-subtitle mt-2">Escolha a solução ideal para sua casa, comércio ou propriedade rural.</p>
         <div className="mt-10 grid md:grid-cols-3 gap-6">
-          {plans.map((p) => (
-            <div key={p.name} className="rounded-xl border border-white/10 bg-white/5 p-6 flex flex-col">
+          {plans.map((p, idx) => (
+            <motion.div
+              key={p.name}
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.4 }}
+              transition={{ duration: 0.5, delay: idx * 0.05 }}
+              className="rounded-xl border border-white/10 bg-white/5 p-6 flex flex-col"
+            >
               <h3 className="text-xl font-semibold">{p.name}</h3>
               <p className="mt-1 text-solar-gray-light">{p.price}</p>
               <ul className="mt-4 space-y-2 text-sm flex-1">
@@ -320,7 +341,7 @@ function Planos() {
                 ))}
               </ul>
               <button onClick={() => openWhatsApp(`Quero proposta para o plano ${p.name} da Solar Energy.`)} className="btn-gradient mt-4">Pedir proposta</button>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>
@@ -364,7 +385,10 @@ function Parceiros() {
     'https://dummyimage.com/120x40/ffffff/000000.png&text=Cooperativa+B',
     'https://dummyimage.com/100x40/ffffff/000000.png&text=Comércio+C',
     'https://dummyimage.com/160x40/ffffff/000000.png&text=Agro+D',
+    'https://dummyimage.com/120x40/ffffff/000000.png&text=Parceiro+E',
+    'https://dummyimage.com/140x40/ffffff/000000.png&text=Construtora+F',
   ]
+  const row = [...logos, ...logos]
   return (
     <section id="parceiros" className="py-16 md:py-24">
       <div className="container-section grid md:grid-cols-2 gap-10 items-center">
@@ -377,13 +401,21 @@ function Parceiros() {
           <h2 className="section-title">Empresas e clientes que confiam na Solar Energy</h2>
           <p className="section-subtitle mt-2">Mais de 500 projetos entregues para residências, comércios e propriedades rurais.</p>
           <p className="mt-4 text-solar-gray-light">Parceiros que acreditam em um futuro mais sustentável e rentável.</p>
-          <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4 items-center">
-            {logos.map((src) => (
-              <div key={src} className="rounded-md border border-white/10 bg-white/5 p-3 flex items-center justify-center">
-                <img src={src} alt="logo parceiro" className="h-8 w-auto opacity-80" />
-              </div>
-            ))}
+
+          <div className="mt-6 relative overflow-hidden">
+            <motion.div
+              className="flex items-center gap-10 min-w-max"
+              animate={{ x: ['0%', '-50%'] }}
+              transition={{ duration: 25, repeat: Infinity, ease: 'linear' }}
+            >
+              {row.map((src, i) => (
+                <div key={src + i} className="rounded-md border border-white/10 bg-white/5 p-3 flex items-center justify-center">
+                  <img src={src} alt="logo parceiro" className="h-8 w-auto opacity-80" />
+                </div>
+              ))}
+            </motion.div>
           </div>
+
           <button onClick={() => openWhatsApp('Quero ser parceiro da Solar Energy.')} className="btn-gradient mt-6">Quero ser parceiro</button>
         </div>
       </div>
