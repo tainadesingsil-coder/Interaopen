@@ -1,3 +1,39 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+	color-scheme: dark;
+	--brand-primary: #FFB300;
+	--brand-secondary: #FFA500;
+	--brand-contrast: #000000;
+	--brand-bg-from: #0A0A0A;
+	--brand-bg-to: #1E1E1E;
+	--brand-ring: rgba(255,179,0,0.4);
+}
+
+body {
+	@apply font-sans bg-gradient-to-b from-[var(--brand-bg-from)] to-[var(--brand-bg-to)];
+	color: #F2F2F2;
+}
+
+.container-section { @apply container mx-auto px-4; }
+.section-title { @apply text-3xl md:text-5xl font-extrabold tracking-tight; }
+.section-subtitle { @apply text-base md:text-lg text-gray-300; }
+
+.btn-gradient {
+	@apply inline-flex items-center justify-center rounded-md font-semibold px-5 py-3 text-white transition focus:outline-none focus:ring-2;
+	background: linear-gradient(90deg, var(--brand-secondary) 0%, var(--brand-primary) 100%);
+	--tw-ring-color: var(--brand-ring);
+}
+.btn-secondary {
+	@apply inline-flex items-center justify-center rounded-md px-5 py-3 transition focus:outline-none focus:ring-2;
+	border: 1px solid var(--brand-primary);
+	color: #FFFFFF;
+	--tw-ring-color: var(--brand-ring);
+}
+.glass { @apply border border-white/10 bg-white/5 backdrop-blur rounded-xl; }
+.stat-pill { @apply inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium border; border-color: rgba(255,255,255,0.12); background: rgba(255,255,255,0.05); }
+.chip { @apply inline-flex items-center gap-2 rounded-md px-2.5 py-1 text-xs font-medium border; border-color: rgba(255,255,255,0.15); background: rgba(255,255,255,0.05); }
+.hover-lift { transition: transform 220ms ease, box-shadow 220ms ease; }
+.hover-lift:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0,0,0,0.25); }
