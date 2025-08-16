@@ -25,7 +25,7 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
       </div>
 
       {/* Top subtle box near the logo */}
-      <div className="absolute left-1/2 -translate-x-1/2 top-[72px] md:top-[88px] w-[min(1120px,92vw)] h-10 rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm" />
+      <div className="absolute left-1/2 -translate-x-1/2 top-[56px] md:top-[72px] w-[min(1120px,92vw)] h-10 rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm" />
 
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center pt-40 md:pt-56 pb-16 md:pb-24">
