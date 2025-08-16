@@ -29,9 +29,9 @@ function Header() {
 
 function Beneficios() {
   const items = [
-    { icon: Sun, title: 'Economia real de até 20%', desc: 'Menos na sua conta, mais no seu bolso.' },
-    { icon: Home, title: 'Residência e empresa', desc: 'Planos sob medida para cada perfil.' },
-    { icon: Leaf, title: 'Energia limpa', desc: 'Sustentável, moderna e confiável.' },
+    { icon: Sun, title: 'Economia REAL desde o primeiro mês', desc: 'Pare de sangrar no boleto: sua conta pode despencar.' },
+    { icon: Home, title: 'Garantia de até 25 anos', desc: 'Energia confiável, sem dor de cabeça — segurança por décadas.' },
+    { icon: Leaf, title: 'Energia limpa que valoriza', desc: 'Sua casa vale mais e você gasta menos. Simples assim.' },
   ]
   return (
     <section className="py-12 md:py-16">
@@ -72,18 +72,18 @@ function Simulador(){
   return (
     <section className="py-12 md:py-16">
       <div className="container-section">
-        <h2 className="text-2xl md:text-3xl font-bold">Simule sua economia</h2>
-        <p className="section-subtitle mt-1">Vê na hora quanto pode economizar.</p>
+        <h2 className="text-2xl md:text-3xl font-bold">Veja agora quanto seu bolso pode recuperar</h2>
+        <p className="section-subtitle mt-1">Sua conta não pode esperar. Simule e descubra seu alívio imediato.</p>
         <div className="mt-6 grid md:grid-cols-5 gap-6">
           <div className="md:col-span-3 grid gap-3">
-            <input className="input" type="number" min={50} step={10} value={conta} onChange={e=>setConta(Number(e.target.value))} placeholder="Conta média (R$/mês)" />
-            <input className="input" type="number" min={5} step={1} value={area} onChange={e=>setArea(Number(e.target.value))} placeholder="Área útil (m²)" />
+            <input className="input" type="number" min={50} step={10} value={conta} onChange={e=>setConta(Number(e.target.value))} placeholder="O que você paga hoje (R$/mês)" />
+            <input className="input" type="number" min={5} step={1} value={area} onChange={e=>setArea(Number(e.target.value))} placeholder="Área útil no telhado (m²)" />
             <input className="input" value={cidade} onChange={e=>setCidade(e.target.value)} placeholder="Cidade" />
           </div>
           <div className="md:col-span-2 grid gap-3">
-            <div className="card"><p className="text-[var(--muted)] text-sm">Economia estimada</p><p className="mt-1 text-xl font-bold text-[var(--yellow)]">{brl(e)} ({p.toFixed(0)}%)</p></div>
-            <div className="card"><p className="text-[var(--muted)] text-sm">Nova conta</p><p className="mt-1 text-xl font-semibold">{brl(n)}</p></div>
-            <div className="card"><p className="text-[var(--muted)] text-sm">ROI estimado</p><p className="mt-1 text-xl font-semibold">{r>0? `${r.toFixed(1)} anos`:'-'}</p></div>
+            <div className="card"><p className="text-[var(--muted)] text-sm">O que você devolve ao seu bolso</p><p className="mt-1 text-xl font-bold text-[var(--yellow)]">{brl(e)} ({p.toFixed(0)}%)</p></div>
+            <div className="card"><p className="text-[var(--muted)] text-sm">Sua nova conta estimada</p><p className="mt-1 text-xl font-semibold">{brl(n)}</p></div>
+            <div className="card"><p className="text-[var(--muted)] text-sm">Em quantos anos se paga</p><p className="mt-1 text-xl font-semibold">{r>0? `${r.toFixed(1)} anos`:'-'}</p></div>
           </div>
         </div>
       </div>
@@ -100,9 +100,9 @@ function Steps(){
     if(inView && mask){ mask.animate([{width:'0%'},{width:'100%'}], {duration:1200, fill:'forwards', easing:'ease-out'}) }
   },[inView])
   const steps=[
-    {n:1,t:'Analisamos seu consumo',d:'Você entende seu perfil e oportunidades.'},
-    {n:2,t:'Mostramos o plano ideal',d:'Sem complicação e com clareza.'},
-    {n:3,t:'Você paga menos luz',d:'Aproveite a economia de até 20%.'},
+    {n:1,t:'Agende sua simulação gratuita',d:'Simples, rápido e sem compromisso.'},
+    {n:2,t:'Receba seu projeto sob medida',d:'Clareza total de economia e prazos.'},
+    {n:3,t:'Instalação expressa e ativação',d:'Veja sua conta despencar já nos próximos meses.'},
   ]
   return (
     <section className="py-12 md:py-16">
@@ -124,9 +124,9 @@ function Steps(){
 
 function Depoimentos(){
   const items=[
-    {t:'Minha conta caiu 20% sem complicação.',a:'Carlos, MG',img:'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=200&auto=format&fit=crop'},
-    {t:'Foi simples, rápido e eficiente.',a:'Aline, BH',img:'https://images.unsplash.com/photo-1520974692973-ac47dfb7fd89?q=80&w=200&auto=format&fit=crop'},
-    {t:'A economia veio logo no primeiro mês.',a:'Rogério, Contagem',img:'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200&auto=format&fit=crop'},
+    {t:'Minha conta foi de R$ 740 para R$ 80 em 3 meses com a Solar Energy.',a:'Ana, BH',img:'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=200&auto=format&fit=crop'},
+    {t:'Reduzi 87% em 90 dias. Processo claro e sem dor de cabeça.',a:'Marcos, Contagem',img:'https://images.unsplash.com/photo-1520974692973-ac47dfb7fd89?q=80&w=200&auto=format&fit=crop'},
+    {t:'Instalação rápida, atendimento local e economia visível.',a:'Paula, Nova Lima',img:'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200&auto=format&fit=crop'},
   ]
   return (
     <section className="py-12 md:py-16">
@@ -146,9 +146,10 @@ function Depoimentos(){
 
 function FAQ(){
   const qas=[
-    {q:'Preciso comprar algum equipamento?',a:'Não. Nosso foco é mostrar como economizar de forma simples.'},
-    {q:'Funciona para residência e empresa?',a:'Sim. Adaptamos para cada perfil e necessidade.'},
-    {q:'Preciso instalar agora?',a:'Você decide o momento ideal. Estamos prontos para orientar.'},
+    {q:'Preciso trocar meu telhado?',a:'Na maioria dos casos, não. Adaptamos ao seu padrão com eficiência — sem obras desnecessárias.'},
+    {q:'E se faltar sol?',a:'Seus créditos compensam. Sua conta nunca fica no escuro.'},
+    {q:'Quanto tempo para instalar?',a:'Em poucos dias úteis você já está economizando.'},
+    {q:'Qual a garantia?',a:'Painéis e sistema com cobertura de até 25 anos. Segurança e tranquilidade.'},
   ]
   const [open,setOpen]=useState<number|null>(0)
   return (
@@ -181,14 +182,14 @@ function CTAFinal(){
     <section className="section-blue py-14 md:py-16">
       <div className="container-section grid md:grid-cols-2 gap-6 items-center">
         <div>
-          <h2 className="text-2xl md:text-3xl font-bold">Pronto para economizar até 20%?</h2>
-          <p className="mt-2 opacity-90">Fale com um especialista e receba seu plano ideal.</p>
+          <h2 className="text-2xl md:text-3xl font-bold">Sua economia começou quando você clicou. Vamos fazer acontecer.</h2>
+          <p className="mt-2 opacity-90">Pare de pagar caro. Fale com um especialista agora e receba seu plano ideal.</p>
         </div>
         <div className="grid sm:grid-cols-2 gap-3">
           <input className="input" placeholder="Nome" />
           <input className="input" placeholder="Telefone" />
           <input className="input sm:col-span-2" placeholder="E-mail" />
-          <button className="btn-yellow sm:col-span-2">Quero economizar agora</button>
+          <button className="btn-yellow sm:col-span-2">Simular minha economia AGORA</button>
         </div>
       </div>
     </section>
@@ -203,20 +204,20 @@ function Plates3D(){
       <div className="container-section">
         <div className="lead-thin max-w-xl">
           <input placeholder="Seu e-mail" />
-          <button className="btn-yellow">Quero economizar</button>
+          <button className="btn-yellow">Começar a economizar hoje</button>
         </div>
         <div className="mt-8 grid md:grid-cols-3 gap-6">
           <div className="plate-3d rounded-2xl p-6">
-            <h3 className="text-lg font-bold">Economia garantida</h3>
-            <p className="mt-1 text-[var(--muted)] text-sm">Visual limpo, destaque em conteúdo, foco no resultado.</p>
+            <h3 className="text-lg font-bold">Confiança que se paga</h3>
+            <p className="mt-1 text-[var(--muted)] text-sm">Facilidade total no pagamento. Parcelamento leve como sua conta.</p>
           </div>
           <div className="plate-3d rounded-2xl p-6">
-            <h3 className="text-lg font-bold">Tecnologia e confiança</h3>
-            <p className="mt-1 text-[var(--muted)] text-sm">Design que inspira ação, com sutis efeitos 3D.</p>
+            <h3 className="text-lg font-bold">Prova de benefício</h3>
+            <p className="mt-1 text-[var(--muted)] text-sm">Mais de 500 projetos entregues em MG — residências, comércios e áreas rurais.</p>
           </div>
           <div className="plate-3d rounded-2xl p-6">
-            <h3 className="text-lg font-bold">Atendimento em MG</h3>
-            <p className="mt-1 text-[var(--muted)] text-sm">Suporte local, proposta em até 24h.</p>
+            <h3 className="text-lg font-bold">É agora ou nunca</h3>
+            <p className="mt-1 text-[var(--muted)] text-sm">Proposta gratuita em 24h e instalação expressa. Sua conta não pode esperar.</p>
           </div>
         </div>
         <div className="logo-marquee mt-10">
@@ -239,7 +240,7 @@ function Footer(){
       <div className="footer-neon-line" />
       <div className="container-section flex flex-col items-center gap-2 mt-4">
         <div className="font-semibold">Solar Energy</div>
-        <div className="text-sm text-[var(--muted)]">+55 31 99999-9999 • contato@solarenergy.com.br</div>
+        <div className="text-sm text-[var(--muted)]">contato@solarenergy.com.br</div>
         <div className="text-xs text-[var(--muted)]">© {new Date().getFullYear()} Solar Energy. Todos os direitos reservados.</div>
       </div>
     </footer>
@@ -261,7 +262,7 @@ export default function App(){
       <Footer/>
       <div className="sticky-cta md:hidden">
         <div className="container-section py-3 text-center">
-          <button className="btn-blue w-full">Quero economizar agora</button>
+          <button className="btn-blue w-full">Simule e comece a economizar hoje</button>
         </div>
       </div>
     </div>
