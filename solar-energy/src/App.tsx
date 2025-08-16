@@ -37,7 +37,7 @@ function Hero() {
         </div>
         <motion.div initial={{opacity:0,x:20}} whileInView={{opacity:1,x:0}} viewport={{once:true}} transition={{duration:0.6}} className="relative">
           <div className="rounded-2xl overflow-hidden border-2 border-white shadow-2xl">
-            <div className="aspect-[4/3] bg-[url('https://images.unsplash.com/photo-1588702547919-26089e690ecc?q=80&w=1600&auto=format&fit=crop')] bg-cover bg-center" />
+            <div className="aspect-[4/3] bg-[url('https://i.postimg.cc/vmFXZQSh/Chat-GPT-Image-15-de-ago-de-2025-23-40-27.png')] bg-cover bg-center" />
           </div>
           <div className="absolute -bottom-6 -left-6 w-40 rounded-xl overflow-hidden border-2 border-white shadow-xl">
             <div className="aspect-[4/3] bg-[url('https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=800&auto=format&fit=crop')] bg-cover bg-center" />
