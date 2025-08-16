@@ -24,8 +24,11 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
         <img src="/logo.svg" alt="Solar Energy" className="h-6 w-auto opacity-90" />
       </div>
 
+      {/* Top subtle box near the logo */}
+      <div className="absolute left-1/2 -translate-x-1/2 top-[72px] md:top-[88px] w-[min(1120px,92vw)] h-10 rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm" />
+
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center pt-14 md:pt-18 pb-14 md:pb-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center pt-32 md:pt-44 pb-16 md:pb-24">
           <motion.div
             initial={{ opacity: 0, y: 14 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -33,7 +36,7 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
             transition={{ duration: 0.6 }}
             className="order-1"
           >
-            <div className="max-w-lg mx-auto text-center mt-0 md:mt-0">
+            <div className="max-w-lg mx-auto text-center">
               <h1 className="text-white text-4xl md:text-6xl font-extrabold leading-tight">
                 20% de desconto na sua conta de luz
               </h1>
