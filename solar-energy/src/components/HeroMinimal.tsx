@@ -31,24 +31,22 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="order-1 flex justify-center md:justify-start"
+            className="order-1"
           >
-            <div className="inline-block w-[90%] max-w-[600px] p-10 bg-white/90 rounded-xl animate-fadeInUp text-[#0E3A6F] text-center">
-              <h1 className="text-4xl md:text-6xl font-extrabold leading-tight">
-                20% de desconto na sua conta de luz
-              </h1>
-              <p className="mt-6 md:mt-7 text-base md:text-lg opacity-80 max-w-xl mx-auto">
-                Pague o mínimo da Cemig e economize na fatura.
-              </p>
+            <h1 className="text-white text-4xl md:text-6xl font-extrabold leading-tight">
+              20% de desconto na sua conta de luz
+            </h1>
+            <p className="mt-6 md:mt-7 text-white/70 text-base md:text-lg max-w-xl">
+              Pague o mínimo da Cemig e economize na fatura.
+            </p>
 
-              <div className="mt-8">
-                <a
-                  href="#cta"
-                  className="inline-flex items-center rounded-full px-6 py-3 text-sm font-semibold transition transform bg-[#FFC107] text-[#0E3A6F] shadow-lg hover:scale-105 hover:shadow-2xl"
-                >
-                  Garanta seu desconto agora!
-                </a>
-              </div>
+            <div className="mt-8">
+              <a
+                href="#cta"
+                className="btn-yellow"
+              >
+                Garanta seu desconto agora
+              </a>
             </div>
           </motion.div>
 
