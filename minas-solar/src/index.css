@@ -27,11 +27,55 @@ body {
   @apply text-base md:text-lg text-solar-gray-light;
 }
 
+.gradient-text {
+  background: linear-gradient(90deg, var(--brand-primary), #ffffff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.card-gradient {
+  position: relative;
+  padding: 1px;
+  border-radius: 0.75rem; /* rounded-xl */
+  background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.02)),
+              radial-gradient(1200px circle at 0% 0%, var(--brand-primary), rgba(255,255,255,0));
+}
+
+.hover-lift {
+  transition: transform 220ms ease, box-shadow 220ms ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+}
+
 .btn-primary {
   @apply inline-flex items-center justify-center rounded-md font-semibold px-5 py-3 hover:brightness-110 transition focus:outline-none focus:ring-2;
   background: var(--brand-primary);
   color: var(--brand-contrast);
   --tw-ring-color: var(--brand-ring);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 120%;
+  height: 100%;
+  background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,0.35) 50%, transparent 100%);
+  transform: skewX(-20deg);
+  animation: shine 3.5s ease-in-out infinite;
+}
+
+@keyframes shine {
+  0% { left: -150%; }
+  60% { left: 150%; }
+  100% { left: 150%; }
 }
 
 .btn-secondary {
@@ -39,4 +83,22 @@ body {
   border: 1px solid var(--brand-primary);
   color: #FFFFFF;
   --tw-ring-color: var(--brand-ring);
+}
+
+.floating-whatsapp {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 50;
+}
+
+.sticky-cta {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  backdrop-filter: blur(8px);
+  background: rgba(0,0,0,0.55);
+  border-top: 1px solid rgba(255,255,255,0.08);
 }

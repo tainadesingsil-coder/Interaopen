@@ -83,7 +83,7 @@ function Hero() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="section-title"
+            className="section-title gradient-text"
           >
             Descontos de até 20% na sua conta de luz em Minas Gerais
           </motion.h1>
@@ -94,19 +94,19 @@ function Hero() {
             transition={{ delay: 0.1, duration: 0.6 }}
             className="section-subtitle mt-4"
           >
-            Projetamos, instalamos e monitoramos sistemas solares com condições especiais para o clima mineiro.
+            Projetos, instalação e monitoramento com condições especiais para o clima mineiro.
           </motion.p>
           <div className="mt-8 flex flex-col sm:flex-row gap-3">
             <button
               onClick={() => document.getElementById('simulador')?.scrollIntoView({ behavior: 'smooth' })}
-              className="btn-primary"
+              className="btn-primary hover-lift"
             >
               Peça seu estudo gratuito
               <ArrowRight className="ml-2 h-4 w-4" />
             </button>
             <button
               onClick={() => openWhatsApp('Olá! Quero meu estudo gratuito de energia solar com a Minas Solar.')} 
-              className="btn-secondary"
+              className="btn-secondary hover-lift"
             >
               Falar no WhatsApp
               <MessageCircle className="ml-2 h-4 w-4" />
@@ -125,8 +125,10 @@ function Hero() {
           transition={{ duration: 0.8 }}
           className="relative"
         >
-          <div className="aspect-[4/3] rounded-2xl border border-white/5 bg-gradient-to-br from-white/10 to-transparent p-2">
-            <div className="h-full w-full rounded-xl bg-[url('https://images.unsplash.com/photo-1509395176047-4a66953fd231?q=80&w=1974&auto=format&fit=crop')] bg-cover bg-center" />
+          <div className="card-gradient rounded-2xl">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-2">
+              <div className="aspect-[4/3] w-full rounded-xl bg-[url('https://images.unsplash.com/photo-1509395176047-4a66953fd231?q=80&w=1974&auto=format&fit=crop')] bg-cover bg-center" />
+            </div>
           </div>
           <div className="absolute -bottom-4 -left-4 hidden md:block h-24 w-24 rounded-xl bg-[var(--brand-primary)] blur-3xl opacity-20" />
         </motion.div>
@@ -242,10 +244,12 @@ function Beneficios() {
         <p className="section-subtitle mt-2">Soluções pensadas para o jeito mineiro: econômico, seguro e duradouro.</p>
         <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {items.map(({ icon: Icon, title, desc }) => (
-            <div key={title} className="rounded-xl border border-white/10 bg-white/5 p-6">
-              <Icon className="h-7 w-7 text-[var(--brand-primary)]" />
-              <h3 className="mt-4 text-xl font-semibold">{title}</h3>
-              <p className="mt-1 text-solar-gray-light">{desc}</p>
+            <div key={title} className="card-gradient rounded-xl hover-lift">
+              <div className="rounded-[0.70rem] border border-white/10 bg-white/5 p-6">
+                <Icon className="h-7 w-7 text-[var(--brand-primary)]" />
+                <h3 className="mt-4 text-xl font-semibold">{title}</h3>
+                <p className="mt-1 text-solar-gray-light">{desc}</p>
+              </div>
             </div>
           ))}
         </div>
@@ -469,6 +473,26 @@ export default function App() {
       <FAQ />
       <CTAFinal />
       <Footer />
+
+      {/* Floating WhatsApp */}
+      <button
+        onClick={() => openWhatsApp('Olá! Quero um atendimento agora.')} 
+        className="floating-whatsapp btn-primary shadow-lg"
+        aria-label="WhatsApp"
+        title="Fale no WhatsApp"
+      >
+        <MessageCircle className="h-5 w-5" />
+      </button>
+
+      {/* Sticky CTA (mobile) */}
+      <div className="sticky-cta md:hidden">
+        <div className="container-section py-3 flex items-center gap-3">
+          <button className="btn-primary flex-1" onClick={() => document.getElementById('simulador')?.scrollIntoView({ behavior: 'smooth' })}>
+            Simular agora
+          </button>
+          <button className="btn-secondary" onClick={() => openWhatsApp('Olá! Quero meu estudo gratuito de energia solar com a Minas Solar.')}>WhatsApp</button>
+        </div>
+      </div>
     </div>
   )
 }
