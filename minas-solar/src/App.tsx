@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { ArrowRight, Check, Leaf, Lock, PiggyBank, Shield, MessageCircle } from 'lucide-react'
+import { ArrowRight, Building2, Check, Leaf, PiggyBank, Shield, MessageCircle } from 'lucide-react'
 import './index.css'
 
 type CityOption = {
@@ -24,7 +24,7 @@ function currencyBRL(value: number): string {
 }
 
 function openWhatsApp(message: string) {
-  const phone = '5531999999999' // TODO: ajustar número oficial
+  const phone = '5531999999999'
   const encoded = encodeURIComponent(message)
   const url = `https://api.whatsapp.com/send?phone=${phone}&text=${encoded}`
   window.open(url, '_blank')
@@ -33,23 +33,24 @@ function openWhatsApp(message: string) {
 function useCalculator(contaMedia: number, area: number, cidade: CityOption | null) {
   return useMemo(() => {
     if (!contaMedia || !area || !cidade) {
-      return { economia: 0, novaConta: 0, roiAnos: 0, potenciaKw: 0 }
+      return { economia: 0, novaConta: 0, roiAnos: 0, potenciaKw: 0, geracaoKwh: 0, economiaPct: 0 }
     }
 
-    const tarifa = 0.95 // R$/kWh médio em MG (estimativa)
-    const irradianciaBase = 150 // kWh/m²/mês aproximado
-    const producao = area * irradianciaBase * cidade.irradianceFactor * 0.18 // 18% eficiência total
+    const tarifa = 0.95
+    const irradianciaBase = 150
+    const producao = area * irradianciaBase * cidade.irradianceFactor * 0.18
     const gastoKwh = contaMedia / tarifa
     const economiaKwh = Math.min(producao, gastoKwh)
     const economia = economiaKwh * tarifa
-    const novaConta = Math.max(contaMedia - economia, 49.9) // piso de taxas
+    const economiaPct = Math.min(100, (economia / Math.max(contaMedia, 1)) * 100)
+    const novaConta = Math.max(contaMedia - economia, 49.9)
 
-    const custoPorKw = 5200 // R$ por kWp instalado (médio)
-    const potenciaKw = (producao / 120) // kW pico estimado (aprox)
+    const custoPorKw = 5200
+    const potenciaKw = (producao / 120)
     const investimento = Math.max(potenciaKw, 1) * custoPorKw
     const roiAnos = investimento / (economia * 12)
 
-    return { economia, novaConta, roiAnos, potenciaKw }
+    return { economia, novaConta, roiAnos, potenciaKw, geracaoKwh: producao, economiaPct }
   }, [contaMedia, area, cidade])
 }
 
@@ -58,33 +59,25 @@ function Header() {
     <header className="fixed top-0 z-40 w-full border-b border-white/5 bg-black/40 backdrop-blur">
       <div className="container-section flex items-center justify-between py-4">
         <a href="#" className="flex items-center gap-3">
-          <img src="/brand-logo.svg" alt="Minas Solar" className="h-8 w-auto" />
-          <span className="text-lg font-extrabold tracking-tight text-white">Minas Solar</span>
+          <img src="/brand-logo.svg" alt="Solar Energy" className="h-8 w-auto" />
+          <span className="text-lg font-extrabold tracking-tight text-white">Solar Energy</span>
         </a>
-        <nav className="hidden md:flex items-center gap-8 text-sm text-solar-gray-light">
+        <nav className="hidden md:flex items-center gap-6 text-sm text-solar-gray-light">
+          <a href="#" className="hover:text-white">Home</a>
           <a href="#beneficios" className="hover:text-white">Benefícios</a>
           <a href="#como-funciona" className="hover:text-white">Como Funciona</a>
           <a href="#planos" className="hover:text-white">Planos</a>
+          <a href="#depoimentos" className="hover:text-white">Depoimentos</a>
+          <a href="#parceiros" className="hover:text-white">Parceiros</a>
           <a href="#contato" className="hover:text-white">Contato</a>
         </nav>
-        <a href="#simulador" className="btn-primary hidden md:inline-flex">Simular economia</a>
+        <a href="#simulador" className="btn-gradient hidden md:inline-flex">Simular economia solar</a>
       </div>
     </header>
   )
 }
 
 function Hero() {
-  const [leadNome, setLeadNome] = useState('')
-  const [leadFone, setLeadFone] = useState('')
-  const [leadCidade, setLeadCidade] = useState('')
-  const [leadConta, setLeadConta] = useState('')
-
-  function enviarLead(e: React.FormEvent) {
-    e.preventDefault()
-    const msg = `Olá, Minas Solar! Quero aproveitar descontos de até 20%.\n\nNome: ${leadNome}\nWhatsApp: ${leadFone}\nCidade: ${leadCidade}\nConta média: R$ ${leadConta}`
-    openWhatsApp(msg)
-  }
-
   return (
     <section className="relative pt-28 md:pt-36 pb-16 md:pb-24">
       <div className="container-section grid md:grid-cols-2 gap-10 items-center">
@@ -94,9 +87,9 @@ function Hero() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="section-title gradient-text"
+            className="section-title"
           >
-            Pague até 20% menos na sua conta de luz em Minas Gerais
+            Economize até 20% na sua conta de luz com energia solar em Minas Gerais
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 10 }}
@@ -105,35 +98,25 @@ function Hero() {
             transition={{ delay: 0.1, duration: 0.6 }}
             className="section-subtitle mt-4"
           >
-            Projetos, instalação e monitoramento com condições especiais para o clima mineiro.
+            Projeto, instalação e monitoramento completo — proposta gratuita em até 24h
           </motion.p>
-          <ul className="mt-6 grid sm:grid-cols-2 gap-3 text-sm text-solar-gray-light">
-            <li className="flex items-center gap-2"><Check className="h-4 w-4 text-[var(--brand-primary)]" /> Estudo gratuito em até 24h</li>
-            <li className="flex items-center gap-2"><Check className="h-4 w-4 text-[var(--brand-primary)]" /> Atuação em todo MG</li>
-            <li className="flex items-center gap-2"><Check className="h-4 w-4 text-[var(--brand-primary)]" /> Sem dor de cabeça</li>
-            <li className="flex items-center gap-2"><Check className="h-4 w-4 text-[var(--brand-primary)]" /> Suporte dedicado</li>
-          </ul>
+          <div className="mt-3 badge">Atendimento em todo o estado de Minas Gerais</div>
 
           <div className="mt-8 flex flex-col sm:flex-row gap-3">
             <button
               onClick={() => document.getElementById('simulador')?.scrollIntoView({ behavior: 'smooth' })}
-              className="btn-primary hover-lift"
+              className="btn-gradient hover-lift"
             >
               Peça seu estudo gratuito
               <ArrowRight className="ml-2 h-4 w-4" />
             </button>
             <button
-              onClick={() => openWhatsApp('Olá! Quero meu estudo gratuito de energia solar com a Minas Solar.')} 
+              onClick={() => openWhatsApp('Olá! Quero meu estudo gratuito de energia solar com a Solar Energy.')} 
               className="btn-secondary hover-lift"
             >
-              Falar no WhatsApp
+              Falar por WhatsApp
               <MessageCircle className="ml-2 h-4 w-4" />
             </button>
-          </div>
-          <div className="mt-6 flex items-center gap-4 text-solar-gray-light text-sm">
-            <div className="flex items-center gap-2"><Shield className="h-4 w-4 text-[var(--brand-primary)]" /> Garantia total</div>
-            <div className="flex items-center gap-2"><Leaf className="h-4 w-4 text-[var(--brand-primary)]" /> Sustentável</div>
-            <div className="flex items-center gap-2"><Lock className="h-4 w-4 text-[var(--brand-primary)]" /> Homologação</div>
           </div>
         </div>
         <motion.div
@@ -144,22 +127,10 @@ function Hero() {
           className="relative"
         >
           <div className="card-gradient rounded-2xl">
-            <form onSubmit={enviarLead} className="rounded-2xl border border-white/10 bg-white/5 p-6">
-              <p className="text-lg font-semibold">Receba sua proposta</p>
-              <p className="text-solar-gray-light text-sm">Grátis e sem compromisso. Respondemos em até 24h.</p>
-              <div className="mt-4 grid gap-3">
-                <input required value={leadNome} onChange={(e) => setLeadNome(e.target.value)} placeholder="Seu nome" className="rounded-md bg-black/40 border border-white/10 px-4 py-3 outline-none focus:ring-2" />
-                <input required value={leadFone} onChange={(e) => setLeadFone(e.target.value)} placeholder="WhatsApp" className="rounded-md bg-black/40 border border-white/10 px-4 py-3 outline-none focus:ring-2" />
-                <div className="grid grid-cols-2 gap-3">
-                  <input required value={leadCidade} onChange={(e) => setLeadCidade(e.target.value)} placeholder="Cidade" className="rounded-md bg-black/40 border border-white/10 px-4 py-3 outline-none focus:ring-2" />
-                  <input required value={leadConta} onChange={(e) => setLeadConta(e.target.value)} placeholder="Conta média (R$)" className="rounded-md bg-black/40 border border-white/10 px-4 py-3 outline-none focus:ring-2" />
-                </div>
-                <button type="submit" className="btn-primary">Receber proposta</button>
-              </div>
-              <p className="mt-3 text-xs text-solar-gray-light">Protegemos seus dados. Nunca enviamos spam.</p>
-            </form>
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-2">
+              <div className="aspect-[4/3] w-full rounded-xl bg-[url('https://images.unsplash.com/photo-1509395176047-4a66953fd231?q=80&w=1974&auto=format&fit=crop')] bg-cover bg-center" />
+            </div>
           </div>
-          <div className="absolute -bottom-4 -left-4 hidden md:block h-24 w-24 rounded-xl bg-[var(--brand-primary)] blur-3xl opacity-20" />
         </motion.div>
       </div>
     </section>
@@ -171,10 +142,10 @@ function Simulador() {
   const [area, setArea] = useState<number>(30)
   const [cidade, setCidade] = useState<CityOption | null>(CITIES[0])
 
-  const { economia, novaConta, roiAnos, potenciaKw } = useCalculator(conta, area, cidade)
+  const { economia, novaConta, roiAnos, potenciaKw, geracaoKwh, economiaPct } = useCalculator(conta, area, cidade)
 
   function handleWhatsApp() {
-    const msg = `Olá, Minas Solar! Quero meu estudo gratuito.\n\nConta média: ${currencyBRL(conta)}\nÁrea disponível: ${area} m²\nCidade: ${cidade?.name}\n\nEconomia estimada: ${currencyBRL(economia)}/mês\nNova conta: ${currencyBRL(novaConta)}\nROI estimado: ${roiAnos.toFixed(1)} anos\nPotência aproximada: ${potenciaKw.toFixed(1)} kWp`
+    const msg = `Olá, Solar Energy! Quero meu estudo gratuito.\n\nConta média: ${currencyBRL(conta)}\nÁrea disponível: ${area} m²\nCidade: ${cidade?.name}\n\nGeração estimada: ${geracaoKwh.toFixed(0)} kWh/mês\nEconomia estimada: ${currencyBRL(economia)} (${economiaPct.toFixed(0)}%)\nNova conta: ${currencyBRL(novaConta)}\nROI estimado: ${roiAnos.toFixed(1)} anos\nPotência aproximada: ${potenciaKw.toFixed(1)} kWp`
     openWhatsApp(msg)
   }
 
@@ -183,14 +154,14 @@ function Simulador() {
       <div className="container-section">
         <div className="max-w-3xl">
           <h2 className="section-title">Simule sua economia</h2>
-          <p className="section-subtitle mt-2">Descubra quanto você pode economizar — descontos de até 20% na fatura.</p>
+          <p className="section-subtitle mt-2">Descubra sua geração mensal, economia e ROI com base na sua cidade.</p>
         </div>
 
         <div className="mt-8 grid md:grid-cols-5 gap-6">
           <div className="md:col-span-3 rounded-xl border border-white/10 bg-white/5 p-6">
             <div className="grid gap-4">
               <label className="grid gap-2">
-                <span className="text-sm text-solar-gray-light">Conta média (R$)</span>
+                <span className="text-sm text-solar-gray-light">Conta média (R$/mês)</span>
                 <input
                   type="number"
                   min={50}
@@ -202,7 +173,7 @@ function Simulador() {
                 />
               </label>
               <label className="grid gap-2">
-                <span className="text-sm text-solar-gray-light">Área disponível (m²)</span>
+                <span className="text-sm text-solar-gray-light">Área do telhado (m²)</span>
                 <input
                   type="number"
                   min={5}
@@ -226,7 +197,7 @@ function Simulador() {
                   ))}
                 </select>
               </label>
-              <button onClick={handleWhatsApp} className="btn-primary mt-2">
+              <button onClick={handleWhatsApp} className="btn-gradient mt-2">
                 Receber proposta no WhatsApp
                 <MessageCircle className="ml-2 h-4 w-4" />
               </button>
@@ -236,8 +207,12 @@ function Simulador() {
           <div className="md:col-span-2 rounded-xl border border-white/10 bg-white/5 p-6">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-solar-gray-light">Economia mensal estimada</span>
-                <span className="text-xl font-bold text-[var(--brand-primary)]">{currencyBRL(economia)}</span>
+                <span className="text-solar-gray-light">Geração mensal estimada</span>
+                <span className="text-xl font-bold text-[var(--brand-primary)]">{geracaoKwh > 0 ? `${geracaoKwh.toFixed(0)} kWh` : '-'}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-solar-gray-light">Economia mensal</span>
+                <span className="text-xl font-semibold">{economia > 0 ? `${currencyBRL(economia)} (${economiaPct.toFixed(0)}%)` : '-'}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-solar-gray-light">Nova conta estimada</span>
@@ -247,11 +222,7 @@ function Simulador() {
                 <span className="text-solar-gray-light">ROI estimado</span>
                 <span className="text-xl font-semibold">{roiAnos > 0 ? `${roiAnos.toFixed(1)} anos` : '-'}</span>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-solar-gray-light">Potência aproximada</span>
-                <span className="text-xl font-semibold">{potenciaKw > 0 ? `${potenciaKw.toFixed(1)} kWp` : '-'}</span>
-              </div>
-              <p className="text-xs text-solar-gray-light/80">Estimativas baseadas em dados médios de irradiação de MG. Resultado final depende de projeto técnico.</p>
+              <p className="text-xs text-solar-gray-light/80">Estimativas médias para MG. Resultados finais dependem de projeto técnico.</p>
             </div>
           </div>
         </div>
@@ -263,15 +234,16 @@ function Simulador() {
 function Beneficios() {
   const items = [
     { icon: PiggyBank, title: 'Economia imediata', desc: 'Descontos de até 20% na sua conta de luz.' },
-    { icon: Shield, title: 'Garantia e manutenção', desc: 'Equipamentos com garantia e assistência técnica completa.' },
-    { icon: Leaf, title: 'Sustentável e valorização', desc: 'Imóvel mais valorizado e emissão de CO₂ reduzida.' },
+    { icon: Shield, title: 'Garantia de até 25 anos', desc: 'Equipamentos com longa durabilidade e suporte.' },
+    { icon: Leaf, title: 'Energia limpa e valorização', desc: 'Sustentável e valorização do seu imóvel.' },
+    { icon: Building2, title: 'Especialistas em MG', desc: 'Projeto pensado para o clima e normas do estado.' },
   ]
   return (
     <section id="beneficios" className="py-16 md:py-24">
       <div className="container-section">
-        <h2 className="section-title">Benefícios que fazem diferença</h2>
-        <p className="section-subtitle mt-2">Soluções pensadas para o jeito mineiro: econômico, seguro e duradouro.</p>
-        <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <h2 className="section-title">Por que escolher a Solar Energy</h2>
+        <p className="section-subtitle mt-2">Soluções completas para reduzir custos e aumentar sua segurança energética.</p>
+        <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {items.map(({ icon: Icon, title, desc }) => (
             <div key={title} className="card-gradient rounded-xl hover-lift">
               <div className="rounded-[0.70rem] border border-white/10 bg-white/5 p-6">
@@ -289,15 +261,15 @@ function Beneficios() {
 
 function ComoFunciona() {
   const steps = [
-    { title: 'Diagnóstico gratuito', desc: 'Entendemos seu consumo e avaliamos seu telhado/área.' },
-    { title: 'Projeto personalizado', desc: 'Solução sob medida para o seu imóvel e sua cidade.' },
-    { title: 'Instalação e homologação', desc: 'Equipe própria, segurança total e tudo homologado.' },
+    { title: 'Diagnóstico gratuito', desc: 'Análise da conta e avaliação do telhado/área.' },
+    { title: 'Projeto personalizado', desc: 'Simulação e proposta sob medida para seu perfil.' },
+    { title: 'Instalação e homologação', desc: 'Execução rápida e homologação com a distribuidora.' },
   ]
   return (
     <section id="como-funciona" className="py-16 md:py-24">
       <div className="container-section">
         <h2 className="section-title">Como funciona</h2>
-        <p className="section-subtitle mt-2">Da análise ao funcionamento, acompanhamos você de ponta a ponta.</p>
+        <p className="section-subtitle mt-2">Do diagnóstico à energia gerando, acompanhamos cada etapa.</p>
         <div className="mt-10 grid md:grid-cols-3 gap-6">
           {steps.map((s, i) => (
             <div key={s.title} className="rounded-xl border border-white/10 bg-white/5 p-6">
@@ -323,12 +295,12 @@ function Planos() {
     },
     {
       name: 'Comercial',
-      price: 'a partir de R$ 499/mês',
+      price: 'soluções sob medida',
       features: ['Redução de custos operacionais', 'Payback acelerado', 'Suporte prioritário'],
     },
     {
       name: 'Rural',
-      price: 'financiado via bancos parceiros',
+      price: 'crédito especial e tecnologia robusta',
       features: ['Soluções para fazendas e sítios', 'Estruturas reforçadas', 'Baixa manutenção'],
     },
   ]
@@ -347,7 +319,7 @@ function Planos() {
                   <li key={f} className="flex items-center gap-2"><Check className="h-4 w-4 text-[var(--brand-primary)]" /> {f}</li>
                 ))}
               </ul>
-              <button onClick={() => openWhatsApp(`Quero proposta para o plano ${p.name} da Minas Solar.`)} className="btn-primary mt-4">Pedir proposta</button>
+              <button onClick={() => openWhatsApp(`Quero proposta para o plano ${p.name} da Solar Energy.`)} className="btn-gradient mt-4">Pedir proposta</button>
             </div>
           ))}
         </div>
@@ -358,18 +330,18 @@ function Planos() {
 
 function Depoimentos() {
   const itens = [
-    { nome: 'Ana Paula', cidade: 'Belo Horizonte', economia: 82, foto: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=1000&auto=format&fit=crop' },
-    { nome: 'Carlos Eduardo', cidade: 'Uberlândia', economia: 90, foto: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=1000&auto=format&fit=crop' },
-    { nome: 'Mariana Souza', cidade: 'Juiz de Fora', economia: 76, foto: 'https://images.unsplash.com/photo-1547425260-76bcadfb4f2c?q=80&w=1000&auto=format&fit=crop' },
+    { nome: 'Ana Paula', cidade: 'Belo Horizonte', economia: 18, foto: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=1000&auto=format&fit=crop' },
+    { nome: 'Carlos Eduardo', cidade: 'Uberlândia', economia: 20, foto: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=1000&auto=format&fit=crop' },
+    { nome: 'Mariana Souza', cidade: 'Juiz de Fora', economia: 16, foto: 'https://images.unsplash.com/photo-1547425260-76bcadfb4f2c?q=80&w=1000&auto=format&fit=crop' },
   ]
   return (
-    <section className="py-16 md:py-24">
+    <section id="depoimentos" className="py-16 md:py-24">
       <div className="container-section">
-        <h2 className="section-title">Clientes que já estão economizando</h2>
-        <p className="section-subtitle mt-2">Histórias reais de mineiros que decidiram pagar menos na conta de luz.</p>
-        <div className="mt-10 grid md:grid-cols-3 gap-6">
+        <h2 className="section-title">Quem já está economizando</h2>
+        <p className="section-subtitle mt-2">Depoimentos de clientes em todo o estado de Minas Gerais.</p>
+        <div className="mt-10 grid md:grid-cols-3 gap-6 overflow-x-auto md:overflow-visible scrollbar-hide">
           {itens.map((d) => (
-            <div key={d.nome} className="rounded-xl border border-white/10 bg-white/5 p-6">
+            <div key={d.nome} className="min-w-[280px] md:min-w-0 rounded-xl border border-white/10 bg-white/5 p-6">
               <div className="flex items-center gap-4">
                 <img src={d.foto} alt={d.nome} className="h-12 w-12 rounded-full object-cover" />
                 <div>
@@ -377,9 +349,42 @@ function Depoimentos() {
                   <p className="text-sm text-solar-gray-light">{d.cidade}</p>
                 </div>
               </div>
-              <p className="mt-4 text-solar-gray-light text-sm">“Minha conta caiu cerca de {d.economia}% logo nos primeiros meses. Atendimento nota 10!”</p>
+              <p className="mt-4 text-solar-gray-light text-sm">“Consegui economizar cerca de {d.economia}% na conta de luz. Atendimento excelente!”</p>
             </div>
           ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function Parceiros() {
+  const logos = [
+    'https://dummyimage.com/140x40/ffffff/000000.png&text=Construtora+A',
+    'https://dummyimage.com/120x40/ffffff/000000.png&text=Cooperativa+B',
+    'https://dummyimage.com/100x40/ffffff/000000.png&text=Comércio+C',
+    'https://dummyimage.com/160x40/ffffff/000000.png&text=Agro+D',
+  ]
+  return (
+    <section id="parceiros" className="py-16 md:py-24">
+      <div className="container-section grid md:grid-cols-2 gap-10 items-center">
+        <div>
+          <div className="rounded-2xl overflow-hidden border border-white/10 bg-white/5">
+            <div className="aspect-[4/3] w-full bg-[url('https://images.unsplash.com/photo-1520974692973-ac47dfb7fd89?q=80&w=1822&auto=format&fit=crop')] bg-cover bg-center" />
+          </div>
+        </div>
+        <div>
+          <h2 className="section-title">Empresas e clientes que confiam na Solar Energy</h2>
+          <p className="section-subtitle mt-2">Mais de 500 projetos entregues para residências, comércios e propriedades rurais.</p>
+          <p className="mt-4 text-solar-gray-light">Parceiros que acreditam em um futuro mais sustentável e rentável.</p>
+          <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4 items-center">
+            {logos.map((src) => (
+              <div key={src} className="rounded-md border border-white/10 bg-white/5 p-3 flex items-center justify-center">
+                <img src={src} alt="logo parceiro" className="h-8 w-auto opacity-80" />
+              </div>
+            ))}
+          </div>
+          <button onClick={() => openWhatsApp('Quero ser parceiro da Solar Energy.')} className="btn-gradient mt-6">Quero ser parceiro</button>
         </div>
       </div>
     </section>
@@ -396,7 +401,7 @@ function Contato() {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    const msg = `Olá, Minas Solar!\n\nNome: ${nome}\nE-mail: ${email}\nTelefone: ${telefone}\nConta média: R$ ${contaMedia}\nCidade: ${cidade}\nMensagem: ${mensagem}`
+    const msg = `Olá, tenho interesse na Solar Energy. Meu nome é ${nome}, consumo R$${contaMedia}/mês e moro em ${cidade}.\n\nMensagem: ${mensagem}\nE-mail: ${email}\nTelefone: ${telefone}`
     openWhatsApp(msg)
   }
 
@@ -410,11 +415,11 @@ function Contato() {
         <form onSubmit={handleSubmit} className="mt-8 grid md:grid-cols-2 gap-4 rounded-xl border border-white/10 bg-white/5 p-6">
           <input required value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Nome" className="rounded-md bg-black/40 border border-white/10 px-4 py-3 outline-none focus:ring-2" />
           <input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="E-mail" className="rounded-md bg-black/40 border border-white/10 px-4 py-3 outline-none focus:ring-2" />
-          <input required value={telefone} onChange={(e) => setTelefone(e.target.value)} placeholder="Telefone/WhatsApp" className="rounded-md bg-black/40 border border-white/10 px-4 py-3 outline-none focus:ring-2" />
+          <input required value={telefone} onChange={(e) => setTelefone(e.target.value)} placeholder="Telefone (WhatsApp)" className="rounded-md bg-black/40 border border-white/10 px-4 py-3 outline-none focus:ring-2" />
           <input required value={contaMedia} onChange={(e) => setContaMedia(e.target.value)} placeholder="Conta média (R$)" className="rounded-md bg-black/40 border border-white/10 px-4 py-3 outline-none focus:ring-2" />
           <input required value={cidade} onChange={(e) => setCidade(e.target.value)} placeholder="Cidade" className="rounded-md bg-black/40 border border-white/10 px-4 py-3 outline-none focus:ring-2 md:col-span-2" />
           <textarea value={mensagem} onChange={(e) => setMensagem(e.target.value)} placeholder="Mensagem" className="rounded-md bg-black/40 border border-white/10 px-4 py-3 outline-none focus:ring-2 md:col-span-2 min-h-[120px]" />
-          <button type="submit" className="btn-primary md:col-span-2">Enviar no WhatsApp</button>
+          <button type="submit" className="btn-gradient md:col-span-2">Enviar no WhatsApp</button>
         </form>
       </div>
     </section>
@@ -423,11 +428,10 @@ function Contato() {
 
 function FAQ() {
   const faqs = [
-    { q: 'Quanto posso economizar?', a: 'Nossos clientes têm descontos de até 20% na conta de luz, dependendo do perfil de consumo.' },
-    { q: 'A energia solar funciona em dias nublados?', a: 'Sim, há geração mesmo com céu encoberto, porém menor. O dimensionamento considera essa variação.' },
-    { q: 'Qual o prazo de instalação?', a: 'Após aprovação, a instalação ocorre geralmente em até 10 dias úteis, respeitando a homologação da distribuidora.' },
-    { q: 'Precisa de manutenção?', a: 'Baixa manutenção. Recomendamos limpezas periódicas e checagens preventivas.' },
-    { q: 'E se eu me mudar?', a: 'O sistema valoriza o imóvel. É possível realocar, mas recomendamos avaliação técnica.' },
+    { q: 'Preciso trocar o telhado?', a: 'Na maioria dos casos não. Avaliamos a estrutura e indicamos eventuais ajustes.' },
+    { q: 'E se faltar sol?', a: 'Há geração mesmo em dias nublados. O projeto considera essa variação sazonal.' },
+    { q: 'Quanto tempo para instalar?', a: 'Após aprovação, geralmente em até 10 dias úteis, além do prazo de homologação.' },
+    { q: 'Qual a garantia dos painéis/inversor?', a: 'Painéis com até 25 anos de garantia de performance e inversores com garantia de fábrica.' },
   ]
   const [open, setOpen] = useState<number | null>(0)
   return (
@@ -454,11 +458,11 @@ function FAQ() {
 
 function CTAFinal() {
   return (
-    <section className="py-16 md:py-24">
+    <section className="py-16 md:py-24 section-yellow">
       <div className="container-section text-center">
-        <h2 className="section-title">Comece a economizar agora</h2>
-        <p className="section-subtitle mt-2">Peça seu estudo gratuito e receba a proposta em até 24h úteis.</p>
-        <button onClick={() => document.getElementById('simulador')?.scrollIntoView({ behavior: 'smooth' })} className="btn-primary mt-6">
+        <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight">Comece a economizar agora com energia solar</h2>
+        <p className="mt-2 text-black/70">Peça seu estudo gratuito e receba a proposta em até 24h úteis.</p>
+        <button onClick={() => document.getElementById('simulador')?.scrollIntoView({ behavior: 'smooth' })} className="btn-gradient mt-6">
           Simular minha economia
         </button>
       </div>
@@ -472,18 +476,18 @@ function Footer() {
       <div className="container-section flex flex-col md:flex-row items-center md:items-start justify-between gap-6">
         <div>
           <div className="flex items-center gap-3">
-            <img src="/brand-logo.svg" alt="Minas Solar" className="h-6 w-auto" />
-            <span className="text-lg font-extrabold">Minas Solar</span>
+            <img src="/brand-logo.svg" alt="Solar Energy" className="h-6 w-auto" />
+            <span className="text-lg font-extrabold">Solar Energy</span>
           </div>
           <p className="mt-2 text-solar-gray-light text-sm">Energia solar para todo o estado de Minas Gerais.</p>
         </div>
         <div className="text-sm text-solar-gray-light">
           <p>Telefone: (31) 99999-9999</p>
-          <p>E-mail: contato@minassolar.com.br</p>
+          <p>E-mail: contato@solarenergy.com.br</p>
           <p>Redes: Instagram • Facebook • LinkedIn</p>
         </div>
       </div>
-      <div className="container-section mt-6 text-center text-xs text-solar-gray-light">© {new Date().getFullYear()} Minas Solar. Todos os direitos reservados.</div>
+      <div className="container-section mt-6 text-center text-xs text-solar-gray-light">© {new Date().getFullYear()} Solar Energy. Todos os direitos reservados.</div>
     </footer>
   )
 }
@@ -498,28 +502,27 @@ export default function App() {
       <ComoFunciona />
       <Planos />
       <Depoimentos />
+      <Parceiros />
       <Contato />
       <FAQ />
       <CTAFinal />
       <Footer />
 
-      {/* Floating WhatsApp */}
       <button
         onClick={() => openWhatsApp('Olá! Quero um atendimento agora.')} 
-        className="floating-whatsapp btn-primary shadow-lg"
+        className="floating-whatsapp btn-gradient shadow-lg"
         aria-label="WhatsApp"
         title="Fale no WhatsApp"
       >
         <MessageCircle className="h-5 w-5" />
       </button>
 
-      {/* Sticky CTA (mobile) */}
       <div className="sticky-cta md:hidden">
         <div className="container-section py-3 flex items-center gap-3">
-          <button className="btn-primary flex-1" onClick={() => document.getElementById('simulador')?.scrollIntoView({ behavior: 'smooth' })}>
+          <button className="btn-gradient flex-1" onClick={() => document.getElementById('simulador')?.scrollIntoView({ behavior: 'smooth' })}>
             Simular agora
           </button>
-          <button className="btn-secondary" onClick={() => openWhatsApp('Olá! Quero meu estudo gratuito de energia solar com a Minas Solar.')}>WhatsApp</button>
+          <button className="btn-secondary" onClick={() => openWhatsApp('Olá! Quero meu estudo gratuito de energia solar com a Solar Energy.')}>WhatsApp</button>
         </div>
       </div>
     </div>
