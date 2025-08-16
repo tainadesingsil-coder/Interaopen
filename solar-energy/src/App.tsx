@@ -102,7 +102,7 @@ function Steps(){
   const steps=[
     {n:1,t:'Você continua pagando o mínimo da Cemig',d:'Sem mudanças na sua rotina.'},
     {n:2,t:'A diferença vira desconto na sua fatura',d:'Você vê o abatimento mês a mês.'},
-    {n:3,t:'Conta reduzida — simples assim',d:'Economia de 20% de forma clara e garantida.'},
+    {n:3,t:'Conta reduzida, simples assim',d:'Economia de 20% de forma clara e garantida.'},
   ]
   return (
     <section className="py-12 md:py-16">
@@ -136,7 +136,7 @@ function Depoimentos(){
             <img src={d.img} alt={d.a} className="h-12 w-12 rounded-full object-cover" />
             <Quote className="h-5 w-5 text-[var(--yellow)]" />
             <p className="italic">“{d.t}”</p>
-            <span className="ml-auto text-sm text-[var(--muted)]">— {d.a}</span>
+            <span className="ml-auto text-sm text-[var(--muted)]">{d.a}</span>
           </div>
         ))}
       </div>
@@ -182,7 +182,7 @@ function CTAFinal(){
     <section className="section-blue py-14 md:py-16">
       <div className="container-section grid md:grid-cols-2 gap-6 items-center">
         <div>
-          <h2 className="text-2xl md:text-3xl font-bold">Pare de pagar mais — aproveite 20% de desconto hoje mesmo.</h2>
+          <h2 className="text-2xl md:text-3xl font-bold">Pare de pagar mais. 20% de desconto hoje mesmo.</h2>
           <p className="mt-2 opacity-90">Você paga menos, economiza na fatura e sente a diferença no bolso.</p>
         </div>
         <div className="grid sm:grid-cols-2 gap-3">
@@ -241,7 +241,7 @@ function Footer(){
       <div className="container-section flex flex-col items-center gap-2 mt-4">
         <div className="font-semibold">Solar Energy</div>
         <div className="text-sm text-[var(--muted)]">contato@solarenergy.com.br</div>
-        <div className="text-xs text-[var(--muted)]">© {new Date().getFullYear()} Solar Energy. Desconto válido para clientes Cemig residencial. Economia baseada em comparação com sua conta atual — transparente e garantida.</div>
+                  <div className="text-xs text-[var(--muted)]">© {new Date().getFullYear()} Solar Energy. Desconto válido para clientes Cemig residencial. Economia baseada em comparação com sua conta atual, transparente e garantida.</div>
       </div>
     </footer>
   )

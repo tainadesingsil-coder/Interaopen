@@ -24,10 +24,10 @@ export default function HeroMinimal({ imageUrl }: HeroMinimalProps) {
             className="order-1"
           >
             <h1 className="text-white text-4xl md:text-6xl font-extrabold leading-tight">
-              Desconto de 20% na sua conta de luz — você paga o mínimo da Cemig e ainda economiza na fatura!
+              20% de desconto na sua conta de luz
             </h1>
             <p className="mt-4 text-white/70 text-base md:text-lg max-w-xl">
-              Pague menos para a distribuidora e comprove a economia REAL na sua próxima fatura.
+              Pague o mínimo da Cemig e economize na fatura.
             </p>
 
             <div className="mt-8">
