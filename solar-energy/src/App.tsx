@@ -11,15 +11,15 @@ function Header() {
         <a href="#" className="flex items-center">
           <img src="/logo.png" alt="Solar Energy" className="h-[77px] w-auto" />
         </a>
-        <div className="flex items-center gap-4">
-          <a href="#" aria-label="Instagram" className="text-white/80 hover:text-white transition">
-            <Instagram size={28} strokeWidth={1.75} />
+        <div className="flex items-center gap-3">
+          <a href="#" aria-label="Instagram" className="text-[#FFC107] hover:text-[#FFD54D] transition">
+            <Instagram size={20} strokeWidth={1.6} />
           </a>
-          <a href="#" aria-label="Facebook" className="text-white/80 hover:text-white transition">
-            <Facebook size={28} strokeWidth={1.75} />
+          <a href="#" aria-label="Facebook" className="text-[#FFC107] hover:text-[#FFD54D] transition">
+            <Facebook size={20} strokeWidth={1.6} />
           </a>
-          <a href="#" aria-label="YouTube" className="text-white/80 hover:text-white transition">
-            <Youtube size={28} strokeWidth={1.75} />
+          <a href="#" aria-label="YouTube" className="text-[#FFC107] hover:text-[#FFD54D] transition">
+            <Youtube size={20} strokeWidth={1.6} />
           </a>
         </div>
       </div>
