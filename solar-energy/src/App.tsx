@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence, useInView } from 'framer-motion'
-import { Sun, Home, Leaf, ChevronDown, Quote } from 'lucide-react'
+import { Sun, Home, Leaf, ChevronDown, Quote, Instagram, Facebook, Youtube } from 'lucide-react'
 import './index.css'
 import HeroMinimal from './components/HeroMinimal'
 
@@ -11,7 +11,18 @@ function Header() {
         <a href="#" className="flex items-center">
           <img src="/logo.png" alt="Solar Energy" className="h-[77px] w-auto" />
         </a>
-        <a href="tel:+5531999999999" className="text-sm text-[var(--muted)]">+55 31 99999-9999</a>
+        <div className="flex items-center gap-4 md:gap-6">
+          <a href="tel:+5531999999999" className="text-sm text-[var(--muted)]">+55 31 99999-9999</a>
+          <a href="#" aria-label="Instagram" className="text-white/80 hover:text-white transition">
+            <Instagram size={77} strokeWidth={1.5} />
+          </a>
+          <a href="#" aria-label="Facebook" className="text-white/80 hover:text-white transition">
+            <Facebook size={77} strokeWidth={1.5} />
+          </a>
+          <a href="#" aria-label="YouTube" className="text-white/80 hover:text-white transition">
+            <Youtube size={77} strokeWidth={1.5} />
+          </a>
+        </div>
       </div>
     </header>
   )
