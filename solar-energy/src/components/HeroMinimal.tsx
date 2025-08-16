@@ -28,7 +28,7 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
       <div className="absolute left-1/2 -translate-x-1/2 top-[72px] md:top-[88px] w-[min(1120px,92vw)] h-10 rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm" />
 
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center pt-32 md:pt-44 pb-16 md:pb-24">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center pt-40 md:pt-56 pb-16 md:pb-24">
           <motion.div
             initial={{ opacity: 0, y: 14 }}
             whileInView={{ opacity: 1, y: 0 }}
