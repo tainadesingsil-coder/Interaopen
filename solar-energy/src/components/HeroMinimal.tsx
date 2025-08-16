@@ -20,13 +20,6 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
 
   return (
     <section className="relative overflow-hidden">
-      <div className="absolute top-5 left-5 z-10">
-        <img src="/logo.svg" alt="Solar Energy" className="h-6 w-auto opacity-90" />
-      </div>
-
-      {/* Top subtle box near the logo */}
-      <div className="absolute left-1/2 -translate-x-1/2 top-[56px] md:top-[72px] w-[min(1120px,92vw)] h-10 rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm" />
-
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center pt-40 md:pt-56 pb-16 md:pb-24">
           <motion.div
