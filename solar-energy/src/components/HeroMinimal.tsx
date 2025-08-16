@@ -12,7 +12,7 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
     if (!imageUrls || imageUrls.length <= 1) return;
     const id = setInterval(() => {
       setIndex((prev) => (prev + 1) % imageUrls.length);
-    }, 4500);
+    }, 2800);
     return () => clearInterval(id);
   }, [imageUrls]);
 
@@ -56,7 +56,7 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
             initial={{ opacity: 0, scale: 0.98 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
             className="relative order-2 md:order-2"
           >
             <div className="relative overflow-hidden shadow-2xl">
@@ -68,25 +68,25 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
                     initial={{ clipPath: "inset(0% 100% 0% 0%)" }}
                     animate={{ clipPath: "inset(0% 0% 0% 0%)" }}
                     exit={{ clipPath: "inset(0% 0% 0% 100%)" }}
-                    transition={{ duration: 0.9, ease: "easeOut" }}
+                    transition={{ duration: 0.6, ease: "easeOut" }}
                     style={{ transformPerspective: 800 }}
-                    whileHover={{ scale: 1.015, rotate: 0.2 }}
+                    whileHover={{ scale: 1.01, rotate: 0.1 }}
                   >
                     <motion.img
                       src={current}
                       alt="Usina solar"
                       className="absolute inset-0 w-full h-full object-cover"
-                      initial={{ opacity: 0, scale: 1.08, x: -12, y: 6, filter: "blur(2px)" as any }}
-                      animate={{ opacity: 1, scale: 1.02, x: 0, y: 0, filter: "blur(0px)" as any }}
-                      exit={{ opacity: 0, scale: 1.02, x: 8, y: -4 }}
-                      transition={{ duration: 4.0, ease: "easeOut" }}
+                      initial={{ opacity: 0, scale: 1.06, x: -8, y: 4, filter: "blur(1.5px)" as any }}
+                      animate={{ opacity: 1, scale: 1.01, x: 0, y: 0, filter: "blur(0px)" as any }}
+                      exit={{ opacity: 0, scale: 1.01, x: 6, y: -3 }}
+                      transition={{ duration: 2.0, ease: "easeOut" }}
                       style={{ transform: "translateZ(0)" }}
                     />
                     <motion.div
                       className="pointer-events-none absolute inset-0"
                       initial={{ x: "-30%", opacity: 0.0 }}
-                      animate={{ x: "130%", opacity: 0.18 }}
-                      transition={{ duration: 3.6, ease: "easeInOut" }}
+                      animate={{ x: "130%", opacity: 0.16 }}
+                      transition={{ duration: 1.8, ease: "easeInOut" }}
                       style={{ background: "linear-gradient(120deg, transparent 35%, rgba(255,255,255,0.5) 50%, transparent 65%)" }}
                     />
                   </motion.div>
