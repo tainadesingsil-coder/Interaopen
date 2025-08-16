@@ -8,7 +8,9 @@ function Header() {
   return (
     <header className="header">
       <div className="container-section flex items-center justify-between py-3">
-        <a href="#" className="font-extrabold tracking-tight">Solar Energy</a>
+        <a href="#" className="flex items-center">
+          <img src="/logo.svg" alt="Solar Energy" className="h-6 w-auto" />
+        </a>
         <a href="tel:+5531999999999" className="text-sm text-[var(--muted)]">+55 31 99999-9999</a>
       </div>
     </header>
