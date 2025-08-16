@@ -2,6 +2,7 @@ import { useMemo, useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence, useInView } from 'framer-motion'
 import { Sun, Home, Leaf, ChevronDown, Quote } from 'lucide-react'
 import './index.css'
+import HeroMinimal from './components/HeroMinimal'
 
 function Header() {
   return (
@@ -11,31 +12,6 @@ function Header() {
         <a href="tel:+5531999999999" className="text-sm text-[var(--muted)]">+55 31 99999-9999</a>
       </div>
     </header>
-  )
-}
-
-function Hero() {
-  const [nome, setNome] = useState('')
-  const [tel, setTel] = useState('')
-  const [email, setEmail] = useState('')
-  return (
-    <section className="relative pt-24 md:pt-32 pb-12 md:pb-16">
-      {/* Uniform dark background (no banner image) */}
-      <div className="container-section relative">
-        <motion.h1 initial={{opacity:0,y:12}} whileInView={{opacity:1,y:0}} viewport={{once:true}} transition={{duration:0.6}} className="section-title text-center md:text-left">
-          Reduza sua conta de luz em até 20% com energia solar.
-        </motion.h1>
-        <motion.p initial={{opacity:0,y:12}} whileInView={{opacity:1,y:0}} viewport={{once:true}} transition={{delay:0.1,duration:0.6}} className="section-subtitle mt-3 text-center md:text-left">
-          Energia limpa, acessível e sustentável.
-        </motion.p>
-        <div className="mt-6 max-w-3xl md:max-w-none md:w-[720px] grid md:grid-cols-4 gap-3">
-          <input className="input" placeholder="Nome" value={nome} onChange={(e)=>setNome(e.target.value)} />
-          <input className="input" placeholder="Telefone" value={tel} onChange={(e)=>setTel(e.target.value)} />
-          <input className="input" placeholder="E-mail" value={email} onChange={(e)=>setEmail(e.target.value)} />
-          <button className="btn-yellow">Quero economizar agora</button>
-        </div>
-      </div>
-    </section>
   )
 }
 
@@ -262,7 +238,7 @@ export default function App(){
   return (
     <div>
       <Header/>
-      <Hero/>
+      <HeroMinimal imageUrl="https://images.unsplash.com/photo-1509395176047-4a66953fd231?q=80&w=1920&auto=format&fit=crop"/>
       <Beneficios/>
       <Simulador/>
       <Steps/>
