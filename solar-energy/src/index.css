@@ -61,26 +61,22 @@ body {
 .card-aggressive:hover .icon-large,
 .card:hover .icon-large { color: var(--yellow); }
 
-/* Header */
-.header { @apply fixed top-0 z-40 w-full bg-white/95 backdrop-blur border-b border-white; box-shadow: 0 6px 20px rgba(0,0,0,0.12); }
+/* Header - dark glass, uniform with site */
+.header { @apply fixed top-0 z-40 w-full backdrop-blur border-b; background: rgba(8,20,35,0.7); border-color: rgba(255,255,255,0.15); box-shadow: 0 6px 20px rgba(0,0,0,0.25); }
 
 /* Steps */
 .steps-rail { position: absolute; top: 36px; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, rgba(0,123,255,0.35), rgba(0,123,255,0.8)); border-radius: 999px; overflow: hidden; }
 .steps-rail .mask { width: 0%; height: 100%; background: rgba(255,255,255,0.6); }
 .step-circle { @apply flex items-center justify-center rounded-full text-black font-bold; width: 48px; height: 48px; background: var(--yellow); border: 4px solid rgba(255,255,255,0.2); }
 
-/* Lead thin box */
 .lead-thin { @apply mx-auto flex items-center gap-2 rounded-full px-3 py-2 shadow-lg; background: rgba(255,255,255,0.9); color: #0F172A; border: 1px solid rgba(255,255,255,0.9); box-shadow: 0 10px 30px rgba(0,0,0,0.25); }
 .lead-thin input { @apply bg-transparent outline-none flex-1 min-w-[160px] text-sm; }
 
-/* 3D plate specifics */
 .plate-3d { position: relative; border: 1.5px solid rgba(255,255,255,0.2); background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03)); box-shadow: 0 40px 80px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.2); transform-style: preserve-3d; }
 .plate-3d:hover { transform: translateY(-8px) scale(1.02); box-shadow: 0 60px 120px rgba(0,0,0,0.55), 0 0 22px rgba(0,183,255,0.22); }
 .neon-soft { box-shadow: 0 0 12px rgba(0,183,255,0.25), 0 0 2px rgba(0,183,255,0.6) inset; }
 
-/* Logo marquee */
 .logo-marquee { @apply overflow-hidden; }
 .logo-track { @apply flex items-center gap-10 min-w-max; }
 
-/* Footer neon */
 .footer-neon-line { height: 2px; background: radial-gradient(closest-side, rgba(0,183,255,0.6), transparent 70%); filter: blur(0.3px); }
