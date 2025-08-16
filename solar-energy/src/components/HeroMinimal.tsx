@@ -25,7 +25,7 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
       </div>
 
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center py-20 md:py-28">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center pt-32 md:pt-44 pb-16 md:pb-24">
           <motion.div
             initial={{ opacity: 0, y: 14 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -36,7 +36,7 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
             <h1 className="text-white text-4xl md:text-6xl font-extrabold leading-tight">
               20% de desconto na sua conta de luz
             </h1>
-            <p className="mt-4 text-white/70 text-base md:text-lg max-w-xl">
+            <p className="mt-6 md:mt-7 text-white/70 text-base md:text-lg max-w-xl">
               Pague o mínimo da Cemig e economize na fatura.
             </p>
 
