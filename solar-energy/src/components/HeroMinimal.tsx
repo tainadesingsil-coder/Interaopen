@@ -24,10 +24,10 @@ export default function HeroMinimal({ imageUrl }: HeroMinimalProps) {
             className="order-1"
           >
             <h1 className="text-white text-4xl md:text-6xl font-extrabold leading-tight">
-              PARE DE PAGAR CARO: Economize até 95% da sua conta de luz AGORA!
+              Desconto de 20% na sua conta de luz — você paga o mínimo da Cemig e ainda economiza na fatura!
             </h1>
             <p className="mt-4 text-white/70 text-base md:text-lg max-w-xl">
-              Projeto completo, instalação expressa e proposta em 24h — comece a economizar já.
+              Pague menos para a distribuidora e comprove a economia REAL na sua próxima fatura.
             </p>
 
             <div className="mt-8">
@@ -35,7 +35,7 @@ export default function HeroMinimal({ imageUrl }: HeroMinimalProps) {
                 href="#lead"
                 className="inline-flex items-center rounded-full px-6 py-3 text-sm font-semibold transition transform bg-[#FFC107] text-[#0E3A6F] shadow-lg hover:scale-105 hover:shadow-2xl"
               >
-                Simule e comece a economizar hoje
+                Garanta seu desconto agora!
               </a>
             </div>
           </motion.div>

@@ -29,9 +29,9 @@ function Header() {
 
 function Beneficios() {
   const items = [
-    { icon: Sun, title: 'Economia REAL desde o primeiro mês', desc: 'Pare de sangrar no boleto: sua conta pode despencar.' },
-    { icon: Home, title: 'Garantia de até 25 anos', desc: 'Energia confiável, sem dor de cabeça — segurança por décadas.' },
-    { icon: Leaf, title: 'Energia limpa que valoriza', desc: 'Sua casa vale mais e você gasta menos. Simples assim.' },
+    { icon: Sun, title: '20% de desconto direto na sua fatura', desc: 'Você paga menos e economiza de verdade.' },
+    { icon: Home, title: 'Pague só o mínimo da Cemig', desc: 'O restante vira economia visível na sua fatura.' },
+    { icon: Leaf, title: 'Simples, claro e garantido', desc: 'Sem truques. Sua conta realmente cai.' },
   ]
   return (
     <section className="py-12 md:py-16">
@@ -72,8 +72,8 @@ function Simulador(){
   return (
     <section className="py-12 md:py-16">
       <div className="container-section">
-        <h2 className="text-2xl md:text-3xl font-bold">Veja agora quanto seu bolso pode recuperar</h2>
-        <p className="section-subtitle mt-1">Sua conta não pode esperar. Simule e descubra seu alívio imediato.</p>
+        <h2 className="text-2xl md:text-3xl font-bold">Veja agora quanto volta para você todo mês</h2>
+        <p className="section-subtitle mt-1">Você paga menos, economiza na fatura. Simule em segundos.</p>
         <div className="mt-6 grid md:grid-cols-5 gap-6">
           <div className="md:col-span-3 grid gap-3">
             <input className="input" type="number" min={50} step={10} value={conta} onChange={e=>setConta(Number(e.target.value))} placeholder="O que você paga hoje (R$/mês)" />
@@ -100,9 +100,9 @@ function Steps(){
     if(inView && mask){ mask.animate([{width:'0%'},{width:'100%'}], {duration:1200, fill:'forwards', easing:'ease-out'}) }
   },[inView])
   const steps=[
-    {n:1,t:'Agende sua simulação gratuita',d:'Simples, rápido e sem compromisso.'},
-    {n:2,t:'Receba seu projeto sob medida',d:'Clareza total de economia e prazos.'},
-    {n:3,t:'Instalação expressa e ativação',d:'Veja sua conta despencar já nos próximos meses.'},
+    {n:1,t:'Você continua pagando o mínimo da Cemig',d:'Sem mudanças na sua rotina.'},
+    {n:2,t:'A diferença vira desconto na sua fatura',d:'Você vê o abatimento mês a mês.'},
+    {n:3,t:'Conta reduzida — simples assim',d:'Economia de 20% de forma clara e garantida.'},
   ]
   return (
     <section className="py-12 md:py-16">
@@ -124,9 +124,9 @@ function Steps(){
 
 function Depoimentos(){
   const items=[
-    {t:'Minha conta foi de R$ 740 para R$ 80 em 3 meses com a Solar Energy.',a:'Ana, BH',img:'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=200&auto=format&fit=crop'},
-    {t:'Reduzi 87% em 90 dias. Processo claro e sem dor de cabeça.',a:'Marcos, Contagem',img:'https://images.unsplash.com/photo-1520974692973-ac47dfb7fd89?q=80&w=200&auto=format&fit=crop'},
-    {t:'Instalação rápida, atendimento local e economia visível.',a:'Paula, Nova Lima',img:'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200&auto=format&fit=crop'},
+    {t:'Minha conta caiu 20% após assinar. Paguei o mínimo da Cemig e vi R$ 50 de economia real.',a:'João, BH',img:'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=200&auto=format&fit=crop'},
+    {t:'O desconto veio certinho todo mês. Ficou simples entender a fatura.',a:'Maria, Uberlândia',img:'https://images.unsplash.com/photo-1520974692973-ac47dfb7fd89?q=80&w=200&auto=format&fit=crop'},
+    {t:'Economizei 20% sem dor de cabeça. Atendimento rápido em MG.',a:'Carlos, Contagem',img:'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200&auto=format&fit=crop'},
   ]
   return (
     <section className="py-12 md:py-16">
@@ -146,10 +146,10 @@ function Depoimentos(){
 
 function FAQ(){
   const qas=[
-    {q:'Preciso trocar meu telhado?',a:'Na maioria dos casos, não. Adaptamos ao seu padrão com eficiência — sem obras desnecessárias.'},
-    {q:'E se faltar sol?',a:'Seus créditos compensam. Sua conta nunca fica no escuro.'},
-    {q:'Quanto tempo para instalar?',a:'Em poucos dias úteis você já está economizando.'},
-    {q:'Qual a garantia?',a:'Painéis e sistema com cobertura de até 25 anos. Segurança e tranquilidade.'},
+    {q:'Preciso trocar meu telhado?',a:'Na maioria dos casos, não. Você mantém tudo como está.'},
+    {q:'E se faltar sol?',a:'O desconto é aplicado na fatura. Você continua economizando.'},
+    {q:'Quando começo a ver a economia?',a:'Já na próxima fatura você sente a diferença.'},
+    {q:'É complicado?',a:'Não. É simples, claro e com desconto garantido.'},
   ]
   const [open,setOpen]=useState<number|null>(0)
   return (
@@ -182,14 +182,14 @@ function CTAFinal(){
     <section className="section-blue py-14 md:py-16">
       <div className="container-section grid md:grid-cols-2 gap-6 items-center">
         <div>
-          <h2 className="text-2xl md:text-3xl font-bold">Sua economia começou quando você clicou. Vamos fazer acontecer.</h2>
-          <p className="mt-2 opacity-90">Pare de pagar caro. Fale com um especialista agora e receba seu plano ideal.</p>
+          <h2 className="text-2xl md:text-3xl font-bold">Pare de pagar mais — aproveite 20% de desconto hoje mesmo.</h2>
+          <p className="mt-2 opacity-90">Você paga menos, economiza na fatura e sente a diferença no bolso.</p>
         </div>
         <div className="grid sm:grid-cols-2 gap-3">
           <input className="input" placeholder="Nome" />
           <input className="input" placeholder="Telefone" />
           <input className="input sm:col-span-2" placeholder="E-mail" />
-          <button className="btn-yellow sm:col-span-2">Simular minha economia AGORA</button>
+          <button className="btn-yellow sm:col-span-2">Quero meu desconto agora</button>
         </div>
       </div>
     </section>
@@ -204,20 +204,20 @@ function Plates3D(){
       <div className="container-section">
         <div className="lead-thin max-w-xl">
           <input placeholder="Seu e-mail" />
-          <button className="btn-yellow">Começar a economizar hoje</button>
+          <button className="btn-yellow">Garanta seu desconto agora</button>
         </div>
         <div className="mt-8 grid md:grid-cols-3 gap-6">
           <div className="plate-3d rounded-2xl p-6">
-            <h3 className="text-lg font-bold">Confiança que se paga</h3>
-            <p className="mt-1 text-[var(--muted)] text-sm">Facilidade total no pagamento. Parcelamento leve como sua conta.</p>
+            <h3 className="text-lg font-bold">20% garantido todo mês</h3>
+            <p className="mt-1 text-[var(--muted)] text-sm">Desconto direto na fatura. Simples e transparente.</p>
           </div>
           <div className="plate-3d rounded-2xl p-6">
-            <h3 className="text-lg font-bold">Prova de benefício</h3>
-            <p className="mt-1 text-[var(--muted)] text-sm">Mais de 500 projetos entregues em MG — residências, comércios e áreas rurais.</p>
+            <h3 className="text-lg font-bold">Pague o mínimo da Cemig</h3>
+            <p className="mt-1 text-[var(--muted)] text-sm">O restante vira economia para você.</p>
           </div>
           <div className="plate-3d rounded-2xl p-6">
-            <h3 className="text-lg font-bold">É agora ou nunca</h3>
-            <p className="mt-1 text-[var(--muted)] text-sm">Proposta gratuita em 24h e instalação expressa. Sua conta não pode esperar.</p>
+            <h3 className="text-lg font-bold">Sem truques</h3>
+            <p className="mt-1 text-[var(--muted)] text-sm">Clareza total e desconto que aparece na fatura.</p>
           </div>
         </div>
         <div className="logo-marquee mt-10">
@@ -241,7 +241,7 @@ function Footer(){
       <div className="container-section flex flex-col items-center gap-2 mt-4">
         <div className="font-semibold">Solar Energy</div>
         <div className="text-sm text-[var(--muted)]">contato@solarenergy.com.br</div>
-        <div className="text-xs text-[var(--muted)]">© {new Date().getFullYear()} Solar Energy. Todos os direitos reservados.</div>
+        <div className="text-xs text-[var(--muted)]">© {new Date().getFullYear()} Solar Energy. Desconto válido para clientes Cemig residencial. Economia baseada em comparação com sua conta atual — transparente e garantida.</div>
       </div>
     </footer>
   )
@@ -262,7 +262,7 @@ export default function App(){
       <Footer/>
       <div className="sticky-cta md:hidden">
         <div className="container-section py-3 text-center">
-          <button className="btn-blue w-full">Simule e comece a economizar hoje</button>
+          <button className="btn-blue w-full">Quero meu desconto agora</button>
         </div>
       </div>
     </div>
