@@ -86,5 +86,5 @@ body {
 .social:hover { box-shadow: 0 0 12px rgba(0,183,255,0.25); border-color: rgba(0,183,255,0.4); }
 
 /* Logo wrapper with the same effect as social buttons */
-.logo-wrap { @apply inline-flex items-center justify-center rounded-lg transition; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.06); }
-.logo-wrap:hover { box-shadow: 0 0 12px rgba(0,183,255,0.25); border-color: rgba(0,183,255,0.4); }
+.logo-wrap { @apply inline-flex items-center justify-center transition; }
+.logo-wrap:hover { box-shadow: 0 0 12px rgba(0,183,255,0.25); }
