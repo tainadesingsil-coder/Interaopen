@@ -58,7 +58,7 @@ function Header() {
     <header className="fixed top-0 z-40 w-full border-b border-white/5 bg-black/40 backdrop-blur">
       <div className="container-section flex items-center justify-between py-4">
         <a href="#" className="flex items-center gap-3">
-          <img src="/brand-logo.jpg" alt="Minas Solar" className="h-8 w-auto rounded-sm" />
+          <img src="/brand-logo.svg" alt="Minas Solar" className="h-8 w-auto" />
           <span className="text-lg font-extrabold tracking-tight text-white">Minas Solar</span>
         </a>
         <nav className="hidden md:flex items-center gap-8 text-sm text-solar-gray-light">
@@ -472,7 +472,7 @@ function Footer() {
       <div className="container-section flex flex-col md:flex-row items-center md:items-start justify-between gap-6">
         <div>
           <div className="flex items-center gap-3">
-            <img src="/brand-logo.jpg" alt="Minas Solar" className="h-6 w-auto rounded-sm" />
+            <img src="/brand-logo.svg" alt="Minas Solar" className="h-6 w-auto" />
             <span className="text-lg font-extrabold">Minas Solar</span>
           </div>
           <p className="mt-2 text-solar-gray-light text-sm">Energia solar para todo o estado de Minas Gerais.</p>
