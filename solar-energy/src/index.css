@@ -5,11 +5,15 @@
 :root {
 	--blue: #007BFF;
 	--yellow: #FFC107;
+	--orange: #FF5722;
 	--text: #111111;
 	--muted: #6B7280;
 	--bg: #FFFFFF;
 	--bg-muted: #F7F7F7;
+	--blue-dark: #0B3B8F;
 }
+
+html { scroll-behavior: smooth; }
 
 body {
 	@apply font-sans bg-[var(--bg)] text-[var(--text)];
@@ -19,44 +23,47 @@ body {
 .section-title { @apply text-3xl md:text-5xl font-extrabold tracking-tight; }
 .section-subtitle { @apply text-base md:text-lg text-[var(--muted)]; }
 
+/* Buttons */
 .btn-yellow {
-	@apply inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-semibold transition focus:outline-none focus:ring-2;
+	@apply inline-flex items-center justify-center rounded-full px-7 py-3 text-sm font-semibold transition transform focus:outline-none focus:ring-2;
 	background: var(--yellow);
 	color: #111111;
-	--tw-ring-color: rgba(255,193,7,0.35);
 }
-.btn-yellow:hover { filter: brightness(1.05); }
+.btn-yellow:hover { background: var(--orange); transform: scale(1.03); box-shadow: 0 10px 24px rgba(255,87,34,0.25); }
 
 .btn-blue {
-	@apply inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-semibold text-white transition focus:outline-none focus:ring-2;
+	@apply inline-flex items-center justify-center rounded-full px-7 py-3 text-sm font-semibold text-white transition transform focus:outline-none focus:ring-2;
 	background: var(--blue);
-	--tw-ring-color: rgba(0,123,255,0.35);
 }
-.btn-blue:hover { filter: brightness(1.05); }
+.btn-blue:hover { filter: brightness(1.05); transform: translateY(-1px); }
 
 .input {
 	@apply w-full rounded-md border border-gray-200 bg-white px-4 py-3 outline-none focus:ring-2;
-	--tw-ring-color: rgba(0,123,255,0.25);
 }
 
-.card {
-	@apply rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition;
-}
-.card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.06); }
+/* Cards */
+.card { @apply rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition transform; }
+.card:hover { box-shadow: 0 20px 40px rgba(0,0,0,0.12); transform: translateY(-3px); }
 
-.header {
-	@apply fixed top-0 z-40 w-full border-b border-gray-200 bg-white/80 backdrop-blur;
-}
+.card-aggressive { @apply rounded-2xl bg-white p-6 transition transform; border: 2px solid #E5E7EB; box-shadow: 0 20px 40px rgba(0,0,0,0.12); }
+.card-aggressive:hover { transform: translateY(-4px) scale(1.02); box-shadow: 0 30px 60px rgba(0,0,0,0.18); }
+.icon-large { width: 32px; height: 32px; color: var(--muted); transition: color 200ms ease; }
+.card-aggressive:hover .icon-large { color: var(--blue); }
 
-.section-blue {
-	background: #0B3B8F;
-	color: #FFFFFF;
-}
+/* Header */
+.header { @apply fixed top-0 z-40 w-full bg-white/90 backdrop-blur border-b border-gray-200; box-shadow: 0 6px 20px rgba(0,0,0,0.06); }
 
-.footer {
-	@apply bg-[var(--bg-muted)] text-[var(--text)];
-}
+/* Sections */
+.section-blue { background: var(--blue-dark); color: #FFFFFF; }
+.footer { @apply bg-[var(--bg-muted)] text-[var(--text)]; }
 
-.sticky-cta {
-	@apply fixed bottom-0 left-0 right-0 z-40 md:hidden border-t border-gray-200 bg-white/95 backdrop-blur;
-}
+/* Lines for steps */
+.steps-rail { position: absolute; top: 36px; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, rgba(0,123,255,0.2), rgba(0,123,255,0.6)); border-radius: 999px; overflow: hidden; }
+.steps-rail .mask { width: 0%; height: 100%; background: rgba(255,255,255,0.9); opacity: 0.25; }
+.step-circle { @apply flex items-center justify-center rounded-full text-white font-bold; width: 48px; height: 48px; background: var(--blue); border: 4px solid #E5E7EB; }
+
+/* Gradient backgrounds */
+.gradient-blue-white { background: linear-gradient(180deg, #E8F1FF 0%, #FFFFFF 60%); }
+
+/* Sticky CTA mobile */
+.sticky-cta { @apply fixed bottom-0 left-0 right-0 z-40 md:hidden border-t border-gray-200 bg-white/95 backdrop-blur; }

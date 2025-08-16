@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react'
-import { motion } from 'framer-motion'
-import { ArrowRight, Sun, Home, Leaf } from 'lucide-react'
+import { useMemo, useState, useEffect, useRef } from 'react'
+import { motion, AnimatePresence, useInView } from 'framer-motion'
+import { ArrowRight, Sun, Home, Leaf, ChevronDown, Quote } from 'lucide-react'
 import './index.css'
 
 function Header() {
@@ -20,20 +20,29 @@ function Hero() {
   const [email, setEmail] = useState('')
   return (
     <section className="relative pt-24 md:pt-32 pb-12 md:pb-16">
-      <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1509395176047-4a66953fd231?q=80&w=1920&auto=format&fit=crop')] bg-cover bg-center opacity-15" />
-      <div className="container-section relative">
-        <motion.h1 initial={{opacity:0,y:8}} whileInView={{opacity:1,y:0}} viewport={{once:true}} transition={{duration:0.5}} className="section-title text-center">
-          Reduza sua conta de luz em até 20% com energia solar.
-        </motion.h1>
-        <motion.p initial={{opacity:0,y:8}} whileInView={{opacity:1,y:0}} viewport={{once:true}} transition={{delay:0.1,duration:0.5}} className="section-subtitle mt-3 text-center">
-          Energia limpa, acessível e sustentável para sua casa ou empresa.
-        </motion.p>
-        <div className="mt-6 max-w-3xl mx-auto grid md:grid-cols-4 gap-3">
-          <input className="input" placeholder="Nome" value={nome} onChange={(e)=>setNome(e.target.value)} />
-          <input className="input" placeholder="Telefone" value={tel} onChange={(e)=>setTel(e.target.value)} />
-          <input className="input" placeholder="E-mail" value={email} onChange={(e)=>setEmail(e.target.value)} />
-          <button className="btn-yellow">Quero economizar agora</button>
+      <div className="container-section relative grid md:grid-cols-2 gap-8 items-center">
+        <div>
+          <motion.h1 initial={{opacity:0,y:12}} whileInView={{opacity:1,y:0}} viewport={{once:true}} transition={{duration:0.6}} className="section-title">
+            Reduza sua conta de luz em até 20% com energia solar.
+          </motion.h1>
+          <motion.p initial={{opacity:0,y:12}} whileInView={{opacity:1,y:0}} viewport={{once:true}} transition={{delay:0.1,duration:0.6}} className="section-subtitle mt-3">
+            Energia limpa, acessível e sustentável.
+          </motion.p>
+          <div className="mt-6 grid md:grid-cols-4 gap-3">
+            <input className="input" placeholder="Nome" value={nome} onChange={(e)=>setNome(e.target.value)} />
+            <input className="input" placeholder="Telefone" value={tel} onChange={(e)=>setTel(e.target.value)} />
+            <input className="input" placeholder="E-mail" value={email} onChange={(e)=>setEmail(e.target.value)} />
+            <button className="btn-yellow">Quero economizar agora</button>
+          </div>
         </div>
+        <motion.div initial={{opacity:0,x:20}} whileInView={{opacity:1,x:0}} viewport={{once:true}} transition={{duration:0.6}} className="relative">
+          <div className="rounded-2xl overflow-hidden border-2 border-white shadow-2xl">
+            <div className="aspect-[4/3] bg-[url('https://images.unsplash.com/photo-1588702547919-26089e690ecc?q=80&w=1600&auto=format&fit=crop')] bg-cover bg-center" />
+          </div>
+          <div className="absolute -bottom-6 -left-6 w-40 rounded-xl overflow-hidden border-2 border-white shadow-xl">
+            <div className="aspect-[4/3] bg-[url('https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=800&auto=format&fit=crop')] bg-cover bg-center" />
+          </div>
+        </motion.div>
       </div>
     </section>
   )
@@ -41,22 +50,20 @@ function Hero() {
 
 function Beneficios() {
   const items = [
-    { icon: Sun, title: 'Economia real', desc: 'Até 20% a menos na sua conta.' },
-    { icon: Home, title: 'Solução simples', desc: 'Sem complicação, acessível.' },
-    { icon: Leaf, title: 'Energia limpa', desc: 'Sustentável e responsável.' },
+    { icon: Sun, title: 'Economia real de até 20%', desc: 'Menos na sua conta, mais no seu bolso.' },
+    { icon: Home, title: 'Residência e empresa', desc: 'Planos sob medida para cada perfil.' },
+    { icon: Leaf, title: 'Energia limpa', desc: 'Sustentável, moderna e confiável.' },
   ]
   return (
-    <section className="py-12 md:py-16 bg-[var(--bg-muted)]">
-      <div className="container-section">
-        <div className="grid md:grid-cols-3 gap-6">
-          {items.map(({icon:Icon,title,desc})=> (
-            <div key={title} className="card text-center">
-              <Icon className="mx-auto h-6 w-6 text-[var(--blue)]" />
-              <h3 className="mt-3 font-semibold">{title}</h3>
-              <p className="mt-1 text-[var(--muted)] text-sm">{desc}</p>
-            </div>
-          ))}
-        </div>
+    <section className="py-12 md:py-16">
+      <div className="container-section grid md:grid-cols-3 gap-6">
+        {items.map(({icon:Icon,title,desc})=> (
+          <div key={title} className="card-aggressive">
+            <Icon className="icon-large" />
+            <h3 className="mt-4 text-lg font-bold">{title}</h3>
+            <p className="mt-1 text-[var(--muted)] text-sm">{desc}</p>
+          </div>
+        ))}
       </div>
     </section>
   )
@@ -84,10 +91,10 @@ function Simulador(){
   const {e,p,n,r}=useCalc(conta,area,cidade)
   const brl=(v:number)=>v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
   return (
-    <section className="py-12 md:py-16">
+    <section className="py-12 md:py-16 gradient-blue-white">
       <div className="container-section">
         <h2 className="text-2xl md:text-3xl font-bold">Simule sua economia</h2>
-        <p className="section-subtitle mt-1">Descubra agora seu potencial de economia.</p>
+        <p className="section-subtitle mt-1">Vê na hora quanto pode economizar.</p>
         <div className="mt-6 grid md:grid-cols-5 gap-6">
           <div className="md:col-span-3 grid gap-3">
             <input className="input" type="number" min={50} step={10} value={conta} onChange={e=>setConta(Number(e.target.value))} placeholder="Conta média (R$/mês)" />
@@ -105,21 +112,28 @@ function Simulador(){
   )
 }
 
-function ComoFunciona(){
+function Steps(){
+  const railRef = useRef<HTMLDivElement>(null)
+  const inView = useInView(railRef, { once: true, margin: '-20% 0px -20% 0px' })
+  useEffect(()=>{
+    if(!railRef.current) return
+    const mask = railRef.current.querySelector<HTMLDivElement>('.mask')
+    if(inView && mask){ mask.animate([{width:'0%'},{width:'100%'}], {duration:1200, fill:'forwards', easing:'ease-out'}) }
+  },[inView])
   const steps=[
-    {n:1,t:'Analisamos seu consumo',d:'Entenda seu perfil e oportunidades.'},
-    {n:2,t:'Mostramos como aplicar',d:'Simulação clara e sem complicação.'},
+    {n:1,t:'Analisamos seu consumo',d:'Você entende seu perfil e oportunidades.'},
+    {n:2,t:'Mostramos o plano ideal',d:'Sem complicação e com clareza.'},
     {n:3,t:'Você paga menos luz',d:'Aproveite a economia de até 20%.'},
   ]
   return (
-    <section className="py-12 md:py-16 bg-[var(--bg-muted)]">
-      <div className="container-section">
-        <h2 className="text-2xl md:text-3xl font-bold">Como funciona</h2>
-        <div className="mt-6 grid md:grid-cols-3 gap-6">
+    <section className="py-12 md:py-16">
+      <div className="container-section relative">
+        <div ref={railRef} className="steps-rail"><div className="mask"/></div>
+        <div className="grid md:grid-cols-3 gap-6">
           {steps.map(s=> (
             <div key={s.n} className="card">
-              <div className="text-4xl font-extrabold text-[var(--blue)]">{s.n}</div>
-              <h3 className="mt-2 font-semibold">{s.t}</h3>
+              <div className="step-circle">{s.n}</div>
+              <h3 className="mt-3 font-semibold">{s.t}</h3>
               <p className="mt-1 text-[var(--muted)] text-sm">{s.d}</p>
             </div>
           ))}
@@ -131,18 +145,21 @@ function ComoFunciona(){
 
 function Depoimentos(){
   const items=[
-    {t:'“Minha conta caiu 20% sem complicação.”',a:'Carlos, MG'},
-    {t:'“Simples, rápido e eficiente.”',a:'Aline, BH'},
-    {t:'“A economia veio no primeiro mês.”',a:'Rogério, Contagem'},
+    {t:'Minha conta caiu 20% sem complicação.',a:'Carlos, MG',img:'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=200&auto=format&fit=crop'},
+    {t:'Foi simples, rápido e eficiente.',a:'Aline, BH',img:'https://images.unsplash.com/photo-1520974692973-ac47dfb7fd89?q=80&w=200&auto=format&fit=crop'},
+    {t:'A economia veio logo no primeiro mês.',a:'Rogério, Contagem',img:'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200&auto=format&fit=crop'},
   ]
   return (
-    <section className="py-12 md:py-16">
-      <div className="container-section">
-        <div className="grid md:grid-cols-3 gap-6">
-          {items.map((d,i)=> (
-            <blockquote key={i} className="card italic"><p>{d.t}</p><p className="mt-2 not-italic text-sm text-[var(--muted)]">— {d.a}</p></blockquote>
-          ))}
-        </div>
+    <section className="py-12 md:py-16 gradient-blue-white">
+      <div className="container-section grid gap-4">
+        {items.map((d,i)=> (
+          <div key={i} className="card flex items-center gap-4">
+            <img src={d.img} alt={d.a} className="h-12 w-12 rounded-full object-cover" />
+            <Quote className="h-5 w-5 text-[var(--blue)]" />
+            <p className="italic">“{d.t}”</p>
+            <span className="ml-auto text-sm text-[var(--muted)]">— {d.a}</span>
+          </div>
+        ))}
       </div>
     </section>
   )
@@ -154,16 +171,25 @@ function FAQ(){
     {q:'Funciona para residência e empresa?',a:'Sim. Adaptamos para cada perfil e necessidade.'},
     {q:'Preciso instalar agora?',a:'Você decide o momento ideal. Estamos prontos para orientar.'},
   ]
+  const [open,setOpen]=useState<number|null>(0)
   return (
-    <section className="py-12 md:py-16 bg-[var(--bg-muted)]">
+    <section className="py-12 md:py-16">
       <div className="container-section">
-        <h2 className="text-2xl md:text-3xl font-bold">Perguntas frequentes</h2>
-        <div className="mt-6 grid gap-3">
+        <div className="grid gap-3">
           {qas.map((x,i)=> (
-            <details key={i} className="card">
-              <summary className="cursor-pointer font-medium">{x.q}</summary>
-              <p className="mt-2 text-[var(--muted)] text-sm">{x.a}</p>
-            </details>
+            <div key={i} className="card">
+              <button onClick={()=>setOpen(open===i?null:i)} className="w-full flex items-center justify-between text-left">
+                <span className="font-medium">{x.q}</span>
+                <ChevronDown className={`h-4 w-4 transition-transform ${open===i?'rotate-180 text-[var(--blue)]':''}`} />
+              </button>
+              <AnimatePresence>
+                {open===i && (
+                  <motion.p initial={{height:0,opacity:0}} animate={{height:'auto',opacity:1}} exit={{height:0,opacity:0}} transition={{duration:0.25}} className="mt-2 text-[var(--muted)] text-sm">
+                    {x.a}
+                  </motion.p>
+                )}
+              </AnimatePresence>
+            </div>
           ))}
         </div>
       </div>
@@ -173,10 +199,18 @@ function FAQ(){
 
 function CTAFinal(){
   return (
-    <section className="section-blue py-14 md:py-16 text-center">
-      <div className="container-section">
-        <h2 className="text-2xl md:text-3xl font-bold">Está pronto para economizar até 20% na sua conta de luz?</h2>
-        <button className="btn-yellow mt-6 inline-flex items-center">Sim, quero economizar<ArrowRight className="ml-2 h-4 w-4"/></button>
+    <section className="section-blue py-14 md:py-16">
+      <div className="container-section grid md:grid-cols-2 gap-6 items-center">
+        <div>
+          <h2 className="text-2xl md:text-3xl font-bold">Pronto para economizar até 20%?</h2>
+          <p className="mt-2 opacity-90">Fale com um especialista e receba seu plano ideal.</p>
+        </div>
+        <div className="grid sm:grid-cols-2 gap-3">
+          <input className="input" placeholder="Nome" />
+          <input className="input" placeholder="Telefone" />
+          <input className="input sm:col-span-2" placeholder="E-mail" />
+          <button className="btn-yellow sm:col-span-2">Quero economizar agora</button>
+        </div>
       </div>
     </section>
   )
@@ -185,7 +219,7 @@ function CTAFinal(){
 function Footer(){
   return (
     <footer className="footer py-8">
-      <div className="container-section flex flex-col md:flex-row items-center md:items-start justify-between gap-4">
+      <div className="container-section flex flex-col items-center gap-2">
         <div className="font-semibold">Solar Energy</div>
         <div className="text-sm text-[var(--muted)]">+55 31 99999-9999 • contato@solarenergy.com.br</div>
         <div className="text-xs text-[var(--muted)]">© {new Date().getFullYear()} Solar Energy. Todos os direitos reservados.</div>
@@ -201,7 +235,7 @@ export default function App(){
       <Hero/>
       <Beneficios/>
       <Simulador/>
-      <ComoFunciona/>
+      <Steps/>
       <Depoimentos/>
       <FAQ/>
       <CTAFinal/>
