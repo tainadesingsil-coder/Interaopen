@@ -82,7 +82,7 @@ body {
 .footer-neon-line { height: 2px; background: radial-gradient(closest-side, rgba(0,183,255,0.6), transparent 70%); filter: blur(0.3px); }
 
 /* Social icon button */
-.social { @apply inline-flex items-center justify-center rounded-full transition; width: 28px; height: 28px; }
+.social { @apply inline-flex items-center justify-center rounded-full transition; width: 32px; height: 32px; }
 .social svg { transition: filter 200ms ease; }
 .social:hover svg { filter: drop-shadow(0 0 10px rgba(0,183,255,0.45)); }
 

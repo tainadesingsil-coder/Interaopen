@@ -19,16 +19,13 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
   const current = imageUrls?.[index] ?? imageUrls?.[0];
 
   return (
-    <section
-      className="relative overflow-hidden"
-      style={{ background: "linear-gradient(180deg, #0E3A6F 0%, #001B36 100%)" }}
-    >
+    <section className="relative overflow-hidden">
       <div className="absolute top-5 left-5 z-10">
         <img src="/logo.svg" alt="Solar Energy" className="h-6 w-auto opacity-90" />
       </div>
 
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center py-16 md:py-24">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center py-20 md:py-28">
           <motion.div
             initial={{ opacity: 0, y: 14 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -75,8 +72,7 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
                     style={{ transform: "translateZ(0)" }}
                   />
                 </AnimatePresence>
-                {/* Badge discreto opcional */}
-                <div className="absolute top-3 left-3 bg-black/40 text-white text-xs px-2 py-1 rounded-md border border-white/10 backdrop-blur-sm">
+                <div className="absolute top-2 left-2 bg-black/25 text-white text-[10px] px-1.5 py-0.5 rounded-md backdrop-blur-sm">
                   20% garantido todo mês
                 </div>
               </div>

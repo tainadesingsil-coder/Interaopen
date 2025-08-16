@@ -13,13 +13,13 @@ function Header() {
         </a>
         <div className="flex items-center gap-2">
           <a href="#" aria-label="Instagram" className="social">
-            <Instagram size={12} strokeWidth={1.2} className="text-white" />
+            <Instagram size={16} strokeWidth={1.2} className="text-white" />
           </a>
           <a href="#" aria-label="Facebook" className="social">
-            <Facebook size={12} strokeWidth={1.2} className="text-white" />
+            <Facebook size={16} strokeWidth={1.2} className="text-white" />
           </a>
           <a href="#" aria-label="YouTube" className="social">
-            <Youtube size={12} strokeWidth={1.2} className="text-white" />
+            <Youtube size={16} strokeWidth={1.2} className="text-white" />
           </a>
         </div>
       </div>
