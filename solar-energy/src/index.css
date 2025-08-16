@@ -87,4 +87,6 @@ body {
 
 /* Logo wrapper with the same effect as social buttons */
 .logo-wrap { @apply inline-flex items-center justify-center transition; }
-.logo-wrap:hover { box-shadow: 0 0 12px rgba(0,183,255,0.25); }
+.logo-wrap:hover {}
+.logo-wrap img { transition: filter 200ms ease; }
+.logo-wrap:hover img { filter: drop-shadow(0 0 12px rgba(0,183,255,0.35)); }
