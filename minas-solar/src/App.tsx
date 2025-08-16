@@ -74,6 +74,17 @@ function Header() {
 }
 
 function Hero() {
+  const [leadNome, setLeadNome] = useState('')
+  const [leadFone, setLeadFone] = useState('')
+  const [leadCidade, setLeadCidade] = useState('')
+  const [leadConta, setLeadConta] = useState('')
+
+  function enviarLead(e: React.FormEvent) {
+    e.preventDefault()
+    const msg = `Olá, Minas Solar! Quero aproveitar descontos de até 20%.\n\nNome: ${leadNome}\nWhatsApp: ${leadFone}\nCidade: ${leadCidade}\nConta média: R$ ${leadConta}`
+    openWhatsApp(msg)
+  }
+
   return (
     <section className="relative pt-28 md:pt-36 pb-16 md:pb-24">
       <div className="container-section grid md:grid-cols-2 gap-10 items-center">
@@ -85,7 +96,7 @@ function Hero() {
             transition={{ duration: 0.6 }}
             className="section-title gradient-text"
           >
-            Descontos de até 20% na sua conta de luz em Minas Gerais
+            Pague até 20% menos na sua conta de luz em Minas Gerais
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 10 }}
@@ -96,6 +107,13 @@ function Hero() {
           >
             Projetos, instalação e monitoramento com condições especiais para o clima mineiro.
           </motion.p>
+          <ul className="mt-6 grid sm:grid-cols-2 gap-3 text-sm text-solar-gray-light">
+            <li className="flex items-center gap-2"><Check className="h-4 w-4 text-[var(--brand-primary)]" /> Estudo gratuito em até 24h</li>
+            <li className="flex items-center gap-2"><Check className="h-4 w-4 text-[var(--brand-primary)]" /> Atuação em todo MG</li>
+            <li className="flex items-center gap-2"><Check className="h-4 w-4 text-[var(--brand-primary)]" /> Sem dor de cabeça</li>
+            <li className="flex items-center gap-2"><Check className="h-4 w-4 text-[var(--brand-primary)]" /> Suporte dedicado</li>
+          </ul>
+
           <div className="mt-8 flex flex-col sm:flex-row gap-3">
             <button
               onClick={() => document.getElementById('simulador')?.scrollIntoView({ behavior: 'smooth' })}
@@ -119,16 +137,27 @@ function Hero() {
           </div>
         </div>
         <motion.div
-          initial={{ opacity: 0, scale: 0.98 }}
-          whileInView={{ opacity: 1, scale: 1 }}
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
+          transition={{ duration: 0.6 }}
           className="relative"
         >
           <div className="card-gradient rounded-2xl">
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-2">
-              <div className="aspect-[4/3] w-full rounded-xl bg-[url('https://images.unsplash.com/photo-1509395176047-4a66953fd231?q=80&w=1974&auto=format&fit=crop')] bg-cover bg-center" />
-            </div>
+            <form onSubmit={enviarLead} className="rounded-2xl border border-white/10 bg-white/5 p-6">
+              <p className="text-lg font-semibold">Receba sua proposta</p>
+              <p className="text-solar-gray-light text-sm">Grátis e sem compromisso. Respondemos em até 24h.</p>
+              <div className="mt-4 grid gap-3">
+                <input required value={leadNome} onChange={(e) => setLeadNome(e.target.value)} placeholder="Seu nome" className="rounded-md bg-black/40 border border-white/10 px-4 py-3 outline-none focus:ring-2" />
+                <input required value={leadFone} onChange={(e) => setLeadFone(e.target.value)} placeholder="WhatsApp" className="rounded-md bg-black/40 border border-white/10 px-4 py-3 outline-none focus:ring-2" />
+                <div className="grid grid-cols-2 gap-3">
+                  <input required value={leadCidade} onChange={(e) => setLeadCidade(e.target.value)} placeholder="Cidade" className="rounded-md bg-black/40 border border-white/10 px-4 py-3 outline-none focus:ring-2" />
+                  <input required value={leadConta} onChange={(e) => setLeadConta(e.target.value)} placeholder="Conta média (R$)" className="rounded-md bg-black/40 border border-white/10 px-4 py-3 outline-none focus:ring-2" />
+                </div>
+                <button type="submit" className="btn-primary">Receber proposta</button>
+              </div>
+              <p className="mt-3 text-xs text-solar-gray-light">Protegemos seus dados. Nunca enviamos spam.</p>
+            </form>
           </div>
           <div className="absolute -bottom-4 -left-4 hidden md:block h-24 w-24 rounded-xl bg-[var(--brand-primary)] blur-3xl opacity-20" />
         </motion.div>
@@ -272,8 +301,8 @@ function ComoFunciona() {
         <div className="mt-10 grid md:grid-cols-3 gap-6">
           {steps.map((s, i) => (
             <div key={s.title} className="rounded-xl border border-white/10 bg-white/5 p-6">
-              <div className="flex items-center gap-3 text-solar-yellow">
-                <div className="h-8 w-8 rounded-full border border-solar-yellow flex items-center justify-center font-bold">{i + 1}</div>
+              <div className="flex items-center gap-3 text-[var(--brand-primary)]">
+                <div className="h-8 w-8 rounded-full border border-[var(--brand-primary)] flex items-center justify-center font-bold">{i + 1}</div>
                 <span className="font-semibold">{s.title}</span>
               </div>
               <p className="mt-3 text-solar-gray-light">{s.desc}</p>
@@ -315,7 +344,7 @@ function Planos() {
               <p className="mt-1 text-solar-gray-light">{p.price}</p>
               <ul className="mt-4 space-y-2 text-sm flex-1">
                 {p.features.map(f => (
-                  <li key={f} className="flex items-center gap-2"><Check className="h-4 w-4 text-solar-yellow" /> {f}</li>
+                  <li key={f} className="flex items-center gap-2"><Check className="h-4 w-4 text-[var(--brand-primary)]" /> {f}</li>
                 ))}
               </ul>
               <button onClick={() => openWhatsApp(`Quero proposta para o plano ${p.name} da Minas Solar.`)} className="btn-primary mt-4">Pedir proposta</button>
