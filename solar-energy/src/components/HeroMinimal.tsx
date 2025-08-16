@@ -67,14 +67,14 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
                   "radial-gradient(closest-side, rgba(0,183,255,0.25), transparent 70%)",
               }}
             />
-            <div className="relative rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10">
-              <div className="relative w-full h-full">
+            <div className="relative overflow-hidden shadow-2xl">
+              <div className="relative w-full aspect-video">
                 <AnimatePresence mode="wait">
                   <motion.img
                     key={current}
                     src={current}
                     alt="Usina solar"
-                    className="block w-full h-auto object-cover"
+                    className="absolute inset-0 w-full h-full object-cover"
                     initial={{ opacity: 0, scale: 1.04 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0.0, scale: 1.02 }}

@@ -82,11 +82,11 @@ body {
 .footer-neon-line { height: 2px; background: radial-gradient(closest-side, rgba(0,183,255,0.6), transparent 70%); filter: blur(0.3px); }
 
 /* Social icon button */
-.social { @apply inline-flex items-center justify-center rounded-full transition; width: 28px; height: 28px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.06); }
-.social:hover { box-shadow: 0 0 12px rgba(0,183,255,0.25); border-color: rgba(0,183,255,0.4); }
+.social { @apply inline-flex items-center justify-center rounded-full transition; width: 24px; height: 24px; }
+.social svg { transition: filter 200ms ease; }
+.social:hover svg { filter: drop-shadow(0 0 10px rgba(0,183,255,0.45)); }
 
-/* Logo wrapper with the same effect as social buttons */
+/* Logo wrapper hover glow only */
 .logo-wrap { @apply inline-flex items-center justify-center transition; }
-.logo-wrap:hover {}
 .logo-wrap img { transition: filter 200ms ease; }
-.logo-wrap:hover img { filter: drop-shadow(0 0 16px rgba(0,183,255,0.5)); }
+.logo-wrap:hover img { filter: drop-shadow(0 0 14px rgba(0,183,255,0.45)); }
