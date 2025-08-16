@@ -1,10 +1,23 @@
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { useEffect, useState } from "react";
 
 type HeroMinimalProps = {
-  imageUrl: string;
+  imageUrls: string[];
 };
 
-export default function HeroMinimal({ imageUrl }: HeroMinimalProps) {
+export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    if (!imageUrls || imageUrls.length <= 1) return;
+    const id = setInterval(() => {
+      setIndex((prev) => (prev + 1) % imageUrls.length);
+    }, 4500);
+    return () => clearInterval(id);
+  }, [imageUrls]);
+
+  const current = imageUrls?.[index] ?? imageUrls?.[0];
+
   return (
     <section
       className="relative overflow-hidden"
@@ -55,12 +68,25 @@ export default function HeroMinimal({ imageUrl }: HeroMinimalProps) {
               }}
             />
             <div className="relative rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10">
-              <img
-                src={imageUrl}
-                alt="Placas solares modernas"
-                className="block w-full h-auto object-cover"
-                style={{ transform: "translateZ(0)" }}
-              />
+              <div className="relative w-full h-full">
+                <AnimatePresence mode="wait">
+                  <motion.img
+                    key={current}
+                    src={current}
+                    alt="Usina solar"
+                    className="block w-full h-auto object-cover"
+                    initial={{ opacity: 0, scale: 1.04 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0.0, scale: 1.02 }}
+                    transition={{ duration: 0.8, ease: "easeOut" }}
+                    style={{ transform: "translateZ(0)" }}
+                  />
+                </AnimatePresence>
+                {/* Badge discreto opcional */}
+                <div className="absolute top-3 left-3 bg-black/40 text-white text-xs px-2 py-1 rounded-md border border-white/10 backdrop-blur-sm">
+                  20% garantido todo mês
+                </div>
+              </div>
             </div>
           </motion.div>
         </div>
