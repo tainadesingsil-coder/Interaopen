@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { ArrowRight, Check, Leaf, Lock, PiggyBank, Shield, Sun, MessageCircle } from 'lucide-react'
+import { ArrowRight, Check, Leaf, Lock, PiggyBank, Shield, MessageCircle } from 'lucide-react'
 import './index.css'
 
 type CityOption = {
@@ -57,8 +57,8 @@ function Header() {
   return (
     <header className="fixed top-0 z-40 w-full border-b border-white/5 bg-black/40 backdrop-blur">
       <div className="container-section flex items-center justify-between py-4">
-        <a href="#" className="flex items-center gap-2">
-          <Sun className="h-6 w-6 text-solar-yellow" />
+        <a href="#" className="flex items-center gap-3">
+          <img src="/brand-logo.jpg" alt="Minas Solar" className="h-8 w-auto rounded-sm" />
           <span className="text-lg font-extrabold tracking-tight text-white">Minas Solar</span>
         </a>
         <nav className="hidden md:flex items-center gap-8 text-sm text-solar-gray-light">
@@ -85,7 +85,7 @@ function Hero() {
             transition={{ duration: 0.6 }}
             className="section-title"
           >
-            Economize até 95% na sua conta de luz em Minas Gerais
+            Descontos de até 20% na sua conta de luz em Minas Gerais
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 10 }}
@@ -94,7 +94,7 @@ function Hero() {
             transition={{ delay: 0.1, duration: 0.6 }}
             className="section-subtitle mt-4"
           >
-            Projetamos, instalamos e monitoramos sistemas solares sob medida para o clima mineiro.
+            Projetamos, instalamos e monitoramos sistemas solares com condições especiais para o clima mineiro.
           </motion.p>
           <div className="mt-8 flex flex-col sm:flex-row gap-3">
             <button
@@ -109,13 +109,13 @@ function Hero() {
               className="btn-secondary"
             >
               Falar no WhatsApp
-              <MessageCircle className="ml-2 h-4 w-4 text-solar-yellow" />
+              <MessageCircle className="ml-2 h-4 w-4" />
             </button>
           </div>
           <div className="mt-6 flex items-center gap-4 text-solar-gray-light text-sm">
-            <div className="flex items-center gap-2"><Shield className="h-4 w-4 text-solar-yellow" /> Garantia total</div>
-            <div className="flex items-center gap-2"><Leaf className="h-4 w-4 text-solar-yellow" /> Sustentável</div>
-            <div className="flex items-center gap-2"><Lock className="h-4 w-4 text-solar-yellow" /> Homologação</div>
+            <div className="flex items-center gap-2"><Shield className="h-4 w-4 text-[var(--brand-primary)]" /> Garantia total</div>
+            <div className="flex items-center gap-2"><Leaf className="h-4 w-4 text-[var(--brand-primary)]" /> Sustentável</div>
+            <div className="flex items-center gap-2"><Lock className="h-4 w-4 text-[var(--brand-primary)]" /> Homologação</div>
           </div>
         </div>
         <motion.div
@@ -128,7 +128,7 @@ function Hero() {
           <div className="aspect-[4/3] rounded-2xl border border-white/5 bg-gradient-to-br from-white/10 to-transparent p-2">
             <div className="h-full w-full rounded-xl bg-[url('https://images.unsplash.com/photo-1509395176047-4a66953fd231?q=80&w=1974&auto=format&fit=crop')] bg-cover bg-center" />
           </div>
-          <div className="absolute -bottom-4 -left-4 hidden md:block h-24 w-24 rounded-xl bg-solar-yellow blur-3xl opacity-20" />
+          <div className="absolute -bottom-4 -left-4 hidden md:block h-24 w-24 rounded-xl bg-[var(--brand-primary)] blur-3xl opacity-20" />
         </motion.div>
       </div>
     </section>
@@ -152,7 +152,7 @@ function Simulador() {
       <div className="container-section">
         <div className="max-w-3xl">
           <h2 className="section-title">Simule sua economia</h2>
-          <p className="section-subtitle mt-2">Em menos de 1 minuto você tem uma estimativa realista para Minas Gerais.</p>
+          <p className="section-subtitle mt-2">Descubra quanto você pode economizar — descontos de até 20% na fatura.</p>
         </div>
 
         <div className="mt-8 grid md:grid-cols-5 gap-6">
@@ -166,7 +166,8 @@ function Simulador() {
                   step={10}
                   value={conta}
                   onChange={(e) => setConta(Number(e.target.value))}
-                  className="w-full rounded-md bg-black/40 border border-white/10 px-4 py-3 outline-none focus:ring-2 focus:ring-solar-yellow/40"
+                  className="w-full rounded-md bg-black/40 border border-white/10 px-4 py-3 outline-none focus:ring-2"
+                  style={{ ['--tw-ring-color' as any]: 'var(--brand-ring)' }}
                 />
               </label>
               <label className="grid gap-2">
@@ -177,7 +178,8 @@ function Simulador() {
                   step={1}
                   value={area}
                   onChange={(e) => setArea(Number(e.target.value))}
-                  className="w-full rounded-md bg-black/40 border border-white/10 px-4 py-3 outline-none focus:ring-2 focus:ring-solar-yellow/40"
+                  className="w-full rounded-md bg-black/40 border border-white/10 px-4 py-3 outline-none focus:ring-2"
+                  style={{ ['--tw-ring-color' as any]: 'var(--brand-ring)' }}
                 />
               </label>
               <label className="grid gap-2">
@@ -185,7 +187,8 @@ function Simulador() {
                 <select
                   value={cidade?.name}
                   onChange={(e) => setCidade(CITIES.find(c => c.name === e.target.value) ?? null)}
-                  className="w-full rounded-md bg-black/40 border border-white/10 px-4 py-3 outline-none focus:ring-2 focus:ring-solar-yellow/40"
+                  className="w-full rounded-md bg-black/40 border border-white/10 px-4 py-3 outline-none focus:ring-2"
+                  style={{ ['--tw-ring-color' as any]: 'var(--brand-ring)' }}
                 >
                   {CITIES.map(c => (
                     <option key={c.name} value={c.name}>{c.name}</option>
@@ -203,7 +206,7 @@ function Simulador() {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-solar-gray-light">Economia mensal estimada</span>
-                <span className="text-xl font-bold text-solar-yellow">{currencyBRL(economia)}</span>
+                <span className="text-xl font-bold text-[var(--brand-primary)]">{currencyBRL(economia)}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-solar-gray-light">Nova conta estimada</span>
@@ -228,7 +231,7 @@ function Simulador() {
 
 function Beneficios() {
   const items = [
-    { icon: PiggyBank, title: 'Economia imediata', desc: 'Reduza sua conta em até 95% logo no primeiro mês.' },
+    { icon: PiggyBank, title: 'Economia imediata', desc: 'Descontos de até 20% na sua conta de luz.' },
     { icon: Shield, title: 'Garantia e manutenção', desc: 'Equipamentos com garantia e assistência técnica completa.' },
     { icon: Leaf, title: 'Sustentável e valorização', desc: 'Imóvel mais valorizado e emissão de CO₂ reduzida.' },
   ]
@@ -240,7 +243,7 @@ function Beneficios() {
         <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {items.map(({ icon: Icon, title, desc }) => (
             <div key={title} className="rounded-xl border border-white/10 bg-white/5 p-6">
-              <Icon className="h-7 w-7 text-solar-yellow" />
+              <Icon className="h-7 w-7 text-[var(--brand-primary)]" />
               <h3 className="mt-4 text-xl font-semibold">{title}</h3>
               <p className="mt-1 text-solar-gray-light">{desc}</p>
             </div>
@@ -372,12 +375,12 @@ function Contato() {
           <p className="section-subtitle mt-2">Receba um estudo gratuito em até 24 horas úteis.</p>
         </div>
         <form onSubmit={handleSubmit} className="mt-8 grid md:grid-cols-2 gap-4 rounded-xl border border-white/10 bg-white/5 p-6">
-          <input required value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Nome" className="rounded-md bg-black/40 border border-white/10 px-4 py-3 outline-none focus:ring-2 focus:ring-solar-yellow/40" />
-          <input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="E-mail" className="rounded-md bg-black/40 border border-white/10 px-4 py-3 outline-none focus:ring-2 focus:ring-solar-yellow/40" />
-          <input required value={telefone} onChange={(e) => setTelefone(e.target.value)} placeholder="Telefone/WhatsApp" className="rounded-md bg-black/40 border border-white/10 px-4 py-3 outline-none focus:ring-2 focus:ring-solar-yellow/40" />
-          <input required value={contaMedia} onChange={(e) => setContaMedia(e.target.value)} placeholder="Conta média (R$)" className="rounded-md bg-black/40 border border-white/10 px-4 py-3 outline-none focus:ring-2 focus:ring-solar-yellow/40" />
-          <input required value={cidade} onChange={(e) => setCidade(e.target.value)} placeholder="Cidade" className="rounded-md bg-black/40 border border-white/10 px-4 py-3 outline-none focus:ring-2 focus:ring-solar-yellow/40 md:col-span-2" />
-          <textarea value={mensagem} onChange={(e) => setMensagem(e.target.value)} placeholder="Mensagem" className="rounded-md bg-black/40 border border-white/10 px-4 py-3 outline-none focus:ring-2 focus:ring-solar-yellow/40 md:col-span-2 min-h-[120px]" />
+          <input required value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Nome" className="rounded-md bg-black/40 border border-white/10 px-4 py-3 outline-none focus:ring-2" />
+          <input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="E-mail" className="rounded-md bg-black/40 border border-white/10 px-4 py-3 outline-none focus:ring-2" />
+          <input required value={telefone} onChange={(e) => setTelefone(e.target.value)} placeholder="Telefone/WhatsApp" className="rounded-md bg-black/40 border border-white/10 px-4 py-3 outline-none focus:ring-2" />
+          <input required value={contaMedia} onChange={(e) => setContaMedia(e.target.value)} placeholder="Conta média (R$)" className="rounded-md bg-black/40 border border-white/10 px-4 py-3 outline-none focus:ring-2" />
+          <input required value={cidade} onChange={(e) => setCidade(e.target.value)} placeholder="Cidade" className="rounded-md bg-black/40 border border-white/10 px-4 py-3 outline-none focus:ring-2 md:col-span-2" />
+          <textarea value={mensagem} onChange={(e) => setMensagem(e.target.value)} placeholder="Mensagem" className="rounded-md bg-black/40 border border-white/10 px-4 py-3 outline-none focus:ring-2 md:col-span-2 min-h-[120px]" />
           <button type="submit" className="btn-primary md:col-span-2">Enviar no WhatsApp</button>
         </form>
       </div>
@@ -387,7 +390,7 @@ function Contato() {
 
 function FAQ() {
   const faqs = [
-    { q: 'Quanto posso economizar?', a: 'Clientes em MG chegam a reduzir até 95% da conta, dependendo do consumo e área disponível.' },
+    { q: 'Quanto posso economizar?', a: 'Nossos clientes têm descontos de até 20% na conta de luz, dependendo do perfil de consumo.' },
     { q: 'A energia solar funciona em dias nublados?', a: 'Sim, há geração mesmo com céu encoberto, porém menor. O dimensionamento considera essa variação.' },
     { q: 'Qual o prazo de instalação?', a: 'Após aprovação, a instalação ocorre geralmente em até 10 dias úteis, respeitando a homologação da distribuidora.' },
     { q: 'Precisa de manutenção?', a: 'Baixa manutenção. Recomendamos limpezas periódicas e checagens preventivas.' },
@@ -403,7 +406,7 @@ function FAQ() {
             <div key={f.q}>
               <button onClick={() => setOpen(open === i ? null : i)} className="w-full text-left px-6 py-4 flex items-center justify-between">
                 <span className="font-medium">{f.q}</span>
-                <ArrowRight className={`h-4 w-4 transition-transform ${open === i ? 'rotate-90 text-solar-yellow' : ''}`} />
+                <ArrowRight className={`h-4 w-4 transition-transform ${open === i ? 'rotate-90 text-[var(--brand-primary)]' : ''}`} />
               </button>
               {open === i && (
                 <div className="px-6 pb-4 text-solar-gray-light">{f.a}</div>
@@ -435,8 +438,8 @@ function Footer() {
     <footer className="border-t border-white/5 py-10">
       <div className="container-section flex flex-col md:flex-row items-center md:items-start justify-between gap-6">
         <div>
-          <div className="flex items-center gap-2">
-            <Sun className="h-6 w-6 text-solar-yellow" />
+          <div className="flex items-center gap-3">
+            <img src="/brand-logo.jpg" alt="Minas Solar" className="h-6 w-auto rounded-sm" />
             <span className="text-lg font-extrabold">Minas Solar</span>
           </div>
           <p className="mt-2 text-solar-gray-light text-sm">Energia solar para todo o estado de Minas Gerais.</p>
