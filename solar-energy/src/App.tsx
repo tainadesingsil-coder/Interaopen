@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence, useInView } from 'framer-motion'
-import { ArrowRight, Sun, Home, Leaf, ChevronDown, Quote } from 'lucide-react'
+import { Sun, Home, Leaf, ChevronDown, Quote } from 'lucide-react'
 import './index.css'
 
 function Header() {
@@ -20,29 +20,21 @@ function Hero() {
   const [email, setEmail] = useState('')
   return (
     <section className="relative pt-24 md:pt-32 pb-12 md:pb-16">
-      <div className="container-section relative grid md:grid-cols-2 gap-8 items-center">
-        <div>
-          <motion.h1 initial={{opacity:0,y:12}} whileInView={{opacity:1,y:0}} viewport={{once:true}} transition={{duration:0.6}} className="section-title">
-            Reduza sua conta de luz em até 20% com energia solar.
-          </motion.h1>
-          <motion.p initial={{opacity:0,y:12}} whileInView={{opacity:1,y:0}} viewport={{once:true}} transition={{delay:0.1,duration:0.6}} className="section-subtitle mt-3">
-            Energia limpa, acessível e sustentável.
-          </motion.p>
-          <div className="mt-6 grid md:grid-cols-4 gap-3">
-            <input className="input" placeholder="Nome" value={nome} onChange={(e)=>setNome(e.target.value)} />
-            <input className="input" placeholder="Telefone" value={tel} onChange={(e)=>setTel(e.target.value)} />
-            <input className="input" placeholder="E-mail" value={email} onChange={(e)=>setEmail(e.target.value)} />
-            <button className="btn-yellow">Quero economizar agora</button>
-          </div>
+      <div className="absolute inset-0 -z-10 bg-[url('https://i.postimg.cc/vmFXZQSh/Chat-GPT-Image-15-de-ago-de-2025-23-40-27.png')] bg-cover bg-center" />
+      <div className="absolute inset-0 -z-10 bg-white/50" />
+      <div className="container-section relative">
+        <motion.h1 initial={{opacity:0,y:12}} whileInView={{opacity:1,y:0}} viewport={{once:true}} transition={{duration:0.6}} className="section-title text-center md:text-left">
+          Reduza sua conta de luz em até 20% com energia solar.
+        </motion.h1>
+        <motion.p initial={{opacity:0,y:12}} whileInView={{opacity:1,y:0}} viewport={{once:true}} transition={{delay:0.1,duration:0.6}} className="section-subtitle mt-3 text-center md:text-left">
+          Energia limpa, acessível e sustentável.
+        </motion.p>
+        <div className="mt-6 max-w-3xl md:max-w-none md:w-[720px] grid md:grid-cols-4 gap-3">
+          <input className="input" placeholder="Nome" value={nome} onChange={(e)=>setNome(e.target.value)} />
+          <input className="input" placeholder="Telefone" value={tel} onChange={(e)=>setTel(e.target.value)} />
+          <input className="input" placeholder="E-mail" value={email} onChange={(e)=>setEmail(e.target.value)} />
+          <button className="btn-yellow">Quero economizar agora</button>
         </div>
-        <motion.div initial={{opacity:0,x:20}} whileInView={{opacity:1,x:0}} viewport={{once:true}} transition={{duration:0.6}} className="relative">
-          <div className="rounded-2xl overflow-hidden border-2 border-white shadow-2xl">
-            <div className="aspect-[4/3] bg-[url('https://i.postimg.cc/vmFXZQSh/Chat-GPT-Image-15-de-ago-de-2025-23-40-27.png')] bg-cover bg-center" />
-          </div>
-          <div className="absolute -bottom-6 -left-6 w-40 rounded-xl overflow-hidden border-2 border-white shadow-xl">
-            <div className="aspect-[4/3] bg-[url('https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=800&auto=format&fit=crop')] bg-cover bg-center" />
-          </div>
-        </motion.div>
       </div>
     </section>
   )
