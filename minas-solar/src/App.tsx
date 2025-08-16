@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowRight, Building2, Check, Leaf, PiggyBank, Shield, MessageCircle } from 'lucide-react'
+import { ArrowRight, Building2, Check, Leaf, PiggyBank, Shield, MessageCircle, CreditCard, Home, BarChart3 } from 'lucide-react'
 import './index.css'
 
 type CityOption = {
@@ -412,13 +412,85 @@ function Parceiros() {
   ]
   const [active, setActive] = useState(0)
 
+  function LeftIllustration() {
+    return (
+      <div className="relative aspect-[4/3] w-full rounded-2xl overflow-hidden border border-white/10 bg-gradient-to-br from-white/10 to-transparent">
+        <motion.div
+          className="absolute -top-16 -left-16 h-64 w-64 rounded-full"
+          style={{ background: 'radial-gradient(closest-side, rgba(255,179,0,0.35), transparent)' }}
+          animate={{ x: [-10, 10, -10], y: [0, -6, 0] }}
+          transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+        />
+        <motion.div
+          className="absolute -bottom-12 -right-12 h-72 w-72 rounded-full"
+          style={{ background: 'radial-gradient(closest-side, rgba(255,165,0,0.25), transparent)' }}
+          animate={{ x: [8, -8, 8], y: [0, 8, 0] }}
+          transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
+        />
+        <motion.div
+          className="absolute left-6 top-6 rounded-xl border border-white/10 bg-black/40 backdrop-blur px-4 py-3 flex items-center gap-3"
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+        >
+          <CreditCard className="h-5 w-5 text-[var(--brand-primary)]" />
+          <div>
+            <p className="text-sm font-semibold">Pagamento facilitado</p>
+            <p className="text-xs text-solar-gray-light">12x com parceiros</p>
+          </div>
+        </motion.div>
+        <motion.div
+          className="absolute right-8 bottom-8 rounded-xl border border-white/10 bg-black/40 backdrop-blur px-4 py-3"
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.15 }}
+        >
+          <div className="flex items-center gap-2">
+            <BarChart3 className="h-5 w-5 text-[var(--brand-primary)]" />
+            <span className="text-sm font-semibold">Economia média</span>
+          </div>
+          <p className="text-xs text-solar-gray-light mt-1">Até 20% na fatura</p>
+        </motion.div>
+      </div>
+    )
+  }
+
+  function PageVisual({ idx }: { idx: number }) {
+    const common = 'rounded-xl border border-white/10 bg-black/40 backdrop-blur px-4 py-3'
+    if (pages[idx].key === 'comercio') {
+      return (
+        <div className="grid grid-cols-2 gap-3">
+          <div className={common}><CreditCard className="h-5 w-5 text-[var(--brand-primary)]" /> <p className="text-sm mt-2">Maquininha integrada</p></div>
+          <div className={common}><Building2 className="h-5 w-5 text-[var(--brand-primary)]" /> <p className="text-sm mt-2">Sem parar operações</p></div>
+          <div className="col-span-2 ${common}"><BarChart3 className="h-5 w-5 text-[var(--brand-primary)]" /> <p className="text-sm mt-2">Previsibilidade de custos</p></div>
+        </div>
+      )
+    }
+    if (pages[idx].key === 'residencial') {
+      return (
+        <div className="grid grid-cols-2 gap-3">
+          <div className={common}><Home className="h-5 w-5 text-[var(--brand-primary)]" /> <p className="text-sm mt-2">Projeto sob medida</p></div>
+          <div className={common}><Shield className="h-5 w-5 text-[var(--brand-primary)]" /> <p className="text-sm mt-2">Garantia estendida</p></div>
+          <div className="col-span-2 ${common}"><Leaf className="h-5 w-5 text-[var(--brand-primary)]" /> <p className="text-sm mt-2">Energia limpa</p></div>
+        </div>
+      )
+    }
+    return (
+      <div className="grid grid-cols-2 gap-3">
+        <div className={common}><Leaf className="h-5 w-5 text-[var(--brand-primary)]" /> <p className="text-sm mt-2">Baixa manutenção</p></div>
+        <div className={common}><Building2 className="h-5 w-5 text-[var(--brand-primary)]" /> <p className="text-sm mt-2">Estruturas reforçadas</p></div>
+        <div className="col-span-2 ${common}"><BarChart3 className="h-5 w-5 text-[var(--brand-primary)]" /> <p className="text-sm mt-2">Crédito especial</p></div>
+      </div>
+    )
+  }
+
   return (
     <section id="parceiros" className="py-16 md:py-24">
       <div className="container-section grid md:grid-cols-2 gap-10 items-center">
         <div>
-          <div className="rounded-2xl overflow-hidden border border-white/10 bg-white/5">
-            <div className="aspect-[4/3] w-full bg-[url('https://i.postimg.cc/W4fSVNV5/Captura-de-tela-2025-08-15-213908.png')] bg-cover bg-center" />
-          </div>
+          <LeftIllustration />
         </div>
         <div>
           <h2 className="section-title">Empresas e clientes que confiam na Solar Energy</h2>
@@ -433,7 +505,7 @@ function Parceiros() {
             ))}
           </div>
 
-          <div className="mt-5 relative overflow-hidden rounded-xl border border-white/10 bg-white/5 p-5 min-h-[180px]">
+          <div className="mt-5 relative overflow-hidden rounded-xl border border-white/10 bg-white/5 p-5 min-h-[200px]">
             <AnimatePresence mode="wait">
               <motion.div
                 key={pages[active].key}
@@ -441,7 +513,7 @@ function Parceiros() {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.35 }}
-                className="grid md:grid-cols-2 gap-4 items-center"
+                className="grid md:grid-cols-2 gap-4 items-start"
               >
                 <div>
                   <h3 className="text-xl font-semibold">{pages[active].title}</h3>
@@ -454,9 +526,7 @@ function Parceiros() {
                   <button onClick={() => openWhatsApp(`Quero ser parceiro (${pages[active].title}) da Solar Energy.`)} className="btn-gradient mt-4">Quero ser parceiro</button>
                 </div>
                 <div className="hidden md:block">
-                  <div className="rounded-lg overflow-hidden border border-white/10">
-                    <div className="aspect-video w-full bg-[url('https://i.postimg.cc/7hX5v686/Captura-de-tela-2025-08-15-213919.png')] bg-cover bg-center" />
-                  </div>
+                  <PageVisual idx={active} />
                 </div>
               </motion.div>
             </AnimatePresence>
