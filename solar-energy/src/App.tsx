@@ -28,21 +28,33 @@ function Header() {
 }
 
 function Beneficios() {
+  const [open,setOpen]=useState<number|null>(null)
   const items = [
-    { icon: Sun, title: '20% de desconto direto na sua fatura', desc: 'Você paga menos e economiza de verdade.' },
-    { icon: Home, title: 'Pague só o mínimo da Cemig', desc: 'O restante vira economia visível na sua fatura.' },
-    { icon: Leaf, title: 'Simples, claro e garantido', desc: 'Sem truques. Sua conta realmente cai.' },
+    { icon: Sun, title: '20% de desconto direto na fatura', desc: 'Desconto aplicado todo mês.', detail: 'Assine agora e veja o abatimento aparecer no próximo ciclo. Sem visita técnica e sem obras.' },
+    { icon: Home, title: 'Você paga só o mínimo da Cemig', desc: 'O restante vira economia.', detail: 'Seu fornecimento segue igual. A diferença é abatida e você acompanha na própria fatura.' },
+    { icon: Leaf, title: 'Simples, claro e garantido', desc: 'Sem burocracia.', detail: 'Cadastro em minutos e contrato digital. Transparência total para você pagar menos.' },
   ]
   return (
     <section className="py-12 md:py-16">
       <div className="container-section grid md:grid-cols-3 gap-6">
-        {items.map(({icon:Icon,title,desc})=> (
-          <div key={title} className="card-aggressive">
-            <Icon className="icon-large" />
-            <h3 className="mt-4 text-lg font-bold">{title}</h3>
-            <p className="mt-1 text-[var(--muted)] text-sm">{desc}</p>
-          </div>
-        ))}
+        {items.map((it,i)=> {
+          const Icon = it.icon
+          const isOpen = open===i
+          return (
+            <div key={it.title} className="card-aggressive cursor-pointer" onClick={()=>setOpen(isOpen?null:i)}>
+              <Icon className="icon-large" />
+              <h3 className="mt-4 text-lg font-bold">{it.title}</h3>
+              <p className="mt-1 text-[var(--muted)] text-sm">{it.desc}</p>
+              <AnimatePresence>
+                {isOpen && (
+                  <motion.p initial={{height:0,opacity:0}} animate={{height:'auto',opacity:1}} exit={{height:0,opacity:0}} transition={{duration:0.25}} className="mt-3 text-sm opacity-90">
+                    {it.detail}
+                  </motion.p>
+                )}
+              </AnimatePresence>
+            </div>
+          )
+        })}
       </div>
     </section>
   )
@@ -99,23 +111,34 @@ function Steps(){
     const mask = railRef.current.querySelector<HTMLDivElement>('.mask')
     if(inView && mask){ mask.animate([{width:'0%'},{width:'100%'}], {duration:1200, fill:'forwards', easing:'ease-out'}) }
   },[inView])
+  const [open,setOpen]=useState<number|null>(null)
   const steps=[
-    {n:1,t:'Você continua pagando o mínimo da Cemig',d:'Sem mudanças na sua rotina.'},
-    {n:2,t:'A diferença vira desconto na sua fatura',d:'Você vê o abatimento mês a mês.'},
-    {n:3,t:'Conta reduzida, simples assim',d:'Economia de 20% de forma clara e garantida.'},
+    {n:1,t:'Você continua pagando o mínimo da Cemig',d:'Sem mudanças na sua rotina.',detail:'Seu medidor e seu fornecimento seguem iguais. O desconto aparece no extrato.'},
+    {n:2,t:'A diferença vira desconto na sua fatura',d:'Você vê o abatimento mês a mês.',detail:'Enviamos relatório mensal e você acompanha cada centavo economizado.'},
+    {n:3,t:'Conta reduzida, simples assim',d:'Economia de 20% garantida.',detail:'Você sente a diferença no bolso e pode cancelar quando quiser, sem dor de cabeça.'},
   ]
   return (
     <section className="py-12 md:py-16">
       <div className="container-section relative">
         <div ref={railRef} className="steps-rail"><div className="mask"/></div>
         <div className="grid md:grid-cols-3 gap-6">
-          {steps.map(s=> (
-            <div key={s.n} className="card">
-              <div className="step-circle">{s.n}</div>
-              <h3 className="mt-3 font-semibold">{s.t}</h3>
-              <p className="mt-1 text-[var(--muted)] text-sm">{s.d}</p>
-            </div>
-          ))}
+          {steps.map((s,i)=> {
+            const isOpen=open===i
+            return (
+              <div key={s.n} className="card cursor-pointer" onClick={()=>setOpen(isOpen?null:i)}>
+                <div className="step-circle">{s.n}</div>
+                <h3 className="mt-3 font-semibold">{s.t}</h3>
+                <p className="mt-1 text-[var(--muted)] text-sm">{s.d}</p>
+                <AnimatePresence>
+                  {isOpen && (
+                    <motion.p initial={{height:0,opacity:0}} animate={{height:'auto',opacity:1}} exit={{height:0,opacity:0}} transition={{duration:0.25}} className="mt-3 text-sm opacity-90">
+                      {s.detail}
+                    </motion.p>
+                  )}
+                </AnimatePresence>
+              </div>
+            )
+          })}
         </div>
       </div>
     </section>
@@ -179,7 +202,7 @@ function FAQ(){
 
 function CTAFinal(){
   return (
-    <section className="section-blue py-14 md:py-16">
+    <section id="cta" className="section-blue py-14 md:py-16">
       <div className="container-section grid md:grid-cols-2 gap-6 items-center">
         <div>
           <h2 className="text-2xl md:text-3xl font-bold">Pare de pagar mais. 20% de desconto hoje mesmo.</h2>
@@ -197,6 +220,12 @@ function CTAFinal(){
 }
 
 function Plates3D(){
+  const [open,setOpen]=useState<number|null>(null)
+  const items=[
+    {t:'20% garantido todo mês',d:'Desconto direto na fatura. Simples e transparente.',detail:'Relatórios mensais por e-mail e suporte dedicado para qualquer dúvida.'},
+    {t:'Você paga o mínimo da Cemig',d:'O restante vira economia para você.',detail:'Nada muda na sua instalação. Só muda o valor que você paga.'},
+    {t:'Transparência total',d:'Acompanhe no app e no e-mail.',detail:'Histórico de economia, comprovantes e atendimento local em MG.'},
+  ]
   const logos=['https://dummyimage.com/100x40/ffffff/000000.png&text=Parceiro+A','https://dummyimage.com/120x40/ffffff/000000.png&text=Parceiro+B','https://dummyimage.com/90x40/ffffff/000000.png&text=Parceiro+C','https://dummyimage.com/140x40/ffffff/000000.png&text=Parceiro+D']
   const track=[...logos,...logos]
   return (
@@ -207,18 +236,22 @@ function Plates3D(){
           <button className="btn-yellow">Garanta seu desconto agora</button>
         </div>
         <div className="mt-8 grid md:grid-cols-3 gap-6">
-          <div className="plate-3d rounded-2xl p-6">
-            <h3 className="text-lg font-bold">20% garantido todo mês</h3>
-            <p className="mt-1 text-[var(--muted)] text-sm">Desconto direto na fatura. Simples e transparente.</p>
-          </div>
-          <div className="plate-3d rounded-2xl p-6">
-            <h3 className="text-lg font-bold">Pague o mínimo da Cemig</h3>
-            <p className="mt-1 text-[var(--muted)] text-sm">O restante vira economia para você.</p>
-          </div>
-          <div className="plate-3d rounded-2xl p-6">
-            <h3 className="text-lg font-bold">Sem truques</h3>
-            <p className="mt-1 text-[var(--muted)] text-sm">Clareza total e desconto que aparece na fatura.</p>
-          </div>
+          {items.map((x,i)=>{
+            const isOpen=open===i
+            return (
+              <div key={x.t} className="plate-3d rounded-2xl p-6 cursor-pointer" onClick={()=>setOpen(isOpen?null:i)}>
+                <h3 className="text-lg font-bold">{x.t}</h3>
+                <p className="mt-1 text-[var(--muted)] text-sm">{x.d}</p>
+                <AnimatePresence>
+                  {isOpen && (
+                    <motion.p initial={{height:0,opacity:0}} animate={{height:'auto',opacity:1}} exit={{height:0,opacity:0}} transition={{duration:0.25}} className="mt-3 text-sm opacity-90">
+                      {x.detail}
+                    </motion.p>
+                  )}
+                </AnimatePresence>
+              </div>
+            )
+          })}
         </div>
         <div className="logo-marquee mt-10">
           <motion.div className="logo-track" animate={{ x: ['0%','-50%'] }} transition={{ duration: 25, repeat: Infinity, ease: 'linear' }}>
@@ -241,7 +274,7 @@ function Footer(){
       <div className="container-section flex flex-col items-center gap-2 mt-4">
         <div className="font-semibold">Solar Energy</div>
         <div className="text-sm text-[var(--muted)]">contato@solarenergy.com.br</div>
-                  <div className="text-xs text-[var(--muted)]">© {new Date().getFullYear()} Solar Energy. Desconto válido para clientes Cemig residencial. Economia baseada em comparação com sua conta atual, transparente e garantida.</div>
+        <div className="text-xs text-[var(--muted)]">© {new Date().getFullYear()} Solar Energy. Desconto válido para clientes Cemig residencial. Economia baseada em comparação com sua conta atual, transparente e garantida.</div>
       </div>
     </footer>
   )

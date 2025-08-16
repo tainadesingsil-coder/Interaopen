@@ -32,7 +32,7 @@ export default function HeroMinimal({ imageUrl }: HeroMinimalProps) {
 
             <div className="mt-8">
               <a
-                href="#lead"
+                href="#cta"
                 className="inline-flex items-center rounded-full px-6 py-3 text-sm font-semibold transition transform bg-[#FFC107] text-[#0E3A6F] shadow-lg hover:scale-105 hover:shadow-2xl"
               >
                 Garanta seu desconto agora!
