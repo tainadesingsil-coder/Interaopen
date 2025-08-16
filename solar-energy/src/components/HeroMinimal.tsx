@@ -20,79 +20,44 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
 
   return (
     <section className="relative overflow-hidden">
-      <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center pt-40 md:pt-56 pb-16 md:pb-24">
-          <motion.div
-            initial={{ opacity: 0, y: 14 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="order-1"
-          >
-            <div className="max-w-lg mx-auto text-center">
-              <h1 className="text-white text-4xl md:text-6xl font-extrabold leading-tight">
-                20% de desconto na sua conta de luz
-              </h1>
-              <p className="mt-6 md:mt-7 text-white/70 text-base md:text-lg">
-                Pague o mínimo da Cemig e economize na fatura.
-              </p>
+      {/* Background slideshow */}
+      <div className="absolute inset-0">
+        <AnimatePresence mode="wait">
+          <motion.img
+            key={current}
+            src={current}
+            alt="Usina solar"
+            className="absolute inset-0 w-full h-full object-cover"
+            initial={{ opacity: 0, scale: 1.06 }}
+            animate={{ opacity: 1, scale: 1.02 }}
+            exit={{ opacity: 0, scale: 1.02 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+          />
+        </AnimatePresence>
+        {/* Gradient overlay to keep uniform site color */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(180deg, rgba(11,31,58,0.85) 0%, rgba(7,23,44,0.55) 45%, rgba(8,20,35,0.88) 100%)",
+          }}
+        />
+      </div>
 
-              <div className="mt-8">
-                <a
-                  href="#cta"
-                  className="btn-yellow"
-                >
-                  Garanta seu desconto agora
-                </a>
-              </div>
+      {/* Centered content */}
+      <div className="relative z-10 container mx-auto px-4">
+        <div className="min-h-[72vh] flex items-center justify-center text-center py-24 md:py-32">
+          <div className="max-w-2xl">
+            <h1 className="text-white text-4xl md:text-6xl font-extrabold leading-tight">
+              20% de desconto na sua conta de luz
+            </h1>
+            <p className="mt-5 text-white/80 text-base md:text-lg">
+              Pague o mínimo da Cemig e economize na fatura.
+            </p>
+            <div className="mt-8">
+              <a href="#cta" className="btn-yellow">Garanta seu desconto agora</a>
             </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, scale: 0.98 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-            className="relative order-2 md:order-2"
-          >
-            <div className="relative overflow-hidden shadow-2xl">
-              <div className="relative w-full aspect-video">
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={current}
-                    className="absolute inset-0"
-                    initial={{ clipPath: "inset(0% 100% 0% 0%)" }}
-                    animate={{ clipPath: "inset(0% 0% 0% 0%)" }}
-                    exit={{ clipPath: "inset(0% 0% 0% 100%)" }}
-                    transition={{ duration: 0.6, ease: "easeOut" }}
-                    style={{ transformPerspective: 800 }}
-                    whileHover={{ scale: 1.01, rotate: 0.1 }}
-                  >
-                    <motion.img
-                      src={current}
-                      alt="Usina solar"
-                      className="absolute inset-0 w-full h-full object-cover"
-                      initial={{ opacity: 0, scale: 1.06, x: -8, y: 4, filter: "blur(1.5px)" as any }}
-                      animate={{ opacity: 1, scale: 1.01, x: 0, y: 0, filter: "blur(0px)" as any }}
-                      exit={{ opacity: 0, scale: 1.01, x: 6, y: -3 }}
-                      transition={{ duration: 2.0, ease: "easeOut" }}
-                      style={{ transform: "translateZ(0)" }}
-                    />
-                    <motion.div
-                      className="pointer-events-none absolute inset-0"
-                      initial={{ x: "-30%", opacity: 0.0 }}
-                      animate={{ x: "130%", opacity: 0.16 }}
-                      transition={{ duration: 1.8, ease: "easeInOut" }}
-                      style={{ background: "linear-gradient(120deg, transparent 35%, rgba(255,255,255,0.5) 50%, transparent 65%)" }}
-                    />
-                  </motion.div>
-                </AnimatePresence>
-                <div className="absolute top-2 left-2 bg-black/25 text-white text-[10px] px-1.5 py-0.5 rounded-md backdrop-blur-sm">
-                  20% garantido todo mês
-                </div>
-              </div>
-            </div>
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>
