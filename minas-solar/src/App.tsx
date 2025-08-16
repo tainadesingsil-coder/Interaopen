@@ -80,7 +80,8 @@ function Header() {
 function Hero() {
   return (
     <section className="relative pt-28 md:pt-36 pb-16 md:pb-24">
-      <div className="container-section grid md:grid-cols-2 gap-10 items-center">
+      <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(800px circle at 10% 20%, rgba(255,136,0,0.12), transparent), radial-gradient(800px circle at 90% 10%, rgba(255,179,0,0.12), transparent)' }} />
+      <div className="container-section grid md:grid-cols-2 gap-10 items-center relative">
         <div>
           <motion.h1
             initial={{ opacity: 0, y: 10 }}
@@ -89,7 +90,7 @@ function Hero() {
             transition={{ duration: 0.6 }}
             className="section-title"
           >
-            Economize até 20% na sua conta de luz com energia solar em Minas Gerais
+            Economize com energia solar em Minas Gerais
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 10 }}
@@ -98,7 +99,7 @@ function Hero() {
             transition={{ delay: 0.1, duration: 0.6 }}
             className="section-subtitle mt-4"
           >
-            Projeto, instalação e monitoramento completo — proposta gratuita em até 24h
+            Reduza sua conta de luz em até 90% com soluções personalizadas
           </motion.p>
           <div className="mt-3 badge">Atendimento em todo o estado de Minas Gerais</div>
 
@@ -107,11 +108,11 @@ function Hero() {
               onClick={() => document.getElementById('simulador')?.scrollIntoView({ behavior: 'smooth' })}
               className="btn-gradient hover-lift"
             >
-              Peça seu estudo gratuito
+              Simular Economia Agora
               <ArrowRight className="ml-2 h-4 w-4" />
             </button>
             <button
-              onClick={() => openWhatsApp('Olá! Quero meu estudo gratuito de energia solar com a Solar Energy.')} 
+              onClick={() => openWhatsApp('Olá! Quero simular minha economia com a Solar Energy.')} 
               className="btn-secondary hover-lift"
             >
               Falar por WhatsApp
@@ -268,16 +269,17 @@ function Beneficios() {
 
 function ComoFunciona() {
   const steps = [
-    { title: 'Diagnóstico gratuito', desc: 'Análise da conta e avaliação do telhado/área.' },
-    { title: 'Projeto personalizado', desc: 'Simulação e proposta sob medida para seu perfil.' },
-    { title: 'Instalação e homologação', desc: 'Execução rápida e homologação com a distribuidora.' },
+    { title: 'Solicite uma simulação', desc: 'Informe consumo, cidade e área disponível.' },
+    { title: 'Projeto personalizado', desc: 'Proposta e simulação sob medida em até 24h.' },
+    { title: 'Instalação rápida e segura', desc: 'Equipe qualificada e homologação com a distribuidora.' },
+    { title: 'Comece a economizar', desc: 'Acompanhe sua geração e reduza a fatura.' },
   ]
   return (
     <section id="como-funciona" className="py-16 md:py-24">
       <div className="container-section">
         <h2 className="section-title">Como funciona</h2>
-        <p className="section-subtitle mt-2">Do diagnóstico à energia gerando, acompanhamos cada etapa.</p>
-        <div className="mt-10 grid md:grid-cols-3 gap-6">
+        <p className="section-subtitle mt-2">Etapas simples para você gerar sua própria energia.</p>
+        <div className="mt-10 grid md:grid-cols-4 gap-6">
           {steps.map((s, i) => (
             <motion.div
               key={s.title}
@@ -351,28 +353,41 @@ function Planos() {
 
 function Depoimentos() {
   const itens = [
-    { nome: 'Ana Paula', cidade: 'Belo Horizonte', economia: 18, foto: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=1000&auto=format&fit=crop' },
-    { nome: 'Carlos Eduardo', cidade: 'Uberlândia', economia: 20, foto: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=1000&auto=format&fit=crop' },
-    { nome: 'Mariana Souza', cidade: 'Juiz de Fora', economia: 16, foto: 'https://images.unsplash.com/photo-1547425260-76bcadfb4f2c?q=80&w=1000&auto=format&fit=crop' },
+    { nome: 'Ana Paula', cidade: 'Belo Horizonte', texto: 'Minha conta caiu de R$ 600 para R$ 80 em poucos meses!', foto: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=300&auto=format&fit=crop' },
+    { nome: 'Carlos Eduardo', cidade: 'Uberlândia', texto: 'Atendimento excelente e instalação rápida. Recomendo!', foto: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=300&auto=format&fit=crop' },
+    { nome: 'Mariana Souza', cidade: 'Juiz de Fora', texto: 'Tudo homologado e funcionando, economia real!', foto: 'https://images.unsplash.com/photo-1547425260-76bcadfb4f2c?q=80&w=300&auto=format&fit=crop' },
   ]
+  const [idx, setIdx] = useState(0)
+  function next() { setIdx((idx + 1) % itens.length) }
+  function prev() { setIdx((idx - 1 + itens.length) % itens.length) }
   return (
     <section id="depoimentos" className="py-16 md:py-24">
       <div className="container-section">
-        <h2 className="section-title">Quem já está economizando</h2>
-        <p className="section-subtitle mt-2">Depoimentos de clientes em todo o estado de Minas Gerais.</p>
-        <div className="mt-10 grid md:grid-cols-3 gap-6 overflow-x-auto md:overflow-visible scrollbar-hide">
-          {itens.map((d) => (
-            <div key={d.nome} className="min-w-[280px] md:min-w-0 rounded-xl border border-white/10 bg-white/5 p-6">
-              <div className="flex items-center gap-4">
-                <img src={d.foto} alt={d.nome} className="h-12 w-12 rounded-full object-cover" />
+        <h2 className="section-title">O que nossos clientes dizem</h2>
+        <p className="section-subtitle mt-2">Resultados reais em todo o estado.</p>
+        <div className="mt-8 relative max-w-3xl">
+          <div className="flex items-center justify-between mb-3">
+            <button className="btn-secondary" onClick={prev}>Anterior</button>
+            <button className="btn-gradient" onClick={next}>Próximo</button>
+          </div>
+          <div className="relative overflow-hidden rounded-xl border border-white/10 bg-white/5 p-6">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={itens[idx].nome}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.35 }}
+                className="grid md:grid-cols-[120px_1fr] gap-4 items-center"
+              >
+                <img src={itens[idx].foto} alt={itens[idx].nome} className="h-24 w-24 rounded-full object-cover" />
                 <div>
-                  <p className="font-semibold">{d.nome}</p>
-                  <p className="text-sm text-solar-gray-light">{d.cidade}</p>
+                  <p className="text-lg font-semibold">{itens[idx].nome} — <span className="text-solar-gray-light text-sm">{itens[idx].cidade}</span></p>
+                  <p className="mt-2 text-solar-gray-light">“{itens[idx].texto}”</p>
                 </div>
-              </div>
-              <p className="mt-4 text-solar-gray-light text-sm">“Consegui economizar cerca de {d.economia}% na conta de luz. Atendimento excelente!”</p>
-            </div>
-          ))}
+              </motion.div>
+            </AnimatePresence>
+          </div>
         </div>
       </div>
     </section>
