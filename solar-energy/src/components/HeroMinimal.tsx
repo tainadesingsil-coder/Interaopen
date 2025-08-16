@@ -60,17 +60,34 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
             <div className="relative overflow-hidden shadow-2xl">
               <div className="relative w-full aspect-video">
                 <AnimatePresence mode="wait">
-                  <motion.img
+                  <motion.div
                     key={current}
-                    src={current}
-                    alt="Usina solar"
-                    className="absolute inset-0 w-full h-full object-cover"
-                    initial={{ opacity: 0, scale: 1.04 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0.0, scale: 1.02 }}
-                    transition={{ duration: 0.8, ease: "easeOut" }}
-                    style={{ transform: "translateZ(0)" }}
-                  />
+                    className="absolute inset-0"
+                    initial={{ clipPath: "inset(0% 100% 0% 0%)" }}
+                    animate={{ clipPath: "inset(0% 0% 0% 0%)" }}
+                    exit={{ clipPath: "inset(0% 0% 0% 100%)" }}
+                    transition={{ duration: 0.9, ease: "easeOut" }}
+                    style={{ transformPerspective: 800 }}
+                    whileHover={{ scale: 1.015, rotate: 0.2 }}
+                  >
+                    <motion.img
+                      src={current}
+                      alt="Usina solar"
+                      className="absolute inset-0 w-full h-full object-cover"
+                      initial={{ opacity: 0, scale: 1.08, x: -12, y: 6, filter: "blur(2px)" as any }}
+                      animate={{ opacity: 1, scale: 1.02, x: 0, y: 0, filter: "blur(0px)" as any }}
+                      exit={{ opacity: 0, scale: 1.02, x: 8, y: -4 }}
+                      transition={{ duration: 4.0, ease: "easeOut" }}
+                      style={{ transform: "translateZ(0)" }}
+                    />
+                    <motion.div
+                      className="pointer-events-none absolute inset-0"
+                      initial={{ x: "-30%", opacity: 0.0 }}
+                      animate={{ x: "130%", opacity: 0.18 }}
+                      transition={{ duration: 3.6, ease: "easeInOut" }}
+                      style={{ background: "linear-gradient(120deg, transparent 35%, rgba(255,255,255,0.5) 50%, transparent 65%)" }}
+                    />
+                  </motion.div>
                 </AnimatePresence>
                 <div className="absolute top-2 left-2 bg-black/25 text-white text-[10px] px-1.5 py-0.5 rounded-md backdrop-blur-sm">
                   20% garantido todo mês
