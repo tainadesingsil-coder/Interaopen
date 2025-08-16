@@ -5,10 +5,10 @@
 :root {
   color-scheme: dark;
   --brand-primary: #FFB300;
-  --brand-secondary: #FF8800;
+  --brand-secondary: #FFA500;
   --brand-contrast: #000000;
   --brand-bg-from: #0A0A0A;
-  --brand-bg-to: #0E1A2B;
+  --brand-bg-to: #1E1E1E;
   --brand-ring: rgba(255,179,0,0.4);
 }
 
