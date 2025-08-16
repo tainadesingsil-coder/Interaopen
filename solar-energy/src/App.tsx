@@ -9,7 +9,7 @@ function Header() {
     <header className="header">
       <div className="container-section flex items-center justify-between py-3">
         <a href="#" className="flex items-center">
-          <img src="/logo.png" alt="Solar Energy" className="h-[77px] w-auto" />
+          <img src="/logo.png" alt="Solar Energy" className="h-[32px] w-auto" />
         </a>
         <div className="flex items-center gap-2">
           <a href="#" aria-label="Instagram" className="social">
