@@ -33,20 +33,22 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
             transition={{ duration: 0.6 }}
             className="order-1"
           >
-            <h1 className="text-white text-4xl md:text-6xl font-extrabold leading-tight">
-              20% de desconto na sua conta de luz
-            </h1>
-            <p className="mt-6 md:mt-7 text-white/70 text-base md:text-lg max-w-xl">
-              Pague o mínimo da Cemig e economize na fatura.
-            </p>
+            <div className="max-w-xl mx-auto text-center mt-20 md:mt-24">
+              <h1 className="text-white text-4xl md:text-6xl font-extrabold leading-tight">
+                20% de desconto na sua conta de luz
+              </h1>
+              <p className="mt-6 md:mt-7 text-white/70 text-base md:text-lg">
+                Pague o mínimo da Cemig e economize na fatura.
+              </p>
 
-            <div className="mt-8">
-              <a
-                href="#cta"
-                className="btn-yellow"
-              >
-                Garanta seu desconto agora
-              </a>
+              <div className="mt-8">
+                <a
+                  href="#cta"
+                  className="btn-yellow"
+                >
+                  Garanta seu desconto agora
+                </a>
+              </div>
             </div>
           </motion.div>
 
