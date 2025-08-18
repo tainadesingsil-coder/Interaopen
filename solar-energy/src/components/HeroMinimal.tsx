@@ -13,7 +13,7 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
     if (!imageUrls || imageUrls.length <= 1) return;
     const id = setInterval(() => {
       setIndex((prev) => (prev + 1) % imageUrls.length);
-    }, 2800);
+    }, 3000);
     return () => clearInterval(id);
   }, [imageUrls]);
 
@@ -21,6 +21,11 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
 
   return (
     <motion.section className="relative overflow-hidden" initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: "easeOut" }}>
+      {/* Minimal logo overlay */}
+      <div className="absolute top-5 left-5 z-20">
+        <img src="/logo.svg" alt="Solar Energy" className="h-7 w-auto opacity-95" />
+      </div>
+
       {/* Background slideshow */}
       <div className="absolute inset-0">
         <AnimatePresence mode="wait">
@@ -28,14 +33,13 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
             key={current}
             src={current}
             alt="Painéis solares modernos"
-            className="absolute inset-0 w-full h-full object-cover"
-            initial={{ opacity: 0, scale: 1.02 }}
+            className="absolute inset-0 w-full h-full object-cover object-center"
+            initial={{ opacity: 0, scale: 1.0 }}
             animate={{ opacity: 1, scale: 1.0 }}
             exit={{ opacity: 0, scale: 1.0 }}
             transition={{ duration: 0.7, ease: "easeOut" }}
           />
         </AnimatePresence>
-        {/* Cinematic blue-green overlay */}
         <div
           className="absolute inset-0"
           style={{
