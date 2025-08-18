@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
+import { InstagramLogo, FacebookLogo, LinkedinLogo } from '@phosphor-icons/react'
 
 type HeroMinimalProps = {
   imageUrls: string[];
@@ -13,7 +14,7 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
     const id = setInterval(() => {
       setIndex((prev) => (prev + 1) % imageUrls.length);
     }, 2800);
-  return () => clearInterval(id);
+    return () => clearInterval(id);
   }, [imageUrls]);
 
   const current = imageUrls?.[index] ?? imageUrls?.[0];
@@ -26,7 +27,7 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
           <motion.img
             key={current}
             src={current}
-            alt="Usina solar"
+            alt="Painéis solares modernos"
             className="absolute inset-0 w-full h-full object-cover"
             initial={{ opacity: 0, scale: 1.06 }}
             animate={{ opacity: 1, scale: 1.02 }}
@@ -34,28 +35,40 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
             transition={{ duration: 0.8, ease: "easeOut" }}
           />
         </AnimatePresence>
+        {/* Cinematic blue-green overlay */}
         <div
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(180deg, rgba(11,31,58,0.85) 0%, rgba(7,23,44,0.55) 45%, rgba(8,20,35,0.88) 100%)",
+              "linear-gradient(180deg, rgba(11,31,58,0.82) 0%, rgba(0,184,84,0.18) 45%, rgba(8,20,35,0.88) 100%)",
           }}
         />
       </div>
 
+      {/* Centered content */}
       <div className="relative z-10 container mx-auto px-4">
-        <div className="min-h-[72vh] flex items-center justify-center text-center py-24 md:py-32">
-          <div className="max-w-2xl">
-            <h1 className="text-white text-4xl md:text-6xl font-extrabold leading-tight">
-              20% de desconto na sua conta de luz
+        <div className="min-h-[80vh] md:min-h-[88vh] flex items-center justify-center text-center py-24 md:py-32">
+          <div className="max-w-3xl">
+            <h1 className="text-white tracking-tight text-4xl md:text-6xl font-extrabold leading-tight">
+              Energia inteligente para um futuro sustentável
             </h1>
-            <p className="mt-5 text-white/80 text-base md:text-lg">
-              Pague o mínimo da Cemig e economize na fatura.
+            <p className="mt-5 text-white/80 text-base md:text-lg font-light">
+              Tecnologia limpa com eficiência real. Confiável, moderna e acessível.
             </p>
             <div className="mt-8">
-              <a href="#cta" className="btn-yellow">Garanta seu desconto agora</a>
+              <a href="#cta" className="inline-flex items-center justify-center rounded-full px-8 py-3 text-sm md:text-base font-semibold text-white bg-gradient-to-r from-[#00C853] to-[#00B7FF] shadow-lg hover:shadow-xl transition-transform hover:scale-[1.03]">
+                Simule sua economia
+              </a>
             </div>
           </div>
+        </div>
+        {/* Discrete social icons aligned to hero footer */}
+        <div className="absolute inset-x-0 bottom-6 flex justify-center">
+          <nav className="flex items-center gap-4 opacity-80 hover:opacity-100 transition">
+            <a href="#" aria-label="Instagram" className="inline-flex"><InstagramLogo size={18} weight="thin" className="text-white"/></a>
+            <a href="#" aria-label="Facebook" className="inline-flex"><FacebookLogo size={18} weight="thin" className="text-white"/></a>
+            <a href="#" aria-label="LinkedIn" className="inline-flex"><LinkedinLogo size={18} weight="thin" className="text-white"/></a>
+          </nav>
         </div>
       </div>
     </motion.section>
