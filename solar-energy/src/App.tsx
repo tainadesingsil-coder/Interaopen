@@ -1,7 +1,6 @@
 import { useMemo, useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence, useInView } from 'framer-motion'
 import { Sun, Home, Leaf, ChevronDown, Quote } from 'lucide-react'
-import { FaInstagram, FaWhatsapp, FaYoutube } from 'react-icons/fa'
 import './index.css'
 import HeroMinimal from './components/HeroMinimal'
 
@@ -12,17 +11,6 @@ function Header() {
         <a href="#" className="logo-wrap">
           <img src="/logo.png" alt="Solar Energy" className="h-[96px] w-auto" />
         </a>
-        <div className="flex items-center gap-2">
-          <a href="#" aria-label="Instagram" className="social">
-            <FaInstagram size={16} className="text-white" />
-          </a>
-          <a href="#" aria-label="WhatsApp" className="social">
-            <FaWhatsapp size={16} className="text-white" />
-          </a>
-          <a href="#" aria-label="YouTube" className="social">
-            <FaYoutube size={16} className="text-white" />
-          </a>
-        </div>
       </div>
     </header>
   )
