@@ -305,11 +305,6 @@ export default function App(){
       <Plates3D/>
       <CTAFinal/>
       <Footer/>
-      <div className="sticky-cta md:hidden">
-        <div className="container-section py-3 text-center">
-          <button className="btn-blue w-full">Quero meu desconto agora</button>
-        </div>
-      </div>
     </div>
   )
 }
