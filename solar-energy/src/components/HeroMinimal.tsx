@@ -23,7 +23,7 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
     <motion.section className="relative overflow-hidden" initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: "easeOut" }}>
       {/* Minimal logo overlay */}
       <div className="absolute top-5 left-5 z-20">
-        <img src="/logo.svg" alt="Solar Energy" className="h-7 w-auto opacity-95" />
+        <img src="https://i.postimg.cc/W40qnLhn/Design-sem-nome-2025-08-16-T014206-739.png" alt="Solar Energy" className="h-20 w-auto opacity-95" />
       </div>
 
       {/* Background slideshow */}
