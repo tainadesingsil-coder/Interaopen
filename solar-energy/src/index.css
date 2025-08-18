@@ -32,7 +32,9 @@ body {
 .mascot { @apply inline-flex items-center justify-center rounded-full transition; width: 56px; height: 56px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.14); box-shadow: 0 10px 24px rgba(0,0,0,0.25), 0 0 0 0 rgba(10,160,255,0.35); }
 .mascot:hover { transform: translateY(-1px); box-shadow: 0 16px 32px rgba(0,0,0,0.35), 0 0 0 2px rgba(10,160,255,0.35); }
 .mascot img { @apply rounded-full; }
-.mascot-bubble { @apply absolute right-0 mt-2 rounded-xl text-sm; top: 60px; min-width: 220px; background: rgba(8,20,35,0.78); border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 18px 36px rgba(0,0,0,0.35); padding: 10px 12px; backdrop-filter: blur(8px); transition: opacity .25s ease, transform .25s ease; }
+.mascot-stand { @apply transition; filter: drop-shadow(0 10px 24px rgba(0,0,0,0.35)); }
+.mascot-stand:hover { transform: translateY(-2px); }
+.mascot-bubble { @apply absolute right-0 rounded-xl text-sm; bottom: 70px; min-width: 220px; background: rgba(8,20,35,0.78); border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 18px 36px rgba(0,0,0,0.35); padding: 10px 12px; backdrop-filter: blur(8px); transition: opacity .25s ease, transform .25s ease; }
 
 @keyframes bob { 0% { transform: translateY(0); } 50% { transform: translateY(-3px); } 100% { transform: translateY(0); } }
 .bob { animation: bob 3s ease-in-out infinite; }
@@ -89,7 +91,7 @@ body {
 .lead-thin { @apply mx-auto flex items-center gap-2 rounded-full px-3 py-2 shadow-lg; background: rgba(255,255,255,0.9); color: #0F172A; border: 1px solid rgba(255,255,255,0.9); box-shadow: 0 10px 30px rgba(0,0,0,0.25); }
 .lead-thin input { @apply bg-transparent outline-none flex-1 min-w-[160px] text-sm; }
 
-.plate-3d { position: relative; border: 1.5px solid rgba(255,255,255,0.2); background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03)); box-shadow: 0 40px 80px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.2); transform-style: preserve-3d; }
+.plate-3d { position: relative; border: 1.5px solid rgba(255,255,255,0.2); background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03)); box-shadow: 0 40px 80px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.2); }
 .plate-3d:hover { transform: translateY(-8px) scale(1.02); box-shadow: 0 60px 120px rgba(0,0,0,0.55), 0 0 22px rgba(10,160,255,0.22); }
 .neon-soft { box-shadow: 0 0 12px rgba(10,160,255,0.25), 0 0 2px rgba(10,160,255,0.6) inset; }
 
