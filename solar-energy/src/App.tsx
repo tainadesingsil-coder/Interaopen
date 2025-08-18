@@ -1,10 +1,9 @@
 import { useMemo, useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence, useInView } from 'framer-motion'
 import { Sun, Home, Leaf, ChevronDown, Quote } from 'lucide-react'
-import { InstagramLogo, WhatsappLogo, YoutubeLogo } from '@phosphor-icons/react'
+import { FaInstagram, FaWhatsapp, FaYoutube } from 'react-icons/fa'
 import './index.css'
 import HeroMinimal from './components/HeroMinimal'
-import Cursor from './components/Cursor'
 
 function Header() {
   return (
@@ -15,13 +14,13 @@ function Header() {
         </a>
         <div className="flex items-center gap-2">
           <a href="#" aria-label="Instagram" className="social">
-            <InstagramLogo size={18} weight="duotone" className="text-white" />
+            <FaInstagram size={16} className="text-white" />
           </a>
           <a href="#" aria-label="WhatsApp" className="social">
-            <WhatsappLogo size={18} weight="duotone" className="text-white" />
+            <FaWhatsapp size={16} className="text-white" />
           </a>
           <a href="#" aria-label="YouTube" className="social">
-            <YoutubeLogo size={18} weight="duotone" className="text-white" />
+            <FaYoutube size={16} className="text-white" />
           </a>
         </div>
       </div>
@@ -266,7 +265,7 @@ function Plates3D(){
           <motion.div className="logo-track" animate={{ x: ['0%','-50%'] }} transition={{ duration: 25, repeat: Infinity, ease: 'linear' }}>
             {track.map((src,i)=> (
               <div key={src+i} className="neon-soft rounded-md border border-white/10 bg-white/5 p-3">
-                <img src={src} className="h-20 md:h-28 w-auto opacity-95" />
+                <img src={src} className="h-8 md:h-10 w-auto opacity-95" />
               </div>
             ))}
           </motion.div>
@@ -292,7 +291,6 @@ function Footer(){
 export default function App(){
   return (
     <div className="hero-in-view">
-      <Cursor/>
       <Header/>
       <HeroMinimal imageUrls={[
         // second becomes first
