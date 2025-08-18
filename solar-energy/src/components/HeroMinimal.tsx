@@ -29,10 +29,10 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
             src={current}
             alt="Painéis solares modernos"
             className="absolute inset-0 w-full h-full object-cover"
-            initial={{ opacity: 0, scale: 1.06 }}
-            animate={{ opacity: 1, scale: 1.02 }}
-            exit={{ opacity: 0, scale: 1.02 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
+            initial={{ opacity: 0, scale: 1.02 }}
+            animate={{ opacity: 1, scale: 1.0 }}
+            exit={{ opacity: 0, scale: 1.0 }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
           />
         </AnimatePresence>
         {/* Cinematic blue-green overlay */}
