@@ -265,8 +265,8 @@ function Plates3D(){
         <div className="logo-marquee mt-10">
           <motion.div className="logo-track" animate={{ x: ['0%','-50%'] }} transition={{ duration: 25, repeat: Infinity, ease: 'linear' }}>
             {track.map((src,i)=> (
-              <div key={src+i} className="neon-soft rounded-md border border-white/10 bg-white/5 p-4 md:p-5">
-                <img src={src} className="h-12 md:h-14 w-auto opacity-95" />
+              <div key={src+i} className="neon-soft rounded-md border border-white/10 bg-white/5 p-3">
+                <img src={src} className="h-8 w-8 md:h-10 md:w-10 object-contain opacity-95" />
               </div>
             ))}
           </motion.div>
