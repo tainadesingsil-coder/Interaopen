@@ -37,15 +37,15 @@ function Beneficios() {
     { icon: Leaf, title: 'Simples, claro e garantido', desc: 'Sem burocracia.', detail: 'Cadastro em minutos e contrato digital. Transparência total para você pagar menos.' },
   ]
   return (
-    <section className="py-10 md:py-14">
-      <div className="container-section grid md:grid-cols-3 gap-6">
+    <section className="py-8 md:py-14">
+      <div className="container-section grid md:grid-cols-3 gap-4 md:gap-6">
         {items.map((it,i)=> {
           const Icon = it.icon
           const isOpen = open===i
           return (
             <div key={it.title} className="card-aggressive cursor-pointer" onClick={()=>setOpen(isOpen?null:i)}>
               <Icon className="icon-large" />
-              <h3 className="mt-4 text-lg font-bold">{it.title}</h3>
+              <h3 className="mt-3 md:mt-4 text-base md:text-lg font-bold">{it.title}</h3>
               <p className="mt-1 text-[var(--muted)] text-sm">{it.desc}</p>
               <AnimatePresence>
                 {isOpen && (
@@ -84,20 +84,20 @@ function Simulador(){
   const {e,p,n,r}=useCalc(conta,area,cidade)
   const brl=(v:number)=>v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
   return (
-    <section className="py-10 md:py-14">
+    <section className="py-8 md:py-14">
       <div className="container-section">
-        <h2 className="text-2xl md:text-3xl font-bold">Veja agora quanto volta para você todo mês</h2>
+        <h2 className="text-xl md:text-3xl font-bold">Veja agora quanto volta para você todo mês</h2>
         <p className="section-subtitle mt-1">Você paga menos, economiza na fatura. Simule em segundos.</p>
-        <div className="mt-6 grid md:grid-cols-5 gap-6">
+        <div className="mt-4 md:mt-6 grid md:grid-cols-5 gap-4 md:gap-6">
           <div className="md:col-span-3 grid gap-3">
             <input className="input" type="number" min={50} step={10} value={conta} onChange={e=>setConta(Number(e.target.value))} placeholder="O que você paga hoje (R$/mês)" />
             <input className="input" type="number" min={5} step={1} value={area} onChange={e=>setArea(Number(e.target.value))} placeholder="Área útil no telhado (m²)" />
             <input className="input" value={cidade} onChange={e=>setCidade(e.target.value)} placeholder="Cidade" />
           </div>
           <div className="md:col-span-2 grid gap-3">
-            <div className="card"><p className="text-[var(--muted)] text-sm">O que você devolve ao seu bolso</p><p className="mt-1 text-xl font-bold text-[var(--blue)]">{brl(e)} ({p.toFixed(0)}%)</p></div>
-            <div className="card"><p className="text-[var(--muted)] text-sm">Sua nova conta estimada</p><p className="mt-1 text-xl font-semibold">{brl(n)}</p></div>
-            <div className="card"><p className="text-[var(--muted)] text-sm">Em quantos anos se paga</p><p className="mt-1 text-xl font-semibold">{r>0? `${r.toFixed(1)} anos`:'-'}</p></div>
+            <div className="card"><p className="text-[var(--muted)] text-sm">O que você devolve ao seu bolso</p><p className="mt-1 text-lg md:text-xl font-bold text-[var(--blue)]">{brl(e)} ({p.toFixed(0)}%)</p></div>
+            <div className="card"><p className="text-[var(--muted)] text-sm">Sua nova conta estimada</p><p className="mt-1 text-lg md:text-xl font-semibold">{brl(n)}</p></div>
+            <div className="card"><p className="text-[var(--muted)] text-sm">Em quantos anos se paga</p><p className="mt-1 text-lg md:text-xl font-semibold">{r>0? `${r.toFixed(1)} anos`:'-'}</p></div>
           </div>
         </div>
       </div>
@@ -120,16 +120,16 @@ function Steps(){
     {n:3,t:'Conta reduzida, simples assim',d:'Economia de 20% garantida.',detail:'Você sente a diferença no bolso e pode cancelar quando quiser, sem dor de cabeça.'},
   ]
   return (
-    <section className="py-10 md:py-14">
+    <section className="py-8 md:py-14">
       <div className="container-section relative">
         <div ref={railRef} className="steps-rail"><div className="mask"/></div>
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-3 gap-4 md:gap-6">
           {steps.map((s,i)=> {
             const isOpen=open===i
             return (
               <div key={s.n} className="card cursor-pointer" onClick={()=>setOpen(isOpen?null:i)}>
                 <div className="step-circle">{s.n}</div>
-                <h3 className="mt-3 font-semibold">{s.t}</h3>
+                <h3 className="mt-3 font-semibold text-base md:text-lg">{s.t}</h3>
                 <p className="mt-1 text-[var(--muted)] text-sm">{s.d}</p>
                 <AnimatePresence>
                   {isOpen && (
@@ -154,14 +154,14 @@ function Depoimentos(){
     {t:'Economizei 20% sem dor de cabeça. Atendimento rápido em MG.',a:'Carlos, Contagem',img:'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200&auto=format&fit=crop'},
   ]
   return (
-    <section className="py-10 md:py-14">
-      <div className="container-section grid gap-4">
+    <section className="py-8 md:py-14">
+      <div className="container-section grid gap-3 md:gap-4">
         {items.map((d,i)=> (
-          <div key={i} className="card flex items-center gap-4">
-            <img src={d.img} alt={d.a} className="h-12 w-12 rounded-full object-cover" />
+          <div key={i} className="card flex items-center gap-3 md:gap-4">
+            <img src={d.img} alt={d.a} className="h-10 w-10 md:h-12 md:w-12 rounded-full object-cover" />
             <Quote className="h-5 w-5 text-[var(--blue)]" />
-            <p className="italic">“{d.t}”</p>
-            <span className="ml-auto text-sm text-[var(--muted)]">{d.a}</span>
+            <p className="italic text-sm md:text-base">“{d.t}”</p>
+            <span className="ml-auto text-xs md:text-sm text-[var(--muted)]">{d.a}</span>
           </div>
         ))}
       </div>
@@ -178,13 +178,13 @@ function FAQ(){
   ]
   const [open,setOpen]=useState<number|null>(0)
   return (
-    <section className="py-10 md:py-14">
+    <section className="py-8 md:py-14">
       <div className="container-section">
         <div className="grid gap-3">
           {qas.map((x,i)=> (
             <div key={i} className="card">
               <button onClick={()=>setOpen(open===i?null:i)} className="w-full flex items-center justify-between text-left">
-                <span className="font-medium">{x.q}</span>
+                <span className="font-medium text-base md:text-lg">{x.q}</span>
                 <ChevronDown className={`h-4 w-4 transition-transform ${open===i?'rotate-180 text-[var(--blue)]':''}`} />
               </button>
               <AnimatePresence>
@@ -204,13 +204,13 @@ function FAQ(){
 
 function CTAFinal(){
   return (
-    <section id="cta" className="section-blue py-12 md:py-14">
-      <div className="container-section grid md:grid-cols-2 gap-6 items-center">
+    <section id="cta" className="section-blue py-10 md:py-14">
+      <div className="container-section grid md:grid-cols-2 gap-4 md:gap-6 items-center">
         <div>
-          <h2 className="text-2xl md:text-3xl font-bold">Pare de pagar mais. 20% de desconto hoje mesmo.</h2>
+          <h2 className="text-xl md:text-3xl font-bold">Pare de pagar mais. 20% de desconto hoje mesmo.</h2>
           <p className="mt-2 opacity-90">Você paga menos, economiza na fatura e sente a diferença no bolso.</p>
         </div>
-        <div className="grid sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <input className="input" placeholder="Nome" />
           <input className="input" placeholder="Telefone" />
           <input className="input sm:col-span-2" placeholder="E-mail" />

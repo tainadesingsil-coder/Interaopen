@@ -24,12 +24,12 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
     <motion.section className="relative overflow-hidden" initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: "easeOut" }}>
       {/* Minimal logo overlay */}
       <div className="absolute top-5 left-5 z-20">
-        <img src="https://i.postimg.cc/W40qnLhn/Design-sem-nome-2025-08-16-T014206-739.png" alt="Solar Energy" className="h-20 w-auto opacity-95" />
+        <img src="https://i.postimg.cc/W40qnLhn/Design-sem-nome-2025-08-16-T014206-739.png" alt="Solar Energy" className="h-16 md:h-20 w-auto opacity-95" />
       </div>
       {/* Mascot fixed at bottom-right (edge) */}
       <div className="fixed right-0 bottom-0 z-50 text-right mr-[-2px] mb-[-2px]">
         <button onClick={()=>setBubble(v=>!v)} aria-label="Assistente" className="mascot-stand">
-          <img src="https://i.postimg.cc/fyCrSrcW/Design-sem-nome-2025-08-18-T120443-767.png" alt="Mascote" className="h-[270px] w-auto"/>
+          <img src="https://i.postimg.cc/fyCrSrcW/Design-sem-nome-2025-08-18-T120443-767.png" alt="Mascote" className="h-[140px] sm:h-[200px] md:h-[270px] w-auto"/>
         </button>
         <AnimatePresence>
           {bubble && (
@@ -68,23 +68,23 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
 
       {/* Centered content */}
       <div className="relative z-10 container mx-auto px-4">
-        <div className="min-h-[80vh] md:min-h-[88vh] flex items-center justify-center text-center py-24 md:py-32">
+        <div className="min-h-[72vh] md:min-h-[88vh] flex items-center justify-center text-center py-16 md:py-32">
           <div className="max-w-3xl">
-            <h1 className="text-white tracking-tight text-4xl md:text-6xl font-extrabold leading-tight">
+            <h1 className="text-white tracking-tight text-3xl md:text-6xl font-extrabold leading-tight">
               Energia inteligente para um futuro sustentável
             </h1>
-            <p className="mt-5 text-white/80 text-base md:text-lg font-light">
+            <p className="mt-4 md:mt-5 text-white/80 text-base md:text-lg font-light">
               Tecnologia limpa com eficiência real. Confiável, moderna e acessível.
             </p>
-            <div className="mt-8">
-              <a href="#cta" className="inline-flex items-center justify-center rounded-full px-8 py-3 text-sm md:text-base font-semibold text-white bg-[var(--blue)] shadow-lg hover:shadow-xl transition-transform hover:scale-[1.03]">
+            <div className="mt-6 md:mt-8">
+              <a href="#cta" className="inline-flex items-center justify-center rounded-full px-6 md:px-8 py-3 text-sm md:text-base font-semibold text-white bg-[var(--blue)] shadow-lg hover:shadow-xl transition-transform hover:scale-[1.03]">
                 Simule sua economia
               </a>
             </div>
           </div>
         </div>
         {/* Discrete social icons aligned to hero footer */}
-        <div className="absolute inset-x-0 bottom-6 flex justify-center">
+        <div className="absolute inset-x-0 bottom-4 md:bottom-6 flex justify-center">
           <nav className="flex items-center gap-4 opacity-80 hover:opacity-100 transition">
             <a href="#" aria-label="Instagram" className="inline-flex"><InstagramLogo size={18} weight="duotone" className="text-white"/></a>
             <a href="#" aria-label="WhatsApp" className="inline-flex"><WhatsappLogo size={18} weight="duotone" className="text-white"/></a>
