@@ -286,6 +286,7 @@ export default function App(){
     <div className="hero-in-view">
       <Header/>
       <HeroMinimal imageUrls={[
+        'https://i.postimg.cc/26314Fwm/Whats-App-Image-2025-08-15-at-12-47-13.jpg',
         'https://i.postimg.cc/ZqK41bX5/Whats-App-Image-2025-08-15-at-12-47-18-1.jpg',
         'https://i.postimg.cc/jjKryxRh/Whats-App-Image-2025-08-15-at-12-47-19-1.jpg',
         'https://i.postimg.cc/cHM4ZW4g/Whats-App-Image-2025-08-15-at-12-47-18.jpg',
