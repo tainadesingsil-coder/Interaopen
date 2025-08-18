@@ -100,6 +100,7 @@ function Simulador(){
         <div className="mt-4 md:mt-6 grid md:grid-cols-5 gap-4 md:gap-6">
           <div className="md:col-span-3 grid gap-3">
             <input className="input" inputMode="numeric" pattern="[0-9]*" type="number" min={50} step={10} value={conta} onChange={e=>setConta(Number(e.target.value))} placeholder="O que você paga hoje (R$/mês)" />
+            <p className="text-xs text-[var(--muted)] -mt-1">Exemplo: R$ 300 = sua conta mensal atual. Ajuste para o valor da sua fatura.</p>
             <div className="relative">
               <input
                 className="input"
