@@ -26,14 +26,14 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
       <div className="absolute top-5 left-5 z-20">
         <img src="https://i.postimg.cc/W40qnLhn/Design-sem-nome-2025-08-16-T014206-739.png" alt="Solar Energy" className="h-20 w-auto opacity-95" />
       </div>
-      {/* Mascot standing at bottom-right */}
-      <div className="absolute right-5 bottom-0 z-20 text-right">
+      {/* Mascot standing at bottom-left */}
+      <div className="absolute left-4 md:left-8 bottom-0 z-20 text-left">
         <button onClick={()=>setBubble(v=>!v)} aria-label="Assistente" className="mascot-stand">
           <img src="https://i.postimg.cc/fyCrSrcW/Design-sem-nome-2025-08-18-T120443-767.png" alt="Mascote" className="h-[400px] w-auto"/>
         </button>
         <AnimatePresence>
           {bubble && (
-            <motion.div initial={{opacity:0, y:6}} animate={{opacity:1, y:0}} exit={{opacity:0, y:6}} transition={{duration:0.2}} className="mascot-bubble">
+            <motion.div initial={{opacity:0, y:6}} animate={{opacity:1, y:0}} exit={{opacity:0, y:6}} transition={{duration:0.2}} className="mascot-bubble left-0 right-auto">
               <div className="text-white/90">Olá! Posso te ajudar a simular sua economia.</div>
               <div className="mt-2">
                 <a href="#cta" className="inline-flex items-center rounded-full px-3 py-1.5 text-xs font-semibold text-white bg-[var(--blue)]">Simular agora</a>
