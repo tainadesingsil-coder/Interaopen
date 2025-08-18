@@ -26,10 +26,10 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
       <div className="absolute top-5 left-5 z-20">
         <img src="https://i.postimg.cc/W40qnLhn/Design-sem-nome-2025-08-16-T014206-739.png" alt="Solar Energy" className="h-20 w-auto opacity-95" />
       </div>
-      {/* Mascot fixed at bottom-right (raised slightly) */}
-      <div className="fixed right-0 bottom-4 z-50 text-right pr-1">
+      {/* Mascot fixed at bottom-right (edge) */}
+      <div className="fixed right-0 bottom-0 z-50 text-right">
         <button onClick={()=>setBubble(v=>!v)} aria-label="Assistente" className="mascot-stand">
-          <img src="https://i.postimg.cc/fyCrSrcW/Design-sem-nome-2025-08-18-T120443-767.png" alt="Mascote" className="h-[350px] w-auto"/>
+          <img src="https://i.postimg.cc/fyCrSrcW/Design-sem-nome-2025-08-18-T120443-767.png" alt="Mascote" className="h-[300px] w-auto"/>
         </button>
         <AnimatePresence>
           {bubble && (
