@@ -66,24 +66,18 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
         />
       </div>
 
-      {/* Centered content */}
+      {/* Centered content: only CTA */}
       <div className="relative z-10 container mx-auto px-4">
-        <div className="min-h-[72vh] md:min-h-[88vh] flex items-center justify-center text-center py-16 md:py-32">
+        <div className="min-h-[60vh] md:min-h-[70vh] flex items-center justify-center text-center py-16 md:py-28">
           <div className="max-w-3xl">
-            <h1 className="text-gradient-blue tracking-tight text-3xl md:text-6xl font-extrabold leading-tight">
-              Energia inteligente para um futuro sustentável
-            </h1>
-            <p className="mt-4 md:mt-5 text-white/80 text-base md:text-lg font-light">
-              Tecnologia limpa com eficiência real. Confiável, moderna e acessível.
-            </p>
-            <div className="mt-6 md:mt-8">
+            <div className="mt-0">
               <a href="#cta" className="inline-flex items-center justify-center rounded-full px-6 md:px-8 py-3 text-sm md:text-base font-semibold text-white bg-[var(--blue)] neon-pulse">
-                Simule sua economia
+                Simular desconto
               </a>
             </div>
           </div>
         </div>
-        {/* Discrete social icons aligned to hero footer */}
+        {/* Social icons at hero footer */}
         <div className="absolute inset-x-0 bottom-4 md:bottom-6 flex justify-center">
           <nav className="flex items-center gap-4 opacity-80 hover:opacity-100 transition">
             <a href="#" aria-label="Instagram" className="inline-flex"><InstagramLogo size={18} weight="duotone" className="text-white"/></a>
