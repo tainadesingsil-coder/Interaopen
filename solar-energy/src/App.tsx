@@ -228,7 +228,7 @@ function Plates3D(){
     {t:'Você paga o mínimo da Cemig',d:'O restante vira economia para você.',detail:'Nada muda na sua instalação. Só muda o valor que você paga.'},
     {t:'Transparência total',d:'Acompanhe no app e no e-mail.',detail:'Histórico de economia, comprovantes e atendimento local em MG.'},
   ]
-  const logos=['https://dummyimage.com/100x40/ffffff/000000.png&text=Parceiro+A','https://dummyimage.com/120x40/ffffff/000000.png&text=Parceiro+B','https://dummyimage.com/90x40/ffffff/000000.png&text=Parceiro+C','https://dummyimage.com/140x40/ffffff/000000.png&text=Parceiro+D']
+  const logos=['https://i.postimg.cc/nLcqGKsz/Design-sem-nome-2025-08-18-T140112-499.png','https://dummyimage.com/100x40/ffffff/000000.png&text=Parceiro+A','https://dummyimage.com/120x40/ffffff/000000.png&text=Parceiro+B','https://dummyimage.com/90x40/ffffff/000000.png&text=Parceiro+C','https://dummyimage.com/140x40/ffffff/000000.png&text=Parceiro+D']
   const track=[...logos,...logos]
   return (
     <section className="py-10 md:py-14">
