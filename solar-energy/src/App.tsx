@@ -228,7 +228,14 @@ function Plates3D(){
     {t:'Você paga o mínimo da Cemig',d:'O restante vira economia para você.',detail:'Nada muda na sua instalação. Só muda o valor que você paga.'},
     {t:'Transparência total',d:'Acompanhe no app e no e-mail.',detail:'Histórico de economia, comprovantes e atendimento local em MG.'},
   ]
-  const logos=['https://i.postimg.cc/nLcqGKsz/Design-sem-nome-2025-08-18-T140112-499.png','https://dummyimage.com/100x40/ffffff/000000.png&text=Parceiro+A','https://dummyimage.com/120x40/ffffff/000000.png&text=Parceiro+B','https://dummyimage.com/90x40/ffffff/000000.png&text=Parceiro+C','https://dummyimage.com/140x40/ffffff/000000.png&text=Parceiro+D']
+  const logos=[
+    'https://i.postimg.cc/htTwTBks/Whats-App-Image-2025-08-18-at-13-50-49.jpg',
+    'https://i.postimg.cc/nLcqGKsz/Design-sem-nome-2025-08-18-T140112-499.png',
+    'https://dummyimage.com/100x40/ffffff/000000.png&text=Parceiro+A',
+    'https://dummyimage.com/120x40/ffffff/000000.png&text=Parceiro+B',
+    'https://dummyimage.com/90x40/ffffff/000000.png&text=Parceiro+C',
+    'https://dummyimage.com/140x40/ffffff/000000.png&text=Parceiro+D'
+  ]
   const track=[...logos,...logos]
   return (
     <section className="py-10 md:py-14">
@@ -258,8 +265,8 @@ function Plates3D(){
         <div className="logo-marquee mt-10">
           <motion.div className="logo-track" animate={{ x: ['0%','-50%'] }} transition={{ duration: 25, repeat: Infinity, ease: 'linear' }}>
             {track.map((src,i)=> (
-              <div key={src+i} className="neon-soft rounded-md border border-white/10 bg-white/5 p-3">
-                <img src={src} className="h-8 w-auto opacity-90" />
+              <div key={src+i} className="neon-soft rounded-md border border-white/10 bg-white/5 p-4 md:p-5">
+                <img src={src} className="h-12 md:h-14 w-auto opacity-95" />
               </div>
             ))}
           </motion.div>
