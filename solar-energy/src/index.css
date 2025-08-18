@@ -62,7 +62,8 @@ body {
 .card:hover .icon-large { color: var(--yellow); }
 
 /* Header - dark glass */
-.header { @apply fixed top-0 z-40 w-full backdrop-blur; background: rgba(8,20,35,0.65); box-shadow: 0 10px 30px rgba(0,0,0,0.25); }
+.header { @apply fixed top-0 z-40 w-full backdrop-blur; background: rgba(8,20,35,0.65); box-shadow: 0 10px 30px rgba(0,0,0,0.25); transition: opacity .35s ease, transform .35s ease; }
+.hero-in-view .header { opacity: 0; transform: translateY(-10px); pointer-events: none; }
 
 /* Steps */
 .steps-rail { position: absolute; top: 36px; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, rgba(0,123,255,0.35), rgba(0,123,255,0.8)); border-radius: 999px; overflow: hidden; }

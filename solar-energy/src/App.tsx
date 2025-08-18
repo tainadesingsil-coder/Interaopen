@@ -1,7 +1,7 @@
 import { useMemo, useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence, useInView } from 'framer-motion'
 import { Sun, Home, Leaf, ChevronDown, Quote } from 'lucide-react'
-import { FiInstagram, FiFacebook, FiYoutube } from 'react-icons/fi'
+import { InstagramLogo, FacebookLogo, YoutubeLogo } from '@phosphor-icons/react'
 import './index.css'
 import HeroMinimal from './components/HeroMinimal'
 
@@ -14,13 +14,13 @@ function Header() {
         </a>
         <div className="flex items-center gap-2">
           <a href="#" aria-label="Instagram" className="social">
-            <FiInstagram size={16} className="text-white" />
+            <InstagramLogo size={16} weight="thin" className="text-white" />
           </a>
           <a href="#" aria-label="Facebook" className="social">
-            <FiFacebook size={16} className="text-white" />
+            <FacebookLogo size={16} weight="thin" className="text-white" />
           </a>
           <a href="#" aria-label="YouTube" className="social">
-            <FiYoutube size={16} className="text-white" />
+            <YoutubeLogo size={16} weight="thin" className="text-white" />
           </a>
         </div>
       </div>
@@ -283,7 +283,7 @@ function Footer(){
 
 export default function App(){
   return (
-    <div>
+    <div className="hero-in-view">
       <Header/>
       <HeroMinimal imageUrls={[
         'https://i.postimg.cc/cHM4ZW4g/Whats-App-Image-2025-08-15-at-12-47-18.jpg',
