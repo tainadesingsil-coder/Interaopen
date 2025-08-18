@@ -273,6 +273,7 @@ function Plates3D(){
     {t:'Transparência total',d:'Acompanhe no app e no e-mail.',detail:'Histórico de economia, comprovantes e atendimento local em MG.'},
   ]
   const logos=[
+    'https://i.postimg.cc/KcQDf5BT/Design-sem-nome-2025-08-18-T183931-249.png',
     'https://i.postimg.cc/htTwTBks/Whats-App-Image-2025-08-18-at-13-50-49.jpg',
     'https://i.postimg.cc/nLcqGKsz/Design-sem-nome-2025-08-18-T140112-499.png',
     'https://dummyimage.com/100x40/ffffff/000000.png&text=Parceiro+A',
