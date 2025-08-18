@@ -13,13 +13,13 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
     const id = setInterval(() => {
       setIndex((prev) => (prev + 1) % imageUrls.length);
     }, 2800);
-    return () => clearInterval(id);
+  return () => clearInterval(id);
   }, [imageUrls]);
 
   const current = imageUrls?.[index] ?? imageUrls?.[0];
 
   return (
-    <section className="relative overflow-hidden">
+    <motion.section className="relative overflow-hidden" initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: "easeOut" }}>
       {/* Background slideshow */}
       <div className="absolute inset-0">
         <AnimatePresence mode="wait">
@@ -34,7 +34,6 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
             transition={{ duration: 0.8, ease: "easeOut" }}
           />
         </AnimatePresence>
-        {/* Gradient overlay to keep uniform site color */}
         <div
           className="absolute inset-0"
           style={{
@@ -44,7 +43,6 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
         />
       </div>
 
-      {/* Centered content */}
       <div className="relative z-10 container mx-auto px-4">
         <div className="min-h-[72vh] flex items-center justify-center text-center py-24 md:py-32">
           <div className="max-w-2xl">
@@ -60,6 +58,6 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
           </div>
         </div>
       </div>
-    </section>
+    </motion.section>
   );
 }
