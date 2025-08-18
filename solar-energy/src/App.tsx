@@ -96,7 +96,7 @@ function Simulador(){
     <section className="py-8 md:py-14">
       <div className="container-section">
         <h2 className="text-xl md:text-3xl font-bold">Veja agora quanto volta para você todo mês</h2>
-        <p className="section-subtitle mt-1">Digite o valor da sua conta e selecione a cidade em MG. As sugestões aparecem enquanto você digita.</p>
+        <p className="section-subtitle mt-1">Digite o valor da sua conta e selecione a cidade em MG</p>
         <div className="mt-4 md:mt-6 grid md:grid-cols-5 gap-4 md:gap-6">
           <div className="md:col-span-3 grid gap-3">
             <input className="input" inputMode="numeric" pattern="[0-9]*" type="number" min={50} step={10} value={conta} onChange={e=>setConta(Number(e.target.value))} placeholder="O que você paga hoje (R$/mês)" />
