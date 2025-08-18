@@ -1,7 +1,7 @@
 import { useMemo, useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence, useInView } from 'framer-motion'
 import { Sun, Home, Leaf, ChevronDown, Quote } from 'lucide-react'
-import { AiFillInstagram, AiFillFacebook, AiFillYoutube } from 'react-icons/ai'
+import { FiInstagram, FiFacebook, FiYoutube } from 'react-icons/fi'
 import './index.css'
 import HeroMinimal from './components/HeroMinimal'
 
@@ -14,13 +14,13 @@ function Header() {
         </a>
         <div className="flex items-center gap-2">
           <a href="#" aria-label="Instagram" className="social">
-            <AiFillInstagram size={16} className="text-white" />
+            <FiInstagram size={16} className="text-white" />
           </a>
           <a href="#" aria-label="Facebook" className="social">
-            <AiFillFacebook size={16} className="text-white" />
+            <FiFacebook size={16} className="text-white" />
           </a>
           <a href="#" aria-label="YouTube" className="social">
-            <AiFillYoutube size={16} className="text-white" />
+            <FiYoutube size={16} className="text-white" />
           </a>
         </div>
       </div>
