@@ -49,42 +49,98 @@ function Beneficios() {
   )
 }
 
-function useCalc(conta:number, area:number, cidade:string){
+function useCalc(conta:number){
   return useMemo(()=>{
-    if(!conta||!area||!cidade) return {e:0,p:0,n:0,r:0}
-    const tarifa=0.95, irr=150
-    const prod= area*irr*0.18
-    const gasto= conta/tarifa
-    const ecoK= Math.min(prod,gasto)
-    const e= ecoK*tarifa
-    const p= Math.min(100, e/Math.max(conta,1)*100)
-    const n= Math.max(conta-e, 49.9)
-    const r= (Math.max(prod/120,1)*5200)/(e*12)
-    return {e,p,n,r}
-  },[conta,area,cidade])
+    if(!conta || conta <= 0) return {economiaMensal:0, porcentagem:0, novaConta:0, economiaAnual:0}
+    const porcentagem = 20 // 20% de desconto garantido
+    const economiaMensal = (conta * porcentagem) / 100
+    const novaConta = Math.max(conta - economiaMensal, 0)
+    const economiaAnual = economiaMensal * 12
+    return {economiaMensal, porcentagem, novaConta, economiaAnual}
+  },[conta])
 }
 
 function Simulador(){
   const [conta,setConta]=useState(300)
-  const [area,setArea]=useState(25)
-  const [cidade,setCidade]=useState('Belo Horizonte')
-  const {e,p,n,r}=useCalc(conta,area,cidade)
+  const [cidade,setCidade]=useState('')
+  const [suggestOpen,setSuggestOpen]=useState(false)
+  const [cidades,setCidades]=useState<string[]>([])
+  const {economiaMensal, porcentagem, novaConta, economiaAnual}=useCalc(conta)
   const brl=(v:number)=>v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
+
+  const fallbackCidades = useMemo(()=>[
+    'Belo Horizonte','Uberlândia','Contagem','Juiz de Fora','Betim','Montes Claros','Ribeirão das Neves','Uberaba','Governador Valadares','Ipatinga','Sete Lagoas','Divinópolis','Santa Luzia','Ibirité','Poços de Caldas','Patos de Minas','Pouso Alegre','Barbacena','Teófilo Otoni','Sabará','Varginha','Itabira','Araguari','Passos','Alfenas','Conselheiro Lafaiete','Ituiutaba','Patrocínio','Ponte Nova','Coronel Fabriciano'
+  ],[])
+
+  useEffect(()=>{
+    let cancelled=false
+    fetch('https://servicodados.ibge.gov.br/api/v1/localidades/estados/MG/municipios')
+      .then(r=>r.json())
+      .then((data)=>{
+        if(cancelled) return
+        const nomes = Array.isArray(data) ? data.map((m:any)=>m.nome as string) : []
+        setCidades(nomes.length? nomes : fallbackCidades)
+      })
+      .catch(()=> setCidades(fallbackCidades))
+    return ()=>{ cancelled=true }
+  },[fallbackCidades])
+
+  const sugestoes = useMemo(()=>{
+    const q = (cidade||'').toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu,'')
+    return cidades
+      .filter(n=> n && n.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu,'').startsWith(q))
+      .slice(0,12)
+  },[cidade,cidades])
+
   return (
     <section className="py-8 md:py-14">
       <div className="container-section">
         <h2 className="text-xl md:text-3xl font-bold">Veja agora quanto volta para você todo mês</h2>
-        <p className="section-subtitle mt-1">Você paga menos, economiza na fatura. Simule em segundos.</p>
+        <p className="section-subtitle mt-1">Digite sua conta e cidade em MG. Autocomplete ajuda a encontrar rápido.</p>
         <div className="mt-4 md:mt-6 grid md:grid-cols-5 gap-4 md:gap-6">
           <div className="md:col-span-3 grid gap-3">
-            <input className="input" type="number" min={50} step={10} value={conta} onChange={e=>setConta(Number(e.target.value))} placeholder="O que você paga hoje (R$/mês)" />
-            <input className="input" type="number" min={5} step={1} value={area} onChange={e=>setArea(Number(e.target.value))} placeholder="Área útil no telhado (m²)" />
-            <input className="input" value={cidade} onChange={e=>setCidade(e.target.value)} placeholder="Cidade" />
+            <input className="input" inputMode="numeric" pattern="[0-9]*" type="number" min={50} step={10} value={conta} onChange={e=>setConta(Number(e.target.value))} placeholder="O que você paga hoje (R$/mês)" />
+            <div className="relative">
+              <input
+                className="input"
+                value={cidade}
+                onChange={e=>{ setCidade(e.target.value); setSuggestOpen(true) }}
+                onFocus={()=> setSuggestOpen(true)}
+                placeholder="Cidade em Minas Gerais"
+                autoComplete="off"
+              />
+              {suggestOpen && cidade && (
+                <div className="absolute z-20 mt-1 w-full rounded-md border border-white/10 bg-white/95 text-slate-800 shadow-xl max-h-60 overflow-auto">
+                  {sugestoes.length===0 && (
+                    <div className="px-3 py-2 text-sm text-slate-500">Nenhuma cidade encontrada</div>
+                  )}
+                  {sugestoes.map((nome)=> (
+                    <button
+                      key={nome}
+                      type="button"
+                      className="w-full text-left px-3 py-2 hover:bg-slate-100 text-sm"
+                      onMouseDown={(e)=>{ e.preventDefault(); setCidade(nome); setSuggestOpen(false) }}
+                    >
+                      {nome}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
           <div className="md:col-span-2 grid gap-3">
-            <div className="card"><p className="text-[var(--muted)] text-sm">O que você devolve ao seu bolso</p><p className="mt-1 text-lg md:text-xl font-bold text-[var(--blue)]">{brl(e)} ({p.toFixed(0)}%)</p></div>
-            <div className="card"><p className="text-[var(--muted)] text-sm">Sua nova conta estimada</p><p className="mt-1 text-lg md:text-xl font-semibold">{brl(n)}</p></div>
-            <div className="card"><p className="text-[var(--muted)] text-sm">Em quantos anos se paga</p><p className="mt-1 text-lg md:text-xl font-semibold">{r>0? `${r.toFixed(1)} anos`:'-'}</p></div>
+            <div className="card">
+              <p className="text-[var(--muted)] text-sm">O que você devolve ao seu bolso</p>
+              <p className="mt-1 text-lg md:text-xl font-bold text-[var(--blue)]">{brl(economiaMensal)} ({porcentagem}%)</p>
+            </div>
+            <div className="card">
+              <p className="text-[var(--muted)] text-sm">Sua nova conta estimada</p>
+              <p className="mt-1 text-lg md:text-xl font-semibold">{brl(novaConta)}</p>
+            </div>
+            <div className="card">
+              <p className="text-[var(--muted)] text-sm">Economia no primeiro ano</p>
+              <p className="mt-1 text-lg md:text-xl font-semibold">{brl(economiaAnual)}</p>
+            </div>
           </div>
         </div>
       </div>
