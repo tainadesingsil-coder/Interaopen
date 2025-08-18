@@ -13,7 +13,7 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
     if (!imageUrls || imageUrls.length <= 1) return;
     const id = setInterval(() => {
       setIndex((prev) => (prev + 1) % imageUrls.length);
-    }, 3000);
+    }, 6000);
     return () => clearInterval(id);
   }, [imageUrls]);
 
@@ -37,7 +37,7 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
             initial={{ opacity: 0, scale: 1.0 }}
             animate={{ opacity: 1, scale: 1.0 }}
             exit={{ opacity: 0, scale: 1.0 }}
-            transition={{ duration: 0.7, ease: "easeOut" }}
+            transition={{ duration: 0.9, ease: "easeOut" }}
           />
         </AnimatePresence>
         <div
