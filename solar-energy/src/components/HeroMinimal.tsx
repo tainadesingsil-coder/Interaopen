@@ -29,14 +29,14 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
       {/* Mascot fixed at bottom-right (edge) */}
       <div className="fixed right-0 bottom-0 z-50 text-right mr-[-2px] mb-[-2px]">
         <button onClick={()=>setBubble(v=>!v)} aria-label="Assistente" className="mascot-stand">
-          <img src="https://i.postimg.cc/fyCrSrcW/Design-sem-nome-2025-08-18-T120443-767.png" alt="Mascote" className="h-[140px] sm:h-[200px] md:h-[270px] w-auto"/>
+          <img src="https://i.postimg.cc/Y9KQgcw6/Design-sem-nome-2025-08-18-T120443-767.png" alt="Mascote" className="h-[140px] sm:h-[200px] md:h-[270px] w-auto"/>
         </button>
         <AnimatePresence>
           {bubble && (
             <motion.div initial={{opacity:0, y:6}} animate={{opacity:1, y:0}} exit={{opacity:0, y:6}} transition={{duration:0.2}} className="mascot-bubble right-0 left-auto">
               <div className="text-white/90">Olá! Posso te ajudar a simular sua economia.</div>
               <div className="mt-2">
-                <a href="#cta" className="inline-flex items-center rounded-full px-3 py-1.5 text-xs font-semibold text-white bg-[var(--blue)]">Simular agora</a>
+                <a href="#cta" className="inline-flex items-center rounded-full px-3 py-1.5 text-xs font-semibold text-white bg-[var(--blue)] neon-pulse">Simular agora</a>
               </div>
             </motion.div>
           )}
@@ -70,14 +70,14 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
       <div className="relative z-10 container mx-auto px-4">
         <div className="min-h-[72vh] md:min-h-[88vh] flex items-center justify-center text-center py-16 md:py-32">
           <div className="max-w-3xl">
-            <h1 className="text-white tracking-tight text-3xl md:text-6xl font-extrabold leading-tight">
+            <h1 className="text-gradient-blue tracking-tight text-3xl md:text-6xl font-extrabold leading-tight">
               Energia inteligente para um futuro sustentável
             </h1>
             <p className="mt-4 md:mt-5 text-white/80 text-base md:text-lg font-light">
               Tecnologia limpa com eficiência real. Confiável, moderna e acessível.
             </p>
             <div className="mt-6 md:mt-8">
-              <a href="#cta" className="inline-flex items-center justify-center rounded-full px-6 md:px-8 py-3 text-sm md:text-base font-semibold text-white bg-[var(--blue)] shadow-lg hover:shadow-xl transition-transform hover:scale-[1.03]">
+              <a href="#cta" className="inline-flex items-center justify-center rounded-full px-6 md:px-8 py-3 text-sm md:text-base font-semibold text-white bg-[var(--blue)] neon-pulse">
                 Simule sua economia
               </a>
             </div>
