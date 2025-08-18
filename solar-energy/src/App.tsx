@@ -4,6 +4,7 @@ import { Sun, Home, Leaf, ChevronDown, Quote } from 'lucide-react'
 import { InstagramLogo, FacebookLogo, YoutubeLogo } from '@phosphor-icons/react'
 import './index.css'
 import HeroMinimal from './components/HeroMinimal'
+import Cursor from './components/Cursor'
 
 function Header() {
   return (
@@ -284,6 +285,7 @@ function Footer(){
 export default function App(){
   return (
     <div className="hero-in-view">
+      <Cursor/>
       <Header/>
       <HeroMinimal imageUrls={[
         // second becomes first

@@ -7,6 +7,7 @@
 	--yellow: #FFC107;
 	--orange: #FF5722;
 	--neon: #00B7FF;
+	--green: #00FFAA;
 	--text: #0F172A;
 	--muted: #CBD5E1;
 }
@@ -15,11 +16,47 @@ html { scroll-behavior: smooth; }
 
 body {
 	@apply font-sans text-white;
+	cursor: none;
 	background:
 		radial-gradient(1400px 600px at -10% -10%, rgba(0,123,255,0.18), transparent 60%),
 		radial-gradient(1200px 600px at 110% -10%, rgba(255,193,7,0.12), transparent 60%),
 		linear-gradient(180deg, #0B1F3A 0%, #07172C 50%, #081423 100%);
 }
+
+* { cursor: none !important; }
+
+.app-cursor {
+	position: fixed; left: 0; top: 0; z-index: 9999;
+	width: 22px; height: 22px;
+	transform: translate3d(-100px, -100px, 0);
+	border-radius: 9999px;
+	background: radial-gradient(closest-side, rgba(0,200,255,0.12), transparent 70%);
+	box-shadow: 0 0 24px rgba(0,200,255,0.25);
+	pointer-events: none;
+	mix-blend-mode: screen;
+}
+.app-cursor::before {
+	content: '';
+	position: absolute; inset: 0;
+	border-radius: 9999px;
+	border: 1.5px solid transparent;
+	background: linear-gradient(135deg, var(--green), var(--neon)) border-box;
+	-webkit-mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0);
+	-webkit-mask-composite: xor; mask-composite: exclude;
+	mask: linear-gradient(#000 0 0);
+}
+.app-cursor--active { transform: translate3d(var(--x,0), var(--y,0), 0) scale(1.2); box-shadow: 0 0 32px rgba(0,200,255,0.35); }
+.app-cursor--pulse { animation: cursorPulse 0.25s ease-out; }
+
+.app-cursor__ripple {
+	position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+	width: 22px; height: 22px; border-radius: 9999px;
+	border: 1.5px solid rgba(0,200,255,0.55);
+	animation: ripple 0.45s ease-out forwards;
+}
+
+@keyframes cursorPulse { from { transform: scale(0.95); } to { transform: scale(1); } }
+@keyframes ripple { from { opacity: 0.6; transform: translate(-50%,-50%) scale(1); } to { opacity: 0; transform: translate(-50%,-50%) scale(1.9); } }
 
 .container-section { @apply container mx-auto px-4; }
 .section-title { @apply text-3xl md:text-5xl font-extrabold tracking-tight; }
