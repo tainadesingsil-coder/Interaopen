@@ -193,7 +193,7 @@ function Steps(){
 
 function Depoimentos(){
   const items=[
-    {t:'Minha conta caiu 20% após assinar. Paguei o mínimo da Cemig e vi R$ 50 de economia real.',a:'João, BH',img:'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=200&auto=format&fit=crop'},
+    {t:'Minha conta caiu 20% após assinar. Paguei o mínimo da Cemig e vi R$ 50 de economia real.',a:'João, BH',img:'https://i.postimg.cc/zByHknrC/Whats-App-Image-2025-08-18-at-13-57-45.jpg'},
     {t:'O desconto veio certinho todo mês. Ficou simples entender a fatura.',a:'Maria, Uberlândia',img:'https://images.unsplash.com/photo-1520974692973-ac47dfb7fd89?q=80&w=200&auto=format&fit=crop'},
     {t:'Economizei 20% sem dor de cabeça. Atendimento rápido em MG.',a:'Carlos, Contagem',img:'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200&auto=format&fit=crop'},
   ]
