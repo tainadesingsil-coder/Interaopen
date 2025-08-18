@@ -66,17 +66,9 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
         />
       </div>
 
-      {/* Centered content: only CTA */}
+      {/* Centered content: no button/text */}
       <div className="relative z-10 container mx-auto px-4">
-        <div className="min-h-[60vh] md:min-h-[70vh] flex items-center justify-center text-center py-16 md:py-28">
-          <div className="max-w-3xl">
-            <div className="mt-0">
-              <a href="#cta" className="inline-flex items-center justify-center rounded-full px-6 md:px-8 py-3 text-sm md:text-base font-semibold text-white bg-[var(--blue)] neon-pulse">
-                Simular desconto
-              </a>
-            </div>
-          </div>
-        </div>
+        <div className="min-h-[60vh] md:min-h-[70vh] flex items-center justify-center text-center py-16 md:py-28" />
         {/* Social icons at hero footer */}
         <div className="absolute inset-x-0 bottom-4 md:bottom-6 flex justify-center">
           <nav className="flex items-center gap-4 opacity-80 hover:opacity-100 transition">
