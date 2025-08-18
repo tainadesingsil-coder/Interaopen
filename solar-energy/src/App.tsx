@@ -95,7 +95,7 @@ function Simulador(){
             <input className="input" value={cidade} onChange={e=>setCidade(e.target.value)} placeholder="Cidade" />
           </div>
           <div className="md:col-span-2 grid gap-3">
-            <div className="card"><p className="text-[var(--muted)] text-sm">O que você devolve ao seu bolso</p><p className="mt-1 text-xl font-bold text-[var(--yellow)]">{brl(e)} ({p.toFixed(0)}%)</p></div>
+            <div className="card"><p className="text-[var(--muted)] text-sm">O que você devolve ao seu bolso</p><p className="mt-1 text-xl font-bold text-[var(--blue)]">{brl(e)} ({p.toFixed(0)}%)</p></div>
             <div className="card"><p className="text-[var(--muted)] text-sm">Sua nova conta estimada</p><p className="mt-1 text-xl font-semibold">{brl(n)}</p></div>
             <div className="card"><p className="text-[var(--muted)] text-sm">Em quantos anos se paga</p><p className="mt-1 text-xl font-semibold">{r>0? `${r.toFixed(1)} anos`:'-'}</p></div>
           </div>
@@ -159,7 +159,7 @@ function Depoimentos(){
         {items.map((d,i)=> (
           <div key={i} className="card flex items-center gap-4">
             <img src={d.img} alt={d.a} className="h-12 w-12 rounded-full object-cover" />
-            <Quote className="h-5 w-5 text-[var(--yellow)]" />
+            <Quote className="h-5 w-5 text-[var(--blue)]" />
             <p className="italic">“{d.t}”</p>
             <span className="ml-auto text-sm text-[var(--muted)]">{d.a}</span>
           </div>
@@ -214,7 +214,7 @@ function CTAFinal(){
           <input className="input" placeholder="Nome" />
           <input className="input" placeholder="Telefone" />
           <input className="input sm:col-span-2" placeholder="E-mail" />
-          <button className="btn-yellow sm:col-span-2">Quero meu desconto agora</button>
+          <button className="btn-blue sm:col-span-2">Quero meu desconto agora</button>
         </div>
       </div>
     </section>
@@ -235,7 +235,7 @@ function Plates3D(){
       <div className="container-section">
         <div className="lead-thin max-w-xl">
           <input placeholder="Seu e-mail" />
-          <button className="btn-yellow">Garanta seu desconto agora</button>
+          <button className="btn-blue">Garanta seu desconto agora</button>
         </div>
         <div className="mt-8 grid md:grid-cols-3 gap-6">
           {items.map((x,i)=>{

@@ -44,7 +44,7 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(180deg, rgba(11,31,58,0.82) 0%, rgba(0,184,84,0.18) 45%, rgba(8,20,35,0.88) 100%)",
+              "linear-gradient(180deg, rgba(11,31,58,0.82) 0%, rgba(10,160,255,0.18) 45%, rgba(8,20,35,0.88) 100%)",
           }}
         />
       </div>
@@ -60,7 +60,7 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
               Tecnologia limpa com eficiência real. Confiável, moderna e acessível.
             </p>
             <div className="mt-8">
-              <a href="#cta" className="inline-flex items-center justify-center rounded-full px-8 py-3 text-sm md:text-base font-semibold text-white bg-gradient-to-r from-[#00C853] to-[#00B7FF] shadow-lg hover:shadow-xl transition-transform hover:scale-[1.03]">
+              <a href="#cta" className="inline-flex items-center justify-center rounded-full px-8 py-3 text-sm md:text-base font-semibold text-white bg-[var(--blue)] shadow-lg hover:shadow-xl transition-transform hover:scale-[1.03]">
                 Simule sua economia
               </a>
             </div>
