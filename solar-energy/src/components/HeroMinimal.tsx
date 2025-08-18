@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
-import { InstagramLogo, FacebookLogo, LinkedinLogo } from '@phosphor-icons/react'
+import { InstagramLogo, WhatsappLogo, YoutubeLogo } from '@phosphor-icons/react'
 
 type HeroMinimalProps = {
   imageUrls: string[];
@@ -86,9 +86,9 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
         {/* Discrete social icons aligned to hero footer */}
         <div className="absolute inset-x-0 bottom-6 flex justify-center">
           <nav className="flex items-center gap-4 opacity-80 hover:opacity-100 transition">
-            <a href="#" aria-label="Instagram" className="inline-flex"><InstagramLogo size={18} weight="thin" className="text-white"/></a>
-            <a href="#" aria-label="Facebook" className="inline-flex"><FacebookLogo size={18} weight="thin" className="text-white"/></a>
-            <a href="#" aria-label="LinkedIn" className="inline-flex"><LinkedinLogo size={18} weight="thin" className="text-white"/></a>
+            <a href="#" aria-label="Instagram" className="inline-flex"><InstagramLogo size={18} weight="duotone" className="text-white"/></a>
+            <a href="#" aria-label="WhatsApp" className="inline-flex"><WhatsappLogo size={18} weight="duotone" className="text-white"/></a>
+            <a href="#" aria-label="YouTube" className="inline-flex"><YoutubeLogo size={18} weight="duotone" className="text-white"/></a>
           </nav>
         </div>
       </div>

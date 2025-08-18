@@ -1,7 +1,7 @@
 import { useMemo, useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence, useInView } from 'framer-motion'
 import { Sun, Home, Leaf, ChevronDown, Quote } from 'lucide-react'
-import { InstagramLogo, FacebookLogo, YoutubeLogo } from '@phosphor-icons/react'
+import { InstagramLogo, WhatsappLogo, YoutubeLogo } from '@phosphor-icons/react'
 import './index.css'
 import HeroMinimal from './components/HeroMinimal'
 import Cursor from './components/Cursor'
@@ -15,13 +15,13 @@ function Header() {
         </a>
         <div className="flex items-center gap-2">
           <a href="#" aria-label="Instagram" className="social">
-            <InstagramLogo size={16} weight="thin" className="text-white" />
+            <InstagramLogo size={18} weight="duotone" className="text-white" />
           </a>
-          <a href="#" aria-label="Facebook" className="social">
-            <FacebookLogo size={16} weight="thin" className="text-white" />
+          <a href="#" aria-label="WhatsApp" className="social">
+            <WhatsappLogo size={18} weight="duotone" className="text-white" />
           </a>
           <a href="#" aria-label="YouTube" className="social">
-            <YoutubeLogo size={16} weight="thin" className="text-white" />
+            <YoutubeLogo size={18} weight="duotone" className="text-white" />
           </a>
         </div>
       </div>
