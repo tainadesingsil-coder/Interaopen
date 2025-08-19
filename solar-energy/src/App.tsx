@@ -85,10 +85,11 @@ function Simulador(){
     return ()=>{ cancelled=true }
   },[fallbackCidades])
 
+  const strip = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
   const sugestoes = useMemo(()=>{
-    const q = (cidade||'').toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu,'')
+    const q = strip((cidade||'').toLowerCase())
     return cidades
-      .filter(n=> n && n.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu,'').startsWith(q))
+      .filter(n=> n && strip(n.toLowerCase()).startsWith(q))
       .slice(0,12)
   },[cidade,cidades])
 
@@ -195,7 +196,7 @@ function Depoimentos(){
   const items=[
     {t:'Minha conta caiu 20% após assinar. Paguei o mínimo da Cemig e vi R$ 50 de economia real.',a:'João, BH',img:'https://i.postimg.cc/zByHknrC/Whats-App-Image-2025-08-18-at-13-57-45.jpg'},
     {t:'O desconto veio certinho todo mês. Ficou simples entender a fatura.',a:'Maria, Uberlândia',img:'https://i.postimg.cc/T2kH1xkB/Whats-App-Image-2025-08-18-at-13-51-19.jpg'},
-    {t:'Economizei 20% sem dor de cabeça. Atendimento rápido em MG.',a:'Carlos, Contagem',img:'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200&auto=format&fit=crop'},
+    {t:'Economizei 20% sem dor de cabeça. Atendimento rápido em MG.',a:'Carlos, Contagem',img:'https://i.postimg.cc/VLnGRtsP/Whats-App-Image-2025-08-18-at-13-52-17.jpg'},
   ]
   return (
     <section className="py-8 md:py-14">
@@ -335,10 +336,20 @@ function Footer(){
 }
 
 export default function App(){
+  const heroRef = useRef<HTMLElement | null>(null)
+  const heroInView = useInView(heroRef, { amount: 0.6 })
+  useEffect(()=>{
+    if (typeof document === 'undefined') return
+    const root = document.querySelector('body > div') as HTMLElement | null
+    if (!root) return
+    if (heroInView) root.classList.add('hero-in-view')
+    else root.classList.remove('hero-in-view')
+  },[heroInView])
+
   return (
-    <div className="hero-in-view">
+    <div>
       <Header/>
-      <HeroMinimal imageUrls={[
+      <HeroMinimal ref={heroRef} imageUrls={[
         // second becomes first
         'https://i.postimg.cc/ZqK41bX5/Whats-App-Image-2025-08-15-at-12-47-18-1.jpg',
         // first goes to second
