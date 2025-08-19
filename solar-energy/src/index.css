@@ -1,0 +1,121 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+	--blue: #0AA0FF;
+	--yellow: #0AA0FF;
+	--orange: #0AA0FF;
+	--neon: #00C8FF;
+	--green: #00FFAA;
+	--text: #0F172A;
+	--muted: #CBD5E1;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+	@apply font-sans text-white;
+	cursor: auto;
+	background:
+		radial-gradient(1400px 600px at -10% -10%, rgba(10,160,255,0.18), transparent 60%),
+		radial-gradient(1200px 600px at 110% -10%, rgba(10,160,255,0.12), transparent 60%),
+		linear-gradient(180deg, #0B1F3A 0%, #07172C 50%, #081423 100%);
+}
+
+/* Neon utilities */
+.neon-glow { box-shadow: 0 0 18px rgba(10,160,255,0.35), 0 0 3px rgba(10,160,255,0.6) inset; }
+.neon-text { text-shadow: 0 0 10px rgba(10,160,255,0.45); }
+.neon-border { border-color: rgba(10,160,255,0.45) !important; }
+@keyframes neonPulse { 0%,100% { box-shadow: 0 0 14px rgba(10,160,255,0.26); } 50% { box-shadow: 0 0 22px rgba(10,160,255,0.44); } }
+.neon-pulse { animation: neonPulse 2.4s ease-in-out infinite; }
+.text-gradient-blue { background: linear-gradient(90deg, #E8F7FF 0%, #9AD9FF 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+/* Mascot (chat assistant) */
+.mascot { @apply inline-flex items-center justify-center rounded-full transition; width: 56px; height: 56px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.14); box-shadow: 0 10px 24px rgba(0,0,0,0.25), 0 0 0 0 rgba(10,160,255,0.35); }
+.mascot:hover { transform: translateY(-1px); box-shadow: 0 16px 32px rgba(0,0,0,0.35), 0 0 0 2px rgba(10,160,255,0.35); }
+.mascot img { @apply rounded-full; }
+.mascot-stand { @apply transition; filter: drop-shadow(0 10px 24px rgba(0,0,0,0.35)); }
+.mascot-stand:hover { transform: translateY(-2px); }
+.mascot-bubble { @apply absolute right-0 rounded-xl text-sm; bottom: 70px; min-width: 220px; background: rgba(8,20,35,0.78); border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 18px 36px rgba(0,0,0,0.35); padding: 10px 12px; backdrop-filter: blur(8px); transition: opacity .25s ease, transform .25s ease; }
+
+@keyframes bob { 0% { transform: translateY(0); } 50% { transform: translateY(-3px); } 100% { transform: translateY(0); } }
+.bob { animation: bob 3s ease-in-out infinite; }
+
+.container-section { @apply container mx-auto px-4; }
+.section-title { @apply text-3xl md:text-5xl font-extrabold tracking-tight; }
+.section-subtitle { @apply text-base md:text-lg text-[var(--muted)]; }
+
+.btn-yellow {
+	@apply inline-flex items-center justify-center rounded-full px-7 py-3 text-sm font-semibold transition transform focus:outline-none focus:ring-2;
+	background: var(--blue);
+	color: #FFFFFF;
+}
+.btn-yellow:hover { background: var(--blue); transform: scale(1.03); box-shadow: 0 12px 26px rgba(10,160,255,0.25); }
+
+.btn-blue {
+	@apply inline-flex items-center justify-center rounded-full px-7 py-3 text-sm font-semibold text-white transition transform focus:outline-none focus:ring-2;
+	background: var(--blue);
+}
+.btn-blue:hover { background: var(--blue); transform: scale(1.03); box-shadow: 0 12px 26px rgba(10,160,255,0.25); }
+
+.input {
+	@apply w-full rounded-md border px-4 py-3 outline-none focus:ring-2;
+	background: rgba(255,255,255,0.08);
+	border-color: rgba(255,255,255,0.18);
+	color: #FFFFFF;
+}
+.input::placeholder { color: rgba(255,255,255,0.6); }
+
+.card,
+.card-aggressive {
+	border: 1px solid rgba(255,255,255,0.16);
+	background: rgba(255,255,255,0.06);
+	backdrop-filter: blur(8px);
+	box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+}
+.card { @apply rounded-2xl p-6 transition transform; }
+.card-aggressive { @apply rounded-2xl p-6 transition transform; }
+.card:hover,
+.card-aggressive:hover { transform: translateY(-4px) scale(1.02); box-shadow: 0 30px 60px rgba(0,0,0,0.35); }
+.icon-large { width: 32px; height: 32px; color: #94A3B8; transition: color 200ms ease; }
+.card-aggressive:hover .icon-large,
+.card:hover .icon-large { color: var(--blue); }
+
+/* Header - dark glass */
+.header { @apply fixed top-0 z-40 w-full backdrop-blur; background: rgba(8,20,35,0.65); box-shadow: 0 10px 30px rgba(0,0,0,0.25); transition: opacity .35s ease, transform .35s ease; }
+.hero-in-view .header { opacity: 0; transform: translateY(-10px); pointer-events: none; }
+
+/* Steps */
+.steps-rail { position: absolute; top: 36px; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, rgba(10,160,255,0.35), rgba(10,160,255,0.8)); border-radius: 999px; overflow: hidden; filter: drop-shadow(0 0 12px rgba(10,160,255,0.35)); }
+.steps-rail .mask { width: 0%; height: 100%; background: rgba(255,255,255,0.6); }
+.step-circle { @apply flex items-center justify-center rounded-full text-white font-bold; width: 48px; height: 48px; background: var(--blue); border: 4px solid rgba(255,255,255,0.2); }
+
+.lead-thin { @apply mx-auto flex items-center gap-2 rounded-full px-3 py-2 shadow-lg; background: rgba(255,255,255,0.9); color: #0F172A; border: 1px solid rgba(255,255,255,0.9); box-shadow: 0 10px 30px rgba(0,0,0,0.25); }
+.lead-thin input { @apply bg-transparent outline-none flex-1 min-w-[160px] text-sm; }
+
+.plate-3d { position: relative; border: 1.5px solid rgba(255,255,255,0.2); background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03)); box-shadow: 0 40px 80px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.2); transform-style: preserve-3d; }
+.plate-3d:hover { transform: translateY(-8px) scale(1.02); box-shadow: 0 60px 120px rgba(0,0,0,0.55), 0 0 22px rgba(10,160,255,0.22); }
+.neon-soft { box-shadow: 0 0 12px rgba(10,160,255,0.25), 0 0 2px rgba(10,160,255,0.6) inset; }
+
+.logo-marquee { @apply overflow-hidden; }
+.logo-track { @apply flex items-center gap-10 min-w-max; }
+
+.footer-neon-line { height: 2px; background: radial-gradient(closest-side, rgba(10,160,255,0.6), transparent 70%); filter: blur(0.3px); }
+
+/* Social icon button */
+.social { @apply inline-flex items-center justify-center rounded-full transition; width: 32px; height: 32px; }
+.social svg { transition: filter 200ms ease; }
+.social:hover svg { filter: drop-shadow(0 0 10px rgba(10,160,255,0.45)); }
+
+/* Logo wrapper hover glow only */
+.logo-wrap { @apply inline-flex items-center justify-center transition; }
+.logo-wrap img { transition: filter 200ms ease; }
+.logo-wrap:hover img { filter: drop-shadow(0 0 14px rgba(10,160,255,0.45)); }
+
+/* Animations */
+@keyframes fadeInUp {
+	from { opacity: 0; transform: translateY(40px); }
+	to { opacity: 1; transform: translateY(0); }
+}
+.animate-fadeInUp { animation: fadeInUp 1s ease-out both; }
