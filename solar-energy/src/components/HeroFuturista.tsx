@@ -8,16 +8,15 @@ export default function HeroFuturista(){
   useEffect(()=>{
     if(!mountRef.current) return
 
-    const GOLD = 0xEAC67A
     const CYAN = 0x00C6FF
-    const BG = 0x0A0A0A
+    // const BG = 0x0A0A0A // remove solid clear to keep site background unified
 
     const container = mountRef.current
 
-    const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:false })
+    const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true })
     renderer.setPixelRatio(Math.min(window.devicePixelRatio,2))
     renderer.setSize(container.clientWidth, container.clientHeight)
-    renderer.setClearColor(BG, 1)
+    renderer.setClearColor(0x000000, 0) // transparent to unify with body background
     container.appendChild(renderer.domElement)
 
     const scene = new THREE.Scene()
@@ -70,7 +69,7 @@ export default function HeroFuturista(){
     const makeSun=(size=0.6)=>{
       const g=new THREE.Group()
       const sphere=new THREE.Mesh(new THREE.SphereGeometry(size,32,32), new THREE.MeshBasicMaterial({ color:CYAN, transparent:true, opacity:0, blending:THREE.AdditiveBlending, depthWrite:false }))
-      const halo=new THREE.Sprite(new THREE.SpriteMaterial({ map:glowTex, color:GOLD, transparent:true, opacity:0, depthWrite:false, blending:THREE.AdditiveBlending }))
+      const halo=new THREE.Sprite(new THREE.SpriteMaterial({ map:glowTex, color:0xEAC67A, transparent:true, opacity:0, depthWrite:false, blending:THREE.AdditiveBlending }))
       halo.scale.set(size*4,size*4,1)
       g.add(sphere); g.add(halo)
       ;(g as any).sphere=sphere; (g as any).halo=halo
@@ -190,6 +189,7 @@ export default function HeroFuturista(){
 
   return (
     <section className="relative w-full h-screen overflow-hidden">
+      <div className="absolute inset-0 z-0 bg-center bg-cover opacity-40" style={{ backgroundImage: "url('https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExejQwY2tndzdzOXh4MHN2aXl3ZnNwdGkweHJpb25scGR1aDJrdjR1cCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/dX0DO16km8TsD4yL7K/giphy.gif')" }} />
       <div ref={mountRef} className="absolute inset-0" />
       <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
         <div className="text-center px-4">
