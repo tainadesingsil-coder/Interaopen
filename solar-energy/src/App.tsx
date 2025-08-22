@@ -258,7 +258,7 @@ function CTAFinal(){
           <input className="input" placeholder="Nome" />
           <input className="input" placeholder="Telefone" />
           <input className="input sm:col-span-2" placeholder="E-mail" />
-          <button className="btn-blue sm:col-span-2">Quero meu desconto agora</button>
+          <button className="btn-yellow btn-pulse sm:col-span-2">Quero meu desconto agora</button>
         </div>
       </div>
     </section>
@@ -278,7 +278,7 @@ function Plates3D(){
       <div className="container-section">
         <div className="lead-thin max-w-xl">
           <input placeholder="Seu e-mail" />
-          <button className="btn-blue">Garanta seu desconto agora</button>
+          <button className="btn-yellow btn-pulse">Garanta seu desconto agora</button>
         </div>
         <div className="mt-8 grid md:grid-cols-3 gap-6">
           {items.map((x,i)=>{
@@ -321,13 +321,9 @@ export default function App(){
   return (
     <div className="hero-in-view">
       <Header/>
-             <HeroMinimal imageUrls={[
-         'https://i.postimg.cc/ZqK41bX5/Whats-App-Image-2025-08-15-at-12-47-18-1.jpg',
-         'https://i.postimg.cc/VkRWfwLh/Whats-App-Image-2025-08-15-at-12-47-12.jpg',
-         'https://i.postimg.cc/26314Fwm/Whats-App-Image-2025-08-15-at-12-47-13.jpg',
-         'https://i.postimg.cc/Qd3rLQHb/Design-sem-nome-2025-08-18-T103534-552.png',
-         'https://i.postimg.cc/cHM4ZW4g/Whats-App-Image-2025-08-15-at-12-47-18.jpg'
-       ]} />
+              <HeroMinimal imageUrls={[
+          'https://i.postimg.cc/ZqK41bX5/Whats-App-Image-2025-08-15-at-12-47-18-1.jpg'
+        ]} />
       <Beneficios/>
       <Simulador/>
       <Steps/>

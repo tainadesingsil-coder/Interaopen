@@ -73,17 +73,8 @@ export default function HeroMinimal({ imageUrls, videoUrls }: HeroMinimalProps) 
               "linear-gradient(180deg, rgba(6,12,20,0.78) 0%, rgba(10,160,255,0.18) 45%, rgba(6,12,20,0.88) 100%)",
           }}
         />
-        {/* Subtle light rays hitting panels */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="rays-layer">
-            {Array.from({length:8}).map((_,i)=> (
-              <span key={i} className={`ray ray-${i}`} />
-            ))}
-            <div className="impact impact-left" />
-            <div className="impact impact-center" />
-            <div className="impact impact-right" />
-          </div>
-        </div>
+        {/* Minimal overlay (no rays) */}
+        <div className="absolute inset-0 pointer-events-none" />
       </div>
 
       {/* Centered content lowered for contrast */}
