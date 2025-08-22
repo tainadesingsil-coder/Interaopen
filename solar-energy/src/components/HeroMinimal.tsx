@@ -27,15 +27,6 @@ export default function HeroMinimal({ imageUrls, videoUrls }: HeroMinimalProps) 
   const currentVideo = slides.videos?.[index]
   const currentImage = slides.images?.[index] ?? slides.images?.[0]
 
-  // pre-build particle configuration (deterministic)
-  const particles = useMemo(() => Array.from({ length: 24 }, (_, i) => ({
-    key: `p-${i}`,
-    left: `${(i * 37) % 100}%`,
-    size: 2 + ((i * 7) % 5),
-    delay: (i * 0.35) % 6,
-    duration: 6 + ((i * 3) % 5),
-  })), [])
-
   return (
     <motion.section className="relative overflow-hidden" initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: "easeOut" }}>
       {/* Minimal logo overlay */}
@@ -82,33 +73,25 @@ export default function HeroMinimal({ imageUrls, videoUrls }: HeroMinimalProps) 
               "linear-gradient(180deg, rgba(6,12,20,0.78) 0%, rgba(10,160,255,0.18) 45%, rgba(6,12,20,0.88) 100%)",
           }}
         />
-        {/* Golden energy particles */}
+        {/* Subtle light rays hitting panels */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          {particles.map((p)=> (
-            <span
-              key={p.key}
-              className="absolute rounded-full"
-              style={{
-                left: p.left,
-                bottom: '-10%',
-                width: p.size,
-                height: p.size,
-                background: 'radial-gradient(circle, rgba(255,215,128,0.95) 0%, rgba(255,180,64,0.75) 60%, rgba(255,180,64,0) 70%)',
-                boxShadow: '0 0 14px rgba(255,200,80,0.85), 0 0 28px rgba(255,180,64,0.55)',
-                filter: 'blur(0.2px)',
-                animation: `floatUp ${p.duration}s linear ${p.delay}s infinite, shimmer 4s ease-in-out ${p.delay}s infinite`,
-              }}
-            />
-          ))}
+          <div className="rays-layer">
+            {Array.from({length:8}).map((_,i)=> (
+              <span key={i} className={`ray ray-${i}`} />
+            ))}
+            <div className="impact impact-left" />
+            <div className="impact impact-center" />
+            <div className="impact impact-right" />
+          </div>
         </div>
       </div>
 
-      {/* Centered content */}
+      {/* Centered content lowered for contrast */}
       <div className="relative z-10 container mx-auto px-4">
-        <div className="min-h-[70vh] md:min-h-[82vh] flex items-center justify-center text-center py-16 md:py-32">
+        <div className="min-h-[70vh] md:min-h-[82vh] flex items-end justify-center text-center pb-16 md:pb-24 pt-10 md:pt-16">
           <div>
             <motion.h1
-              className="text-3xl md:text-5xl font-extrabold leading-tight text-white drop-shadow-[0_8px_40px_rgba(0,0,0,0.55)]"
+              className="text-3xl md:text-5xl font-extrabold leading-tight text-white drop-shadow-[0_8px_40px_rgba(0,0,0,0.65)]"
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, ease: 'easeOut' }}

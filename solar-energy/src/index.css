@@ -46,6 +46,7 @@ body {
 .section-title { @apply text-3xl md:text-5xl font-extrabold tracking-tight; }
 .section-subtitle { @apply text-base md:text-lg text-[var(--muted)]; }
 
+/* Unified discount/CTA buttons */
 .btn-yellow {
 	@apply inline-flex items-center justify-center rounded-full px-7 py-3 text-sm font-semibold transition transform focus:outline-none focus:ring-2;
 	background: linear-gradient(90deg, #FFD471, #FFA23A);
@@ -136,3 +137,22 @@ body {
 	0%,100% { filter: drop-shadow(0 0 8px rgba(255,200,80,0.5)); }
 	50% { filter: drop-shadow(0 0 14px rgba(255,180,64,0.8)); }
 }
+
+/* Light rays overlay for hero */
+.rays-layer { position: absolute; inset: 0; overflow: hidden; }
+.ray { position: absolute; top: -20%; bottom: -20%; width: 12%; background: linear-gradient(180deg, rgba(234,198,122,0.0) 0%, rgba(234,198,122,0.18) 45%, rgba(0,198,255,0.12) 100%); filter: blur(8px); mix-blend-mode: screen; opacity: 0.0; }
+.ray-0 { left: 10%; animation: raySweep 6s ease-in-out infinite 0s; }
+.ray-1 { left: 22%; animation: raySweep 7s ease-in-out infinite 0.4s; }
+.ray-2 { left: 34%; animation: raySweep 6.5s ease-in-out infinite 0.8s; }
+.ray-3 { left: 46%; animation: raySweep 7.5s ease-in-out infinite 1.2s; }
+.ray-4 { left: 58%; animation: raySweep 6.8s ease-in-out infinite 1.6s; }
+.ray-5 { left: 70%; animation: raySweep 7.2s ease-in-out infinite 2.0s; }
+.ray-6 { left: 82%; animation: raySweep 6.4s ease-in-out infinite 2.4s; }
+.ray-7 { left: 50%; width: 18%; animation: rayPulse 8s ease-in-out infinite 1.8s; }
+@keyframes raySweep { 0% { opacity: 0; transform: translateY(10%) skewX(-6deg); } 10% { opacity: .45; } 50% { opacity: .18; } 100% { opacity: 0; transform: translateY(-10%) skewX(-6deg); } }
+@keyframes rayPulse { 0%,100% { opacity: 0; transform: translateY(12%) skewX(-6deg) scaleX(1); } 20% { opacity: .35; } 50% { opacity: .12; transform: translateY(-12%) skewX(-6deg) scaleX(1.15); } 80% { opacity: .2; } }
+.impact { position: absolute; bottom: 16%; width: 18%; height: 3px; background: radial-gradient(closest-side, rgba(255,240,200,0.45), rgba(255,240,200,0) 70%); filter: blur(2px); opacity: 0.0; animation: impactBlink 3.6s ease-in-out infinite; }
+.impact-left { left: 18%; animation-delay: 0.6s; }
+.impact-center { left: 45%; animation-delay: 1.2s; }
+.impact-right { left: 68%; animation-delay: 1.8s; }
+@keyframes impactBlink { 0% { opacity: 0; } 10% { opacity: .45; } 40% { opacity: .12; } 100% { opacity: 0; } }
