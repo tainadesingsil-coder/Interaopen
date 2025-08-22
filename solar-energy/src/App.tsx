@@ -195,14 +195,20 @@ function Depoimentos(){
   const items=[
     {t:'Minha conta caiu 20% após assinar. Paguei o mínimo da Cemig e vi R$ 50 de economia real.',a:'João, BH',img:'https://i.postimg.cc/zByHknrC/Whats-App-Image-2025-08-18-at-13-57-45.jpg'},
     {t:'O desconto veio certinho todo mês. Ficou simples entender a fatura.',a:'Maria, Uberlândia',img:'https://i.postimg.cc/T2kH1xkB/Whats-App-Image-2025-08-18-at-13-51-19.jpg'},
-    {t:'Economizei 20% sem dor de cabeça. Atendimento rápido em MG.',a:'Carlos, Contagem',img:'https://i.postimg.cc/TwW6vJgn/Whats-App-Image-2025-08-18-at-13-52-17.jpg', pos:'50% 35%'},
+    {t:'Economizei 20% sem dor de cabeça. Atendimento rápido em MG.',a:'Carlos, Contagem',img:'https://i.postimg.cc/TwW6vJgn/Whats-App-Image-2025-08-18-at-13-52-17.jpg', pos:'50% 35%', link:'https://i.postimg.cc/TwW6vJgn/Whats-App-Image-2025-08-18-at-13-52-17.jpg'},
   ]
   return (
     <section className="py-8 md:py-14">
       <div className="container-section grid gap-3 md:gap-4">
         {items.map((d,i)=> (
           <div key={i} className="card flex items-center gap-3 md:gap-4">
-            <img src={d.img} alt={d.a} className="h-10 w-10 md:h-12 md:w-12 rounded-full object-cover" style={{ objectPosition: (d as any).pos || '50% 50%' }} />
+            { (d as any).link ? (
+              <a href={(d as any).link} target="_blank" rel="noopener noreferrer">
+                <img src={d.img} alt={d.a} className="h-10 w-10 md:h-12 md:w-12 rounded-full object-cover" style={{ objectPosition: (d as any).pos || '50% 50%' }} />
+              </a>
+            ) : (
+              <img src={d.img} alt={d.a} className="h-10 w-10 md:h-12 md:w-12 rounded-full object-cover" style={{ objectPosition: (d as any).pos || '50% 50%' }} />
+            )}
             <Quote className="h-5 w-5 text-[var(--blue)]" />
             <p className="italic text-sm md:text-base">“{d.t}”</p>
             <span className="ml-auto text-xs md:text-sm text-[var(--muted)]">{d.a}</span>
