@@ -195,7 +195,7 @@ function Depoimentos(){
   const items=[
     {t:'Minha conta caiu 20% após assinar. Paguei o mínimo da Cemig e vi R$ 50 de economia real.',a:'João, BH',img:'https://i.postimg.cc/zByHknrC/Whats-App-Image-2025-08-18-at-13-57-45.jpg'},
     {t:'O desconto veio certinho todo mês. Ficou simples entender a fatura.',a:'Maria, Uberlândia',img:'https://i.postimg.cc/T2kH1xkB/Whats-App-Image-2025-08-18-at-13-51-19.jpg'},
-    {t:'Economizei 20% sem dor de cabeça. Atendimento rápido em MG.',a:'Carlos, Contagem',img:'https://i.postimg.cc/TwW6vJgn/Whats-App-Image-2025-08-18-at-13-52-17.jpg', pos:'50% 35%', link:'https://i.postimg.cc/TwW6vJgn/Whats-App-Image-2025-08-18-at-13-52-17.jpg'},
+    {t:'Economizei 20% sem dor de cabeça. Atendimento rápido em MG.',a:'Carlos, Contagem',img:'https://i.postimg.cc/90VHwxxV/Whats-App-Image-2025-08-18-at-13-19-46.jpg', pos:'50% 35%', link:'https://i.postimg.cc/90VHwxxV/Whats-App-Image-2025-08-18-at-13-19-46.jpg'},
   ]
   return (
     <section className="py-8 md:py-14">

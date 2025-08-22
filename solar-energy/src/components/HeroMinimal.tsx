@@ -82,7 +82,7 @@ export default function HeroMinimal({ imageUrls, videoUrls }: HeroMinimalProps) 
         <div className="min-h-[70vh] md:min-h-[82vh] flex items-end justify-center text-center pb-24 md:pb-32 pt-6 md:pt-10">
           <div>
             <motion.div
-              className="inline-block rounded-lg bg-[rgba(8,20,35,0.22)] backdrop-blur-[1px] px-3 py-2.5 md:px-6 md:py-4 shadow-[0_8px_20px_rgba(0,0,0,0.20)]"
+              className="inline-block rounded-lg bg-[rgba(8,20,35,0.42)] backdrop-blur-[3px] px-3 py-2.5 md:px-6 md:py-4 shadow-[0_10px_28px_rgba(0,0,0,0.30)]"
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45, ease: 'easeOut' }}
