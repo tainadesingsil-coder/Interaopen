@@ -2,7 +2,7 @@ import { useMemo, useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence, useInView } from 'framer-motion'
 import { Sun, Home, Leaf, ChevronDown, Quote } from 'lucide-react'
 import './index.css'
-import HeroMinimal from './components/HeroMinimal'
+import HeroFuturista from './components/HeroFuturista'
 
 function Header() {
   return (
@@ -338,20 +338,7 @@ export default function App(){
   return (
     <div className="hero-in-view">
       <Header/>
-      <HeroMinimal
-        videoUrls={[
-          'https://cdn.coverr.co/videos/coverr-solar-panels-6545/1080p.mp4',
-          'https://cdn.coverr.co/videos/coverr-sunset-over-houses-7541/1080p.mp4',
-          'https://cdn.coverr.co/videos/coverr-night-city-lights-9248/1080p.mp4'
-        ]}
-        imageUrls={[
-          'https://i.postimg.cc/ZqK41bX5/Whats-App-Image-2025-08-15-at-12-47-18-1.jpg',
-          'https://i.postimg.cc/VkRWfwLh/Whats-App-Image-2025-08-15-at-12-47-12.jpg',
-          'https://i.postimg.cc/26314Fwm/Whats-App-Image-2025-08-15-at-12-47-13.jpg',
-          'https://i.postimg.cc/Qd3rLQHb/Design-sem-nome-2025-08-18-T103534-552.png',
-          'https://i.postimg.cc/cHM4ZW4g/Whats-App-Image-2025-08-15-at-12-47-18.jpg'
-        ]}
-      />
+      <HeroFuturista />
       <Beneficios/>
       <Simulador/>
       <Steps/>
