@@ -24,7 +24,7 @@ function Beneficios() {
     { icon: Leaf, title: 'Simples, claro e garantido', desc: 'Sem burocracia.', detail: 'Cadastro em minutos e contrato digital. Transparência total para você pagar menos.' },
   ]
   return (
-    <section className="py-8 md:py-14">
+    <section id="beneficios" className="py-8 md:py-14">
       <div className="container-section grid md:grid-cols-3 gap-4 md:gap-6">
         {items.map((it,i)=> {
           const Icon = it.icon
@@ -338,16 +338,20 @@ export default function App(){
   return (
     <div className="hero-in-view">
       <Header/>
-      <HeroMinimal imageUrls={[
-        // second becomes first
-        'https://i.postimg.cc/ZqK41bX5/Whats-App-Image-2025-08-15-at-12-47-18-1.jpg',
-        // first goes to second
-        'https://i.postimg.cc/VkRWfwLh/Whats-App-Image-2025-08-15-at-12-47-12.jpg',
-        // new third (requested)
-        'https://i.postimg.cc/26314Fwm/Whats-App-Image-2025-08-15-at-12-47-13.jpg',
-        'https://i.postimg.cc/Qd3rLQHb/Design-sem-nome-2025-08-18-T103534-552.png',
-        'https://i.postimg.cc/cHM4ZW4g/Whats-App-Image-2025-08-15-at-12-47-18.jpg'
-      ]}/>
+      <HeroMinimal
+        videoUrls={[
+          'https://cdn.coverr.co/videos/coverr-solar-panels-6545/1080p.mp4',
+          'https://cdn.coverr.co/videos/coverr-sunset-over-houses-7541/1080p.mp4',
+          'https://cdn.coverr.co/videos/coverr-night-city-lights-9248/1080p.mp4'
+        ]}
+        imageUrls={[
+          'https://i.postimg.cc/ZqK41bX5/Whats-App-Image-2025-08-15-at-12-47-18-1.jpg',
+          'https://i.postimg.cc/VkRWfwLh/Whats-App-Image-2025-08-15-at-12-47-12.jpg',
+          'https://i.postimg.cc/26314Fwm/Whats-App-Image-2025-08-15-at-12-47-13.jpg',
+          'https://i.postimg.cc/Qd3rLQHb/Design-sem-nome-2025-08-18-T103534-552.png',
+          'https://i.postimg.cc/cHM4ZW4g/Whats-App-Image-2025-08-15-at-12-47-18.jpg'
+        ]}
+      />
       <Beneficios/>
       <Simulador/>
       <Steps/>
