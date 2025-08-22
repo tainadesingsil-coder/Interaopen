@@ -9,7 +9,7 @@ function Header() {
     <header className="header">
       <div className="container-section flex items-center justify-between py-3">
         <a href="#" className="logo-wrap">
-          <img src="/logo.png" alt="Solar Energy" className="h-[96px] w-auto" />
+          <img src="https://i.postimg.cc/gjNczFG1/LOGO-V-BRANCA-1.png" alt="Solar Energy" className="h-[96px] w-auto" />
         </a>
       </div>
     </header>
@@ -193,9 +193,9 @@ function Steps(){
 
 function Depoimentos(){
   const items=[
-    {t:'Minha conta caiu 20% após assinar. Paguei o mínimo da Cemig e vi R$ 50 de economia real.',a:'João, BH',img:'https://i.postimg.cc/zByHknrC/Whats-App-Image-2025-08-18-at-13-57-45.jpg'},
-    {t:'O desconto veio certinho todo mês. Ficou simples entender a fatura.',a:'Maria, Uberlândia',img:'https://i.postimg.cc/T2kH1xkB/Whats-App-Image-2025-08-18-at-13-51-19.jpg'},
-    {t:'Economizei 20% sem dor de cabeça. Atendimento rápido em MG.',a:'Carlos, Contagem',img:'https://i.postimg.cc/90VHwxxV/Whats-App-Image-2025-08-18-at-13-19-46.jpg', pos:'50% 35%', link:'https://i.postimg.cc/90VHwxxV/Whats-App-Image-2025-08-18-at-13-19-46.jpg'},
+    {t:'Minha conta caiu 20% após assinar. Paguei o mínimo da Cemig e vi R$ 50 de economia real.',a:'Empresa 1, Montes Claros - MG',img:'https://i.postimg.cc/zByHknrC/Whats-App-Image-2025-08-18-at-13-57-45.jpg'},
+    {t:'O desconto veio certinho todo mês. Ficou simples entender a fatura.',a:'Empresa 2, Montes Claros - MG',img:'https://i.postimg.cc/T2kH1xkB/Whats-App-Image-2025-08-18-at-13-51-19.jpg'},
+    {t:'Economizei 20% sem dor de cabeça. Atendimento rápido em MG.',a:'Empresa 3, Montes Claros - MG',img:'https://i.postimg.cc/90VHwxxV/Whats-App-Image-2025-08-18-at-13-19-46.jpg', pos:'50% 35%', link:'https://i.postimg.cc/90VHwxxV/Whats-App-Image-2025-08-18-at-13-19-46.jpg'},
   ]
   return (
     <section className="py-8 md:py-14">
@@ -225,6 +225,7 @@ function FAQ(){
     {q:'E se faltar sol?',a:'O desconto é aplicado na fatura. Você continua economizando.'},
     {q:'Quando começo a ver a economia?',a:'Já na próxima fatura você sente a diferença.'},
     {q:'É complicado?',a:'Não. É simples, claro e com desconto garantido.'},
+    {q:'Quanto tempo leva para ativar o desconto?',a:'Em até 24 horas após a confirmação do cadastro.'},
   ]
   const [open,setOpen]=useState<number|null>(0)
   return (
@@ -282,10 +283,6 @@ function Plates3D(){
   return (
     <section className="py-10 md:py-14">
       <div className="container-section">
-        <div className="lead-thin max-w-xl">
-          <input placeholder="Seu e-mail" />
-          <button className="btn-yellow btn-pulse">Garanta seu desconto agora</button>
-        </div>
         <div className="mt-8 grid md:grid-cols-3 gap-6">
           {items.map((x,i)=>{
             const isOpen=open===i
@@ -304,7 +301,6 @@ function Plates3D(){
             )
           })}
         </div>
-
       </div>
     </section>
   )
@@ -314,11 +310,6 @@ function Footer(){
   return (
     <footer className="footer py-8">
       <div className="footer-neon-line" />
-      <div className="container-section flex flex-col items-center gap-2 mt-4">
-        <div className="font-semibold">Solar Energy</div>
-        <div className="text-sm text-[var(--muted)]">contato@solarenergy.com.br</div>
-        <div className="text-xs text-[var(--muted)]">© {new Date().getFullYear()} Solar Energy. Desconto válido para clientes Cemig residencial. Economia baseada em comparação com sua conta atual, transparente e garantida.</div>
-      </div>
     </footer>
   )
 }
@@ -327,7 +318,7 @@ export default function App(){
   return (
     <div className="hero-in-view">
       <Header/>
-              <HeroMinimal imageUrls={[
+             <HeroMinimal imageUrls={[
           'https://i.postimg.cc/ZqK41bX5/Whats-App-Image-2025-08-15-at-12-47-18-1.jpg'
         ]} />
       <Beneficios/>
