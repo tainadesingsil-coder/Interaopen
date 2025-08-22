@@ -70,7 +70,7 @@ export default function HeroMinimal({ imageUrls, videoUrls }: HeroMinimalProps) 
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(180deg, rgba(6,12,20,0.78) 0%, rgba(10,160,255,0.18) 45%, rgba(6,12,20,0.88) 100%)",
+              "linear-gradient(180deg, rgba(6,12,20,0.85) 0%, rgba(10,160,255,0.16) 45%, rgba(6,12,20,0.92) 100%)",
           }}
         />
         {/* Minimal overlay (no rays) */}
@@ -81,30 +81,37 @@ export default function HeroMinimal({ imageUrls, videoUrls }: HeroMinimalProps) 
       <div className="relative z-10 container mx-auto px-4">
         <div className="min-h-[70vh] md:min-h-[82vh] flex items-end justify-center text-center pb-16 md:pb-24 pt-10 md:pt-16">
           <div>
-            <motion.h1
-              className="text-3xl md:text-5xl font-extrabold leading-tight text-white drop-shadow-[0_8px_40px_rgba(0,0,0,0.65)]"
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, ease: 'easeOut' }}
-            >
-              Não é sobre energia,<br className="hidden sm:block" /> é sobre liberdade financeira.
-            </motion.h1>
-            <motion.p
-              className="mt-3 md:mt-4 text-sm md:text-lg text-slate-300"
-              initial={{ opacity: 0, y: 28 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, ease: 'easeOut', delay: 0.1 }}
-            >
-              Transforme sua conta de luz em investimento inteligente.
-            </motion.p>
             <motion.div
-              className="mt-6 md:mt-8 flex items-center justify-center gap-3 md:gap-4"
-              initial={{ opacity: 0, y: 32 }}
+              className="inline-block rounded-2xl border border-white/10 bg-[rgba(8,20,35,0.55)] backdrop-blur-sm px-5 py-4 md:px-8 md:py-6 shadow-[0_20px_60px_rgba(0,0,0,0.35)]"
+              initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, ease: 'easeOut', delay: 0.2 }}
+              transition={{ duration: 0.6, ease: 'easeOut' }}
             >
-              <a href="#cta" className="btn-yellow btn-pulse">Solicite orçamento</a>
-              <a href="#beneficios" className="btn-outline-white">Saiba mais</a>
+              <motion.h1
+                className="text-3xl md:text-5xl font-extrabold leading-tight text-white drop-shadow-[0_8px_40px_rgba(0,0,0,0.65)]"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, ease: 'easeOut', delay: 0.05 }}
+              >
+                Não é sobre energia,<br className="hidden sm:block" /> é sobre liberdade financeira.
+              </motion.h1>
+              <motion.p
+                className="mt-3 md:mt-4 text-sm md:text-lg text-slate-300"
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, ease: 'easeOut', delay: 0.1 }}
+              >
+                Transforme sua conta de luz em investimento inteligente.
+              </motion.p>
+              <motion.div
+                className="mt-6 md:mt-8 flex items-center justify-center gap-3 md:gap-4"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, ease: 'easeOut', delay: 0.15 }}
+              >
+                <a href="#cta" className="btn-yellow btn-pulse">Solicite orçamento</a>
+                <a href="#beneficios" className="btn-outline-white">Saiba mais</a>
+              </motion.div>
             </motion.div>
           </div>
         </div>
