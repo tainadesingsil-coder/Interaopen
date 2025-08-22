@@ -65,9 +65,15 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
         />
       </div>
 
-      {/* Centered content: no button/text */}
+      {/* Centered content: headline added */}
       <div className="relative z-10 container mx-auto px-4">
-        <div className="min-h-[60vh] md:min-h-[70vh] flex items-center justify-center text-center py-16 md:py-28" />
+        <div className="min-h-[60vh] md:min-h-[70vh] flex items-center justify-center text-center py-16 md:py-28">
+          <h1 className="text-3xl md:text-5xl font-extrabold leading-tight text-white drop-shadow-[0_4px_24px_rgba(0,0,0,0.45)]">
+            Não é sobre energia,
+            <br className="hidden sm:block" />
+            é sobre liberdade financeira.
+          </h1>
+        </div>
         {/* Social icons removed as solicitado */}
       </div>
     </motion.section>
