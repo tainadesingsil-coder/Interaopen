@@ -2,7 +2,7 @@ import { useMemo, useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence, useInView } from 'framer-motion'
 import { Sun, Home, Leaf, ChevronDown, Quote } from 'lucide-react'
 import './index.css'
-import HeroFuturista from './components/HeroFuturista'
+import HeroMinimal from './components/HeroMinimal'
 
 function Header() {
   return (
@@ -321,7 +321,13 @@ export default function App(){
   return (
     <div className="hero-in-view">
       <Header/>
-      <HeroFuturista />
+             <HeroMinimal imageUrls={[
+         'https://i.postimg.cc/ZqK41bX5/Whats-App-Image-2025-08-15-at-12-47-18-1.jpg',
+         'https://i.postimg.cc/VkRWfwLh/Whats-App-Image-2025-08-15-at-12-47-12.jpg',
+         'https://i.postimg.cc/26314Fwm/Whats-App-Image-2025-08-15-at-12-47-13.jpg',
+         'https://i.postimg.cc/Qd3rLQHb/Design-sem-nome-2025-08-18-T103534-552.png',
+         'https://i.postimg.cc/cHM4ZW4g/Whats-App-Image-2025-08-15-at-12-47-18.jpg'
+       ]} />
       <Beneficios/>
       <Simulador/>
       <Steps/>
