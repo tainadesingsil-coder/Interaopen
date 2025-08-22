@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState, useMemo } from "react";
+import { Instagram, Youtube, MessageCircle } from 'lucide-react'
 
 type HeroMinimalProps = {
   imageUrls?: string[];
@@ -109,8 +110,18 @@ export default function HeroMinimal({ imageUrls, videoUrls }: HeroMinimalProps) 
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.45, ease: 'easeOut', delay: 0.15 }}
               >
-                <a href="#cta" className="btn-yellow btn-pulse">Solicite orçamento</a>
-                <a href="#beneficios" className="btn-outline-white">Saiba mais</a>
+                <a href="#cta" className="btn-yellow btn-pulse">Solicite desconto</a>
+                <div className="flex items-center gap-2">
+                  <a href="#" className="social" aria-label="WhatsApp" target="_blank" rel="noopener noreferrer">
+                    <MessageCircle className="h-5 w-5" />
+                  </a>
+                  <a href="#" className="social" aria-label="Instagram" target="_blank" rel="noopener noreferrer">
+                    <Instagram className="h-5 w-5" />
+                  </a>
+                  <a href="#" className="social" aria-label="YouTube" target="_blank" rel="noopener noreferrer">
+                    <Youtube className="h-5 w-5" />
+                  </a>
+                </div>
               </motion.div>
             </motion.div>
           </div>
