@@ -79,7 +79,7 @@ export default function HeroMinimal({ imageUrls, videoUrls }: HeroMinimalProps) 
 
       {/* Centered content lowered for contrast */}
       <div className="relative z-10 container mx-auto px-4">
-        <div className="min-h-[70vh] md:min-h-[82vh] flex items-end justify-center text-center pb-14 md:pb-20 pt-8 md:pt-14">
+        <div className="min-h-[70vh] md:min-h-[82vh] flex items-end justify-center text-center pb-24 md:pb-32 pt-6 md:pt-10">
           <div>
             <motion.div
               className="inline-block rounded-xl bg-[rgba(8,20,35,0.35)] backdrop-blur-[2px] px-4 py-3 md:px-7 md:py-5 shadow-[0_12px_32px_rgba(0,0,0,0.25)]"
