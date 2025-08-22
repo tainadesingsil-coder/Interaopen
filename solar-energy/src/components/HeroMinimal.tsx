@@ -70,7 +70,7 @@ export default function HeroMinimal({ imageUrls, videoUrls }: HeroMinimalProps) 
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(180deg, rgba(6,12,20,0.60) 0%, rgba(10,160,255,0.10) 45%, rgba(6,12,20,0.80) 100%)",
+              "linear-gradient(180deg, rgba(6,12,20,0.50) 0%, rgba(10,160,255,0.08) 45%, rgba(6,12,20,0.70) 100%)",
           }}
         />
         {/* Minimal overlay (no rays) */}
@@ -82,32 +82,32 @@ export default function HeroMinimal({ imageUrls, videoUrls }: HeroMinimalProps) 
         <div className="min-h-[70vh] md:min-h-[82vh] flex items-end justify-center text-center pb-24 md:pb-32 pt-6 md:pt-10">
           <div>
             <motion.div
-              className="inline-block rounded-xl bg-[rgba(8,20,35,0.35)] backdrop-blur-[2px] px-4 py-3 md:px-7 md:py-5 shadow-[0_12px_32px_rgba(0,0,0,0.25)]"
-              initial={{ opacity: 0, y: 16 }}
+              className="inline-block rounded-lg bg-[rgba(8,20,35,0.22)] backdrop-blur-[1px] px-3 py-2.5 md:px-6 md:py-4 shadow-[0_8px_20px_rgba(0,0,0,0.20)]"
+              initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, ease: 'easeOut' }}
+              transition={{ duration: 0.45, ease: 'easeOut' }}
             >
               <motion.h1
-                className="text-3xl md:text-5xl font-extrabold leading-tight text-white drop-shadow-[0_6px_28px_rgba(0,0,0,0.5)]"
-                initial={{ opacity: 0, y: 10 }}
+                className="text-2xl md:text-4xl font-bold tracking-tight leading-tight text-white drop-shadow-[0_4px_18px_rgba(0,0,0,0.45)]"
+                initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, ease: 'easeOut', delay: 0.05 }}
+                transition={{ duration: 0.45, ease: 'easeOut', delay: 0.05 }}
               >
                 Não é sobre energia,<br className="hidden sm:block" /> é sobre liberdade financeira.
               </motion.h1>
               <motion.p
-                className="mt-2 md:mt-3 text-sm md:text-lg text-slate-200"
-                initial={{ opacity: 0, y: 12 }}
+                className="mt-2 md:mt-3 text-sm md:text-base text-slate-200"
+                initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, ease: 'easeOut', delay: 0.1 }}
+                transition={{ duration: 0.45, ease: 'easeOut', delay: 0.1 }}
               >
                 Transforme sua conta de luz em investimento inteligente.
               </motion.p>
               <motion.div
-                className="mt-5 md:mt-6 flex items-center justify-center gap-3 md:gap-4"
-                initial={{ opacity: 0, y: 14 }}
+                className="mt-4 md:mt-5 flex items-center justify-center gap-3 md:gap-4"
+                initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, ease: 'easeOut', delay: 0.15 }}
+                transition={{ duration: 0.45, ease: 'easeOut', delay: 0.15 }}
               >
                 <a href="#cta" className="btn-yellow btn-pulse">Solicite orçamento</a>
                 <a href="#beneficios" className="btn-outline-white">Saiba mais</a>
