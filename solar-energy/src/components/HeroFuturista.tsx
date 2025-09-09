@@ -189,16 +189,13 @@ export default function HeroFuturista(){
 
   return (
     <section className="relative w-full h-screen overflow-hidden">
-      <div className="absolute inset-0 z-0 bg-center bg-cover opacity-40" style={{ backgroundImage: "url('https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExejQwY2tndzdzOXh4MHN2aXl3ZnNwdGkweHJpb25scGR1aDJrdjR1cCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/dX0DO16km8TsD4yL7K/giphy.gif')" }} />
+      {/* Fundo animado removido */}
       <div ref={mountRef} className="absolute inset-0" />
       <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
         <div className="text-center px-4">
           <h1 className="text-3xl md:text-5xl font-extrabold leading-tight">Não é sobre energia, é sobre liberdade financeira.</h1>
           <p className="mt-3 md:mt-4 text-sm md:text-lg text-slate-300">Transforme sua conta de luz em investimento inteligente.</p>
-          <div className="mt-6 md:mt-8 flex items-center justify-center gap-3 md:gap-4">
-            <a href="#cta" className="btn-yellow btn-pulse">Solicite orçamento</a>
-            <a href="#beneficios" className="btn-outline-white">Saiba mais</a>
-          </div>
+          {/* Botões removidos */}
         </div>
       </div>
     </section>
