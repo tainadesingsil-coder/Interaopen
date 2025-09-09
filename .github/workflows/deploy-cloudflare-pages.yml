@@ -35,4 +35,4 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           projectName: solarenergy-5h5
           directory: ./solar-energy/dist
-          branch: production
+          branch: main
