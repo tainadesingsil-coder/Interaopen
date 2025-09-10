@@ -17,12 +17,10 @@
 html { scroll-behavior: smooth; }
 
 body {
-	@apply font-sans text-white;
+	@apply font-sans;
 	cursor: auto;
-	background:
-		radial-gradient(1200px 600px at -10% -10%, rgba(246,142,52,0.08), transparent 60%),
-		radial-gradient(1100px 600px at 110% -10%, rgba(246,142,52,0.06), transparent 60%),
-		linear-gradient(180deg, #1A323F 0%, #152935 50%, #11222C 100%);
+	background: #FFFFFF;
+	color: #0F172A;
 	-webkit-touch-callout: none; /* iOS disable callout */
 }
 

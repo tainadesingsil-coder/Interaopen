@@ -21,18 +21,14 @@ function Header(){
 
 function Hero(){
   return (
-    <section className="relative overflow-hidden min-h-[78vh] md:min-h-[88vh] flex items-center">
-      <div className="absolute inset-0" style={{
-        background:
-          'radial-gradient(900px 500px at 20% 10%, rgba(234,198,122,0.12), transparent 60%), radial-gradient(800px 600px at 80% 0%, rgba(234,198,122,0.08), transparent 60%), linear-gradient(180deg, #0B1628 0%, #0E1520 60%, #0A0F19 100%)'
-      }} />
+    <section className="relative overflow-hidden min-h-[78vh] md:min-h-[88vh] flex items-center" style={{ background: '#FFFFFF' }}>
       <div className="container-section relative z-10 grid md:grid-cols-12 gap-6 md:gap-8 items-center pt-24 md:pt-28 pb-10">
         <div className="md:col-span-7">
           <img src="/logo.svg" alt="Belmoc" className="h-10 w-auto mb-4 opacity-95" />
           <motion.h1 initial={{opacity:0,y:12}} animate={{opacity:1,y:0}} transition={{duration:0.6,ease:'easeOut'}} className="text-3xl md:text-6xl font-extrabold tracking-tight" style={{ fontFamily: 'Montserrat, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu' }}>
             Invista na sua usina solar e colha resultados para sempre.
           </motion.h1>
-          <motion.p initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} transition={{duration:0.7,delay:0.1,ease:'easeOut'}} className="mt-3 md:mt-4 text-base md:text-xl max-w-2xl" style={{ color: 'var(--light)' }}>
+          <motion.p initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} transition={{duration:0.7,delay:0.1,ease:'easeOut'}} className="mt-3 md:mt-4 text-base md:text-xl max-w-2xl" style={{ color: '#64748B' }}>
             Energia que gera patrimônio, economia e independência.
           </motion.p>
           <motion.div initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} transition={{duration:0.7,delay:0.18,ease:'easeOut'}} className="mt-6 flex flex-wrap items-center gap-3">
@@ -40,8 +36,8 @@ function Hero(){
               Quero investir agora
               <ArrowRight className="ml-2 h-4 w-4" />
             </a>
-            <div className="inline-flex items-center text-xs md:text-sm text-white/70">
-              <ShieldCheck className="h-4 w-4 mr-2 text-[var(--gold)]" /> Consultoria premium e instalação homologada
+            <div className="inline-flex items-center text-xs md:text-sm" style={{ color: '#475569' }}>
+              <ShieldCheck className="h-4 w-4 mr-2" color="#F68E34" /> Consultoria premium e instalação homologada
             </div>
           </motion.div>
         </div>
