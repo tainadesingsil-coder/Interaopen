@@ -16,11 +16,11 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
       {/* Neon line at top (slightly stronger) */}
       <div className="footer-neon-line absolute top-0 left-0 right-0" style={{ height: '4px' }} />
       {/* Brand logo centered near the top */}
-      <div className="absolute inset-x-0 top-16 md:top-12 z-20 flex justify-center">
+      <div className="absolute inset-x-0 top-16 md:top-16 z-20 flex justify-center">
         <img
           src="https://i.postimg.cc/9QPDDmBV/Design-sem-nome-2025-09-09-T221243-506.png"
           alt="Solar Energy"
-          className="h-[96px] md:h-[120px] w-auto opacity-95"
+          className="h-[96px] md:h-[140px] w-auto opacity-95"
         />
       </div>
       {/* Minimal logo overlay removida */}
