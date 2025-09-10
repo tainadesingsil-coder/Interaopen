@@ -6,8 +6,9 @@ type HeroMinimalProps = {
   videoUrls?: string[];
 };
 
-export default function HeroMinimal(_: HeroMinimalProps) {
+export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
   const [bubble, setBubble] = useState(false)
+  const backgroundImage = Array.isArray(imageUrls) && imageUrls.length > 0 ? imageUrls[0] : undefined
 
   return (
     <motion.section className="relative overflow-hidden" initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: "easeOut" }}>
@@ -16,7 +17,27 @@ export default function HeroMinimal(_: HeroMinimalProps) {
         <img src="https://i.postimg.cc/W40qnLhn/Design-sem-nome-2025-08-16-T014206-739.png" alt="Solar Energy" className="h-16 md:h-20 w-auto opacity-95" />
       </div>
 
-      {/* Background removido: sem imagem/vídeo, usa o fundo do body */}
+      {/* Background: imagem única fornecida */}
+      {backgroundImage && (
+        <div className="absolute inset-0">
+          <motion.img
+            key={backgroundImage}
+            src={backgroundImage}
+            alt="Banner"
+            className="absolute inset-0 w-full h-full object-cover object-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+          />
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(180deg, rgba(6,12,20,0.40) 0%, rgba(6,12,20,0.40) 45%, rgba(6,12,20,0.60) 100%)",
+            }}
+          />
+        </div>
+      )}
 
       {/* Centered content lowered for contrast */}
       <div className="relative z-10 container mx-auto px-4">

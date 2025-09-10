@@ -319,7 +319,7 @@ export default function App(){
     <div className="hero-in-view">
       <Header/>
              <HeroMinimal imageUrls={[
-          'https://i.postimg.cc/ZqK41bX5/Whats-App-Image-2025-08-15-at-12-47-18-1.jpg'
+          'https://i.postimg.cc/D0YVzXS0/Solar-Social-Media7-Banner.png'
         ]} />
       <Beneficios/>
       <Simulador/>
