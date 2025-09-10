@@ -1,6 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
-import { MessageCircle, Instagram } from 'lucide-react'
 
 type HeroMinimalProps = {
   imageUrls?: string[];
@@ -13,10 +12,6 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
 
   return (
     <motion.section className="relative overflow-hidden min-h-[70vh] md:min-h-[82vh]" initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: "easeOut" }}>
-      {/* Neon line at top (slightly stronger) */}
-      <div className="footer-neon-line absolute top-0 left-0 right-0" style={{ height: '4px' }} />
-      {/* Logo removida deste banner */}
-      {/* Minimal logo overlay removida */}
 
       {/* Background: imagem única fornecida */}
       {backgroundImage && (
@@ -30,40 +25,10 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
           />
-          <div
-            className="absolute inset-0"
-            style={{
-              background:
-                "linear-gradient(180deg, rgba(6,12,20,0.20) 0%, rgba(6,12,20,0.18) 45%, rgba(6,12,20,0.45) 100%)",
-            }}
-          />
         </div>
       )}
 
-      {/* Reserve space even without text */}
-      <div className="h-[70vh] md:h-[82vh]" />
-
-      {/* Only social icons, positioned just below the roof area */}
-      <div className="absolute inset-x-0 top-24 md:top-28 z-20 flex items-center justify-center gap-3 md:gap-4">
-        <a
-          href="https://wa.me/5538999266004?text=Gostaria%20de%20saber%20mais%20sobre%20como%20obter%20meu%20desconto"
-          className="social w-[28px] h-[28px] opacity-85 hover:opacity-100 transition"
-          aria-label="WhatsApp"
-          onClick={(e)=>{ e.preventDefault(); window.location.href='https://wa.me/5538999266004?text=Gostaria%20de%20saber%20mais%20sobre%20como%20obter%20meu%20desconto' }}
-          style={{ WebkitTapHighlightColor: 'transparent' }}
-        >
-          <MessageCircle className="h-4 w-4" />
-        </a>
-        <a
-          href="https://www.instagram.com/solarenergymoc/"
-          className="social w-[28px] h-[28px] opacity-85 hover:opacity-100 transition"
-          aria-label="Instagram"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Instagram className="h-4 w-4" />
-        </a>
-      </div>
+      {/* Apenas imagem no banner */}
 
       {/* Mascot fixed at bottom-right (edge) */}
       <div className="fixed right-0 bottom-0 z-50 text-right mr-[-2px] mb-[-2px]">
