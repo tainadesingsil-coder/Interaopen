@@ -42,8 +42,8 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
 
       {/* Centered content lowered for contrast */}
       <div className="relative z-10 container mx-auto px-4">
-        <div className="min-h-[70vh] md:min-h-[82vh] flex items-end justify-center text-center pb-16 md:pb-32 pt-4 md:pt-10">
-          <div>
+        <div className="min-h-[64vh] md:min-h-[82vh] flex items-end justify-center text-center pb-12 md:pb-32 pt-4 md:pt-10">
+          <div className="max-w-[28rem] md:max-w-3xl mx-auto px-2">
             <div className="flex justify-center">
               <img
                 src="https://i.postimg.cc/9f3DM49L/LOGO-V-BRANCA-1-1.png"
@@ -52,13 +52,13 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
               />
             </div>
             <motion.div
-              className="inline-block rounded-lg bg-[rgba(8,20,35,0.42)] backdrop-blur-[3px] px-3 py-2.5 md:px-6 md:py-4 shadow-[0_10px_28px_rgba(0,0,0,0.30)] neon-soft neon-glow"
+              className="inline-block rounded-lg bg-[rgba(8,20,35,0.46)] backdrop-blur-[3px] px-3 py-2 md:px-6 md:py-4 shadow-[0_10px_28px_rgba(0,0,0,0.30)] neon-soft neon-glow"
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45, ease: 'easeOut' }}
             >
               <motion.h1
-                className="text-2xl md:text-4xl font-bold tracking-tight leading-tight text-white drop-shadow-[0_4px_18px_rgba(0,0,0,0.45)]"
+                className="text-xl sm:text-3xl md:text-4xl font-bold tracking-tight leading-snug text-white drop-shadow-[0_4px_18px_rgba(0,0,0,0.45)]"
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.45, ease: 'easeOut', delay: 0.05 }}
@@ -69,8 +69,8 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
                 href="https://wa.me/5538999266004?text=Gostaria%20de%20saber%20mais%20sobre%20como%20obter%20meu%20desconto"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-2 md:mt-3 inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm md:text-base font-semibold"
-                style={{ color: '#EAC67A' }}
+                className="mt-3 md:mt-4 inline-flex items-center gap-1.5 md:gap-2 rounded-full px-3 py-1.5 md:px-4 md:py-2 text-[13px] md:text-base font-semibold border"
+                style={{ color: '#EAC67A', borderColor: 'rgba(234,198,122,0.55)', background: 'rgba(234,198,122,0.10)' }}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.45, ease: 'easeOut', delay: 0.1 }}
