@@ -66,21 +66,21 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
               >
                 <a
                   href="https://wa.me/5538999266004?text=Gostaria%20de%20saber%20mais%20sobre%20como%20obter%20meu%20desconto"
-                  className="social w-[32px] h-[32px]"
+                  className="social w-[28px] h-[28px] opacity-80 hover:opacity-100 transition"
                   aria-label="WhatsApp"
                   onClick={(e)=>{ e.preventDefault(); window.location.href='https://wa.me/5538999266004?text=Gostaria%20de%20saber%20mais%20sobre%20como%20obter%20meu%20desconto' }}
                   style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
-                  <MessageCircle className="h-5 w-5" />
+                  <MessageCircle className="h-4 w-4" />
                 </a>
                 <a
                   href="https://www.instagram.com/solarenergymoc/"
-                  className="social w-[32px] h-[32px]"
+                  className="social w-[28px] h-[28px] opacity-80 hover:opacity-100 transition"
                   aria-label="Instagram"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <Instagram className="h-5 w-5" />
+                  <Instagram className="h-4 w-4" />
                 </a>
               </motion.div>
             </motion.div>
