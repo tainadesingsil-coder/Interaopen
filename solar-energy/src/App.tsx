@@ -321,24 +321,31 @@ function Footer(){
   return (
     <footer className="footer py-8">
       <div className="footer-neon-line" />
+      <div className="container-section mt-4">
+        <p className="text-center text-xs md:text-sm" style={{ color: '#B8B8B8' }}>
+          © 2025 Solar Energy — Todos os direitos reservados | 🔒 Site seguro | Desenvolvido por Codexion
+        </p>
+      </div>
     </footer>
   )
 }
 
 export default function App(){
   return (
-    <div className="hero-in-view">
+    <div className="hero-in-view min-h-screen flex flex-col">
       <Header/>
+      <main className="flex-1">
              <HeroMinimal imageUrls={[
           'https://i.postimg.cc/D0YVzXS0/Solar-Social-Media7-Banner.png'
         ]} />
-      <Beneficios/>
-      <Simulador/>
-      <Steps/>
-      <Depoimentos/>
-      <FAQ/>
-      <Plates3D/>
-      <CTAFinal/>
+        <Beneficios/>
+        <Simulador/>
+        <Steps/>
+        <Depoimentos/>
+        <FAQ/>
+        <Plates3D/>
+        <CTAFinal/>
+      </main>
       <Footer/>
     </div>
   )
