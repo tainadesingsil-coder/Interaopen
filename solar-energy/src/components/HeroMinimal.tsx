@@ -20,7 +20,7 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
         <img
           src="https://i.postimg.cc/9QPDDmBV/Design-sem-nome-2025-09-09-T221243-506.png"
           alt="Solar Energy"
-          className="h-[96px] md:h-[140px] w-auto opacity-95"
+          className="h-[120px] md:h-[168px] w-auto opacity-95"
         />
       </div>
       {/* Minimal logo overlay removida */}
