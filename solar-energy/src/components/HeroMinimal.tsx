@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
+import { MessageCircle } from 'lucide-react'
 
 type HeroMinimalProps = {
   imageUrls?: string[];
@@ -12,9 +13,11 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
 
   return (
     <motion.section className="relative overflow-hidden" initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: "easeOut" }}>
+      {/* Neon line at top */}
+      <div className="footer-neon-line absolute top-0 left-0 right-0" />
       {/* Minimal logo overlay */}
-      <div className="absolute top-0 left-5 z-20">
-        <img src="https://i.postimg.cc/Qxys8R7m/Design-sem-nome-2025-09-05-T184335-653.png" alt="Solar Energy" className="h-[160px] md:h-[200px] w-auto opacity-95" />
+      <div className="absolute top-[-8px] left-5 z-20">
+        <img src="https://i.postimg.cc/Qxys8R7m/Design-sem-nome-2025-09-05-T184335-653.png" alt="Solar Energy" className="h-[120px] md:h-[160px] w-auto opacity-95" />
       </div>
 
       {/* Background: imagem única fornecida */}
@@ -44,7 +47,7 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
         <div className="min-h-[70vh] md:min-h-[82vh] flex items-end justify-center text-center pb-24 md:pb-32 pt-6 md:pt-10">
           <div>
             <motion.div
-              className="inline-block rounded-lg bg-[rgba(8,20,35,0.42)] backdrop-blur-[3px] px-3 py-2.5 md:px-6 md:py-4 shadow-[0_10px_28px_rgba(0,0,0,0.30)]"
+              className="inline-block rounded-lg bg-[rgba(8,20,35,0.42)] backdrop-blur-[3px] px-3 py-2.5 md:px-6 md:py-4 shadow-[0_10px_28px_rgba(0,0,0,0.30)] neon-soft"
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45, ease: 'easeOut' }}
@@ -57,14 +60,19 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
               >
                 Mais que energia, é liberdade para investir no que importa.
               </motion.h1>
-              <motion.p
-                className="mt-2 md:mt-3 text-sm md:text-base text-slate-200"
+              <motion.a
+                href="https://wa.me/5538999266004?text=Gostaria%20de%20saber%20mais%20sobre%20como%20obter%20meu%20desconto"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-2 md:mt-3 inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm md:text-base font-semibold"
+                style={{ color: '#EAC67A' }}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.45, ease: 'easeOut', delay: 0.1 }}
               >
+                <MessageCircle className="h-4 w-4" />
                 Transforme sua conta de luz em uma escolha inteligente.
-              </motion.p>
+              </motion.a>
               {/* Botões removidos conforme solicitação */}
             </motion.div>
           </div>
