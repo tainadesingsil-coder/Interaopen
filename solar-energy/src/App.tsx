@@ -266,13 +266,21 @@ function CTAFinal(){
           <p className="mt-2 opacity-90">Você paga menos, economiza na fatura e sente a diferença no bolso.</p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <input className="input sm:col-span-2" type="email" inputMode="email" placeholder="E-mail" />
-          <input className="input" type="text" placeholder="Nome" />
-          <input className="input" type="tel" inputMode="tel" placeholder="Telefone" />
+          <input id="lead-email" className="input sm:col-span-2" type="email" inputMode="email" placeholder="E-mail" />
+          <input id="lead-nome" className="input" type="text" placeholder="Nome" />
+          <input id="lead-tel" className="input" type="tel" inputMode="tel" placeholder="Telefone" />
           <button
             type="button"
             className="btn-yellow btn-pulse sm:col-span-2"
-            onClick={(e)=>{ e.preventDefault(); window.location.href='https://wa.me/5538999266004?text=Gostaria%20de%20saber%20mais%20sobre%20como%20obter%20meu%20desconto' }}
+            onClick={(e)=>{
+              e.preventDefault();
+              const nome=(document.getElementById('lead-nome') as HTMLInputElement)?.value?.trim()||'';
+              const email=(document.getElementById('lead-email') as HTMLInputElement)?.value?.trim()||'';
+              const tel=(document.getElementById('lead-tel') as HTMLInputElement)?.value?.trim()||'';
+              const msg = `Olá! Quero meu desconto. Nome: ${nome || '-'} | E-mail: ${email || '-'} | Telefone: ${tel || '-'}`;
+              const url = 'https://wa.me/5538999266004?text=' + encodeURIComponent(msg);
+              window.location.href = url;
+            }}
             style={{ WebkitTapHighlightColor: 'transparent' }}
           >
             Quero meu desconto agora
