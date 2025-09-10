@@ -14,13 +14,13 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
   return (
     <motion.section className="relative overflow-hidden" initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: "easeOut" }}>
       {/* Neon line at top (slightly stronger) */}
-      <div className="footer-neon-line absolute top-0 left-0 right-0" style={{ height: '3px' }} />
+      <div className="footer-neon-line absolute top-0 left-0 right-0" style={{ height: '4px' }} />
       {/* Brand logo centered near the top */}
-      <div className="absolute inset-x-0 top-6 md:top-10 z-20 flex justify-center">
+      <div className="absolute inset-x-0 top-10 md:top-10 z-20 flex justify-center">
         <img
           src="https://i.postimg.cc/9QPDDmBV/Design-sem-nome-2025-09-09-T221243-506.png"
           alt="Solar Energy"
-          className="h-[56px] md:h-[80px] w-auto opacity-95"
+          className="h-[72px] md:h-[80px] w-auto opacity-95"
         />
       </div>
       {/* Minimal logo overlay removida */}
@@ -52,7 +52,7 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
         <div className="min-h-[64vh] md:min-h-[82vh] flex items-end justify-center text-center pb-12 md:pb-32 pt-4 md:pt-10">
           <div className="max-w-[28rem] md:max-w-3xl mx-auto px-2">
             <motion.div
-              className="inline-block rounded-lg bg-[rgba(8,20,35,0.46)] backdrop-blur-[3px] px-3 py-2 md:px-6 md:py-4 shadow-[0_10px_28px_rgba(0,0,0,0.30)] neon-soft neon-glow"
+              className="inline-block rounded-lg bg-[rgba(8,20,35,0.50)] backdrop-blur-[3px] px-5 py-3 md:px-6 md:py-4 shadow-[0_10px_28px_rgba(0,0,0,0.30)] neon-soft neon-glow neon-pulse"
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45, ease: 'easeOut' }}
