@@ -12,7 +12,7 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
   const backgroundImage = Array.isArray(imageUrls) && imageUrls.length > 0 ? imageUrls[0] : undefined
 
   return (
-    <motion.section className="relative overflow-hidden" initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: "easeOut" }}>
+    <motion.section className="relative overflow-hidden min-h-[70vh] md:min-h-[82vh]" initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: "easeOut" }}>
       {/* Neon line at top (slightly stronger) */}
       <div className="footer-neon-line absolute top-0 left-0 right-0" style={{ height: '4px' }} />
       {/* Logo removida deste banner */}
