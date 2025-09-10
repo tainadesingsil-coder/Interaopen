@@ -266,10 +266,17 @@ function CTAFinal(){
           <p className="mt-2 opacity-90">Você paga menos, economiza na fatura e sente a diferença no bolso.</p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <input className="input" placeholder="Nome" />
-          <input className="input" placeholder="Telefone" />
-          <input className="input sm:col-span-2" placeholder="E-mail" />
-          <button className="btn-yellow btn-pulse sm:col-span-2">Quero meu desconto agora</button>
+          <input className="input sm:col-span-2" type="email" inputMode="email" placeholder="E-mail" />
+          <input className="input" type="text" placeholder="Nome" />
+          <input className="input" type="tel" inputMode="tel" placeholder="Telefone" />
+          <button
+            type="button"
+            className="btn-yellow btn-pulse sm:col-span-2"
+            onClick={(e)=>{ e.preventDefault(); window.location.href='https://wa.me/5538999266004?text=Gostaria%20de%20saber%20mais%20sobre%20como%20obter%20meu%20desconto' }}
+            style={{ WebkitTapHighlightColor: 'transparent' }}
+          >
+            Quero meu desconto agora
+          </button>
         </div>
       </div>
     </section>
