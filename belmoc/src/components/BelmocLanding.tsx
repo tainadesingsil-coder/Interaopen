@@ -1,19 +1,16 @@
 import { motion } from 'framer-motion'
-import { ArrowRight, LineChart, ShieldCheck, TrendingUp, Building2, Lock, CheckCircle2, Clock, Building } from 'lucide-react'
+import { ArrowRight, LineChart, ShieldCheck, TrendingUp, Building2, Lock, CheckCircle2, Building } from 'lucide-react'
 
 const WHATSAPP_LINK = 'https://wa.me/5538999266004?text=Quero%20investir%20em%20uma%20usina%20solar%20com%20a%20Belmoc'
 
 function Header(){
   return (
-    <header className="fixed top-0 z-40 w-full backdrop-blur border-b border-white/10" style={{ background: 'rgba(10,10,10,0.55)' }}>
+    <header className="fixed top-0 z-40 w-full backdrop-blur border-b border-white/10" style={{ background: 'rgba(255,255,255,0.85)' }}>
       <div className="container-section flex items-center justify-between py-3">
         <a href="#" className="logo-wrap inline-flex items-center gap-3">
           <img src="/logo.svg" alt="Belmoc" className="h-[42px] md:h-[52px] w-auto" />
         </a>
-        <a href={WHATSAPP_LINK} className="btn-yellow btn-pulse hidden sm:inline-flex" aria-label="Quero investir agora">
-          Quero investir agora
-          <ArrowRight className="ml-2 h-4 w-4" />
-        </a>
+        {/* CTA removido do header conforme solicitação */}
       </div>
     </header>
   )
@@ -25,14 +22,14 @@ function Hero(){
       <div className="container-section relative z-10 grid md:grid-cols-12 gap-6 md:gap-8 items-center pt-24 md:pt-28 pb-10">
         <div className="md:col-span-7">
           <img src="/logo.svg" alt="Belmoc" className="h-10 w-auto mb-4 opacity-95" />
-          <motion.h1 initial={{opacity:0,y:12}} animate={{opacity:1,y:0}} transition={{duration:0.6,ease:'easeOut'}} className="text-3xl md:text-6xl font-extrabold tracking-tight" style={{ fontFamily: 'Montserrat, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu' }}>
+          <motion.h1 initial={{opacity:0,y:12}} animate={{opacity:1,y:0}} transition={{duration:0.6,ease:'easeOut'}} className="text-3xl md:text-6xl font-extrabold tracking-tight" style={{ fontFamily: 'Montserrat, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu', color: '#0F172A' }}>
             Invista na sua usina solar e colha resultados para sempre.
           </motion.h1>
           <motion.p initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} transition={{duration:0.7,delay:0.1,ease:'easeOut'}} className="mt-3 md:mt-4 text-base md:text-xl max-w-2xl" style={{ color: '#64748B' }}>
             Energia que gera patrimônio, economia e independência.
           </motion.p>
           <motion.div initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} transition={{duration:0.7,delay:0.18,ease:'easeOut'}} className="mt-6 flex flex-wrap items-center gap-3">
-            <a href={WHATSAPP_LINK} className="btn-yellow">
+            <a href={WHATSAPP_LINK} className="btn-yellow" style={{ background: '#F68E34' }}>
               Quero investir agora
               <ArrowRight className="ml-2 h-4 w-4" />
             </a>
@@ -44,22 +41,22 @@ function Hero(){
         <div className="md:col-span-5">
           <div className="grid grid-cols-2 gap-3 md:gap-4">
             <div className="card" style={{ background: '#FFFFFF', color: '#0F172A' }}>
-              <LineChart className="h-5 w-5 text-[var(--gold)]" />
+              <LineChart className="h-5 w-5" color="#F68E34" />
               <p className="mt-2 text-sm" style={{ color: '#475569' }}>Investimento sólido</p>
               <p className="text-xl md:text-2xl font-bold">ROI previsível</p>
             </div>
             <div className="card" style={{ background: '#FFFFFF', color: '#0F172A' }}>
-              <TrendingUp className="h-5 w-5 text-[var(--gold)]" />
+              <TrendingUp className="h-5 w-5" color="#F68E34" />
               <p className="mt-2 text-sm" style={{ color: '#475569' }}>Valorização imobiliária</p>
               <p className="text-xl md:text-2xl font-bold">+ valor do imóvel</p>
             </div>
             <div className="card" style={{ background: '#FFFFFF', color: '#0F172A' }}>
-              <Building className="h-5 w-5 text-[var(--gold)]" />
+              <Building className="h-5 w-5" color="#F68E34" />
               <p className="mt-2 text-sm" style={{ color: '#475569' }}>Ativo real</p>
               <p className="text-xl md:text-2xl font-bold">no seu patrimônio</p>
             </div>
             <div className="card" style={{ background: '#FFFFFF', color: '#0F172A' }}>
-              <ShieldCheck className="h-5 w-5 text-[var(--gold)]" />
+              <ShieldCheck className="h-5 w-5" color="#F68E34" />
               <p className="mt-2 text-sm" style={{ color: '#475569' }}>Independência energética</p>
               <p className="text-xl md:text-2xl font-bold">proteção contra alta</p>
             </div>
@@ -207,25 +204,7 @@ function FAQ(){
   )
 }
 
-function CTAFinal(){
-  return (
-    <section className="py-12 md:py-16">
-      <div className="container-section text-center">
-        <h2 className="text-2xl md:text-4xl font-extrabold" style={{ fontFamily: 'Montserrat, system-ui' }}>Invista hoje e transforme energia em patrimônio.</h2>
-        <p className="mt-2 text-white/75 max-w-2xl mx-auto">Receba uma avaliação técnica e uma proposta personalizada para seu imóvel.</p>
-        <div className="mt-6">
-          <a href={WHATSAPP_LINK} className="btn-yellow inline-flex">
-            Falar com a Belmoc
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </a>
-        </div>
-        <div className="mt-3 inline-flex items-center text-xs text-white/60">
-          <Clock className="h-3.5 w-3.5 mr-1.5" /> Proposta em até 24h úteis
-        </div>
-      </div>
-    </section>
-  )
-}
+// CTA final removido conforme solicitação
 
 function Footer(){
   return (
@@ -251,7 +230,6 @@ export default function BelmocLanding(){
         <Educativa/>
         <Exclusividade/>
         <FAQ/>
-        <CTAFinal/>
       </main>
       <Footer/>
     </div>

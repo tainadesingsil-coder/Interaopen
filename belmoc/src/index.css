@@ -3,15 +3,10 @@
 @tailwind utilities;
 
 :root {
-	--blue: #1A323F; /* azul escuro institucional */
-	--yellow: #EAC67A; /* acento dourado do logo */
-	--orange: #F68E34; /* laranja solar para destaques */
-	--gold: #EAC67A;
-	--neon: #8FA6C6; /* suave */
-	--green: #00FFAA;
+	--orange: #F68E34; /* cor principal de acento */
 	--text: #0F172A;
-	--muted: #94A3B8;
-	--light: #F4F4F4; /* cinza claro */
+	--muted: #64748B;
+	--light: #F4F4F4;
 }
 
 html { scroll-behavior: smooth; }
@@ -29,7 +24,7 @@ img { -webkit-user-drag: none; user-drag: none; pointer-events: none; }
 /* Neon utilities */
 .neon-glow { box-shadow: 0 0 18px rgba(10,160,255,0.35), 0 0 3px rgba(10,160,255,0.6) inset; }
 .neon-text { text-shadow: 0 0 10px rgba(10,160,255,0.45); }
-.neon-border { border-color: rgba(234,198,122,0.35) !important; }
+.neon-border { border-color: rgba(246,142,52,0.35) !important; }
 @keyframes neonPulse { 0%,100% { box-shadow: 0 0 14px rgba(10,160,255,0.26); } 50% { box-shadow: 0 0 22px rgba(10,160,255,0.44); } }
 .neon-pulse { animation: neonPulse 2.4s ease-in-out infinite; }
 .text-gradient-blue { background: linear-gradient(90deg, #E8F7FF 0%, #9AD9FF 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
