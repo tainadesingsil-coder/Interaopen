@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { ArrowRight, LineChart, ShieldCheck, TrendingUp, Building2, Lock, CheckCircle2, Clock } from 'lucide-react'
+import { ArrowRight, LineChart, ShieldCheck, TrendingUp, Building2, Lock, CheckCircle2, Clock, Building } from 'lucide-react'
 
 const WHATSAPP_LINK = 'https://wa.me/5538999266004?text=Quero%20investir%20em%20uma%20usina%20solar%20com%20a%20Belmoc'
 
@@ -21,18 +21,19 @@ function Header(){
 
 function Hero(){
   return (
-    <section className="relative overflow-hidden min-h-[76vh] md:min-h-[86vh] flex items-center">
+    <section className="relative overflow-hidden min-h-[78vh] md:min-h-[88vh] flex items-center">
       <div className="absolute inset-0" style={{
         background:
-          'radial-gradient(900px 500px at 20% 10%, rgba(234,198,122,0.12), transparent 60%), radial-gradient(800px 600px at 80% 0%, rgba(234,198,122,0.08), transparent 60%), linear-gradient(180deg, #0B0B0C 0%, #0E1116 60%, #0A0A0A 100%)'
+          'radial-gradient(900px 500px at 20% 10%, rgba(234,198,122,0.12), transparent 60%), radial-gradient(800px 600px at 80% 0%, rgba(234,198,122,0.08), transparent 60%), linear-gradient(180deg, #0B1628 0%, #0E1520 60%, #0A0F19 100%)'
       }} />
       <div className="container-section relative z-10 grid md:grid-cols-12 gap-6 md:gap-8 items-center pt-24 md:pt-28 pb-10">
         <div className="md:col-span-7">
+          <img src="/logo.svg" alt="Belmoc" className="h-10 w-auto mb-4 opacity-95" />
           <motion.h1 initial={{opacity:0,y:12}} animate={{opacity:1,y:0}} transition={{duration:0.6,ease:'easeOut'}} className="text-3xl md:text-6xl font-extrabold tracking-tight">
-            Invista em energia que valoriza seu patrimônio.
+            Invista na sua usina solar e colha resultados para sempre.
           </motion.h1>
-          <motion.p initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} transition={{duration:0.7,delay:0.1,ease:'easeOut'}} className="mt-3 md:mt-4 text-base md:text-xl text-[var(--muted)] max-w-2xl">
-            A Belmoc instala sua usina solar, você ganha economia mensal e aumenta o valor do seu imóvel.
+          <motion.p initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} transition={{duration:0.7,delay:0.1,ease:'easeOut'}} className="mt-3 md:mt-4 text-base md:text-xl text-white/80 max-w-2xl">
+            Energia que gera patrimônio, economia e independência.
           </motion.p>
           <motion.div initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} transition={{duration:0.7,delay:0.18,ease:'easeOut'}} className="mt-6 flex flex-wrap items-center gap-3">
             <a href={WHATSAPP_LINK} className="btn-yellow">
@@ -48,23 +49,23 @@ function Hero(){
           <div className="grid grid-cols-2 gap-3 md:gap-4">
             <div className="card">
               <LineChart className="h-5 w-5 text-[var(--gold)]" />
-              <p className="mt-2 text-sm text-white/70">Retorno do investimento</p>
-              <p className="text-xl md:text-2xl font-bold">ROI 3–5 anos</p>
+              <p className="mt-2 text-sm text-white/70">Investimento sólido</p>
+              <p className="text-xl md:text-2xl font-bold">ROI previsível</p>
             </div>
             <div className="card">
               <TrendingUp className="h-5 w-5 text-[var(--gold)]" />
               <p className="mt-2 text-sm text-white/70">Valorização imobiliária</p>
-              <p className="text-xl md:text-2xl font-bold">até 10%</p>
+              <p className="text-xl md:text-2xl font-bold">+ valor do imóvel</p>
             </div>
             <div className="card">
-              <Building2 className="h-5 w-5 text-[var(--gold)]" />
-              <p className="mt-2 text-sm text-white/70">Ativo real instalado</p>
-              <p className="text-xl md:text-2xl font-bold">no seu imóvel</p>
+              <Building className="h-5 w-5 text-[var(--gold)]" />
+              <p className="mt-2 text-sm text-white/70">Ativo real</p>
+              <p className="text-xl md:text-2xl font-bold">no seu patrimônio</p>
             </div>
             <div className="card">
               <ShieldCheck className="h-5 w-5 text-[var(--gold)]" />
-              <p className="mt-2 text-sm text-white/70">Proteção contra inflação</p>
-              <p className="text-xl md:text-2xl font-bold">da energia</p>
+              <p className="mt-2 text-sm text-white/70">Independência energética</p>
+              <p className="text-xl md:text-2xl font-bold">proteção contra alta</p>
             </div>
           </div>
         </div>
@@ -73,17 +74,18 @@ function Hero(){
   )
 }
 
-function Destaque(){
+function Diferenciais(){
   const items=[
-    { icon: LineChart, t:'ROI entre 3 e 5 anos.', d:'Receba retorno mensal com geração própria e reduza sua exposição a aumentos tarifários.' },
-    { icon: TrendingUp, t:'Imóveis valorizam até 10%.', d:'Usina solar agrega liquidez e diferenciação ao seu patrimônio.' },
-    { icon: ShieldCheck, t:'Proteção contra inflação da energia.', d:'Blindagem da conta de luz por décadas com tecnologia de alta eficiência.' },
+    { icon: LineChart, t:'Investimento sólido', d:'ROI previsível em poucos anos com geração própria.' },
+    { icon: TrendingUp, t:'Valorização imobiliária', d:'Usinas elevam o valor de mercado do imóvel.' },
+    { icon: ShieldCheck, t:'Independência energética', d:'Blindagem contra a inflação da energia no longo prazo.' },
+    { icon: Building2, t:'Credibilidade local', d:'Referência no Norte de Minas, execução de ponta a ponta.' },
   ]
   return (
     <section className="py-10 md:py-16">
       <div className="container-section">
-        <h2 className="text-2xl md:text-4xl font-extrabold">Uma usina solar é mais que economia — é patrimônio que cresce.</h2>
-        <div className="mt-6 md:mt-8 grid md:grid-cols-3 gap-4 md:gap-6">
+        <h2 className="text-2xl md:text-4xl font-extrabold">Diferenciais Belmoc</h2>
+        <div className="mt-6 md:mt-8 grid md:grid-cols-4 gap-4 md:gap-6">
           {items.map((x)=>{
             const Icon=x.icon
             return (
@@ -102,17 +104,18 @@ function Destaque(){
 
 function Numeros(){
   const economiaTotalMi = 12
+  const clientes = 180
   const items=[
-    { n:'+200', l:'usinas vendidas em Minas Gerais' },
-    { n:`+R$ ${economiaTotalMi} mi`, l:'economizados por clientes' },
-    { n:'100%', l:'de satisfação no Norte de Minas' },
+    { n:'+200', l:'usinas instaladas em Minas Gerais' },
+    { n:`+R$ ${economiaTotalMi} mi`, l:'em economia acumulada' },
+    { n:`+${clientes}`, l:'clientes investidores satisfeitos' },
   ]
   return (
     <section className="py-8 md:py-12">
       <div className="container-section grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
         {items.map((x)=> (
           <div key={x.l} className="card text-center">
-            <p className="text-2xl md:text-3xl font-extrabold text-[var(--gold)]">{x.n}</p>
+            <p className="text-2xl md:text-4xl font-extrabold text-[var(--gold)]">{x.n}</p>
             <p className="mt-1 text-sm text-white/70">{x.l}</p>
           </div>
         ))}
@@ -121,43 +124,37 @@ function Numeros(){
   )
 }
 
-function ProvaSocial(){
-  const depo=[
-    {t:'Transformamos custo em ativo. O payback veio antes do previsto.',a:'Medular — Case de investimento'},
-    {t:'A usina elevou o valuation e reduziu volatilidade da operação.',a:'Amávia — Case corporativo'},
-  ]
+function Narrativa(){
   return (
     <section className="py-10 md:py-14">
-      <div className="container-section grid gap-3 md:gap-4">
-        {depo.map((d)=> (
-          <div key={d.a} className="card">
-            <p className="text-base md:text-lg italic">“{d.t}”</p>
-            <p className="mt-2 text-xs md:text-sm text-white/70">{d.a}</p>
-          </div>
-        ))}
+      <div className="container-section">
+        <div className="card">
+          <p className="text-base md:text-lg text-white/85">
+            Na Belmoc, tratamos energia como ativo. Nossa visão é simples: cada usina instalada é
+            um passo a mais rumo à independência energética e ao crescimento do seu patrimônio. Com
+            engenharia própria e execução local, conectamos tecnologia e resultado financeiro de longo prazo.
+          </p>
+        </div>
       </div>
     </section>
   )
 }
 
-function ComoFunciona(){
-  const steps=[
-    { n:1, t:'Estudo, projeto e proposta', d:'Análise técnica e financeira personalizada do seu imóvel e consumo.' },
-    { n:2, t:'Instalação e homologação', d:'Execução por equipe certificada, com segurança e conformidade total.' },
-    { n:3, t:'Operação e retorno mensal', d:'Monitoramento, manutenção e rentabilidade com redução recorrente da fatura.' },
+function Educativa(){
+  const blocks=[
+    { t:'Economia recorrente', d:'Redução mensal da fatura, gerando fluxo de caixa ao longo dos anos.' },
+    { t:'Valorização patrimonial', d:'Usina agrega valor percebido e liquidez ao imóvel.' },
+    { t:'Retorno garantido', d:'Projeto técnico e equipamentos com garantia estendida e performance monitorada.' },
   ]
   return (
     <section className="py-10 md:py-16">
       <div className="container-section">
-        <h2 className="text-2xl md:text-4xl font-extrabold">Como funciona</h2>
+        <h2 className="text-2xl md:text-4xl font-extrabold">Por que é um investimento inteligente?</h2>
         <div className="mt-6 grid md:grid-cols-3 gap-4 md:gap-6">
-          {steps.map((s)=> (
-            <div key={s.n} className="card">
-              <div className="flex items-center gap-3">
-                <div className="step-circle" style={{ background: 'var(--gold)' }}>{s.n}</div>
-                <p className="font-semibold text-base md:text-lg">{s.t}</p>
-              </div>
-              <p className="mt-2 text-sm text-white/75">{s.d}</p>
+          {blocks.map(b=> (
+            <div key={b.t} className="card">
+              <p className="text-base md:text-lg font-semibold">{b.t}</p>
+              <p className="mt-1 text-sm text-white/75">{b.d}</p>
             </div>
           ))}
         </div>
@@ -166,14 +163,14 @@ function ComoFunciona(){
   )
 }
 
-function Autoridade(){
+function Exclusividade(){
   return (
     <section className="py-8 md:py-12">
       <div className="container-section">
         <div className="card md:flex md:items-center md:justify-between">
           <div>
-            <h3 className="text-lg md:text-2xl font-extrabold">Belmoc — referência em usinas solares no Norte de Minas.</h3>
-            <p className="mt-1 text-sm text-white/75">Engenharia, execução e atendimento premium de ponta a ponta.</p>
+            <h3 className="text-lg md:text-2xl font-extrabold">Mais do que energia, a Belmoc entrega patrimônio e independência para o Norte de Minas.</h3>
+            <p className="mt-1 text-sm text-white/75">Projetos exclusivos, execução certificada e acompanhamento contínuo.</p>
           </div>
           <div className="mt-3 md:mt-0 inline-flex items-center text-sm text-white/80">
             <Lock className="h-4 w-4 mr-2 text-[var(--gold)]" />
@@ -187,11 +184,11 @@ function Autoridade(){
 
 function FAQ(){
   const qas=[
-    {q:'Qual é o ROI típico de uma usina solar?',a:'Projetos residenciais e corporativos apresentam payback entre 3 e 5 anos, variando pela tarifa local e perfil de consumo.'},
-    {q:'Usina solar valoriza meu imóvel?',a:'Sim. Empreendimentos com geração própria são percebidos como mais eficientes, podendo valorizar até 10%.'},
-    {q:'E a manutenção ao longo dos anos?',a:'Baixa. Recomendamos inspeções periódicas e limpeza. Equipamentos possuem garantias estendidas.'},
-    {q:'A energia aumenta todo ano. Isso me protege?',a:'A geração própria reduz sua exposição a aumentos, fornecendo previsibilidade de custos por décadas.'},
-    {q:'Belmoc cuida de tudo?',a:'Da engenharia à homologação e monitoramento. Você acompanha a performance e colhe os resultados.'},
+    {q:'Qual o ROI típico?',a:'Payback esperado entre 3 e 5 anos, dependendo do perfil de consumo e tarifa local.'},
+    {q:'Valoriza meu imóvel?',a:'Sim. Projetos com geração própria aumentam o valor percebido e atratividade.'},
+    {q:'Garantia e manutenção?',a:'Equipamentos com garantia estendida e manutenção simples; monitoramento contínuo.'},
+    {q:'Protege da inflação da energia?',a:'A geração própria reduz a exposição a reajustes, trazendo previsibilidade de custos.'},
+    {q:'A Belmoc cuida de tudo?',a:'Da engenharia à homologação e operação assistida. Você acompanha os resultados.'},
   ]
   return (
     <section className="py-10 md:py-14">
@@ -218,11 +215,11 @@ function CTAFinal(){
   return (
     <section className="py-12 md:py-16">
       <div className="container-section text-center">
-        <h2 className="text-2xl md:text-4xl font-extrabold">Invista hoje em uma usina solar e colha benefícios para sempre.</h2>
-        <p className="mt-2 text-white/75 max-w-2xl mx-auto">Avaliação técnica rápida e proposta sob medida para seu imóvel.</p>
+        <h2 className="text-2xl md:text-4xl font-extrabold">Invista hoje e transforme energia em patrimônio.</h2>
+        <p className="mt-2 text-white/75 max-w-2xl mx-auto">Receba uma avaliação técnica e uma proposta personalizada para seu imóvel.</p>
         <div className="mt-6">
           <a href={WHATSAPP_LINK} className="btn-yellow inline-flex">
-            Quero investir com a Belmoc
+            Falar com a Belmoc
             <ArrowRight className="ml-2 h-4 w-4" />
           </a>
         </div>
@@ -252,11 +249,11 @@ export default function BelmocLanding(){
       <Header/>
       <main className="flex-1">
         <Hero/>
-        <Destaque/>
+        <Diferenciais/>
+        <Narrativa/>
         <Numeros/>
-        <ProvaSocial/>
-        <ComoFunciona/>
-        <Autoridade/>
+        <Educativa/>
+        <Exclusividade/>
         <FAQ/>
         <CTAFinal/>
       </main>

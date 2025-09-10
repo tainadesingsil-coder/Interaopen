@@ -3,11 +3,11 @@
 @tailwind utilities;
 
 :root {
-	--blue: #0AA0FF;
-	--yellow: #EAC67A;
+	--blue: #0B1628; /* azul escuro de base */
+	--yellow: #EAC67A; /* acento dourado do logo */
 	--orange: #EAC67A;
 	--gold: #EAC67A;
-	--neon: #00C8FF;
+	--neon: #8FA6C6; /* suavizado para fintech */
 	--green: #00FFAA;
 	--text: #0F172A;
 	--muted: #CBD5E1;
@@ -19,9 +19,9 @@ body {
 	@apply font-sans text-white;
 	cursor: auto;
 	background:
-		radial-gradient(1200px 600px at -10% -10%, rgba(234,198,122,0.12), transparent 60%),
-		radial-gradient(1100px 600px at 110% -10%, rgba(234,198,122,0.08), transparent 60%),
-		linear-gradient(180deg, #0B0B0C 0%, #0E1116 50%, #0A0A0A 100%);
+		radial-gradient(1200px 600px at -10% -10%, rgba(234,198,122,0.10), transparent 60%),
+		radial-gradient(1100px 600px at 110% -10%, rgba(234,198,122,0.06), transparent 60%),
+		linear-gradient(180deg, #0B1628 0%, #0E1520 50%, #0A0F19 100%);
 	-webkit-touch-callout: none; /* iOS disable callout */
 }
 
@@ -30,7 +30,7 @@ img { -webkit-user-drag: none; user-drag: none; pointer-events: none; }
 /* Neon utilities */
 .neon-glow { box-shadow: 0 0 18px rgba(10,160,255,0.35), 0 0 3px rgba(10,160,255,0.6) inset; }
 .neon-text { text-shadow: 0 0 10px rgba(10,160,255,0.45); }
-.neon-border { border-color: rgba(10,160,255,0.45) !important; }
+.neon-border { border-color: rgba(234,198,122,0.35) !important; }
 @keyframes neonPulse { 0%,100% { box-shadow: 0 0 14px rgba(10,160,255,0.26); } 50% { box-shadow: 0 0 22px rgba(10,160,255,0.44); } }
 .neon-pulse { animation: neonPulse 2.4s ease-in-out infinite; }
 .text-gradient-blue { background: linear-gradient(90deg, #E8F7FF 0%, #9AD9FF 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
@@ -53,12 +53,12 @@ img { -webkit-user-drag: none; user-drag: none; pointer-events: none; }
 /* Unified CTA buttons (premium gold theme) */
 .btn-yellow {
 	@apply inline-flex items-center justify-center rounded-full px-7 py-3 text-sm font-semibold transition transform focus:outline-none focus:ring-2;
-	background: linear-gradient(90deg, #1A1A1A, #101010);
+	background: linear-gradient(90deg, #111827, #0B1628);
 	color: #FFFFFF;
 	box-shadow: 0 10px 22px rgba(234,198,122,0.18), 0 0 18px rgba(234,198,122,0.28);
-	border: 1px solid rgba(234,198,122,0.45);
+	border: 1px solid rgba(234,198,122,0.35);
 }
-.btn-yellow:hover { transform: translateY(-1px) scale(1.03); box-shadow: 0 16px 32px rgba(234,198,122,0.35), 0 0 24px rgba(234,198,122,0.45); border-color: rgba(234,198,122,0.7); }
+.btn-yellow:hover { transform: translateY(-1px) scale(1.03); box-shadow: 0 16px 32px rgba(234,198,122,0.30), 0 0 24px rgba(234,198,122,0.40); border-color: rgba(234,198,122,0.6); }
 @keyframes ctaPulse { 0%,100% { filter: drop-shadow(0 0 6px rgba(10,160,255,0.45)); } 50% { filter: drop-shadow(0 0 12px rgba(10,160,255,0.6)); } }
 .btn-pulse { animation: ctaPulse 2.2s ease-in-out infinite; }
 
@@ -78,17 +78,18 @@ img { -webkit-user-drag: none; user-drag: none; pointer-events: none; }
 }
 .input::placeholder { color: rgba(255,255,255,0.6); }
 
+
 .card,
 .card-aggressive {
 	border: 1px solid rgba(255,255,255,0.12);
-	background: rgba(255,255,255,0.04);
+	background: rgba(255,255,255,0.035);
 	backdrop-filter: blur(8px);
 	box-shadow: 0 20px 40px rgba(0,0,0,0.25);
 }
 .card { @apply rounded-2xl p-6 transition transform; }
 .card-aggressive { @apply rounded-2xl p-6 transition transform; }
 .card:hover,
-.card-aggressive:hover { transform: translateY(-4px) scale(1.02); box-shadow: 0 30px 60px rgba(234,198,122,0.22), 0 0 18px rgba(234,198,122,0.28); border-color: rgba(234,198,122,0.45); }
+.card-aggressive:hover { transform: translateY(-4px) scale(1.02); box-shadow: 0 30px 60px rgba(234,198,122,0.18), 0 0 18px rgba(234,198,122,0.24); border-color: rgba(234,198,122,0.35); }
 .icon-large { width: 32px; height: 32px; color: #94A3B8; transition: color 200ms ease; }
 .card-aggressive:hover .icon-large,
 .card:hover .icon-large { color: var(--blue); }
