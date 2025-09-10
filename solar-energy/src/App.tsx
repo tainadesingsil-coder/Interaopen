@@ -203,11 +203,15 @@ function Depoimentos(){
         {items.map((d,i)=> (
           <div key={i} className="card flex items-center gap-3 md:gap-4">
             { (d as any).link ? (
-              <a href={(d as any).link} target="_blank" rel="noopener noreferrer">
-                <img src={d.img} alt={d.a} className="h-10 w-10 md:h-12 md:w-12 rounded-full object-cover" style={{ objectPosition: (d as any).pos || '50% 50%' }} />
+              <a href={(d as any).link} target="_blank" rel="noopener noreferrer" className="shrink-0">
+                <div className="h-12 w-12 md:h-12 md:w-12 rounded-full overflow-hidden">
+                  <img src={d.img} alt={d.a} className="h-full w-full object-cover" style={{ objectPosition: (d as any).pos || '50% 50%' }} />
+                </div>
               </a>
             ) : (
-              <img src={d.img} alt={d.a} className="h-10 w-10 md:h-12 md:w-12 rounded-full object-cover" style={{ objectPosition: (d as any).pos || '50% 50%' }} />
+              <div className="h-12 w-12 md:h-12 md:w-12 rounded-full overflow-hidden shrink-0">
+                <img src={d.img} alt={d.a} className="h-full w-full object-cover" style={{ objectPosition: (d as any).pos || '50% 50%' }} />
+              </div>
             )}
             <Quote className="h-5 w-5 text-[var(--blue)]" />
             <p className="italic text-sm md:text-base">“{d.t}”</p>
