@@ -221,11 +221,11 @@ function Depoimentos(){
 
 function FAQ(){
   const qas=[
-    {q:'Preciso trocar meu telhado?',a:'Não. Sem obras, sem manutenção e economia no primeiro mês.'},
-    {q:'E se faltar sol?',a:'O desconto é aplicado na fatura. Você continua economizando.'},
-    {q:'Quando começo a ver a economia?',a:'Já na próxima fatura você sente a diferença.'},
-    {q:'É complicado?',a:'Não. É simples, claro e com desconto garantido.'},
-    {q:'Quanto tempo leva para ativar o desconto?',a:'Em até 24 horas após a confirmação do cadastro.'},
+    {q:'Preciso trocar meu telhado?',a:'Não. Sem obras, sem manutenção e já com economia no primeiro mês.'},
+    {q:'E se faltar sol?',a:'Mesmo em dias nublados, a economia é garantida com energia compensada.'},
+    {q:'Quando começo a ver a economia?',a:'Você já nota a redução já na primeira fatura com o desconto ativo.'},
+    {q:'É complicado?',a:'Não. Todo o processo é simples, rápido e sem burocracia para você.'},
+    {q:'Quanto tempo leva para ativar o desconto?',a:'O desconto começa a valer já no primeiro mês após a adesão.'},
   ]
   const [open,setOpen]=useState<number|null>(0)
   return (
