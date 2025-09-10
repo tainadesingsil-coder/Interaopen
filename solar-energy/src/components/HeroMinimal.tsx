@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
-import { MessageCircle } from 'lucide-react'
+import { MessageCircle, Instagram } from 'lucide-react'
 
 type HeroMinimalProps = {
   imageUrls?: string[];
@@ -20,7 +20,7 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
         <img
           src="https://i.postimg.cc/9f3DM49L/LOGO-V-BRANCA-1-1.png"
           alt="Solar Energy"
-          className="h-[60px] md:h-[84px] w-auto opacity-95"
+          className="h-[48px] md:h-[72px] w-auto opacity-95"
         />
       </div>
       {/* Minimal logo overlay removida */}
@@ -52,32 +52,44 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
         <div className="min-h-[64vh] md:min-h-[82vh] flex items-end justify-center text-center pb-12 md:pb-32 pt-4 md:pt-10">
           <div className="max-w-[28rem] md:max-w-3xl mx-auto px-2">
             <motion.div
-              className="inline-block rounded-lg bg-[rgba(8,20,35,0.50)] backdrop-blur-[3px] px-5 py-3 md:px-6 md:py-4 shadow-[0_10px_28px_rgba(0,0,0,0.30)] neon-soft neon-glow neon-pulse"
+              className="inline-block rounded-lg bg-[rgba(8,20,35,0.50)] backdrop-blur-[6px] px-5 py-4 md:px-8 md:py-6 shadow-[0_10px_28px_rgba(0,0,0,0.30)] neon-soft neon-glow"
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45, ease: 'easeOut' }}
             >
               <motion.h1
-                className="text-[18px] sm:text-3xl md:text-4xl font-bold tracking-tight leading-snug text-white drop-shadow-[0_4px_18px_rgba(0,0,0,0.45)]"
+                className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight leading-snug drop-shadow-[0_4px_18px_rgba(0,0,0,0.45)] text-[#F2F2F2]"
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.45, ease: 'easeOut', delay: 0.05 }}
               >
-                Mais que energia, é liberdade para investir no que importa.
+                Energia que gera liberdade financeira.
               </motion.h1>
-              <motion.a
-                href="https://wa.me/5538999266004?text=Gostaria%20de%20saber%20mais%20sobre%20como%20obter%20meu%20desconto"
-                className="mt-3 md:mt-4 inline-flex items-center gap-1.5 md:gap-2 rounded-full px-3 py-1 md:px-4 md:py-2 text-[12px] md:text-base font-semibold border"
-                style={{ color: '#EAC67A', borderColor: 'rgba(234,198,122,0.55)', background: 'rgba(234,198,122,0.12)', WebkitTapHighlightColor: 'transparent' }}
-                onClick={(e)=>{ e.preventDefault(); window.location.href='https://wa.me/5538999266004?text=Gostaria%20de%20saber%20mais%20sobre%20como%20obter%20meu%20desconto' }}
+              <motion.div
+                className="mt-4 md:mt-5 flex items-center justify-center gap-3 md:gap-4"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.45, ease: 'easeOut', delay: 0.1 }}
               >
-                <MessageCircle className="h-4 w-4" />
-                Transforme sua conta de luz em uma escolha inteligente.
-              </motion.a>
-              {/* Botões removidos conforme solicitação */}
+                <a
+                  href="https://wa.me/5538999266004?text=Gostaria%20de%20saber%20mais%20sobre%20como%20obter%20meu%20desconto"
+                  className="social"
+                  aria-label="WhatsApp"
+                  onClick={(e)=>{ e.preventDefault(); window.location.href='https://wa.me/5538999266004?text=Gostaria%20de%20saber%20mais%20sobre%20como%20obter%20meu%20desconto' }}
+                  style={{ WebkitTapHighlightColor: 'transparent' }}
+                >
+                  <MessageCircle className="h-5 w-5" />
+                </a>
+                <a
+                  href="https://instagram.com/"
+                  className="social"
+                  aria-label="Instagram"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Instagram className="h-5 w-5" />
+                </a>
+              </motion.div>
             </motion.div>
           </div>
         </div>
