@@ -18,9 +18,9 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
       {/* Brand logo centered near the top */}
       <div className="absolute inset-x-0 top-16 md:top-16 z-20 flex justify-center">
         <img
-          src="https://i.postimg.cc/9QPDDmBV/Design-sem-nome-2025-09-09-T221243-506.png"
+          src="https://i.postimg.cc/9f3DM49L/LOGO-V-BRANCA-1-1.png"
           alt="Solar Energy"
-          className="h-[120px] md:h-[168px] w-auto opacity-95"
+          className="h-[140px] md:h-[168px] w-auto opacity-95"
         />
       </div>
       {/* Minimal logo overlay removida */}
