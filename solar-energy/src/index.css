@@ -21,7 +21,10 @@ body {
 		radial-gradient(1400px 600px at -10% -10%, rgba(10,160,255,0.18), transparent 60%),
 		radial-gradient(1200px 600px at 110% -10%, rgba(10,160,255,0.12), transparent 60%),
 		linear-gradient(180deg, #0B1F3A 0%, #07172C 50%, #081423 100%);
+	-webkit-touch-callout: none; /* iOS disable callout */
 }
+
+img { -webkit-user-drag: none; user-drag: none; pointer-events: none; }
 
 /* Neon utilities */
 .neon-glow { box-shadow: 0 0 18px rgba(10,160,255,0.35), 0 0 3px rgba(10,160,255,0.6) inset; }
