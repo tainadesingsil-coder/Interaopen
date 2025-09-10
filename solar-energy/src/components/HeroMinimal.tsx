@@ -55,7 +55,7 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.45, ease: 'easeOut', delay: 0.05 }}
               >
-                Não é sobre energia,<br className="hidden sm:block" /> é sobre liberdade financeira.
+                Mais que energia, é liberdade para investir no que importa.
               </motion.h1>
               <motion.p
                 className="mt-2 md:mt-3 text-sm md:text-base text-slate-200"
@@ -63,7 +63,7 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.45, ease: 'easeOut', delay: 0.1 }}
               >
-                Transforme sua conta de luz em investimento inteligente.
+                Transforme sua conta de luz em uma escolha inteligente.
               </motion.p>
               {/* Botões removidos conforme solicitação */}
             </motion.div>
