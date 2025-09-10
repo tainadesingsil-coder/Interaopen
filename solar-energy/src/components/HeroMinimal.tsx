@@ -40,6 +40,9 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
         </div>
       )}
 
+      {/* Reserve space even without text */}
+      <div className="h-[70vh] md:h-[82vh]" />
+
       {/* Only social icons, positioned just below the roof area */}
       <div className="absolute inset-x-0 top-24 md:top-28 z-20 flex items-center justify-center gap-3 md:gap-4">
         <a
