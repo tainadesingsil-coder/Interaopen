@@ -15,10 +15,7 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
     <motion.section className="relative overflow-hidden" initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: "easeOut" }}>
       {/* Neon line at top (slightly stronger) */}
       <div className="footer-neon-line absolute top-0 left-0 right-0" style={{ height: '3px' }} />
-      {/* Minimal logo overlay */}
-      <div className="absolute top-1.5 left-2 md:top-4 md:left-5 z-20">
-        <img src="https://i.postimg.cc/9f3DM49L/LOGO-V-BRANCA-1-1.png" alt="Solar Energy" className="h-[48px] md:h-[84px] w-auto opacity-95" />
-      </div>
+      {/* Minimal logo overlay removida */}
 
       {/* Background: imagem única fornecida */}
       {backgroundImage && (
