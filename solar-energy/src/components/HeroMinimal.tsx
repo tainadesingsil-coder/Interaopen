@@ -58,7 +58,7 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
               transition={{ duration: 0.45, ease: 'easeOut' }}
             >
               <motion.h1
-                className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight leading-snug drop-shadow-[0_4px_18px_rgba(0,0,0,0.45)] text-[#F2F2F2]"
+                className="text-xl sm:text-3xl md:text-4xl font-bold tracking-tight leading-snug drop-shadow-[0_4px_18px_rgba(0,0,0,0.45)] text-[#F2F2F2]"
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.45, ease: 'easeOut', delay: 0.05 }}
@@ -81,7 +81,7 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
                   <MessageCircle className="h-5 w-5" />
                 </a>
                 <a
-                  href="https://instagram.com/"
+                  href="https://www.instagram.com/solarenergymoc/"
                   className="social"
                   aria-label="Instagram"
                   target="_blank"
