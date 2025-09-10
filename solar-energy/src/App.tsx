@@ -9,7 +9,7 @@ function Header() {
     <header className="header">
       <div className="container-section flex items-center justify-between py-3">
         <a href="#" className="logo-wrap">
-          <img src="https://i.postimg.cc/Qxys8R7m/Design-sem-nome-2025-09-05-T184335-653.png" alt="Solar Energy" className="h-[960px] w-auto" />
+          <img src="https://i.postimg.cc/Qxys8R7m/Design-sem-nome-2025-09-05-T184335-653.png" alt="Solar Energy" className="h-[56px] md:h-[96px] w-auto" />
         </a>
       </div>
     </header>

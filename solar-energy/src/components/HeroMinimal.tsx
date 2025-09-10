@@ -42,13 +42,13 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
 
       {/* Centered content lowered for contrast */}
       <div className="relative z-10 container mx-auto px-4">
-        <div className="min-h-[70vh] md:min-h-[82vh] flex items-end justify-center text-center pb-24 md:pb-32 pt-6 md:pt-10">
+        <div className="min-h-[70vh] md:min-h-[82vh] flex items-end justify-center text-center pb-16 md:pb-32 pt-4 md:pt-10">
           <div>
             <div className="flex justify-center">
               <img
                 src="https://i.postimg.cc/9f3DM49L/LOGO-V-BRANCA-1-1.png"
                 alt="Solar Energy"
-                className="mx-auto h-[36px] md:h-[48px] w-auto opacity-90 mb-2 md:mb-3 transform translate-x-6 md:translate-x-10 -translate-y-4 md:-translate-y-6"
+                className="mx-auto h-[28px] md:h-[48px] w-auto opacity-90 mb-1 md:mb-3 transform translate-x-4 md:translate-x-10 -translate-y-5 md:-translate-y-6"
               />
             </div>
             <motion.div
@@ -85,7 +85,7 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
       </div>
 
       {/* Mascot fixed at bottom-right (edge) */}
-      <div className="fixed right-0 bottom-0 z-50 text-right mr-[-2px] mb-[-2px]">
+      <div className="fixed right-0 bottom-0 z-50 text-right mr-[-2px] mb-[-2px] hidden sm:block">
         <button onClick={()=>setBubble(v=>!v)} aria-label="Assistente" className="mascot-stand">
           <img src="https://i.postimg.cc/Y9KQgcw6/Design-sem-nome-2025-08-18-T120443-767.png" alt="Mascote" className="h-[140px] sm:h-[200px] md:h-[270px] w-auto"/>
         </button>
