@@ -43,7 +43,10 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
       <div className="relative z-10 container mx-auto px-4">
         <div className="min-h-[64vh] md:min-h-[82vh] flex items-end justify-center text-center pb-12 md:pb-32 pt-4 md:pt-10">
           <div className="max-w-[28rem] md:max-w-3xl mx-auto px-2">
-            {/* Center logo removed */}
+            {/* Nome da empresa centralizado e discreto */}
+            <div className="flex justify-center mb-2 md:mb-3">
+              <span className="block text-[15px] sm:text-[17px] md:text-xl font-semibold" style={{ color: '#EAC67A' }}>Solar Energy</span>
+            </div>
             <motion.div
               className="inline-block rounded-lg bg-[rgba(8,20,35,0.46)] backdrop-blur-[3px] px-3 py-2 md:px-6 md:py-4 shadow-[0_10px_28px_rgba(0,0,0,0.30)] neon-soft neon-glow"
               initial={{ opacity: 0, y: 14 }}
