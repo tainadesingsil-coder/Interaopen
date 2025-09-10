@@ -193,7 +193,7 @@ function Steps(){
 
 function Depoimentos(){
   const items=[
-    {t:'Minha conta caiu 20% após assinar. Paguei o mínimo da Cemig e vi R$ 50 de economia real.',a:'Medular, Montes Claros - MG',img:'https://i.postimg.cc/zByHknrC/Whats-App-Image-2025-08-18-at-13-57-45.jpg'},
+    {t:'A fatura de luz ficou simples e previsível. Hoje sobra para investir.',a:'Medular, Montes Claros - MG',img:'https://i.postimg.cc/zByHknrC/Whats-App-Image-2025-08-18-at-13-57-45.jpg'},
     {t:'O desconto chegou direitinho todo mês. A fatura ficou fácil de entender.',a:'HortiFrut Fm, Montes Claros - MG',img:'https://i.postimg.cc/T2kH1xkB/Whats-App-Image-2025-08-18-at-13-51-19.jpg'},
     {t:'Reduzi 20% sem complicação. Atendimento ágil e eficiente em MG.',a:'Amávia, Montes Claros - MG',img:'https://i.postimg.cc/90VHwxxV/Whats-App-Image-2025-08-18-at-13-19-46.jpg', pos:'50% 35%', link:'https://i.postimg.cc/90VHwxxV/Whats-App-Image-2025-08-18-at-13-19-46.jpg'},
   ]
