@@ -336,7 +336,7 @@ export default function App(){
       <Header/>
       <main className="flex-1">
              <HeroMinimal imageUrls={[
-          'https://i.postimg.cc/RZzrZfds/Solar-Social-Media7-Banner-3.png'
+          'https://i.postimg.cc/RZzrZfds/Solar-Social-Media7-Banner-3.png?v=2'
         ]} />
         <Beneficios/>
         <Simulador/>

@@ -31,7 +31,7 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
       )}
 
       {/* Ícones minimalistas abaixo do topo da imagem */}
-      <div className="absolute inset-x-0 top-56 md:top-44 z-20 flex items-center justify-center gap-3 md:gap-4">
+      <div className="absolute inset-x-0 top-64 md:top-48 z-20 flex items-center justify-center gap-3 md:gap-4">
         <a
           href="https://wa.me/5538999266004?text=Gostaria%20de%20saber%20mais%20sobre%20como%20obter%20meu%20desconto"
           className="social w-[28px] h-[28px] opacity-85 hover:opacity-100 transition"
