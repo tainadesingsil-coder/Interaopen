@@ -221,7 +221,7 @@ function Depoimentos(){
 
 function FAQ(){
   const qas=[
-    {q:'Preciso trocar meu telhado?',a:'Na maioria dos casos, não. Você mantém tudo como está.'},
+    {q:'Preciso trocar meu telhado?',a:'Não. Sem obras, sem manutenção e economia no primeiro mês.'},
     {q:'E se faltar sol?',a:'O desconto é aplicado na fatura. Você continua economizando.'},
     {q:'Quando começo a ver a economia?',a:'Já na próxima fatura você sente a diferença.'},
     {q:'É complicado?',a:'Não. É simples, claro e com desconto garantido.'},
