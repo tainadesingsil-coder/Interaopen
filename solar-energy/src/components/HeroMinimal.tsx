@@ -21,7 +21,8 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
             key={backgroundImage}
             src={backgroundImage}
             alt="Banner"
-            className="absolute inset-0 w-full h-full object-cover object-center md:object-center"
+            className="absolute inset-0 w-full h-full object-cover"
+            style={{ objectPosition: '50% 18%' }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
@@ -30,7 +31,7 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
       )}
 
       {/* Ícones minimalistas abaixo do topo da imagem */}
-      <div className="absolute inset-x-0 top-24 md:top-28 z-20 flex items-center justify-center gap-3 md:gap-4">
+      <div className="absolute inset-x-0 top-40 md:top-32 z-20 flex items-center justify-center gap-3 md:gap-4">
         <a
           href="https://wa.me/5538999266004?text=Gostaria%20de%20saber%20mais%20sobre%20como%20obter%20meu%20desconto"
           className="social w-[28px] h-[28px] opacity-85 hover:opacity-100 transition"
