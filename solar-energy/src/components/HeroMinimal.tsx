@@ -20,7 +20,7 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
             key={backgroundImage}
             src={backgroundImage}
             alt="Banner"
-            className="absolute inset-0 w-full h-full object-cover object-center"
+            className="absolute inset-0 w-full h-full object-cover object-center md:object-center"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
