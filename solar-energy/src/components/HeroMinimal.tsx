@@ -48,7 +48,7 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
               <img
                 src="https://i.postimg.cc/9f3DM49L/LOGO-V-BRANCA-1-1.png"
                 alt="Solar Energy"
-                className="mx-auto h-[140px] md:h-[180px] w-auto opacity-95 mb-3 md:mb-4"
+                className="mx-auto h-[56px] md:h-[72px] w-auto opacity-90 mb-2 md:mb-3 transform translate-x-6 md:translate-x-10"
               />
             </div>
             <motion.div
