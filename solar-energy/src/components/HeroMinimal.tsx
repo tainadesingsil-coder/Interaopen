@@ -16,8 +16,8 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
       {/* Neon line at top (slightly stronger) */}
       <div className="footer-neon-line absolute top-0 left-0 right-0" style={{ height: '3px' }} />
       {/* Minimal logo overlay */}
-      <div className="absolute top-2 left-3 md:top-4 md:left-5 z-20">
-        <img src="https://i.postimg.cc/9f3DM49L/LOGO-V-BRANCA-1-1.png" alt="Solar Energy" className="h-[36px] md:h-[64px] w-auto opacity-95" />
+      <div className="absolute top-1.5 left-2 md:top-4 md:left-5 z-20">
+        <img src="https://i.postimg.cc/9f3DM49L/LOGO-V-BRANCA-1-1.png" alt="Solar Energy" className="h-[32px] md:h-[64px] w-auto opacity-95" />
       </div>
 
       {/* Background: imagem única fornecida */}
@@ -63,10 +63,9 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
               </motion.h1>
               <motion.a
                 href="https://wa.me/5538999266004?text=Gostaria%20de%20saber%20mais%20sobre%20como%20obter%20meu%20desconto"
-                target="_blank"
-                rel="noopener noreferrer"
                 className="mt-3 md:mt-4 inline-flex items-center gap-1.5 md:gap-2 rounded-full px-3 py-1 md:px-4 md:py-2 text-[12px] md:text-base font-semibold border"
-                style={{ color: '#EAC67A', borderColor: 'rgba(234,198,122,0.55)', background: 'rgba(234,198,122,0.12)' }}
+                style={{ color: '#EAC67A', borderColor: 'rgba(234,198,122,0.55)', background: 'rgba(234,198,122,0.12)', WebkitTapHighlightColor: 'transparent' }}
+                onClick={(e)=>{ e.preventDefault(); window.location.href='https://wa.me/5538999266004?text=Gostaria%20de%20saber%20mais%20sobre%20como%20obter%20meu%20desconto' }}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.45, ease: 'easeOut', delay: 0.1 }}
