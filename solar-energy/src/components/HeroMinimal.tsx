@@ -13,12 +13,10 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
 
   return (
     <motion.section className="relative overflow-hidden" initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: "easeOut" }}>
-      {/* Neon line at top */}
-      <div className="footer-neon-line absolute top-0 left-0 right-0" />
+      {/* Neon line at top (slightly stronger) */}
+      <div className="footer-neon-line absolute top-0 left-0 right-0" style={{ height: '3px' }} />
       {/* Minimal logo overlay */}
-      <div className="absolute top-[-8px] left-5 z-20">
-        <img src="https://i.postimg.cc/Qxys8R7m/Design-sem-nome-2025-09-05-T184335-653.png" alt="Solar Energy" className="h-[120px] md:h-[160px] w-auto opacity-95" />
-      </div>
+      {/* Top-left logo removed; new centered logo added above the title */}
 
       {/* Background: imagem única fornecida */}
       {backgroundImage && (
@@ -46,8 +44,15 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
       <div className="relative z-10 container mx-auto px-4">
         <div className="min-h-[70vh] md:min-h-[82vh] flex items-end justify-center text-center pb-24 md:pb-32 pt-6 md:pt-10">
           <div>
+            <div className="flex justify-center">
+              <img
+                src="https://i.postimg.cc/9f3DM49L/LOGO-V-BRANCA-1-1.png"
+                alt="Solar Energy"
+                className="mx-auto h-[140px] md:h-[180px] w-auto opacity-95 mb-3 md:mb-4"
+              />
+            </div>
             <motion.div
-              className="inline-block rounded-lg bg-[rgba(8,20,35,0.42)] backdrop-blur-[3px] px-3 py-2.5 md:px-6 md:py-4 shadow-[0_10px_28px_rgba(0,0,0,0.30)] neon-soft"
+              className="inline-block rounded-lg bg-[rgba(8,20,35,0.42)] backdrop-blur-[3px] px-3 py-2.5 md:px-6 md:py-4 shadow-[0_10px_28px_rgba(0,0,0,0.30)] neon-soft neon-glow"
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45, ease: 'easeOut' }}
