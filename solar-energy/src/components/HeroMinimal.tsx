@@ -17,7 +17,7 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
       <div className="footer-neon-line absolute top-0 left-0 right-0" style={{ height: '3px' }} />
       {/* Minimal logo overlay */}
       <div className="absolute top-2 left-3 md:top-4 md:left-5 z-20">
-        <img src="https://i.postimg.cc/Qxys8R7m/Design-sem-nome-2025-09-05-T184335-653.png" alt="Solar Energy" className="h-[36px] md:h-[64px] w-auto opacity-95" />
+        <img src="https://i.postimg.cc/9f3DM49L/LOGO-V-BRANCA-1-1.png" alt="Solar Energy" className="h-[36px] md:h-[64px] w-auto opacity-95" />
       </div>
 
       {/* Background: imagem única fornecida */}
