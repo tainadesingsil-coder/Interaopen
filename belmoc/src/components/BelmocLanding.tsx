@@ -29,10 +29,10 @@ function Hero(){
       <div className="container-section relative z-10 grid md:grid-cols-12 gap-6 md:gap-8 items-center pt-24 md:pt-28 pb-10">
         <div className="md:col-span-7">
           <img src="/logo.svg" alt="Belmoc" className="h-10 w-auto mb-4 opacity-95" />
-          <motion.h1 initial={{opacity:0,y:12}} animate={{opacity:1,y:0}} transition={{duration:0.6,ease:'easeOut'}} className="text-3xl md:text-6xl font-extrabold tracking-tight">
+          <motion.h1 initial={{opacity:0,y:12}} animate={{opacity:1,y:0}} transition={{duration:0.6,ease:'easeOut'}} className="text-3xl md:text-6xl font-extrabold tracking-tight" style={{ fontFamily: 'Montserrat, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu' }}>
             Invista na sua usina solar e colha resultados para sempre.
           </motion.h1>
-          <motion.p initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} transition={{duration:0.7,delay:0.1,ease:'easeOut'}} className="mt-3 md:mt-4 text-base md:text-xl text-white/80 max-w-2xl">
+          <motion.p initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} transition={{duration:0.7,delay:0.1,ease:'easeOut'}} className="mt-3 md:mt-4 text-base md:text-xl max-w-2xl" style={{ color: 'var(--light)' }}>
             Energia que gera patrimônio, economia e independência.
           </motion.p>
           <motion.div initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} transition={{duration:0.7,delay:0.18,ease:'easeOut'}} className="mt-6 flex flex-wrap items-center gap-3">
@@ -47,24 +47,24 @@ function Hero(){
         </div>
         <div className="md:col-span-5">
           <div className="grid grid-cols-2 gap-3 md:gap-4">
-            <div className="card">
+            <div className="card" style={{ background: '#FFFFFF', color: '#0F172A' }}>
               <LineChart className="h-5 w-5 text-[var(--gold)]" />
-              <p className="mt-2 text-sm text-white/70">Investimento sólido</p>
+              <p className="mt-2 text-sm" style={{ color: '#475569' }}>Investimento sólido</p>
               <p className="text-xl md:text-2xl font-bold">ROI previsível</p>
             </div>
-            <div className="card">
+            <div className="card" style={{ background: '#FFFFFF', color: '#0F172A' }}>
               <TrendingUp className="h-5 w-5 text-[var(--gold)]" />
-              <p className="mt-2 text-sm text-white/70">Valorização imobiliária</p>
+              <p className="mt-2 text-sm" style={{ color: '#475569' }}>Valorização imobiliária</p>
               <p className="text-xl md:text-2xl font-bold">+ valor do imóvel</p>
             </div>
-            <div className="card">
+            <div className="card" style={{ background: '#FFFFFF', color: '#0F172A' }}>
               <Building className="h-5 w-5 text-[var(--gold)]" />
-              <p className="mt-2 text-sm text-white/70">Ativo real</p>
+              <p className="mt-2 text-sm" style={{ color: '#475569' }}>Ativo real</p>
               <p className="text-xl md:text-2xl font-bold">no seu patrimônio</p>
             </div>
-            <div className="card">
+            <div className="card" style={{ background: '#FFFFFF', color: '#0F172A' }}>
               <ShieldCheck className="h-5 w-5 text-[var(--gold)]" />
-              <p className="mt-2 text-sm text-white/70">Independência energética</p>
+              <p className="mt-2 text-sm" style={{ color: '#475569' }}>Independência energética</p>
               <p className="text-xl md:text-2xl font-bold">proteção contra alta</p>
             </div>
           </div>
@@ -111,12 +111,12 @@ function Numeros(){
     { n:`+${clientes}`, l:'clientes investidores satisfeitos' },
   ]
   return (
-    <section className="py-8 md:py-12">
+    <section className="py-8 md:py-12" style={{ background: 'var(--light)' }}>
       <div className="container-section grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
         {items.map((x)=> (
-          <div key={x.l} className="card text-center">
-            <p className="text-2xl md:text-4xl font-extrabold text-[var(--gold)]">{x.n}</p>
-            <p className="mt-1 text-sm text-white/70">{x.l}</p>
+          <div key={x.l} className="text-center" style={{ background: '#fff', borderRadius: 16, padding: 24 }}>
+            <p className="text-2xl md:text-4xl font-extrabold" style={{ color: '#F68E34', fontFamily: 'Montserrat, system-ui' }}>{x.n}</p>
+            <p className="mt-1 text-sm" style={{ color: '#334155' }}>{x.l}</p>
           </div>
         ))}
       </div>
@@ -165,15 +165,15 @@ function Educativa(){
 
 function Exclusividade(){
   return (
-    <section className="py-8 md:py-12">
+    <section className="py-8 md:py-12" style={{ background: 'var(--light)' }}>
       <div className="container-section">
-        <div className="card md:flex md:items-center md:justify-between">
+        <div className="md:flex md:items-center md:justify-between">
           <div>
-            <h3 className="text-lg md:text-2xl font-extrabold">Mais do que energia, a Belmoc entrega patrimônio e independência para o Norte de Minas.</h3>
-            <p className="mt-1 text-sm text-white/75">Projetos exclusivos, execução certificada e acompanhamento contínuo.</p>
+            <h3 className="text-lg md:text-2xl font-extrabold" style={{ color: '#1A323F' }}>Mais do que energia, a Belmoc entrega patrimônio e independência para o Norte de Minas.</h3>
+            <p className="mt-1 text-sm" style={{ color: '#334155' }}>Projetos exclusivos, execução certificada e acompanhamento contínuo.</p>
           </div>
-          <div className="mt-3 md:mt-0 inline-flex items-center text-sm text-white/80">
-            <Lock className="h-4 w-4 mr-2 text-[var(--gold)]" />
+          <div className="mt-3 md:mt-0 inline-flex items-center text-sm" style={{ color: '#1A323F' }}>
+            <Lock className="h-4 w-4 mr-2" color="#F68E34" />
             <span>🔒 Site seguro</span>
           </div>
         </div>
@@ -215,7 +215,7 @@ function CTAFinal(){
   return (
     <section className="py-12 md:py-16">
       <div className="container-section text-center">
-        <h2 className="text-2xl md:text-4xl font-extrabold">Invista hoje e transforme energia em patrimônio.</h2>
+        <h2 className="text-2xl md:text-4xl font-extrabold" style={{ fontFamily: 'Montserrat, system-ui' }}>Invista hoje e transforme energia em patrimônio.</h2>
         <p className="mt-2 text-white/75 max-w-2xl mx-auto">Receba uma avaliação técnica e uma proposta personalizada para seu imóvel.</p>
         <div className="mt-6">
           <a href={WHATSAPP_LINK} className="btn-yellow inline-flex">
