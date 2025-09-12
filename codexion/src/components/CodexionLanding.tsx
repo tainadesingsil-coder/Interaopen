@@ -35,12 +35,20 @@ export default function CodexionLanding(){
           className="hero-bg"
         />
         <div className="hero-overlay" />
-        {/* Robô animado */}
-        <img
-          src="https://i.postimg.cc/W3KhWT93/Future-Tenses-Grammar-Presentation-in-Blue-Orange-Green-Futuristic-Style.png"
-          alt="Robô futurista"
-          className="hero-robot"
-        />
+        {/* Robô animado + feixe + QR nas mãos */}
+        <div className="hero-robot-wrap">
+          <img
+            src="https://i.postimg.cc/W3KhWT93/Future-Tenses-Grammar-Presentation-in-Blue-Orange-Green-Futuristic-Style.png"
+            alt="Robô futurista"
+            className="hero-robot"
+          />
+          <div className="robot-beam" />
+          <img
+            src="https://i.postimg.cc/7h9Z2z5p/LOGO-EM-PDF-1-pdf-1.png"
+            alt="QR Code"
+            className="robot-qr"
+          />
+        </div>
         <Container>
           <div className="relative z-10 py-8 md:py-14" />
         </Container>
