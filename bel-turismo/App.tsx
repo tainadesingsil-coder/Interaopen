@@ -3,7 +3,7 @@ import { NavigationContainer } from '@react-navigation/native'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { View, Text, ScrollView, TouchableOpacity, Image, Platform } from 'react-native'
+import { View, Text, ScrollView, TouchableOpacity, Image, Platform, TextInput } from 'react-native'
 import Constants from 'expo-constants'
 import * as Localization from 'expo-localization'
 import * as Speech from 'expo-speech'
@@ -19,6 +19,7 @@ import { initReactI18next, useTranslation } from 'react-i18next'
 const ORANGE = '#F68E34'
 const WHITE = '#FFFFFF'
 const MUTED = '#64748B'
+const LIGHT = '#F4F6F8'
 
 // i18n setup (PT/EN)
 i18next.use(initReactI18next).init({
@@ -57,8 +58,8 @@ function useDb(){
 
 function Section({ title, children }: { title: string; children?: React.ReactNode }){
   return (
-    <View style={{ marginBottom: 16 }}>
-      <Text style={{ fontSize: 18, fontWeight: '800', color: '#0F172A', marginBottom: 8 }}>{title}</Text>
+    <View style={{ marginBottom: 20 }}>
+      <Text style={{ fontSize: 20, fontWeight: '800', color: '#0F172A', marginBottom: 12 }}>{title}</Text>
       {children}
     </View>
   )
@@ -74,14 +75,14 @@ function Chip({ label }: { label: string }){
 
 function Card({ title, subtitle, image }: { title: string; subtitle?: string; image?: string }){
   return (
-    <View style={{ backgroundColor: WHITE, borderRadius: 16, overflow: 'hidden', borderWidth: 1, borderColor: '#E5E7EB' }}>
+    <View style={{ backgroundColor: WHITE, borderRadius: 16, overflow: 'hidden', borderWidth: 1, borderColor: '#EAECF0' }}>
       {image ? (
-        <Image source={{ uri: image }} style={{ width: '100%', height: 140 }} />
+        <Image source={{ uri: image }} style={{ width: '100%', height: 160 }} />
       ) : (
-        <View style={{ width: '100%', height: 140, backgroundColor: '#F8FAFC' }} />
+        <View style={{ width: '100%', height: 160, backgroundColor: '#F8FAFC' }} />
       )}
       <View style={{ padding: 12 }}>
-        <Text style={{ fontSize: 16, fontWeight: '700', color: '#0F172A' }}>{title}</Text>
+        <Text style={{ fontSize: 16, fontWeight: '800', color: '#0F172A' }}>{title}</Text>
         {subtitle ? <Text style={{ marginTop: 4, color: MUTED }}>{subtitle}</Text> : null}
         <View style={{ flexDirection: 'row', marginTop: 10 }}>
           <QuickButton label="Mapa" />
@@ -101,6 +102,28 @@ function QuickButton({ label }: { label: string }){
   )
 }
 
+function SearchBar(){
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: LIGHT, borderRadius: 999, paddingHorizontal: 14, paddingVertical: 10, borderWidth: 1, borderColor: '#E5E7EB' }}>
+      <Text style={{ color: MUTED, marginRight: 8 }}>🔎</Text>
+      <TextInput placeholder="Pesquise praias, cultura ou comércios locais" placeholderTextColor={MUTED} style={{ flex: 1, color: '#0F172A' }} />
+    </View>
+  )
+}
+
+function CategoryCard({ title, image }: { title: string; image: string }){
+  return (
+    <View style={{ width: 160, marginRight: 12 }}>
+      <View style={{ backgroundColor: WHITE, borderRadius: 16, overflow: 'hidden', borderWidth: 1, borderColor: '#EAECF0' }}>
+        <Image source={{ uri: image }} style={{ width: '100%', height: 100 }} />
+        <View style={{ padding: 10 }}>
+          <Text style={{ fontWeight: '800', color: '#0F172A' }}>{title}</Text>
+        </View>
+      </View>
+    </View>
+  )
+}
+
 function HomeScreen(){
   useDb()
   const { t } = useTranslation()
@@ -108,24 +131,49 @@ function HomeScreen(){
     <SafeAreaView style={{ flex: 1, backgroundColor: WHITE }}>
       <ScrollView contentContainerStyle={{ padding: 16, paddingTop: 12 }}>
         <Text style={{ fontSize: 28, fontWeight: '900', color: '#0F172A' }}>{t('appName')}</Text>
-        <View style={{ marginTop: 8, backgroundColor: WHITE, borderRadius: 16, borderWidth: 1, borderColor: '#E5E7EB', padding: 14 }}>
-          <Text style={{ color: MUTED }}>BEL</Text>
-          <Text style={{ marginTop: 4, color: '#0F172A', fontSize: 16 }}>
-            {t('belWelcome')}
-          </Text>
-          <View style={{ flexDirection: 'row', marginTop: 12 }}>
-            {['Comércio','Cultura','Praias','Roteiros','Mapa'].map(l=> <Chip key={l} label={l} />)}
-          </View>
+
+        <View style={{ marginTop: 14 }}>
+          <SearchBar/>
         </View>
 
-        <Section title="Agora em destaque">
+        <View style={{ marginTop: 16, borderRadius: 16, overflow: 'hidden', borderWidth: 1, borderColor: '#EAECF0' }}>
+          <Image source={{ uri: 'https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?q=80&w=1200&auto=format&fit=crop' }} style={{ width: '100%', height: 180 }} />
+        </View>
+
+        <Section title="Explorar por categoria">
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <CategoryCard title="Praias" image="https://images.unsplash.com/photo-1500375592092-40eb2168fd21?q=80&w=800&auto=format&fit=crop"/>
+            <CategoryCard title="Cultura" image="https://images.unsplash.com/photo-1523419410224-44e4832fc2bf?q=80&w=800&auto=format&fit=crop"/>
+            <CategoryCard title="Comércio Local" image="https://images.unsplash.com/photo-1515165562835-c3b8c6b2a4d1?q=80&w=800&auto=format&fit=crop"/>
+            <CategoryCard title="Experiências" image="https://images.unsplash.com/photo-1549880338-65ddcdfd017b?q=80&w=800&auto=format&fit=crop"/>
+          </ScrollView>
+        </Section>
+
+        <Section title="O que é tendência em Belmonte">
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             {[1,2,3].map(i=> (
-              <View key={i} style={{ width: 260, marginRight: 12 }}>
-                <Card title={`Evento ${i}`} subtitle="Hoje, 19:00" image={`https://picsum.photos/seed/event${i}/600/400`} />
+              <View key={i} style={{ width: 280, marginRight: 12 }}>
+                <Card title={`Em alta ${i}`} subtitle="Hoje" image={`https://picsum.photos/seed/trend${i}/600/420`} />
               </View>
             ))}
           </ScrollView>
+        </Section>
+
+        <Section title="Próximo a você">
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            {[1,2].map(i=> (
+              <View key={i} style={{ width: 280, marginRight: 12 }}>
+                <Card title={`Perto ${i}`} subtitle="A 5 min" image={`https://picsum.photos/seed/near${i}/600/420`} />
+              </View>
+            ))}
+          </ScrollView>
+        </Section>
+
+        <Section title="Sugestões da BEL">
+          <View style={{ backgroundColor: WHITE, borderRadius: 16, borderWidth: 1, borderColor: '#EAECF0', padding: 14 }}>
+            <Text style={{ color: MUTED }}>BEL</Text>
+            <Text style={{ marginTop: 4, color: '#0F172A', fontSize: 16 }}>{t('belWelcome')}</Text>
+          </View>
         </Section>
       </ScrollView>
     </SafeAreaView>
@@ -137,7 +185,7 @@ function BELScreen(){
   const speak = (text: string) => Speech.speak(text, { language: i18next.language })
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: WHITE }}>
-      <ScrollView contentContainerStyle={{ padding: 16 }}>
+      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 100 }}>
         <Text style={{ fontSize: 24, fontWeight: '900', color: '#0F172A' }}>BEL</Text>
         <Text style={{ color: MUTED, marginTop: 6 }}>Toque e fale. Sugestões serão baseadas no horário e sua localização.</Text>
         <View style={{ marginTop: 16, backgroundColor: WHITE, borderRadius: 16, borderWidth: 1, borderColor: '#E5E7EB', padding: 16 }}>
@@ -146,8 +194,8 @@ function BELScreen(){
             <Text key={s} style={{ marginTop: 8, color: MUTED }}>• {s}</Text>
           ))}
         </View>
-        <TouchableOpacity onPress={()=> speak(t('belWelcome'))} style={{ alignSelf:'center', marginTop: 24, backgroundColor: ORANGE, borderRadius: 999, paddingHorizontal: 24, paddingVertical: 12 }}>
-          <Text style={{ color: WHITE, fontWeight: '800' }}>{t('speakToBEL')}</Text>
+        <TouchableOpacity onPress={()=> speak(t('belWelcome'))} style={{ position: 'absolute', right: 20, bottom: 24, backgroundColor: ORANGE, borderRadius: 999, paddingHorizontal: 22, paddingVertical: 16, shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 8, elevation: 5 }}>
+          <Text style={{ color: WHITE, fontWeight: '800' }}>🎤</Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
@@ -212,6 +260,20 @@ function MapaScreen(){
   )
 }
 
+function FavoritesScreen(){
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: WHITE }}>
+      <ScrollView contentContainerStyle={{ padding: 16 }}>
+        <Text style={{ fontSize: 24, fontWeight: '900', color: '#0F172A' }}>Favoritos</Text>
+        <Text style={{ marginTop: 8, color: MUTED }}>Salve locais e roteiros para acessar rapidamente offline.</Text>
+        <View style={{ marginTop: 16, gap: 12 }}>
+          {[1,2].map(i=> <Card key={i} title={`Favorito ${i}`} subtitle="Toque para abrir" image={`https://picsum.photos/seed/fav${i}/640/400`} />)}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  )
+}
+
 function RoteirosScreen(){
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: WHITE }}>
@@ -242,11 +304,11 @@ const Stack = createNativeStackNavigator()
 function Tabs(){
   return (
     <Tab.Navigator screenOptions={{ headerShown: false, tabBarActiveTintColor: ORANGE }}>
-      <Tab.Screen name="Início" component={HomeScreen} />
+      <Tab.Screen name="Explorar" component={HomeScreen} />
+      <Tab.Screen name="Mapa" component={MapaScreen} />
+      <Tab.Screen name="Favoritos" component={FavoritesScreen} />
+      <Tab.Screen name="Perfil" component={PerfilScreen} />
       <Tab.Screen name="BEL" component={BELScreen} />
-      <Tab.Screen name="Comércio" component={ComercioScreen} />
-      <Tab.Screen name="Cultura" component={CulturaScreen} />
-      <Tab.Screen name="Praias" component={PraiasScreen} />
     </Tab.Navigator>
   )
 }
