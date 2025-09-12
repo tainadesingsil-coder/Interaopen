@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+import { } from 'framer-motion'
 import { useEffect } from 'react'
 import { Cpu, Bot, Workflow, Briefcase, Shield, Rocket, CheckCircle2, ArrowRight } from 'lucide-react'
 
@@ -36,16 +36,7 @@ export default function CodexionLanding(){
         />
         <div className="hero-overlay" />
         <Container>
-          <div className="flex items-center justify-center text-center relative z-10 py-10 md:py-16">
-            <motion.img
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              src="https://i.postimg.cc/W3VNYtVX/Design-sem-nome-6.png"
-              alt="Codexion logo"
-              className="hero-logo float-soft"
-            />
-          </div>
+          <div className="relative z-10 py-8 md:py-14" />
         </Container>
       </Section>
 
