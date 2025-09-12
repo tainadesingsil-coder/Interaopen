@@ -1,7 +1,5 @@
-import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { ArrowRight, LineChart, ShieldCheck, TrendingUp, Building2, Lock, CheckCircle2, Building } from 'lucide-react'
-import QRCode from 'qrcode'
 
 const WHATSAPP_LINK = 'https://wa.me/5538999266004?text=Quero%20investir%20em%20uma%20usina%20solar%20com%20a%20Belmont'
 
@@ -220,36 +218,6 @@ function Footer(){
   )
 }
 
-function Premiere(){
-  const [dataUrl, setDataUrl] = useState<string>('')
-  useEffect(()=>{
-    QRCode.toDataURL('https://bel-turismo.pages.dev/', { width: 240, margin: 1, color: { dark: '#000000', light: '#FFFFFF' } })
-      .then(setDataUrl)
-      .catch(()=> setDataUrl(''))
-  },[])
-  return (
-    <section className="py-10 md:py-16" style={{ background: '#FFFFFF' }}>
-      <div className="container-section grid md:grid-cols-2 gap-6 items-center">
-        <div>
-          <h2 className="text-2xl md:text-4xl font-extrabold" style={{ fontFamily: 'Montserrat, system-ui', color: '#0F172A' }}>Premiere</h2>
-          <p className="mt-2" style={{ color: '#475569' }}>Aponte a câmera para o QR Code ou acesse diretamente: bel-turismo.pages.dev</p>
-          <a href="https://bel-turismo.pages.dev/" className="btn-yellow inline-flex mt-4" style={{ background: '#F68E34' }}>
-            Abrir bel-turismo.pages.dev
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </a>
-        </div>
-        <div className="justify-self-center">
-          {dataUrl ? (
-            <img src={dataUrl} alt="QR bel-turismo.pages.dev" style={{ width: 220, height: 220 }} />
-          ) : (
-            <div style={{ width: 220, height: 220, background: '#F4F4F4', borderRadius: 16 }} />
-          )}
-        </div>
-      </div>
-    </section>
-  )
-}
-
 export default function BelmocLanding(){
   return (
     <div className="min-h-screen flex flex-col">
@@ -261,7 +229,6 @@ export default function BelmocLanding(){
         <Numeros/>
         <Educativa/>
         <Exclusividade/>
-        <Premiere/>
         <FAQ/>
       </main>
       <Footer/>
