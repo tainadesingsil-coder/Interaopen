@@ -38,7 +38,7 @@ export default function CodexionLanding(){
           <div className="mt-6 grid md:grid-cols-4 gap-4 md:gap-6">
             {[{icon:Briefcase,t:'Desenvolvimento de sistemas',d:'Web, mobile e APIs performáticas.'},
               {icon:Bot,t:'Inteligência Artificial',d:'Chatbots, visão computacional e automações.'},
-              {icon:Workflow,t:'Automação',d:'Integrações e orquestração de processos.'},
+              {icon:Workflow,t:'Social Media',d:'Cuidamos das suas mídias com automações integradas ao seu site: conteúdo, captação e funis 24/7.'},
               {icon:Cpu,t:'Marketing IA',d:'Uma agência de IA orquestrando funil, mídia e CRM para vender mais.'}].map(({icon:Icon,t,d})=> (
               <div key={t} className="card-dark">
                 <Icon className="h-5 w-5 text-accent neon-icon" />
