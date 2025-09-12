@@ -1,14 +1,52 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { NavigationContainer } from '@react-navigation/native'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { View, Text, ScrollView, TouchableOpacity, Image, StyleSheet } from 'react-native'
+import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native'
 import Constants from 'expo-constants'
+import * as Localization from 'expo-localization'
+import * as Speech from 'expo-speech'
+import * as SQLite from 'expo-sqlite'
+import i18next from 'i18next'
+import { initReactI18next, useTranslation } from 'react-i18next'
 
 const ORANGE = '#F68E34'
 const WHITE = '#FFFFFF'
 const MUTED = '#64748B'
+
+// i18n setup (PT/EN)
+i18next.use(initReactI18next).init({
+  compatibilityJSON: 'v3',
+  lng: Localization.getLocales()[0]?.languageCode === 'pt' ? 'pt' : 'en',
+  fallbackLng: 'en',
+  resources: {
+    en: { translation: {
+      appName: 'Bel Turismo',
+      belWelcome: 'Welcome to Belmonte 🌞 What do you want to explore today?',
+      speakToBEL: 'Talk to BEL',
+      suggestions: 'Suggestions',
+    }},
+    pt: { translation: {
+      appName: 'Bel Turismo',
+      belWelcome: 'Bem-vindo a Belmonte 🌞 Quer descobrir praias, cultura ou comércio local hoje?',
+      speakToBEL: 'Falar com a BEL',
+      suggestions: 'Sugestões',
+    }}
+  }
+})
+
+// SQLite placeholder
+type DB = SQLite.SQLiteDatabase
+let db: DB | null = null
+function useDb(){
+  useEffect(()=>{
+    db = SQLite.openDatabase('bel-turismo.db')
+    db.transaction(tx=>{
+      tx.executeSql('CREATE TABLE IF NOT EXISTS favorites (id TEXT PRIMARY KEY, type TEXT, title TEXT);')
+    })
+  },[])
+}
 
 function Section({ title, children }: { title: string; children?: React.ReactNode }){
   return (
@@ -57,14 +95,16 @@ function QuickButton({ label }: { label: string }){
 }
 
 function HomeScreen(){
+  useDb()
+  const { t } = useTranslation()
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: WHITE }}>
       <ScrollView contentContainerStyle={{ padding: 16, paddingTop: 12 }}>
-        <Text style={{ fontSize: 28, fontWeight: '900', color: '#0F172A' }}>Bel Turismo</Text>
+        <Text style={{ fontSize: 28, fontWeight: '900', color: '#0F172A' }}>{t('appName')}</Text>
         <View style={{ marginTop: 8, backgroundColor: WHITE, borderRadius: 16, borderWidth: 1, borderColor: '#E5E7EB', padding: 14 }}>
           <Text style={{ color: MUTED }}>BEL</Text>
           <Text style={{ marginTop: 4, color: '#0F172A', fontSize: 16 }}>
-            Bem-vindo a Belmonte 🌞 Quer descobrir praias, cultura ou comércio local hoje?
+            {t('belWelcome')}
           </Text>
           <View style={{ flexDirection: 'row', marginTop: 12 }}>
             {['Comércio','Cultura','Praias','Roteiros','Mapa'].map(l=> <Chip key={l} label={l} />)}
@@ -86,19 +126,21 @@ function HomeScreen(){
 }
 
 function BELScreen(){
+  const { t } = useTranslation()
+  const speak = (text: string) => Speech.speak(text, { language: i18next.language })
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: WHITE }}>
       <ScrollView contentContainerStyle={{ padding: 16 }}>
         <Text style={{ fontSize: 24, fontWeight: '900', color: '#0F172A' }}>BEL</Text>
         <Text style={{ color: MUTED, marginTop: 6 }}>Toque e fale. Sugestões serão baseadas no horário e sua localização.</Text>
         <View style={{ marginTop: 16, backgroundColor: WHITE, borderRadius: 16, borderWidth: 1, borderColor: '#E5E7EB', padding: 16 }}>
-          <Text style={{ color: '#0F172A', fontWeight: '700' }}>Sugestões</Text>
+          <Text style={{ color: '#0F172A', fontWeight: '700' }}>{t('suggestions')}</Text>
           {['Praias tranquilas agora','Roteiro histórico de 1 dia','Mercados artesanais por perto'].map(s=> (
             <Text key={s} style={{ marginTop: 8, color: MUTED }}>• {s}</Text>
           ))}
         </View>
-        <TouchableOpacity style={{ alignSelf:'center', marginTop: 24, backgroundColor: ORANGE, borderRadius: 999, paddingHorizontal: 24, paddingVertical: 12 }}>
-          <Text style={{ color: WHITE, fontWeight: '800' }}>Falar com a BEL</Text>
+        <TouchableOpacity onPress={()=> speak(t('belWelcome'))} style={{ alignSelf:'center', marginTop: 24, backgroundColor: ORANGE, borderRadius: 999, paddingHorizontal: 24, paddingVertical: 12 }}>
+          <Text style={{ color: WHITE, fontWeight: '800' }}>{t('speakToBEL')}</Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
