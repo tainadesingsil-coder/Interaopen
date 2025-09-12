@@ -48,21 +48,28 @@ export default function CodexionLanding(){
       <Section>
         <Container>
           <h2 className="section-title">Benefícios</h2>
-          <div className="mt-6 grid gap-4 md:gap-5">
-            {[{icon:Rocket,t:'Agilidade',d:'Entrega contínua, ciclos curtos e foco em performance.'},
-              {icon:Shield,t:'Segurança',d:'Arquitetura segura, auditoria e observabilidade ponta a ponta.'},
-              {icon:CheckCircle2,t:'Crescimento',d:'Soluções que escalam com o negócio e geram resultados.'}].map(({icon:Icon,t,d})=> (
-              <div key={t} className="benefit-panel">
-                <div className="benefit-left">
-                  <div className="benefit-accent" />
-                  <div className="icon-ring"><Icon className="h-5 w-5" /></div>
-                </div>
-                <div className="benefit-right">
-                  <p className="benefit-title">{t}</p>
-                  <p className="benefit-desc">{d}</p>
-                </div>
+          <div className="mt-6 grid md:grid-cols-2 gap-5 items-start">
+            <div>
+              <div className="card-dark overflow-hidden">
+                <img src="https://i.postimg.cc/25B268Pd/Design-sem-nome-3-1.png" alt="Benefícios Codexion" className="w-full h-auto object-cover" />
               </div>
-            ))}
+            </div>
+            <div className="grid gap-4 md:gap-5">
+              {[{icon:Rocket,t:'Agilidade',d:'Entrega contínua, ciclos curtos e foco em performance.'},
+                {icon:Shield,t:'Segurança',d:'Arquitetura segura, auditoria e observabilidade ponta a ponta.'},
+                {icon:CheckCircle2,t:'Crescimento',d:'Soluções que escalam com o negócio e geram resultados.'}].map(({icon:Icon,t,d})=> (
+                <div key={t} className="benefit-panel">
+                  <div className="benefit-left">
+                    <div className="benefit-accent" />
+                    <div className="icon-ring"><Icon className="h-5 w-5" /></div>
+                  </div>
+                  <div className="benefit-right">
+                    <p className="benefit-title">{t}</p>
+                    <p className="benefit-desc">{d}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </Container>
       </Section>
