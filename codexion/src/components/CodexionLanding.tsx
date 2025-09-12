@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { useEffect } from 'react'
 import { Cpu, Bot, Workflow, Briefcase, Shield, Rocket, CheckCircle2, ArrowRight } from 'lucide-react'
 
 const CTA_LINK = 'https://wa.me/5538999266004?text=Quero%20um%20or%C3%A7amento%20com%20a%20CodexionTech'
@@ -12,8 +13,21 @@ function Container({ children }: { children: React.ReactNode }){
 }
 
 export default function CodexionLanding(){
+  useEffect(()=>{
+    const onScroll = () => {
+      const doc = document.documentElement
+      const total = doc.scrollHeight - window.innerHeight
+      const ratio = total > 0 ? (window.scrollY / total) : 0
+      const px = ratio * window.innerHeight
+      doc.style.setProperty('--scrollLineY', `${px}px`)
+    }
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  },[])
   return (
     <div className="min-h-screen flex flex-col bg-[#0A0A0B] text-white">
+      <div className="scroll-line" />
       {/* Hero com gradiente forte + lead */}
       <Section className="relative overflow-hidden pt-24 md:pt-32 hero-gradient hero">
         <img
