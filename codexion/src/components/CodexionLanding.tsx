@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Cpu, Bot, Workflow, Briefcase, Shield, Rocket, CheckCircle2, ArrowRight } from 'lucide-react'
+import { Cpu, Bot, Workflow, Briefcase, ArrowRight } from 'lucide-react'
 
 const CTA_LINK = 'https://wa.me/5538999266004?text=Quero%20um%20or%C3%A7amento%20com%20a%20CodexionTech'
 
@@ -75,31 +75,12 @@ export default function CodexionLanding(){
         </Container>
       </Section>
 
-      {/* Benefícios – redesign inspirado (painéis lineares com acento) */}
+      {/* Destaque visual */}
       <Section>
         <Container>
-          <h2 className="section-title">Benefícios</h2>
-          <div className="mt-6 grid md:grid-cols-2 gap-5 items-start">
-            <div>
-              <div className="card-dark overflow-hidden">
-                <img src="https://i.postimg.cc/x8vnv2hB/Preto-e-Roxo-Moderno-Aumente-Suas-Vendas-Marketing-Post-para-Instagram.png" alt="Benefícios Codexion" className="w-full h-auto object-cover" />
-              </div>
-            </div>
-            <div className="grid gap-4 md:gap-5">
-              {[{icon:Rocket,t:'Agilidade',d:'Entrega contínua, ciclos curtos e foco em performance.'},
-                {icon:Shield,t:'Segurança',d:'Arquitetura segura, auditoria e observabilidade ponta a ponta.'},
-                {icon:CheckCircle2,t:'Crescimento',d:'Soluções que escalam com o negócio e geram resultados.'}].map(({icon:Icon,t,d})=> (
-                <div key={t} className="benefit-panel">
-                  <div className="benefit-left">
-                    <div className="benefit-accent" />
-                    <div className="icon-ring"><Icon className="h-5 w-5" /></div>
-                  </div>
-                  <div className="benefit-right">
-                    <p className="benefit-title">{t}</p>
-                    <p className="benefit-desc">{d}</p>
-                  </div>
-                </div>
-              ))}
+          <div className="mt-2">
+            <div className="card-dark overflow-hidden">
+              <img src="https://i.postimg.cc/x8vnv2hB/Preto-e-Roxo-Moderno-Aumente-Suas-Vendas-Marketing-Post-para-Instagram.png" alt="Destaque visual Codexion" className="w-full h-auto object-cover" />
             </div>
           </div>
         </Container>
