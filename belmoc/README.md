@@ -1,4 +1,4 @@
-# Belmoc — Landing Page (React + TypeScript + Vite)
+# Belmont — Landing Page (React + TypeScript + Vite)
 
 Landing page premium e minimalista focada em conversão para venda de usinas solares como investimento patrimonial.
 
@@ -12,7 +12,7 @@ Currently, two official plugins are available:
 - `npm run dev` — desenvolvimento
 - `npm run build` — build de produção
 - `npm run preview` — servidor de prévia
-- `npm run deploy:cf:preview` — deploy no Cloudflare Pages (branch preview) com `--project-name=belmoc`
+- `npm run deploy:cf:preview` — deploy no Cloudflare Pages (branch preview) com `--project-name=belmont`
 - `npm run deploy:cf` — deploy de produção no Cloudflare Pages (branch production)
 
 Pré-requisitos para deploy: setar variável `CLOUDFLARE_API_TOKEN` (escopo Pages Edit) e ter o projeto `belmoc` criado.

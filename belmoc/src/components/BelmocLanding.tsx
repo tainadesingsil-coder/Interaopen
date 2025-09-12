@@ -1,14 +1,14 @@
 import { motion } from 'framer-motion'
 import { ArrowRight, LineChart, ShieldCheck, TrendingUp, Building2, Lock, CheckCircle2, Building } from 'lucide-react'
 
-const WHATSAPP_LINK = 'https://wa.me/5538999266004?text=Quero%20investir%20em%20uma%20usina%20solar%20com%20a%20Belmoc'
+const WHATSAPP_LINK = 'https://wa.me/5538999266004?text=Quero%20investir%20em%20uma%20usina%20solar%20com%20a%20Belmont'
 
 function Header(){
   return (
     <header className="fixed top-0 z-40 w-full backdrop-blur border-b border-white/10" style={{ background: 'rgba(255,255,255,0.85)' }}>
       <div className="container-section flex items-center justify-between py-3">
         <a href="#" className="logo-wrap inline-flex items-center gap-3">
-          <img src="/logo.svg" alt="Belmoc" className="h-[42px] md:h-[52px] w-auto" />
+          <img src="/logo.svg" alt="Belmont" className="h-[42px] md:h-[52px] w-auto" />
         </a>
         {/* CTA removido do header conforme solicitação */}
       </div>
@@ -21,7 +21,7 @@ function Hero(){
     <section className="relative overflow-hidden min-h-[78vh] md:min-h-[88vh] flex items-center" style={{ background: '#FFFFFF' }}>
       <div className="container-section relative z-10 grid md:grid-cols-12 gap-6 md:gap-8 items-center pt-24 md:pt-28 pb-10">
         <div className="md:col-span-7">
-          <img src="/logo.svg" alt="Belmoc" className="h-10 w-auto mb-4 opacity-95" />
+          <img src="/logo.svg" alt="Belmont" className="h-10 w-auto mb-4 opacity-95" />
           <motion.h1 initial={{opacity:0,y:12}} animate={{opacity:1,y:0}} transition={{duration:0.6,ease:'easeOut'}} className="text-3xl md:text-6xl font-extrabold tracking-tight" style={{ fontFamily: 'Montserrat, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu', color: '#0F172A' }}>
             Invista na sua usina solar e colha resultados para sempre.
           </motion.h1>
