@@ -1,8 +1,8 @@
 import './index.css'
-import BelmocLanding from './components/BelmocLanding'
+import CodexionLanding from './components/CodexionLanding'
 
 export default function App(){
   return (
-    <BelmocLanding/>
+    <CodexionLanding/>
   )
 }

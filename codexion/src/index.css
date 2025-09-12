@@ -14,8 +14,8 @@ html { scroll-behavior: smooth; }
 body {
 	@apply font-sans;
 	cursor: auto;
-	background: #FFFFFF;
-	color: #0F172A;
+	background: #0A0A0B;
+	color: #FFFFFF;
 	-webkit-touch-callout: none; /* iOS disable callout */
 }
 
@@ -45,14 +45,14 @@ img { -webkit-user-drag: none; user-drag: none; pointer-events: none; }
 .section-subtitle { @apply text-base md:text-lg text-[var(--muted)]; }
 
 /* Unified CTA buttons (premium gold theme) */
-.btn-yellow {
+.btn-neon, .btn-yellow {
 	@apply inline-flex items-center justify-center rounded-full px-7 py-3 text-sm font-semibold transition transform focus:outline-none focus:ring-2;
-	background: linear-gradient(90deg, #F68E34, #F68E34);
+	background: linear-gradient(90deg, #00C6FF, #7C3AED);
 	color: #FFFFFF;
-	box-shadow: 0 10px 22px rgba(246,142,52,0.26), 0 0 18px rgba(246,142,52,0.28);
+	box-shadow: 0 0 24px rgba(124,58,237,0.45), 0 0 18px rgba(0,198,255,0.35);
 	border: 1px solid rgba(255,255,255,0.12);
 }
-.btn-yellow:hover { transform: translateY(-1px) scale(1.03); box-shadow: 0 16px 32px rgba(246,142,52,0.35), 0 0 24px rgba(246,142,52,0.45); }
+.btn-neon:hover, .btn-yellow:hover { transform: translateY(-1px) scale(1.03); box-shadow: 0 16px 32px rgba(124,58,237,0.55), 0 0 24px rgba(0,198,255,0.45); }
 @keyframes ctaPulse { 0%,100% { filter: drop-shadow(0 0 6px rgba(10,160,255,0.45)); } 50% { filter: drop-shadow(0 0 12px rgba(10,160,255,0.6)); } }
 .btn-pulse { animation: ctaPulse 2.2s ease-in-out infinite; }
 
@@ -73,13 +73,8 @@ img { -webkit-user-drag: none; user-drag: none; pointer-events: none; }
 .input::placeholder { color: rgba(255,255,255,0.6); }
 
 
-.card,
-.card-aggressive {
-	border: 1px solid rgba(255,255,255,0.12);
-	background: rgba(255,255,255,0.04);
-	backdrop-filter: blur(8px);
-	box-shadow: 0 20px 40px rgba(0,0,0,0.25);
-}
+.card-dark { border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); backdrop-filter: blur(8px); box-shadow: 0 20px 40px rgba(0,0,0,0.35); border-radius: 16px; padding: 16px; }
+.text-accent { color: #00C6FF; }
 .card { @apply rounded-2xl p-6 transition transform; }
 .card-aggressive { @apply rounded-2xl p-6 transition transform; }
 .card:hover,
