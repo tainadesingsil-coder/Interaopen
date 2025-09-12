@@ -1,5 +1,5 @@
 import { } from 'framer-motion'
-import { useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Cpu, Bot, Workflow, Briefcase, Shield, Rocket, CheckCircle2, ArrowRight } from 'lucide-react'
 
 const CTA_LINK = 'https://wa.me/5538999266004?text=Quero%20um%20or%C3%A7amento%20com%20a%20CodexionTech'
@@ -13,6 +13,8 @@ function Container({ children }: { children: React.ReactNode }){
 }
 
 export default function CodexionLanding(){
+  const robotRef = useRef<HTMLImageElement|null>(null)
+  const [robotReady,setRobotReady]=useState(false)
   useEffect(()=>{
     const onScroll = () => {
       const doc = document.documentElement
@@ -22,7 +24,12 @@ export default function CodexionLanding(){
     }
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
+    const onAnimEnd = () => setRobotReady(true)
+    robotRef.current?.addEventListener('animationend', onAnimEnd)
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      robotRef.current?.removeEventListener('animationend', onAnimEnd)
+    }
   },[])
   return (
     <div className="min-h-screen flex flex-col bg-[#0A0A0B] text-white">
@@ -41,13 +48,12 @@ export default function CodexionLanding(){
             src="https://i.postimg.cc/W3KhWT93/Future-Tenses-Grammar-Presentation-in-Blue-Orange-Green-Futuristic-Style.png"
             alt="Robô futurista"
             className="hero-robot"
+            ref={robotRef}
           />
           <div className="robot-beam" />
-          <img
-            src="https://i.postimg.cc/7h9Z2z5p/LOGO-EM-PDF-1-pdf-1.png"
-            alt="QR Code"
-            className="robot-qr"
-          />
+          {robotReady && (
+            <a href="#" className="robot-cta btn-neon btn-pulse">Falar com a Codexion</a>
+          )}
         </div>
         <Container>
           <div className="relative z-10 py-8 md:py-14" />
