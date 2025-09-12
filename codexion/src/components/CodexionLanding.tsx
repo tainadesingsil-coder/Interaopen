@@ -52,7 +52,7 @@ export default function CodexionLanding(){
           />
           <div className="robot-beam" />
           {robotReady && (
-            <a href="#" className="robot-cta btn-neon btn-pulse">Falar com a Codexion</a>
+            <a href="https://wa.me/qr/F3UMI4YIMPD4B1" className="robot-cta btn-neon btn-pulse">Falar com a Codexion</a>
           )}
         </div>
         <Container>
