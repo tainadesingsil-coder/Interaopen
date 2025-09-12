@@ -49,6 +49,9 @@ img { -webkit-user-drag: none; user-drag: none; pointer-events: none; }
 .hero { min-height: 56vh }
 .hero-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.25; }
 .hero-overlay { position:absolute; inset:0; background: linear-gradient(180deg, rgba(10,10,11,0.35), rgba(10,10,11,0.75)); }
+.title-anim { position: relative; display: inline-block; }
+.title-anim::after { content: ''; position: absolute; left: 0; right: 0; bottom: -8px; height: 3px; border-radius: 999px; background: linear-gradient(90deg, #00C6FF, #7C3AED); filter: drop-shadow(0 0 12px rgba(0,198,255,0.55)); transform-origin: left; transform: scaleX(0); animation: underlineGrow 1.2s ease-out 0.4s forwards; }
+@keyframes underlineGrow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 
 .lead-card { border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); backdrop-filter: blur(10px); border-radius: 16px; padding: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.35); }
 .lead-input { width: 100%; margin-top: 8px; background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.12); color: #fff; border-radius: 10px; padding: 10px 12px; outline: none; }
