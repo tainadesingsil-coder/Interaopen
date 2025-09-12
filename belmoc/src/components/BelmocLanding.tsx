@@ -223,7 +223,7 @@ function Footer(){
 function Premiere(){
   const [dataUrl, setDataUrl] = useState<string>('')
   useEffect(()=>{
-    QRCode.toDataURL('https://belmoc.pages.dev/', { width: 240, margin: 1, color: { dark: '#000000', light: '#FFFFFF' } })
+    QRCode.toDataURL('https://bel-turismo.pages.dev/', { width: 240, margin: 1, color: { dark: '#000000', light: '#FFFFFF' } })
       .then(setDataUrl)
       .catch(()=> setDataUrl(''))
   },[])
@@ -232,15 +232,15 @@ function Premiere(){
       <div className="container-section grid md:grid-cols-2 gap-6 items-center">
         <div>
           <h2 className="text-2xl md:text-4xl font-extrabold" style={{ fontFamily: 'Montserrat, system-ui', color: '#0F172A' }}>Premiere</h2>
-          <p className="mt-2" style={{ color: '#475569' }}>Aponte a câmera para o QR Code ou acesse diretamente: belmoc.pages.dev</p>
-          <a href="https://belmoc.pages.dev/" className="btn-yellow inline-flex mt-4" style={{ background: '#F68E34' }}>
-            Abrir belmoc.pages.dev
+          <p className="mt-2" style={{ color: '#475569' }}>Aponte a câmera para o QR Code ou acesse diretamente: bel-turismo.pages.dev</p>
+          <a href="https://bel-turismo.pages.dev/" className="btn-yellow inline-flex mt-4" style={{ background: '#F68E34' }}>
+            Abrir bel-turismo.pages.dev
             <ArrowRight className="ml-2 h-4 w-4" />
           </a>
         </div>
         <div className="justify-self-center">
           {dataUrl ? (
-            <img src={dataUrl} alt="QR belmoc.pages.dev" style={{ width: 220, height: 220 }} />
+            <img src={dataUrl} alt="QR bel-turismo.pages.dev" style={{ width: 220, height: 220 }} />
           ) : (
             <div style={{ width: 220, height: 220, background: '#F4F4F4', borderRadius: 16 }} />
           )}
