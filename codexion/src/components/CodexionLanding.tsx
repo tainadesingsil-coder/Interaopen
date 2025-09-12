@@ -15,9 +15,15 @@ export default function CodexionLanding(){
   return (
     <div className="min-h-screen flex flex-col bg-[#0A0A0B] text-white">
       {/* Hero com gradiente forte + lead */}
-      <Section className="pt-24 md:pt-32 hero-gradient">
+      <Section className="relative overflow-hidden pt-24 md:pt-32 hero-gradient hero">
+        <img
+          src="https://i.postimg.cc/MTfTNgfp/Black-and-White-Dark-Minimalist-Project-Management-Platform-Website-UI-Prototype.png"
+          alt="Banner Codexion"
+          className="hero-bg"
+        />
+        <div className="hero-overlay" />
         <Container>
-          <div className="flex items-center justify-center text-center">
+          <div className="flex items-center justify-center text-center relative z-10 py-10 md:py-16">
             <motion.h1 initial={{opacity:0,y:12}} animate={{opacity:1,y:0}} transition={{duration:0.6}} className="text-4xl md:text-7xl font-extrabold tracking-tight">
               Codexion
             </motion.h1>
