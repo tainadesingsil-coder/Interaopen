@@ -60,27 +60,38 @@ export default function CodexionLanding(){
         <Container>
           <a id="solucoes" />
           <h2 className="section-title">Soluções</h2>
-          <div className="mt-6 grid md:grid-cols-4 gap-4 md:gap-6">
-            {[{icon:Briefcase,t:'Desenvolvimento de sistemas',d:'Web, mobile e APIs performáticas.'},
-              {icon:Bot,t:'Inteligência Artificial',d:'Chatbots, visão computacional e automações.'},
-              {icon:Workflow,t:'Social Media',d:'Cuidamos das suas mídias com automações integradas ao seu site: conteúdo, captação e funis 24/7.'},
-              {icon:Cpu,t:'Marketing IA',d:'Uma agência de IA orquestrando funil, mídia e CRM para vender mais.'}].map(({icon:Icon,t,d})=> (
-              <div key={t} className="card-dark">
-                <Icon className="h-5 w-5 text-accent neon-icon" />
-                <p className="mt-3 font-semibold">{t}</p>
-                <p className="mt-1 text-sm text-[#A3A3AD]">{d}</p>
-              </div>
-            ))}
+          <div className="mt-6 max-w-3xl">
+            <p className="text-[#A3A3AD] text-lg leading-relaxed">
+              A CodexionTech entrega soluções digitais ponta a ponta com foco em resultado: do
+              planejamento à execução, combinamos desenvolvimento moderno, inteligência artificial
+              aplicada e automações para acelerar crescimento com segurança e eficiência. Projetamos
+              arquiteturas escaláveis, experiências rápidas e integrações sólidas que se conectam ao
+              seu funil e aos seus processos de negócio.
+            </p>
           </div>
         </Container>
       </Section>
 
-      {/* Destaque visual */}
+      {/* Destaque visual + cards de soluções (transferidos) */}
       <Section>
         <Container>
-          <div className="mt-2">
-            <div className="card-dark overflow-hidden">
-              <img src="https://i.postimg.cc/x8vnv2hB/Preto-e-Roxo-Moderno-Aumente-Suas-Vendas-Marketing-Post-para-Instagram.png" alt="Destaque visual Codexion" className="w-full h-auto object-cover" />
+          <div className="mt-6 grid md:grid-cols-2 gap-5 items-start">
+            <div>
+              <div className="card-dark overflow-hidden">
+                <img src="https://i.postimg.cc/x8vnv2hB/Preto-e-Roxo-Moderno-Aumente-Suas-Vendas-Marketing-Post-para-Instagram.png" alt="Destaque visual Codexion" className="w-full h-auto object-cover" />
+              </div>
+            </div>
+            <div className="grid gap-4 md:gap-5">
+              {[{icon:Briefcase,t:'Desenvolvimento de sistemas',d:'Web, mobile e APIs performáticas.'},
+                {icon:Bot,t:'Inteligência Artificial',d:'Chatbots, visão computacional e automações.'},
+                {icon:Workflow,t:'Social Media',d:'Cuidamos das suas mídias com automações integradas ao seu site: conteúdo, captação e funis 24/7.'},
+                {icon:Cpu,t:'Marketing IA',d:'Uma agência de IA orquestrando funil, mídia e CRM para vender mais.'}].map(({icon:Icon,t,d})=> (
+                <div key={t} className="card-dark">
+                  <Icon className="h-5 w-5 text-accent neon-icon" />
+                  <p className="mt-3 font-semibold">{t}</p>
+                  <p className="mt-1 text-sm text-[#A3A3AD]">{d}</p>
+                </div>
+              ))}
             </div>
           </div>
         </Container>
