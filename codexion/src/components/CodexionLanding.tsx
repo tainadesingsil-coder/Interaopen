@@ -17,7 +17,7 @@ export default function CodexionLanding(){
       {/* Hero com gradiente forte + lead */}
       <Section className="relative overflow-hidden pt-24 md:pt-32 hero-gradient hero">
         <img
-          src="https://i.postimg.cc/MTfTNgfp/Black-and-White-Dark-Minimalist-Project-Management-Platform-Website-UI-Prototype.png"
+          src="https://i.postimg.cc/3rpjDcfh/Black-and-White-Dark-Minimalist-Project-Management-Platform-Website-UI-Prototype-1.png"
           alt="Banner Codexion"
           className="hero-bg"
         />
