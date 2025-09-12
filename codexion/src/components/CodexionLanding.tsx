@@ -15,13 +15,14 @@ export default function CodexionLanding(){
   const robotRef = useRef<HTMLImageElement|null>(null)
   return (
     <div className="min-h-screen flex flex-col bg-[#0A0A0B] text-white">
-      {/* Hero apenas com foto de fundo e robô */}
-      <Section className="relative overflow-hidden pt-24 md:pt-32 hero">
+      {/* Hero com gradiente + overlay e robô */}
+      <Section className="relative overflow-hidden pt-24 md:pt-32 hero-gradient hero">
         <img
           src="https://i.postimg.cc/3rpjDcfh/Black-and-White-Dark-Minimalist-Project-Management-Platform-Website-UI-Prototype-1.png"
           alt="Banner Codexion"
           className="hero-bg"
         />
+        <div className="hero-overlay" />
         {/* Robô animado */}
         <div className="hero-robot-wrap">
           <img
