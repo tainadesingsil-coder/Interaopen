@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef } from 'react'
 import { Cpu, Bot, Workflow, Briefcase, ArrowRight } from 'lucide-react'
+import { FaInstagram, FaWhatsapp } from 'react-icons/fa'
 
 const CTA_LINK = 'https://wa.me/5538999266004?text=Quero%20um%20or%C3%A7amento%20com%20a%20CodexionTech'
 
@@ -13,14 +14,6 @@ function Container({ children }: { children: React.ReactNode }){
 
 export default function CodexionLanding(){
   const robotRef = useRef<HTMLImageElement|null>(null)
-  const [robotReady, setRobotReady] = useState(false)
-  useEffect(() => {
-    const onAnimEnd = () => setRobotReady(true)
-    robotRef.current?.addEventListener('animationend', onAnimEnd)
-    return () => {
-      robotRef.current?.removeEventListener('animationend', onAnimEnd)
-    }
-  }, [])
   return (
     <div className="min-h-screen flex flex-col bg-[#0A0A0B] text-white">
       {/* Hero com gradiente + overlay e robô */}
@@ -39,16 +32,6 @@ export default function CodexionLanding(){
             className="hero-robot"
             ref={robotRef}
           />
-          {robotReady && (
-            <div className="robot-panel">
-              <p className="robot-panel-title">Como posso ajudar?</p>
-              <div className="robot-panel-actions">
-                <a href="https://wa.me/qr/F3UMI4YIMPD4B1" className="btn-neon btn-pulse">Falar no WhatsApp</a>
-                <a href="#solucoes" className="btn-outline-white">Ver serviços</a>
-                <a href="#cases" className="btn-outline-white">Ver cases</a>
-              </div>
-            </div>
-          )}
         </div>
         <Container>
           <div className="relative z-10 py-8 md:py-14" />
@@ -63,16 +46,20 @@ export default function CodexionLanding(){
             <h3 className="text-2xl md:text-4xl font-extrabold tracking-tight">
               <span className="text-gradient-blue">Tecnologia que acelera resultados</span>
             </h3>
-            <p className="mt-3 text-[#C7C7D1] text-base md:text-lg leading-relaxed">
-              Co-criamos produtos e plataformas com <span className="text-white font-semibold">desenvolvimento moderno</span>,
-              <span className="text-white font-semibold"> IA aplicada</span> e <span className="text-white font-semibold">automações</span> para escalar operações com 
-              segurança. Arquiteturas enxutas, UX rápida e integrações que se conectam ao seu CRM, mídia e
-              funil — para <span className="text-white font-semibold">crescer com previsibilidade</span>.
+            <p className="mt-3 text-[#A3A3AD] text-lg leading-relaxed">
+              A CodexionTech entrega soluções digitais ponta a ponta com foco em resultado: do
+              planejamento à execução, combinamos desenvolvimento moderno, inteligência artificial
+              aplicada e automações para acelerar crescimento com segurança e eficiência. Projetamos
+              arquiteturas escaláveis, experiências rápidas e integrações sólidas que se conectam ao
+              seu funil e aos seus processos de negócio.
             </p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {['Web & Mobile','IA aplicada','APIs & Integrações','Dados & Observabilidade'].map(chip => (
-                <span key={chip} className="logo-chip">{chip}</span>
-              ))}
+            <div className="mt-5 flex items-center gap-6">
+              <a href="https://instagram.com" target="_blank" rel="noreferrer" className="social">
+                <FaInstagram size={22} />
+              </a>
+              <a href="https://wa.me/qr/F3UMI4YIMPD4B1" target="_blank" rel="noreferrer" className="social">
+                <FaWhatsapp size={22} />
+              </a>
             </div>
           </div>
         </Container>
