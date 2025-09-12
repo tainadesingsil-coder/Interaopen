@@ -59,14 +59,21 @@ export default function CodexionLanding(){
       <Section>
         <Container>
           <a id="solucoes" />
-          <div className="mt-6 max-w-3xl">
-            <p className="text-[#A3A3AD] text-lg leading-relaxed">
-              A CodexionTech entrega soluções digitais ponta a ponta com foco em resultado: do
-              planejamento à execução, combinamos desenvolvimento moderno, inteligência artificial
-              aplicada e automações para acelerar crescimento com segurança e eficiência. Projetamos
-              arquiteturas escaláveis, experiências rápidas e integrações sólidas que se conectam ao
-              seu funil e aos seus processos de negócio.
+          <div className="mt-4 max-w-4xl">
+            <h3 className="text-2xl md:text-4xl font-extrabold tracking-tight">
+              <span className="text-gradient-blue">Tecnologia que acelera resultados</span>
+            </h3>
+            <p className="mt-3 text-[#C7C7D1] text-base md:text-lg leading-relaxed">
+              Co-criamos produtos e plataformas com <span className="text-white font-semibold">desenvolvimento moderno</span>,
+              <span className="text-white font-semibold"> IA aplicada</span> e <span className="text-white font-semibold">automações</span> para escalar operações com 
+              segurança. Arquiteturas enxutas, UX rápida e integrações que se conectam ao seu CRM, mídia e
+              funil — para <span className="text-white font-semibold">crescer com previsibilidade</span>.
             </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {['Web & Mobile','IA aplicada','APIs & Integrações','Dados & Observabilidade'].map(chip => (
+                <span key={chip} className="logo-chip">{chip}</span>
+              ))}
+            </div>
           </div>
         </Container>
       </Section>
