@@ -44,18 +44,23 @@ export default function CodexionLanding(){
         </Container>
       </Section>
 
-      {/* Benefícios */}
+      {/* Benefícios – redesign inspirado (painéis lineares com acento) */}
       <Section>
         <Container>
           <h2 className="section-title">Benefícios</h2>
-          <div className="mt-6 grid md:grid-cols-3 gap-4 md:gap-6">
-            {[{icon:Rocket,t:'Agilidade',d:'Entrega contínua com qualidade.'},
-              {icon:Shield,t:'Segurança',d:'Boas práticas, auditoria e observabilidade.'},
-              {icon:CheckCircle2,t:'Crescimento',d:'Produtos que escalam com o seu negócio.'}].map(({icon:Icon,t,d})=> (
-              <div key={t} className="card-dark">
-                <Icon className="h-5 w-5 text-accent" />
-                <p className="mt-3 font-semibold">{t}</p>
-                <p className="mt-1 text-sm text-[#A3A3AD]">{d}</p>
+          <div className="mt-6 grid gap-4 md:gap-5">
+            {[{icon:Rocket,t:'Agilidade',d:'Entrega contínua, ciclos curtos e foco em performance.'},
+              {icon:Shield,t:'Segurança',d:'Arquitetura segura, auditoria e observabilidade ponta a ponta.'},
+              {icon:CheckCircle2,t:'Crescimento',d:'Soluções que escalam com o negócio e geram resultados.'}].map(({icon:Icon,t,d})=> (
+              <div key={t} className="benefit-panel">
+                <div className="benefit-left">
+                  <div className="benefit-accent" />
+                  <div className="icon-ring"><Icon className="h-5 w-5" /></div>
+                </div>
+                <div className="benefit-right">
+                  <p className="benefit-title">{t}</p>
+                  <p className="benefit-desc">{d}</p>
+                </div>
               </div>
             ))}
           </div>
