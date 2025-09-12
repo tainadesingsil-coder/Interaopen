@@ -20,7 +20,7 @@ export default function CodexionLanding(){
           <div className="grid md:grid-cols-2 gap-6 items-center">
             <div>
               <motion.h1 initial={{opacity:0,y:12}} animate={{opacity:1,y:0}} transition={{duration:0.6}} className="text-3xl md:text-6xl font-extrabold tracking-tight">
-                CodexionTech: tecnologia que acelera resultados.
+                Codexion
               </motion.h1>
               <motion.p initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} transition={{delay:0.1,duration:0.6}} className="mt-4 text-base md:text-xl text-[#C7C7D1] max-w-2xl">
                 Desenvolvimento, IA e automação para escalar seu negócio com segurança e velocidade.
