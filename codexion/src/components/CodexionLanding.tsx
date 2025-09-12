@@ -75,7 +75,7 @@ export default function CodexionLanding(){
           <div className="mt-6 grid md:grid-cols-2 gap-5 items-start">
             <div>
               <div className="card-dark overflow-hidden">
-                <img src="https://i.postimg.cc/25B268Pd/Design-sem-nome-3-1.png" alt="Benefícios Codexion" className="w-full h-auto object-cover" />
+                <img src="https://i.postimg.cc/x8vnv2hB/Preto-e-Roxo-Moderno-Aumente-Suas-Vendas-Marketing-Post-para-Instagram.png" alt="Benefícios Codexion" className="w-full h-auto object-cover" />
               </div>
             </div>
             <div className="grid gap-4 md:gap-5">
