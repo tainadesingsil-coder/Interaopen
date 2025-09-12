@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Cpu, Bot, Workflow, Briefcase, Shield, Rocket, CheckCircle2, ArrowRight } from 'lucide-react'
 
 const CTA_LINK = 'https://wa.me/5538999266004?text=Quero%20um%20or%C3%A7amento%20com%20a%20CodexionTech'
@@ -13,6 +13,14 @@ function Container({ children }: { children: React.ReactNode }){
 
 export default function CodexionLanding(){
   const robotRef = useRef<HTMLImageElement|null>(null)
+  const [robotReady, setRobotReady] = useState(false)
+  useEffect(() => {
+    const onAnimEnd = () => setRobotReady(true)
+    robotRef.current?.addEventListener('animationend', onAnimEnd)
+    return () => {
+      robotRef.current?.removeEventListener('animationend', onAnimEnd)
+    }
+  }, [])
   return (
     <div className="min-h-screen flex flex-col bg-[#0A0A0B] text-white">
       {/* Hero com gradiente + overlay e robô */}
@@ -31,6 +39,16 @@ export default function CodexionLanding(){
             className="hero-robot"
             ref={robotRef}
           />
+          {robotReady && (
+            <div className="robot-panel">
+              <p className="robot-panel-title">Como posso ajudar?</p>
+              <div className="robot-panel-actions">
+                <a href="https://wa.me/qr/F3UMI4YIMPD4B1" className="btn-neon btn-pulse">Falar no WhatsApp</a>
+                <a href="#solucoes" className="btn-outline-white">Ver soluções</a>
+                <a href="#cases" className="btn-outline-white">Ver cases</a>
+              </div>
+            </div>
+          )}
         </div>
         <Container>
           <div className="relative z-10 py-8 md:py-14" />
@@ -40,6 +58,7 @@ export default function CodexionLanding(){
       {/* Soluções */}
       <Section>
         <Container>
+          <a id="solucoes" />
           <h2 className="section-title">Soluções</h2>
           <div className="mt-6 grid md:grid-cols-4 gap-4 md:gap-6">
             {[{icon:Briefcase,t:'Desenvolvimento de sistemas',d:'Web, mobile e APIs performáticas.'},
@@ -104,6 +123,7 @@ export default function CodexionLanding(){
       {/* Casos de Sucesso */}
       <Section>
         <Container>
+          <a id="cases" />
           <h2 className="section-title">Casos de Sucesso</h2>
           <div className="mt-6 grid md:grid-cols-3 gap-4 md:gap-6">
             {[1,2,3].map(i=> (
