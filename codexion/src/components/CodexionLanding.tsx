@@ -46,13 +46,6 @@ export default function CodexionLanding(){
             <h3 className="text-2xl md:text-4xl font-extrabold tracking-tight">
               <span className="text-gradient-blue">Tecnologia que acelera resultados</span>
             </h3>
-            <p className="mt-3 text-[#A3A3AD] text-lg leading-relaxed">
-              A CodexionTech entrega soluções digitais ponta a ponta com foco em resultado: do
-              planejamento à execução, combinamos desenvolvimento moderno, inteligência artificial
-              aplicada e automações para acelerar crescimento com segurança e eficiência. Projetamos
-              arquiteturas escaláveis, experiências rápidas e integrações sólidas que se conectam ao
-              seu funil e aos seus processos de negócio.
-            </p>
             <div className="mt-5 flex items-center gap-6">
               <a href="https://instagram.com" target="_blank" rel="noreferrer" className="social">
                 <FaInstagram size={22} />
