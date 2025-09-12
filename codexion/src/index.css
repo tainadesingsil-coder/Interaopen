@@ -19,7 +19,7 @@ body {
 	-webkit-touch-callout: none; /* iOS disable callout */
 }
 /* scroll line */
-.scroll-line { position: fixed; top: var(--scrollLineY, 0px); left: 0; right: 0; height: 2px; pointer-events: none; z-index: 50; background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.25), rgba(255,255,255,0)); filter: blur(0.4px); }
+.scroll-line { position: fixed; top: 0; left: 0; height: 2px; width: var(--scrollW, 0%); pointer-events: none; z-index: 50; background: linear-gradient(90deg, #00C6FF, #7C3AED); box-shadow: 0 0 12px rgba(0,198,255,0.65); }
 
 img { -webkit-user-drag: none; user-drag: none; pointer-events: none; }
 

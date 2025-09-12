@@ -18,8 +18,7 @@ export default function CodexionLanding(){
       const doc = document.documentElement
       const total = doc.scrollHeight - window.innerHeight
       const ratio = total > 0 ? (window.scrollY / total) : 0
-      const px = ratio * window.innerHeight
-      doc.style.setProperty('--scrollLineY', `${px}px`)
+      doc.style.setProperty('--scrollW', `${(ratio*100).toFixed(2)}%`)
     }
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
