@@ -44,7 +44,7 @@ export default function CodexionLanding(){
               <p className="robot-panel-title">Como posso ajudar?</p>
               <div className="robot-panel-actions">
                 <a href="https://wa.me/qr/F3UMI4YIMPD4B1" className="btn-neon btn-pulse">Falar no WhatsApp</a>
-                <a href="#solucoes" className="btn-outline-white">Ver soluções</a>
+                <a href="#solucoes" className="btn-outline-white">Ver serviços</a>
                 <a href="#cases" className="btn-outline-white">Ver cases</a>
               </div>
             </div>
@@ -59,7 +59,6 @@ export default function CodexionLanding(){
       <Section>
         <Container>
           <a id="solucoes" />
-          <h2 className="section-title">Soluções</h2>
           <div className="mt-6 max-w-3xl">
             <p className="text-[#A3A3AD] text-lg leading-relaxed">
               A CodexionTech entrega soluções digitais ponta a ponta com foco em resultado: do
