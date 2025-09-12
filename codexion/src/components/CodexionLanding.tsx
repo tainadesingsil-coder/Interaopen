@@ -15,36 +15,12 @@ export default function CodexionLanding(){
   return (
     <div className="min-h-screen flex flex-col bg-[#0A0A0B] text-white">
       {/* Hero com gradiente forte + lead */}
-      <Section className="pt-24 md:pt-28 hero-gradient">
+      <Section className="pt-24 md:pt-32 hero-gradient">
         <Container>
-          <div className="grid md:grid-cols-2 gap-6 items-center">
-            <div>
-              <motion.h1 initial={{opacity:0,y:12}} animate={{opacity:1,y:0}} transition={{duration:0.6}} className="text-3xl md:text-6xl font-extrabold tracking-tight">
-                Codexion
-              </motion.h1>
-              <motion.p initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} transition={{delay:0.1,duration:0.6}} className="mt-4 text-base md:text-xl text-[#C7C7D1] max-w-2xl">
-                Desenvolvimento, IA e automação para escalar seu negócio com segurança e velocidade.
-              </motion.p>
-              <motion.div initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} transition={{delay:0.18,duration:0.6}} className="mt-6 hidden md:block">
-                <a href={CTA_LINK} className="btn-neon">
-                  Solicite seu orçamento <ArrowRight className="ml-2 h-4 w-4" />
-                </a>
-              </motion.div>
-            </div>
-            <div>
-              <div className="lead-card">
-                <p className="text-sm text-[#9CA3AF]">Solicite uma avaliação gratuita</p>
-                <form onSubmit={(e)=>{e.preventDefault(); const n=(document.getElementById('cx-nome') as HTMLInputElement)?.value||''; const e1=(document.getElementById('cx-email') as HTMLInputElement)?.value||''; const c=(document.getElementById('cx-empresa') as HTMLInputElement)?.value||''; const msg=`Olá! Quero um orçamento. Nome: ${n} | Email: ${e1} | Empresa: ${c}`; window.location.href=CTA_LINK+`&text=`+encodeURIComponent(msg);}}>
-                  <input id="cx-nome" className="lead-input" placeholder="Nome" />
-                  <input id="cx-email" className="lead-input" placeholder="E-mail" />
-                  <input id="cx-empresa" className="lead-input" placeholder="Empresa" />
-                  <button className="btn-neon w-full mt-2" type="submit">Receber proposta</button>
-                </form>
-              </div>
-            </div>
-          </div>
-          <div className="logo-row">
-            {['Azure','AWS','Google Cloud','OpenAI','Stripe'].map(x=> <div key={x} className="logo-chip">{x}</div>)}
+          <div className="flex items-center justify-center text-center">
+            <motion.h1 initial={{opacity:0,y:12}} animate={{opacity:1,y:0}} transition={{duration:0.6}} className="text-4xl md:text-7xl font-extrabold tracking-tight">
+              Codexion
+            </motion.h1>
           </div>
         </Container>
       </Section>
@@ -134,11 +110,6 @@ export default function CodexionLanding(){
           <p className="text-center text-xs md:text-sm text-[#8B8B96]">© 2025 CodexionTech — Todos os direitos reservados | 🔒 Site seguro | Desenvolvido por CodexionTech</p>
         </Container>
       </footer>
-
-      {/* CTA fixo mobile */}
-      <div className="sticky-cta">
-        <a href={CTA_LINK} className="btn-neon w-full inline-flex items-center justify-center">Solicite seu orçamento</a>
-      </div>
     </div>
   )
 }
