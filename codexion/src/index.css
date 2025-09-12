@@ -69,12 +69,12 @@ img { -webkit-user-drag: none; user-drag: none; pointer-events: none; }
 .benefit-desc { color:#A3A3AD; margin-top: 4px; font-size: 14px }
 .section-subtitle { @apply text-base md:text-lg text-[var(--muted)]; }
 
-/* Unified CTA buttons (premium gold theme) */
+/* Unified CTA buttons */
 .btn-neon, .btn-yellow {
 	@apply inline-flex items-center justify-center rounded-full px-7 py-3 text-sm font-semibold transition transform focus:outline-none focus:ring-2;
 	background: linear-gradient(90deg, #00C6FF, #7C3AED);
 	color: #FFFFFF;
-	box-shadow: 0 0 24px rgba(124,58,237,0.45), 0 0 18px rgba(0,198,255,0.35);
+	box-shadow: 0 0 24px rgba(124,58,237,0.45), 0 0 18px rgba(0,198,255,0.35), inset 0 0 12px rgba(0,198,255,0.25);
 	border: 1px solid rgba(255,255,255,0.12);
 }
 .btn-neon:hover, .btn-yellow:hover { transform: translateY(-1px) scale(1.03); box-shadow: 0 16px 32px rgba(124,58,237,0.55), 0 0 24px rgba(0,198,255,0.45); }
@@ -97,9 +97,11 @@ img { -webkit-user-drag: none; user-drag: none; pointer-events: none; }
 }
 .input::placeholder { color: rgba(255,255,255,0.6); }
 
-
 .card-dark { border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); backdrop-filter: blur(8px); box-shadow: 0 20px 40px rgba(0,0,0,0.35); border-radius: 16px; padding: 16px; }
 .text-accent { color: #00C6FF; }
+.neon-icon { filter: drop-shadow(0 0 10px rgba(0,198,255,0.65)); }
+.card-dark:hover .neon-icon { filter: drop-shadow(0 0 14px rgba(0,198,255,0.85)); }
+
 .card { @apply rounded-2xl p-6 transition transform; }
 .card-aggressive { @apply rounded-2xl p-6 transition transform; }
 .card:hover,

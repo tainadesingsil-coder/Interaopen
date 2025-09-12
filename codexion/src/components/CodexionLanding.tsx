@@ -33,9 +33,9 @@ export default function CodexionLanding(){
             {[{icon:Briefcase,t:'Desenvolvimento de sistemas',d:'Web, mobile e APIs performáticas.'},
               {icon:Bot,t:'Inteligência Artificial',d:'Chatbots, visão computacional e automações.'},
               {icon:Workflow,t:'Automação',d:'Integrações e orquestração de processos.'},
-              {icon:Cpu,t:'Consultoria',d:'Arquitetura, cloud e estratégia digital.'}].map(({icon:Icon,t,d})=> (
+              {icon:Cpu,t:'Marketing IA',d:'Uma agência de IA orquestrando funil, mídia e CRM para vender mais.'}].map(({icon:Icon,t,d})=> (
               <div key={t} className="card-dark">
-                <Icon className="h-5 w-5 text-accent" />
+                <Icon className="h-5 w-5 text-accent neon-icon" />
                 <p className="mt-3 font-semibold">{t}</p>
                 <p className="mt-1 text-sm text-[#A3A3AD]">{d}</p>
               </div>
