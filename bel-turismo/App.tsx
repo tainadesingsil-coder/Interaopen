@@ -3,11 +3,16 @@ import { NavigationContainer } from '@react-navigation/native'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native'
+import { View, Text, ScrollView, TouchableOpacity, Image, Platform } from 'react-native'
 import Constants from 'expo-constants'
 import * as Localization from 'expo-localization'
 import * as Speech from 'expo-speech'
-import * as SQLite from 'expo-sqlite'
+// SQLite: evitar import web (wasm). Carrega só em nativo
+let SQLite: any = null as any
+if (Platform.OS !== 'web') {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  SQLite = require('expo-sqlite')
+}
 import i18next from 'i18next'
 import { initReactI18next, useTranslation } from 'react-i18next'
 
@@ -41,10 +46,12 @@ type DB = SQLite.SQLiteDatabase
 let db: DB | null = null
 function useDb(){
   useEffect(()=>{
-    db = SQLite.openDatabase('bel-turismo.db')
-    db.transaction(tx=>{
-      tx.executeSql('CREATE TABLE IF NOT EXISTS favorites (id TEXT PRIMARY KEY, type TEXT, title TEXT);')
-    })
+    if (Platform.OS !== 'web' && SQLite) {
+      db = SQLite.openDatabase('bel-turismo.db')
+      db.transaction((tx: any)=>{
+        tx.executeSql('CREATE TABLE IF NOT EXISTS favorites (id TEXT PRIMARY KEY, type TEXT, title TEXT);')
+      })
+    }
   },[])
 }
 
