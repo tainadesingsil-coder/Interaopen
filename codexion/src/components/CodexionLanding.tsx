@@ -35,6 +35,12 @@ export default function CodexionLanding(){
           className="hero-bg"
         />
         <div className="hero-overlay" />
+        {/* Robô animado */}
+        <img
+          src="https://i.postimg.cc/W3KhWT93/Future-Tenses-Grammar-Presentation-in-Blue-Orange-Green-Futuristic-Style.png"
+          alt="Robô futurista"
+          className="hero-robot"
+        />
         <Container>
           <div className="relative z-10 py-8 md:py-14" />
         </Container>
