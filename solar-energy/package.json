@@ -8,8 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "deploy:cf": "wrangler pages deploy dist --project-name=solarenergy-5h5 --branch=production",
-    "deploy:cf:preview": "wrangler pages deploy dist --project-name=solarenergy-5h5 --branch=preview"
+    "deploy:cf": "wrangler pages deploy dist --project-name=interaopen --branch=production",
+    "deploy:cf:preview": "wrangler pages deploy dist --project-name=interaopen --branch=preview"
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.8",
