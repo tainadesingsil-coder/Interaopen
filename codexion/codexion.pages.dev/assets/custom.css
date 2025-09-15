@@ -1,0 +1,3 @@
+.banner{position:relative;min-height:60vh;overflow:hidden}
+@media (min-width:768px){.banner{min-height:82vh}}
+.banner .hero-bg{opacity:.35}
