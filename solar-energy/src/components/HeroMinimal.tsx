@@ -21,7 +21,7 @@ export default function HeroMinimal({ imageUrls }: HeroMinimalProps) {
     >
       {/* Background: imagem única fornecida */}
       {backgroundImage && (
-        <div className='absolute inset-0'>
+        <div className='absolute inset-0 hidden sm:block'>
           <motion.img
             key={backgroundImage}
             src={backgroundImage}
