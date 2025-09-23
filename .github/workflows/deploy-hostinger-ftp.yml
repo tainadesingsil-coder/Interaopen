@@ -37,6 +37,7 @@ jobs:
           server-dir: public_html/
           dry-run: false
           log-level: minimal
+          dangerous-clean-slate: true
 
       - name: Deploy via FTPS to Hostinger (domain docroot)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
@@ -50,3 +51,4 @@ jobs:
           server-dir: domains/solarenergyminas.com/public_html/
           dry-run: false
           log-level: minimal
+          dangerous-clean-slate: true
