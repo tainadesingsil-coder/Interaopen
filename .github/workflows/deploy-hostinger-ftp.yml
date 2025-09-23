@@ -25,7 +25,7 @@ jobs:
         run: npm run build
         working-directory: solar-energy
 
-      - name: Deploy via FTPS to Hostinger
+      - name: Deploy via FTPS to Hostinger (public_html)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
@@ -35,5 +35,18 @@ jobs:
           port: 21
           local-dir: solar-energy/dist/
           server-dir: public_html/
+          dry-run: false
+          log-level: minimal
+
+      - name: Deploy via FTPS to Hostinger (domain docroot)
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: solar-energy/dist/
+          server-dir: domains/solarenergyminas.com/public_html/
           dry-run: false
           log-level: minimal
