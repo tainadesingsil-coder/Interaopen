@@ -377,3 +377,30 @@ html, body { background: linear-gradient(180deg, #2C4D7B, #1A1A1A) !important; }
 .card, .contact-form, .gallery-item, .testimonial { background: rgba(255,255,255,0.06) !important; border: 1px solid rgba(255,255,255,0.14) !important; color: #ffffff !important; }
 .footer-links a, .footer-contact a { color: #4C9ED9 !important; }
 
+/* Spacing and static sizing overrides */
+:root {
+  --section-desktop: 64px;
+  --section-mobile: 48px;
+}
+.section { padding: var(--section-desktop) 0 !important; }
+@media (max-width: 640px) { .section { padding: var(--section-mobile) 0 !important; } }
+
+/* Lock hero text sizes to avoid dynamic resizing */
+.display { font-size: 44px !important; line-height: 1.14 !important; }
+.lead { font-size: 18px !important; }
+@media (max-width: 640px) {
+  .display { font-size: 32px !important; }
+  .lead { font-size: 16px !important; }
+}
+
+/* Disable interactions that can shift layout */
+.btn:active { transform: none !important; }
+.card:hover, .gallery-item:hover { transform: none !important; }
+@media (hover: none) {
+  * { transition: none !important; }
+  .card:hover, .gallery-item:hover, .btn:hover { transform: none !important; box-shadow: inherit !important; border-color: inherit !important; }
+}
+
+/* Consistent container padding on mobile */
+@media (max-width: 640px) { .container { padding: 0 16px !important; } }
+
