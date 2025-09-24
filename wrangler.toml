@@ -1,0 +1,7 @@
+name = "portal-velho-chico"
+pages_build_output_dir = "public"
+
+[pages]
+project_name = "portal-velho-chico"
+build_output_dir = "public"
+
