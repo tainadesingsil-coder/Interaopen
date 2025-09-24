@@ -181,6 +181,28 @@
       dock.position.set(0.7, 0.2, 0.0);
       house.add(dock);
 
+      // Fisherman (minimalist mannequin) on dock
+      const fisherman = new THREE.Group();
+      const body = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.1, 0.45, 12), new THREE.MeshStandardMaterial({ color: 0xbcbcbc }));
+      body.position.y = 0.45/2;
+      const head = new THREE.Mesh(new THREE.SphereGeometry(0.09, 16, 12), new THREE.MeshStandardMaterial({ color: 0xe6e6e6 }));
+      head.position.y = 0.45 + 0.12;
+      // Arms: left idle, right throwing (as a group with pivot at shoulder)
+      const leftArm = new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.03,0.32,8), new THREE.MeshStandardMaterial({ color: 0xbcbcbc }));
+      leftArm.position.set(-0.12, 0.35, 0);
+      leftArm.rotation.z = 0.6;
+      const rightArm = new THREE.Group();
+      rightArm.position.set(0.12, 0.35, 0); // shoulder pivot
+      const rightArmBone = new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.03,0.34,8), new THREE.MeshStandardMaterial({ color: 0xbcbcbc }));
+      rightArmBone.position.y = -0.17;
+      const rightHandRef = new THREE.Object3D();
+      rightHandRef.position.y = -0.34;
+      rightArm.add(rightArmBone);
+      rightArm.add(rightHandRef);
+      fisherman.add(body, head, leftArm, rightArm);
+      fisherman.position.set(0.9, 0.26, 0.0);
+      house.add(fisherman);
+
       // Place house near a bank point
       (function placeHouseAt(t, sideOffset){
         const c = curve.getPoint(t);
@@ -223,8 +245,31 @@
           const sideOffset = (p.clone().sub(bestC).dot(bestSide) > 0 ? 1 : -1) * 1.4;
           const pos = bestC.clone().addScaledVector(bestSide, sideOffset);
           house.position.set(pos.x, 0, pos.z);
+          // Also trigger throw on click near house
+          triggerThrow();
         }
       });
+
+      // Fisherman throw animation + net
+      let throwState = 'idle';
+      let throwStart = 0;
+      const nets = [];
+      function spawnNet(origin) {
+        const geo = new THREE.RingGeometry(0.05, 0.2, 24, 1);
+        const mat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.85, wireframe: true });
+        const mesh = new THREE.Mesh(geo, mat);
+        mesh.position.copy(origin);
+        mesh.rotation.x = -Math.PI/2;
+        scene.add(mesh);
+        nets.push({ mesh, start: clock.getElapsedTime(), dur: 1.6, dir: new THREE.Vector3(0.8, 0.6, -1.2).normalize() });
+      }
+      function triggerThrow() {
+        if (throwState !== 'idle') return;
+        throwState = 'windup';
+        throwStart = clock.getElapsedTime();
+      }
+      // Auto throw every few seconds
+      setInterval(triggerThrow, 6000);
 
       const onResize = () => {
         const w = container.clientWidth;
@@ -239,6 +284,51 @@
       const animate = () => {
         requestAnimationFrame(animate);
         waterUniforms.u_time.value = clock.getElapsedTime();
+
+        // Throw state machine
+        if (throwState !== 'idle') {
+          const t = clock.getElapsedTime() - throwStart;
+          if (throwState === 'windup') {
+            // 0-0.4s: arm back
+            const k = Math.min(t / 0.4, 1);
+            rightArm.rotation.z = -0.8 * k; // back
+            if (k >= 1) { throwState = 'throw'; throwStart = clock.getElapsedTime(); }
+          } else if (throwState === 'throw') {
+            // 0-0.5s: swing forward and release
+            const k = Math.min((clock.getElapsedTime() - throwStart) / 0.5, 1);
+            rightArm.rotation.z = -0.8 + (1.2 * k); // forward
+            if (k >= 0.4 && k < 0.45) {
+              // release once
+              const handWorld = new THREE.Vector3();
+              rightHandRef.getWorldPosition(handWorld);
+              spawnNet(handWorld);
+            }
+            if (k >= 1) { throwState = 'recover'; throwStart = clock.getElapsedTime(); }
+          } else if (throwState === 'recover') {
+            // 0-0.6s: settle to neutral
+            const k = Math.min((clock.getElapsedTime() - throwStart) / 0.6, 1);
+            rightArm.rotation.z = 0.4 * (1 - k); // slight forward pose to neutral
+            if (k >= 1) { rightArm.rotation.z = 0; throwState = 'idle'; }
+          }
+        }
+
+        // Update nets
+        for (let i = nets.length - 1; i >= 0; i--) {
+          const n = nets[i];
+          const tt = (clock.getElapsedTime() - n.start) / n.dur;
+          if (tt >= 1) {
+            scene.remove(n.mesh);
+            nets.splice(i, 1);
+            continue;
+          }
+          const arc = (tt * (1 - tt)) * 2.2; // parabolic arc factor
+          n.mesh.position.addScaledVector(n.dir, 0.06); // advance
+          n.mesh.position.y = 0.25 + arc; // height
+          const s = 1 + tt * 2.2; // expand net radius
+          n.mesh.scale.set(s, s, s);
+          n.mesh.material.opacity = 0.85 * (1 - Math.max(0, (tt - 0.6) / 0.4));
+        }
+
         renderer.render(scene, camera);
       };
       animate();
