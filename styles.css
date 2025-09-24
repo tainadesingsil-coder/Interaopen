@@ -125,6 +125,7 @@ a { color: inherit; text-decoration: none; }
 
 /* Hero */
 .hero { position: relative; padding-top: var(--space-20); background: linear-gradient(180deg, #2C4D7B, #1A1A1A); overflow: hidden; }
+.hero.has-bg::before { content: ""; position: absolute; inset: 0; background-image: var(--banner-url); background-size: cover; background-position: center; opacity: .28; filter: saturate(115%) contrast(110%); z-index: 0; }
 .hero.hero-light { background: transparent; }
 .hero.hero-light .display { color: #ffffff; }
 .hero.hero-light .lead { color: #dbeafe; }
@@ -142,6 +143,13 @@ a { color: inherit; text-decoration: none; }
 .hero-3d { position: absolute; inset: 0; z-index: 0; }
 .hero-inner { display: grid; grid-template-columns: 1.15fr 1fr; gap: var(--space-12); align-items: center; }
 .hero-inner, .hero .display, .hero .lead, .hero .actions { position: relative; z-index: 1; }
+.hero-anim { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+.pulse { position: absolute; left: var(--x); top: var(--y); width: 10px; height: 10px; transform: translate(-50%,-50%); border-radius: 999px; background: rgba(255,255,255,0.9); box-shadow: 0 0 0 0 rgba(255,255,255,0.6); animation: pulseAnim 2.8s ease-out infinite; animation-delay: var(--d); }
+@keyframes pulseAnim {
+  0% { box-shadow: 0 0 0 0 rgba(255,255,255,0.6); opacity: 1; }
+  70% { box-shadow: 0 0 0 24px rgba(255,255,255,0); opacity: .75; }
+  100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); opacity: 0; }
+}
 /* Force white text on image background */
 .hero.hero-light.has-bg .display { color: #ffffff; text-shadow: 0 2px 18px rgba(0,0,0,0.45); }
 .hero.hero-light.has-bg .lead { color: #f3f4f6; text-shadow: 0 1px 12px rgba(0,0,0,0.4); }
