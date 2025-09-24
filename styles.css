@@ -19,7 +19,7 @@
   --gold: #CFA34B;
 
   /* Derived tokens */
-  --color-bg: #ffffff;
+  --color-bg: #eaf6ff; /* baby-blue sitewide */
   --color-surface: #ffffff;
   --color-muted: var(--gray-50);
   --color-border: var(--gray-200);
@@ -159,7 +159,7 @@ a { color: inherit; text-decoration: none; }
 /* Glass and gradient buttons */
 .btn-gradient { background: linear-gradient(135deg, var(--green), var(--gold)); color: #0a0a0a; border: none; box-shadow: 0 14px 40px rgba(207,163,75,0.25); }
 .btn-gradient:hover { filter: brightness(1.02); box-shadow: 0 18px 50px rgba(207,163,75,0.35); }
-.glass { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+.glass { background: rgba(255,255,255,0.85); border: 1px solid rgba(0,0,0,0.06); border-radius: 16px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(0,0,0,0.06); }
 .hero-glass { margin-top: 16px; padding: 12px 14px; }
 .hero-glass-row { display: flex; gap: 12px; color: var(--white-soft); font-size: 13px; opacity: 0.9; }
 
