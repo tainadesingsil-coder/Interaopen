@@ -125,7 +125,9 @@ a { color: inherit; text-decoration: none; }
 .hero.hero-light .btn-gradient { color: #0b0b0b; }
 /* Removed hero corner logo */
 .hero.has-bg { background: var(--gray-900); }
-.hero.has-bg::before { content: ""; position: absolute; inset: 0; background-image: var(--banner-url); background-size: cover; background-position: center; opacity: 0.32; filter: none; z-index: 0; }
+.hero.has-bg::before { content: ""; position: absolute; inset: 0; background-image: var(--banner-url); background-size: cover; background-position: center; opacity: 1; filter: saturate(120%) contrast(112%) brightness(1.02); z-index: 0; }
+/* Subtle dark overlay for readability */
+.hero.has-bg::after { content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none; background: linear-gradient(180deg, rgba(0,0,0,0.18), rgba(0,0,0,0.08) 40%, rgba(0,0,0,0.22)); }
 .video-bg::before { opacity: 0.16; }
 /* New: stronger overlay and text contrast on video bg */
 .video-bg::after { content: ""; position: absolute; inset: 0; z-index: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.46), rgba(0,0,0,0.28) 40%, rgba(0,0,0,0.38)); }
@@ -133,12 +135,11 @@ a { color: inherit; text-decoration: none; }
 .hero-3d { position: absolute; inset: 0; z-index: 0; }
 .hero-inner { display: grid; grid-template-columns: 1.15fr 1fr; gap: var(--space-12); align-items: center; }
 .hero-inner, .hero .display, .hero .lead, .hero .actions { position: relative; z-index: 1; }
-/* New: force white text on video background */
-.video-bg .display { color: #ffffff; text-shadow: 0 2px 18px rgba(0,0,0,0.45); }
-.video-bg .lead { color: #e5e7eb; text-shadow: 0 1px 14px rgba(0,0,0,0.4); }
-/* Chips visibility on video */
-.video-bg .glass { background: rgba(255,255,255,0.18); border-color: rgba(255,255,255,0.38); }
-.video-bg .hero-glass-row { color: #ffffff; font-weight: 600; text-shadow: 0 1px 10px rgba(0,0,0,0.45); }
+/* Force white text on image background */
+.hero.hero-light.has-bg .display { color: #ffffff; text-shadow: 0 2px 18px rgba(0,0,0,0.45); }
+.hero.hero-light.has-bg .lead { color: #f3f4f6; text-shadow: 0 1px 12px rgba(0,0,0,0.4); }
+.hero.hero-light.has-bg .glass { background: rgba(255,255,255,0.18); border-color: rgba(255,255,255,0.38); }
+.hero.hero-light.has-bg .hero-glass-row { color: #ffffff; font-weight: 600; }
 .media-card { border-radius: var(--radius); overflow: hidden; background: #fff; border: 1px solid var(--color-border); }
 .shadow { box-shadow: var(--shadow-soft); }
 .media-card img { width: 100%; height: auto; border-radius: 0; }
