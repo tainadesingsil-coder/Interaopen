@@ -461,3 +461,13 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; -webkit-tap-highl
   .nav-social { display: none !important; }
 }
 
+/* Nav social icons sizing to match logo/letters */
+.nav-social { display: inline-flex; align-items: center; gap: 10px; margin-left: 12px; }
+.nav-icon { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.14); color: #ffffff; background: rgba(255,255,255,0.06); vertical-align: middle; }
+.nav-icon svg { width: 11px; height: 11px; }
+@media (max-width: 640px) {
+  .nav-social { gap: 8px; margin-left: 8px; }
+  .nav-icon { width: 16px; height: 16px; }
+  .nav-icon svg { width: 9px; height: 9px; }
+}
+
