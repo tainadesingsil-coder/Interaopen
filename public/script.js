@@ -351,18 +351,7 @@
 
   document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
 
-  // Hero hover accent position (green spotlight)
-  const hero = document.querySelector('.hero.hero-light');
-  if (hero) {
-    const updatePos = (e) => {
-      const r = hero.getBoundingClientRect();
-      const x = ((e.clientX - r.left) / r.width) * 100;
-      const y = ((e.clientY - r.top) / r.height) * 100;
-      hero.style.setProperty('--mx', x + '%');
-      hero.style.setProperty('--my', y + '%');
-    };
-    hero.addEventListener('mousemove', updatePos);
-  }
+  // Removed hero hover accent
 
   // Formulário: compõe e abre mailto com os dados
   const form = document.getElementById('contact-form');
