@@ -130,6 +130,58 @@ a { color: inherit; text-decoration: none; }
 .explore-cta:hover { background: rgba(0,0,0,0.7); }
 .explore-cta-hero { position: relative; inset: unset; margin-top: 8px; border: 1px solid rgba(255,255,255,0.12); }
 
+/* Premium palette overrides */
+:root {
+  --green: #1E8B63;
+  --blue: #2A9DF4;
+  --gold: #CFA34B;
+  --white-soft: #F5F5F5;
+}
+
+/* Glass and gradient buttons */
+.btn-gradient { background: linear-gradient(135deg, var(--green), var(--gold)); color: #0a0a0a; border: none; box-shadow: 0 14px 40px rgba(207,163,75,0.25); }
+.btn-gradient:hover { filter: brightness(1.02); box-shadow: 0 18px 50px rgba(207,163,75,0.35); }
+.glass { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+.hero-glass { margin-top: 16px; padding: 12px 14px; }
+.hero-glass-row { display: flex; gap: 12px; color: var(--white-soft); font-size: 13px; opacity: 0.9; }
+
+/* Sobre: dark + subtle texture and golden icons */
+.about { background: radial-gradient(1200px 400px at 50% 120%, rgba(255,255,255,0.04), transparent 60%), var(--gray-875); }
+.about .icon-item svg { stroke: var(--gold); }
+
+/* Vantagens: blue-dark gradient + luminous icons */
+.benefits { background: linear-gradient(180deg, #091512, #0b1822 60%, #0a1210); }
+.benefits .card-icon { background: linear-gradient(135deg, rgba(30,139,99,0.18), rgba(207,163,75,0.18)); box-shadow: 0 10px 30px rgba(0,0,0,0.35); }
+.benefits .card-icon svg { stroke: var(--gold); }
+
+/* Galeria: green->blue gradient and gold hover */
+.gallery { background: linear-gradient(135deg, rgba(30,139,99,0.22), rgba(42,157,244,0.2)); }
+.gallery-item:hover { border-color: rgba(207,163,75,0.6); box-shadow: 0 18px 50px rgba(207,163,75,0.25); }
+.gallery-item figcaption { color: var(--gray-400); background: var(--gray-875); }
+
+/* CTA dourado: glass button */
+.material-cta { background: linear-gradient(135deg, #cfa34b, #b88933); }
+.material-cta .contrast { color: #0b0b0b; }
+.material-cta .btn { background: rgba(255,255,255,0.14); color: #0b0b0b; border: 1px solid rgba(0,0,0,0.1); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.material-cta .btn:hover { background: rgba(255,255,255,0.18); }
+
+/* Depoimentos: starry background + glass cards */
+.testimonials { position: relative; background: #000; }
+.testimonials::before { content: ""; position: absolute; inset: 0; background-image: radial-gradient(2px 2px at 20% 30%, rgba(255,255,255,0.25), transparent 60%), radial-gradient(1.5px 1.5px at 70% 60%, rgba(255,255,255,0.15), transparent 60%), radial-gradient(1px 1px at 40% 80%, rgba(255,255,255,0.12), transparent 60%); pointer-events: none; opacity: 0.7; }
+.testimonial { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+.person strong { color: var(--green); }
+
+/* Formulário: glass inputs */
+.contact { background: radial-gradient(1200px 400px at 50% 120%, rgba(255,255,255,0.04), transparent 60%), var(--gray-900); }
+.contact-form { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+.form-field input { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: var(--color-text); }
+.form-field input:hover { background: rgba(255,255,255,0.08); }
+.form-field input:focus { box-shadow: 0 0 0 3px rgba(207,163,75,0.22); border-color: rgba(207,163,75,0.6); }
+
+/* Footer tweaks */
+.site-footer { background: #000; }
+.footer-links a, .footer-contact a { color: var(--gray-200); }
+
 /* About */
 .about { background: var(--gray-875); }
 .about-inner { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-12); align-items: center; }
