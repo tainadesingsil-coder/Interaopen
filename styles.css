@@ -344,3 +344,14 @@ body, .site-footer { background-image: var(--color-bg); }
   .gallery-item img { height: 200px; }
 }
 
+/* Final overrides for dark blue gradient sitewide */
+html, body { background: linear-gradient(180deg, #2C4D7B, #1A1A1A) !important; }
+.hero { background: linear-gradient(180deg, #2C4D7B, #1A1A1A) !important; }
+.hero::before, .hero::after { display: none !important; }
+.section, main, header, footer, .about, .benefits, .gallery, .testimonials, .material-cta, .contact, .site-footer { background: transparent !important; }
+.site-header { background: rgba(10,15,25,0.6) !important; border-bottom: 1px solid rgba(255,255,255,0.08) !important; }
+.section-title { color: #ffffff !important; }
+.lead, .body-text { color: #dbeafe !important; }
+.card, .contact-form, .gallery-item, .testimonial { background: rgba(255,255,255,0.06) !important; border: 1px solid rgba(255,255,255,0.14) !important; color: #ffffff !important; }
+.footer-links a, .footer-contact a { color: #4C9ED9 !important; }
+
