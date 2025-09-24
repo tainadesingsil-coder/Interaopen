@@ -25,6 +25,95 @@
     footerWhatsapp.setAttribute('href', waLink);
   }
 
+  // Hero Three.js background
+  (function initHero3D() {
+    const container = document.getElementById('hero-3d');
+    if (!container) return;
+    const textureUrl = 'https://i.postimg.cc/6QbBKQJF/Black-and-White-Dark-Minimalist-Project-Management-Platform-Website-UI-Prototype-4.png';
+    const script = document.createElement('script');
+    script.src = 'https://unpkg.com/three@0.160.0/build/three.min.js';
+    script.onload = () => {
+      const THREE = window.THREE;
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(35, container.clientWidth / container.clientHeight, 0.1, 1000);
+      camera.position.z = 8;
+      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setSize(container.clientWidth, container.clientHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      container.appendChild(renderer.domElement);
+
+      const light = new THREE.DirectionalLight(0xffffff, 0.9);
+      light.position.set(2, 3, 4);
+      scene.add(light);
+      scene.add(new THREE.AmbientLight(0xffffff, 0.35));
+
+      const loader = new THREE.TextureLoader();
+      loader.setCrossOrigin('anonymous');
+      loader.load(textureUrl, (tex) => {
+        tex.encoding = THREE.sRGBEncoding;
+        const geometry = new THREE.PlaneGeometry(12, 6, 64, 32);
+        // Displace slightly for relief
+        const pos = geometry.attributes.position;
+        for (let i = 0; i < pos.count; i++) {
+          const u = (i % 65) / 64; // approx columns
+          const v = Math.floor(i / 65) / 32; // approx rows
+          const n = Math.sin(u * Math.PI * 2) * Math.cos(v * Math.PI * 2);
+          pos.setZ(i, n * 0.15);
+        }
+        pos.needsUpdate = true;
+        const material = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.9, metalness: 0.0 });
+        const plane = new THREE.Mesh(geometry, material);
+        plane.rotation.x = -0.2;
+        scene.add(plane);
+
+        const houseGeo = new THREE.BoxGeometry(0.4, 0.2, 0.4);
+        const houseMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
+        let house = null;
+
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        container.addEventListener('pointermove', (e) => {
+          const rect = container.getBoundingClientRect();
+          const x = (e.clientX - rect.left) / rect.width;
+          const y = (e.clientY - rect.top) / rect.height;
+          camera.position.x = (x - 0.5) * 1.2;
+          camera.position.y = (0.5 - y) * 0.6;
+        });
+        container.addEventListener('click', (e) => {
+          const rect = container.getBoundingClientRect();
+          mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+          mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+          raycaster.setFromCamera(mouse, camera);
+          const intersects = raycaster.intersectObject(plane);
+          if (intersects.length > 0) {
+            const p = intersects[0].point.clone();
+            if (!house) {
+              house = new THREE.Mesh(houseGeo, houseMat);
+              scene.add(house);
+            }
+            house.position.copy(p.add(new THREE.Vector3(0, 0, 0.1)));
+          }
+        });
+
+        const onResize = () => {
+          const w = container.clientWidth;
+          const h = container.clientHeight;
+          renderer.setSize(w, h);
+          camera.aspect = w / h;
+          camera.updateProjectionMatrix();
+        };
+        window.addEventListener('resize', onResize);
+
+        const animate = () => {
+          requestAnimationFrame(animate);
+          renderer.render(scene, camera);
+        };
+        animate();
+      });
+    };
+    document.head.appendChild(script);
+  })();
+
   // Animação de revelação ao rolar
   const observer = new IntersectionObserver(
     (entries) => {
