@@ -28,7 +28,7 @@
   // Hero Three.js background (procedural São Francisco river + stilt house)
   (function initHero3D() {
     const container = document.getElementById('hero-3d');
-    if (!container) return;
+    if (!container) return; // if no 3D container, skip (using static image)
     const script = document.createElement('script');
     script.src = 'https://unpkg.com/three@0.160.0/build/three.min.js';
     script.onload = () => {
