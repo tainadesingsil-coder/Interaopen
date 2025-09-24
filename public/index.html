@@ -45,8 +45,9 @@
               </div>
             </div>
             <div class="hero-media reveal">
-              <figure class="media-card shadow">
-                <img src="https://images.unsplash.com/photo-1533105079780-92b9be482077?q=80&w=1640&auto=format&fit=crop" alt="Vista aérea do rio e da região do empreendimento" loading="eager" />
+              <figure class="media-card shadow" data-open-lot-explorer>
+                <img src="https://i.postimg.cc/6QbBKQJF/Black-and-White-Dark-Minimalist-Project-Management-Platform-Website-UI-Prototype-4.png" alt="Interface minimalista preta e branca - inspiração do projeto" loading="eager" />
+                <button type="button" class="explore-cta">Explorar Lotes em 3D</button>
               </figure>
             </div>
           </div>
@@ -230,6 +231,44 @@
           </div>
         </section>
       </main>
+
+      <!-- Lot Explorer Modal -->
+      <div id="lot-explorer" class="lot-explorer" aria-hidden="true" role="dialog" aria-modal="true">
+        <div class="lot-explorer-backdrop" data-close-lot-explorer></div>
+        <div class="lot-explorer-dialog" role="document">
+          <button class="lot-close" type="button" aria-label="Fechar" data-close-lot-explorer>✕</button>
+          <div class="lot-stage" id="lot-stage">
+            <div class="lot-plane" id="lot-plane">
+              <!-- Simulação de lotes com efeito 3D-like -->
+              <div class="lot" data-lot="A1" style="--x: -120; --y: -60;"></div>
+              <div class="lot" data-lot="A2" style="--x: -40; --y: -60;"></div>
+              <div class="lot" data-lot="A3" style="--x: 40; --y: -60;"></div>
+              <div class="lot" data-lot="A4" style="--x: 120; --y: -60;"></div>
+
+              <div class="lot" data-lot="B1" style="--x: -120; --y: 0;"></div>
+              <div class="lot" data-lot="B2" style="--x: -40; --y: 0;"></div>
+              <div class="lot" data-lot="B3" style="--x: 40; --y: 0;"></div>
+              <div class="lot" data-lot="B4" style="--x: 120; --y: 0;"></div>
+
+              <div class="lot" data-lot="C1" style="--x: -120; --y: 60;"></div>
+              <div class="lot" data-lot="C2" style="--x: -40; --y: 60;"></div>
+              <div class="lot" data-lot="C3" style="--x: 40; --y: 60;"></div>
+              <div class="lot" data-lot="C4" style="--x: 120; --y: 60;"></div>
+            </div>
+          </div>
+          <div class="lot-sidebar" id="lot-sidebar">
+            <h3>Explorador de Lotes</h3>
+            <p class="muted">Arraste para girar. Clique em um lote para pré-visualizar.</p>
+            <div class="lot-info" id="lot-info">
+              <div class="placeholder">Selecione um lote para detalhes</div>
+            </div>
+            <div class="lot-actions">
+              <button class="btn btn-primary" id="lot-action-build">Simular Casa de Pescador</button>
+              <a class="btn" data-drive-cta>Baixar Material</a>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <footer class="site-footer">
         <div class="container footer-inner">
