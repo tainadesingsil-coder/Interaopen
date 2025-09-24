@@ -126,6 +126,8 @@ a { color: inherit; text-decoration: none; }
 /* Removed hero corner logo */
 .hero.has-bg { background: var(--gray-900); }
 .hero.has-bg::before { content: ""; position: absolute; inset: 0; background-image: var(--banner-url); background-size: cover; background-position: center; opacity: 0.32; filter: none; z-index: 0; }
+.video-bg::before { opacity: 0.16; }
+.hero-bg-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; filter: saturate(110%) contrast(110%); }
 .hero-3d { position: absolute; inset: 0; z-index: 0; }
 .hero-inner { display: grid; grid-template-columns: 1.15fr 1fr; gap: var(--space-12); align-items: center; }
 .hero-inner, .hero .display, .hero .lead, .hero .actions { position: relative; z-index: 1; }
