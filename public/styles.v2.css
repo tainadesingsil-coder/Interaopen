@@ -357,6 +357,15 @@ body, .site-footer { background-image: var(--color-bg); }
   .container { padding: 0 var(--space-4); }
 }
 
+/* Mobile anti-shift overrides */
+@media (max-width: 640px) {
+  .reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
+  .container { padding: 0 16px !important; }
+  .section { padding: 48px 0 !important; }
+  .hero { padding-top: 40px !important; }
+  .header-inner { height: 56px !important; }
+}
+
 /* Final overrides for dark blue gradient sitewide */
 html, body { background: linear-gradient(180deg, #2C4D7B, #1A1A1A) !important; }
 .hero { background: linear-gradient(180deg, #2C4D7B, #1A1A1A) !important; }
