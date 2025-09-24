@@ -20,7 +20,7 @@
   --white: #FFFFFF;
 
   /* Derived tokens */
-  --color-bg: #FFFFFF;
+  --color-bg: linear-gradient(180deg, #2C4D7B, #1A1A1A);
   --color-surface: #FFFFFF;
   --color-muted: #F7FAFE;
   --color-border: #E3EAF4;
@@ -118,17 +118,17 @@ a { color: inherit; text-decoration: none; }
 .actions { display: flex; gap: var(--space-4); }
 
 /* Hero */
-.hero { position: relative; padding-top: var(--space-20); background: linear-gradient(180deg, var(--gray-900), var(--gray-875)); overflow: hidden; }
-.hero.hero-light { background: #ffffff; }
+.hero { position: relative; padding-top: var(--space-20); background: linear-gradient(180deg, #2C4D7B, #1A1A1A); overflow: hidden; }
+.hero.hero-light { background: transparent; }
 .hero.hero-light .display { color: #0b0b0b; }
 .hero.hero-light .lead { color: #374151; }
 .hero.hero-light .glass { background: rgba(255,255,255,0.7); border-color: rgba(0,0,0,0.06); }
 .hero.hero-light .btn-gradient { color: #0b0b0b; }
 /* Removed hero corner logo */
-.hero.has-bg { background: var(--gray-900); }
-.hero.has-bg::before { content: ""; position: absolute; inset: 0; background-image: var(--banner-url); background-size: cover; background-position: center; opacity: 1; filter: saturate(120%) contrast(112%) brightness(1.02); z-index: 0; }
+.hero.has-bg { background: transparent; }
+.hero.has-bg::before { display: none; }
 /* Subtle dark overlay for readability */
-.hero.has-bg::after { content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none; background: linear-gradient(180deg, rgba(0,0,0,0.18), rgba(0,0,0,0.08) 40%, rgba(0,0,0,0.22)); }
+.hero.has-bg::after { display: none; }
 .video-bg::before { opacity: 0.16; }
 /* New: stronger overlay and text contrast on video bg */
 .video-bg::after { content: ""; position: absolute; inset: 0; z-index: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.46), rgba(0,0,0,0.28) 40%, rgba(0,0,0,0.38)); }
