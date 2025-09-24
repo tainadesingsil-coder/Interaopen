@@ -431,3 +431,11 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; -webkit-tap-highl
   .site-header { background: rgba(10,15,25,0.75) !important; }
 }
 
+/* One-line top nav on mobile with horizontal scroll */
+@media (max-width: 600px) {
+  .site-header .site-nav { display: flex !important; flex-wrap: nowrap !important; overflow-x: auto; -webkit-overflow-scrolling: touch; gap: 6px; justify-content: flex-start; }
+  .site-header .site-nav::-webkit-scrollbar { display: none; }
+  .site-header .site-nav { -ms-overflow-style: none; scrollbar-width: none; }
+  .site-header .site-nav a { flex: 0 0 auto; white-space: nowrap; font-size: 12px; padding: 6px 8px; }
+}
+
