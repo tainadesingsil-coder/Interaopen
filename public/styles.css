@@ -5,30 +5,25 @@
 */
 
 :root {
-  /* Dark Minimal Palette (Black & White) */
+  /* Base Light Palette */
   --white: #FFFFFF;
-  --gray-50: #f5f5f5;
-  --gray-200: #e5e5e5;
-  --gray-400: #a3a3a3;
-  --gray-500: #737373;
-  --gray-600: #525252;
-  --gray-700: #404040;
-  --gray-800: #262626;
-  --gray-850: #1b1b1b;
-  --gray-875: #151515;
-  --gray-900: #0b0b0b;
+  --gray-50: #f9fafb;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-700: #374151;
+  --green: #1E8B63;
+  --blue: #2A9DF4;
+  --gold: #CFA34B;
 
   /* Derived tokens */
-  --color-bg: var(--gray-900);
-  --color-surface: var(--gray-875);
-  --color-muted: var(--gray-850);
-  --color-border: var(--gray-800);
-  --color-text: var(--gray-50);
-  --color-text-muted: var(--gray-400);
-  --shadow-soft: 0 10px 30px rgba(0,0,0,0.06);
-  --radius: 16px;
-  --radius-sm: 12px;
-  --radius-xs: 10px;
+  --color-bg: #ffffff;
+  --color-surface: #ffffff;
+  --color-muted: var(--gray-50);
+  --color-border: var(--gray-200);
+  --color-text: #0b0b0b;
+  --color-text-muted: var(--gray-700);
   --shadow-soft: 0 10px 30px rgba(0,0,0,0.06);
   --radius: 16px;
   --radius-sm: 12px;
@@ -266,6 +261,25 @@ a { color: inherit; text-decoration: none; }
 /* Reveal animations */
 .reveal { opacity: 0; transform: translateY(16px); transition: opacity 600ms ease, transform 600ms ease; }
 .reveal.is-visible { opacity: 1; transform: translateY(0); }
+
+/* Light Theme Overrides (full white + green hover accents) */
+.site-header { background: rgba(255,255,255,0.78); border-bottom: 1px solid var(--color-border); }
+.site-nav a:hover { background: #ffffff; box-shadow: 0 8px 24px rgba(30,139,99,0.16); }
+.site-nav .nav-cta { color: #ffffff; background: var(--green); }
+.site-nav .nav-cta:hover { filter: brightness(0.96); box-shadow: 0 10px 26px rgba(30,139,99,0.26); }
+
+.btn { background: #ffffff; border: 1px solid var(--color-border); color: var(--color-text); box-shadow: 0 6px 18px rgba(0,0,0,0.06); }
+.btn:hover { background: #ffffff; border-color: #b7e1d1; box-shadow: 0 12px 28px rgba(30,139,99,0.14); }
+.btn-primary { background: var(--green); color: #ffffff; border-color: transparent; box-shadow: 0 8px 20px rgba(30,139,99,0.22); }
+.btn-primary:hover { filter: brightness(0.98); box-shadow: 0 12px 28px rgba(30,139,99,0.3); }
+
+body, .section, .about, .benefits, .gallery, .testimonials, .contact, .material-cta, .site-footer { background: #ffffff !important; }
+.testimonial, .card, .contact-form, .gallery-item { background: #ffffff; border: 1px solid var(--color-border); box-shadow: 0 6px 18px rgba(0,0,0,0.06); }
+.testimonials::before { display: none; }
+.contrast { color: var(--color-text) !important; }
+.person strong { color: var(--green); }
+.gallery-item:hover { border-color: #b7e1d1; box-shadow: 0 14px 40px rgba(30,139,99,0.14); }
+.site-footer { border-top: 1px solid var(--color-border) !important; }
 
 /* Lot Explorer */
 .lot-explorer { position: fixed; inset: 0; display: none; z-index: 120; }
