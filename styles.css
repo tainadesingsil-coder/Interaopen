@@ -342,8 +342,8 @@ body, .site-footer { background-image: var(--color-bg); }
   .section { padding: var(--space-16) 0; }
   .header-inner { height: 56px; }
   /* Mostrar navegação também no mobile para manter consistência */
-  .site-nav { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
-  .site-nav a { font-size: 13px; padding: 6px 10px; }
+  .site-header .site-nav { display: flex !important; gap: 8px; flex-wrap: wrap; justify-content: center; }
+  .site-header .site-nav a { font-size: 13px; padding: 6px 10px; }
   .form-grid { grid-template-columns: 1fr; }
   .gallery-item img { height: 200px; }
 }
@@ -357,6 +357,8 @@ body, .site-footer { background-image: var(--color-bg); }
   .lead { font-size: 16px; }
   .header-logo-opposite { height: 24px; }
   .container { padding: 0 var(--space-4); }
+  /* Garantir nav visível em retrato também */
+  .site-header .site-nav { display: flex !important; }
 }
 
 /* Unificar grid de cards/galeria no mobile em qualquer orientação */
