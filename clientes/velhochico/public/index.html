@@ -4,8 +4,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Portal do Velho Chico — Condomínio de Alto Padrão</title>
-    <meta name="description" content="Condomínio fechado de alto padrão às margens do Rio São Francisco. Infraestrutura urbana, lazer completo e contato direto com a natureza." />
-    <meta name="theme-color" content="#0b1220" />
+    <meta name="description" content="Condomínio fechado de alto padrão às margens do Rio São Francisco. Lazer completo, segurança 24h e natureza em um só lugar." />
+    <meta name="theme-color" content="#2c5282" />
 
     <!-- Tipografia: fallback até disponibilizar Lovera e Verbatim Extended -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -17,97 +17,109 @@
   <body>
     <main>
       <!-- Hero Section -->
-      <section class="hero" id="inicio" aria-label="Hero – Portal do Velho Chico">
-        <div class="hero__backdrop" aria-hidden="true"></div>
+      <section class="hero hero--blue" id="inicio" aria-label="Hero – Portal do Velho Chico">
+        <div class="hero__glow" aria-hidden="true"></div>
         <div class="container hero__content">
-          <h1 class="title-glow reveal" style="--glow-hue: 210">
-            Portal do Velho Chico
-          </h1>
-          <p class="subtitle reveal" style="--delay: .05s">
-            Condomínio fechado de alto padrão às margens do São Francisco
-          </p>
-          <a class="btn btn-glow reveal" style="--delay: .1s" href="#contato" aria-label="Agende uma visita">
-            Agende uma visita
-          </a>
+          <h1 class="title-glow" style="--glow-hue: 210">Portal do Velho Chico</h1>
+          <p class="subtitle">Condomínio fechado de alto padrão às margens do São Francisco</p>
+          <div class="hero__ctas">
+            <button class="btn btn-glow" data-modal-open="contact" aria-label="Agende sua visita">Agende sua visita</button>
+            <a class="btn btn-outline" href="catalogo.pdf" download aria-label="Baixar catálogo digital">Baixar catálogo digital</a>
+          </div>
         </div>
       </section>
 
       <!-- Sobre o Empreendimento -->
       <section class="about section" id="sobre" aria-label="Sobre o Empreendimento">
-        <div class="container">
-          <p class="about__lead reveal">
-            Inspirado na cultura ribeirinha, o Portal do Velho Chico une infraestrutura urbana, lazer completo e o contato direto com os rios, em um estilo de vida exclusivo, seguro e conectado à natureza.
-          </p>
-          <div class="icons-grid" role="list">
-            <div class="icon-card reveal" role="listitem">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M12 3l7 4v5c0 5-3.5 8-7 9-3.5-1-7-4-7-9V7l7-4z" stroke="currentColor" stroke-width="1.5"/>
-                <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              <span>Segurança</span>
-            </div>
-            <div class="icon-card reveal" style="--delay: .05s" role="listitem">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M4 17h16M6 13h12M8 9h8M10 5h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                <circle cx="12" cy="17" r="3" stroke="currentColor" stroke-width="1.5"/>
-              </svg>
-              <span>Lazer</span>
-            </div>
-            <div class="icon-card reveal" style="--delay: .1s" role="listitem">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M3 17l6-6 4 4 8-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M14 7h7v7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-              </svg>
-              <span>Valorização</span>
-            </div>
-            <div class="icon-card reveal" style="--delay: .15s" role="listitem">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M12 22c4-3 6-6.5 6-10a6 6 0 10-12 0c0 3.5 2 7 6 10z" stroke="currentColor" stroke-width="1.5"/>
-                <path d="M9 12c.5 1.5 2 3 3 3 1 0 2.5-1.5 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-              </svg>
-              <span>Natureza</span>
-            </div>
+        <div class="container about__grid">
+          <div class="about__text">
+            <p class="about__lead">
+              Um espaço exclusivo inspirado na cultura ribeirinha, onde lazer, segurança e natureza se encontram. Um estilo de vida único, com valorização patrimonial garantida.
+            </p>
+            <button class="btn btn-glow" data-scroll="#diferenciais" aria-label="Saiba mais">Saiba mais</button>
           </div>
+          <figure class="about__image">
+            <img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1400&q=80" alt="Pôr do sol no rio" />
+            <div class="about__image-glow" aria-hidden="true"></div>
+          </figure>
         </div>
       </section>
 
       <!-- Diferenciais -->
       <section class="features section" id="diferenciais" aria-label="Diferenciais">
-        <div class="container features__grid">
-          <article class="feature-card reveal">
-            <div class="feature-card__halo" aria-hidden="true"></div>
-            <h3 class="feature-card__title">Acesso privilegiado ao Rio São Francisco</h3>
-          </article>
-          <article class="feature-card reveal" style="--delay: .05s">
-            <div class="feature-card__halo" aria-hidden="true"></div>
-            <h3 class="feature-card__title">Clube completo com lazer para toda família</h3>
-          </article>
-          <article class="feature-card reveal" style="--delay: .1s">
-            <div class="feature-card__halo" aria-hidden="true"></div>
-            <h3 class="feature-card__title">Segurança 24h integrada ao condomínio</h3>
-          </article>
-          <article class="feature-card reveal" style="--delay: .15s">
-            <div class="feature-card__halo" aria-hidden="true"></div>
-            <h3 class="feature-card__title">Valorização patrimonial garantida</h3>
-          </article>
+        <div class="container">
+          <div class="features__grid">
+            <article class="feature-card">
+              <div class="feature-card__halo" aria-hidden="true"></div>
+              <div class="feature-card__icon" aria-hidden="true">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M3 17l6-6 4 4 8-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <h3 class="feature-card__title">Acesso exclusivo ao Rio São Francisco</h3>
+              <button class="btn btn-outline-light" data-modal-open="interest" data-interest="Acesso exclusivo ao Rio São Francisco">Tenho interesse nesse diferencial</button>
+            </article>
+            <article class="feature-card">
+              <div class="feature-card__halo" aria-hidden="true"></div>
+              <div class="feature-card__icon" aria-hidden="true">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="6" stroke="currentColor" stroke-width="1.5"/><path d="M4 18h16M6 6h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+              </div>
+              <h3 class="feature-card__title">Clube de lazer completo</h3>
+              <button class="btn btn-outline-light" data-modal-open="interest" data-interest="Clube de lazer completo">Tenho interesse nesse diferencial</button>
+            </article>
+            <article class="feature-card">
+              <div class="feature-card__halo" aria-hidden="true"></div>
+              <div class="feature-card__icon" aria-hidden="true">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 3l7 4v5c0 5-3.5 8-7 9-3.5-1-7-4-7-9V7l7-4z" stroke="currentColor" stroke-width="1.5"/><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <h3 class="feature-card__title">Segurança 24h com tecnologia avançada</h3>
+              <button class="btn btn-outline-light" data-modal-open="interest" data-interest="Segurança 24h com tecnologia avançada">Tenho interesse nesse diferencial</button>
+            </article>
+            <article class="feature-card">
+              <div class="feature-card__halo" aria-hidden="true"></div>
+              <div class="feature-card__icon" aria-hidden="true">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M14 7h7v7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M3 17l6-6 4 4 8-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <h3 class="feature-card__title">Valorização patrimonial garantida</h3>
+              <button class="btn btn-outline-light" data-modal-open="interest" data-interest="Valorização patrimonial garantida">Tenho interesse nesse diferencial</button>
+            </article>
+          </div>
         </div>
       </section>
 
       <!-- Galeria / Experiência -->
       <section class="gallery section" id="experiencia" aria-label="Galeria e Experiência">
         <div class="container gallery__grid">
-          <figure class="gallery__item reveal">
-            <img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=80" alt="Pôr do sol sobre o rio" />
-          </figure>
-          <figure class="gallery__item reveal" style="--delay: .05s">
-            <img src="https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=1600&q=80" alt="Pescador no rio ao entardecer" />
-          </figure>
-          <figure class="gallery__item reveal" style="--delay: .1s">
-            <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1600&q=80" alt="Família curtindo a beira do rio" />
-          </figure>
-          <figure class="gallery__item reveal" style="--delay: .15s">
-            <img src="https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1600&q=80" alt="Natureza e águas calmas" />
-          </figure>
+          <figure class="gallery__item"><img data-lightbox src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=80" alt="Pôr do sol sobre o rio" /></figure>
+          <figure class="gallery__item"><img data-lightbox src="https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=1600&q=80" alt="Pescador no rio ao entardecer" /></figure>
+          <figure class="gallery__item"><img data-lightbox src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1600&q=80" alt="Família curtindo a beira do rio" /></figure>
+          <figure class="gallery__item"><img data-lightbox src="https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1600&q=80" alt="Natureza e águas calmas" /></figure>
+        </div>
+        <div class="container gallery__cta">
+          <button class="btn btn-glow" data-modal-open="contact">Quero viver essa experiência</button>
+        </div>
+      </section>
+
+      <!-- Seção Comercial -->
+      <section class="commercial section" id="planos" aria-label="Opções comerciais">
+        <div class="container">
+          <h2 class="title-glow small" style="--glow-hue: 210">Mais do que um lote, um investimento no seu futuro.</h2>
+          <div class="commercial__grid">
+            <article class="commercial__card" data-price="180000" data-title="Lote 360m²">
+              <h3>Lote 360m²</h3>
+              <p>Condições especiais de lançamento.</p>
+              <div class="commercial__actions">
+                <button class="btn btn-outline" data-modal-open="calc">Simular Financiamento</button>
+                <a class="btn btn-outline-light" href="https://wa.me/5599999999999?text=Tenho%20interesse%20no%20Portal%20do%20Velho%20Chico" target="_blank" rel="noopener">Falar com um corretor agora</a>
+              </div>
+            </article>
+            <article class="commercial__card" data-price="240000" data-title="Lote 450m²">
+              <h3>Lote 450m²</h3>
+              <p>Espaço amplo para construir seu projeto de vida.</p>
+              <div class="commercial__actions">
+                <button class="btn btn-outline" data-modal-open="calc">Simular Financiamento</button>
+                <a class="btn btn-outline-light" href="https://wa.me/5599999999999?text=Tenho%20interesse%20no%20Portal%20do%20Velho%20Chico" target="_blank" rel="noopener">Falar com um corretor agora</a>
+              </div>
+            </article>
+          </div>
         </div>
       </section>
 
@@ -115,10 +127,11 @@
       <section class="final-cta section" id="contato" aria-label="Chamada para ação final">
         <div class="final-cta__glow" aria-hidden="true"></div>
         <div class="container final-cta__content">
-          <h2 class="title-glow reveal" style="--glow-hue: 38">Seu lugar entre o rio e o pôr do sol.</h2>
-          <a class="btn btn-glow reveal" style="--delay: .05s" href="#inicio" aria-label="Quero conhecer o Portal">
-            Quero conhecer o Portal
-          </a>
+          <h2 class="title-glow" style="--glow-hue: 38">Seu lugar entre o rio e o pôr do sol.</h2>
+          <div class="hero__ctas">
+            <button class="btn btn-glow" data-modal-open="schedule">Agendar visita presencial</button>
+            <button class="btn btn-outline" data-modal-open="lead">Receber condições especiais</button>
+          </div>
         </div>
       </section>
     </main>
@@ -129,6 +142,82 @@
         <span>Condomínio fechado de alto padrão</span>
       </div>
     </footer>
+
+    <!-- Lightbox -->
+    <div class="lightbox" data-lightbox-overlay aria-hidden="true">
+      <button class="lightbox__close" data-lightbox-close aria-label="Fechar">×</button>
+      <img class="lightbox__image" alt="Pré-visualização" />
+    </div>
+
+    <!-- Modals -->
+    <div class="modal" id="modal-contact" aria-hidden="true" role="dialog" aria-modal="true">
+      <div class="modal__dialog">
+        <button class="modal__close" data-modal-close aria-label="Fechar">×</button>
+        <h3>Agende sua visita</h3>
+        <form class="form" data-form="contact">
+          <input type="text" name="nome" placeholder="Nome" required />
+          <input type="tel" name="telefone" placeholder="Telefone" required />
+          <input type="email" name="email" placeholder="E-mail" required />
+          <textarea name="mensagem" placeholder="Mensagem" rows="3"></textarea>
+          <button class="btn btn-glow" type="submit">Enviar</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="modal" id="modal-interest" aria-hidden="true" role="dialog" aria-modal="true">
+      <div class="modal__dialog">
+        <button class="modal__close" data-modal-close aria-label="Fechar">×</button>
+        <h3>Tenho interesse</h3>
+        <form class="form" data-form="interest">
+          <input type="hidden" name="diferencial" value="" />
+          <input type="text" name="nome" placeholder="Nome" required />
+          <input type="tel" name="telefone" placeholder="Telefone" required />
+          <input type="email" name="email" placeholder="E-mail" required />
+          <button class="btn btn-glow" type="submit">Enviar</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="modal" id="modal-calc" aria-hidden="true" role="dialog" aria-modal="true">
+      <div class="modal__dialog">
+        <button class="modal__close" data-modal-close aria-label="Fechar">×</button>
+        <h3>Simulador de parcelas</h3>
+        <form class="form" data-form="calc">
+          <input type="number" name="valor" placeholder="Valor do lote (R$)" required />
+          <input type="number" name="entrada" placeholder="Entrada (R$)" value="0" />
+          <input type="number" name="taxa" placeholder="Taxa anual (%)" value="12" />
+          <input type="number" name="prazo" placeholder="Prazo (anos)" value="10" />
+          <button class="btn btn-glow" type="submit">Calcular</button>
+        </form>
+        <div class="calc__result" aria-live="polite"></div>
+      </div>
+    </div>
+
+    <div class="modal" id="modal-schedule" aria-hidden="true" role="dialog" aria-modal="true">
+      <div class="modal__dialog">
+        <button class="modal__close" data-modal-close aria-label="Fechar">×</button>
+        <h3>Agendar visita presencial</h3>
+        <form class="form" data-form="schedule">
+          <input type="text" name="nome" placeholder="Nome" required />
+          <input type="tel" name="telefone" placeholder="Telefone" required />
+          <input type="email" name="email" placeholder="E-mail" required />
+          <input type="date" name="data" placeholder="Data preferida" />
+          <button class="btn btn-glow" type="submit">Agendar</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="modal" id="modal-lead" aria-hidden="true" role="dialog" aria-modal="true">
+      <div class="modal__dialog">
+        <button class="modal__close" data-modal-close aria-label="Fechar">×</button>
+        <h3>Receber condições especiais</h3>
+        <form class="form" data-form="lead">
+          <input type="text" name="nome" placeholder="Nome" required />
+          <input type="email" name="email" placeholder="E-mail" required />
+          <button class="btn btn-glow" type="submit">Quero receber</button>
+        </form>
+      </div>
+    </div>
 
     <script src="./script.js"></script>
   </body>
