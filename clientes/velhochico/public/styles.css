@@ -45,7 +45,7 @@ body {
 /* Use CSS var if provided */
 .hero__bg { background-image: var(--hero-bg); }
 /* Deep blue overlay for readability */
-.hero--minimal::before { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgba(44,82,130,0.42), rgba(44,82,130,0.42)); }
+.hero--minimal::before { content: ""; position: absolute; inset: 0; z-index: -1; background: transparent; }
 
 .brand-mark { display: none; }
 .brand-mark svg { stroke: var(--blue-light); }
