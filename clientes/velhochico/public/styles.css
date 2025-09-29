@@ -47,7 +47,7 @@ body {
 /* Deep blue overlay for readability */
 .hero--minimal::before { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgba(44,82,130,0.65), rgba(44,82,130,0.65)); }
 
-.brand-mark { display: flex; justify-content: center; margin-bottom: 16px; filter: drop-shadow(0 0 10px rgba(66,153,225,0.25)); }
+.brand-mark { display: none; }
 .brand-mark svg { stroke: var(--blue-light); }
 .hero__content { text-align: center; }
 .hero__ctas { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
