@@ -8,7 +8,7 @@ html { scroll-behavior: smooth; }
   --blue-light: #4299e1; /* glow color */
   --text: #ffffff; /* primary text on deep blue */
   --muted: rgba(255,255,255,0.75);
-  --bg: #2c5282;
+  --bg: #1a3556;
   --border: rgba(66,153,225,0.28);
   --radius: 16px;
 }
