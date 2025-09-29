@@ -40,8 +40,9 @@ body {
 .subtitle--muted { color: var(--muted); }
 
 /* Hero minimal on deep blue */
-.hero--minimal { position: relative; padding: 120px 0 80px; background: transparent; }
-.hero__bg { position: absolute; inset: 0; z-index: -2; background-position: center 60%; background-size: cover; background-repeat: no-repeat; }
+.hero--minimal { position: relative; padding: 0; background: transparent; min-height: 70vh; display: grid; place-items: center; }
+@media (min-width: 1280px) { .hero--minimal { min-height: 90vh; } }
+.hero__bg { position: absolute; inset: 0; z-index: -2; background-position: center 55%; background-size: cover; background-repeat: no-repeat; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges; }
 /* Use CSS var if provided */
 .hero__bg { background-image: var(--hero-bg); }
 /* Deep blue overlay for readability */
@@ -49,7 +50,7 @@ body {
 
 .brand-mark { display: none; }
 .brand-mark svg { stroke: var(--blue-light); }
-.hero__content { text-align: center; }
+.hero__content { text-align: center; padding: 120px 24px 80px; }
 .hero__ctas { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
 
 /* Buttons: white with blue text, glow on hover */
