@@ -40,7 +40,13 @@ body {
 .subtitle--muted { color: var(--muted); }
 
 /* Hero minimal on deep blue */
-.hero--minimal { padding: 120px 0 80px; background: transparent; }
+.hero--minimal { position: relative; padding: 120px 0 80px; background: transparent; }
+.hero__bg { position: absolute; inset: 0; z-index: -2; background-position: center; background-size: cover; background-repeat: no-repeat; }
+/* Use CSS var if provided */
+.hero__bg { background-image: var(--hero-bg); }
+/* Deep blue overlay for readability */
+.hero--minimal::before { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgba(44,82,130,0.65), rgba(44,82,130,0.65)); }
+
 .brand-mark { display: flex; justify-content: center; margin-bottom: 16px; filter: drop-shadow(0 0 10px rgba(66,153,225,0.25)); }
 .brand-mark svg { stroke: var(--blue-light); }
 .hero__content { text-align: center; }
