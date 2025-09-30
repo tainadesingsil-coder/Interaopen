@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Platform } from 'react-native';
 import { colors, typography } from '@/theme';
 import { GlassCard } from '@/components/GlassCard';
+import Constants from 'expo-constants';
 import WebView from 'react-native-webview';
 
 const vendors = [
@@ -12,11 +13,16 @@ const vendors = [
 
 export default function CommerceScreen() {
   const [showOnline, setShowOnline] = useState(false);
-  const token = 'L1v3lt0zi9NiAIMnu8hlFzUBDM0BIUiHyOXBajcN';
-  const id = '1d9c74bc8b8fedb33e8753d741d8f824';
-  const onlineUri = `https://belmontappturis.dev/?id=${id}&token=${token}`;
+  const { domain, token, id } = (Constants.expoConfig?.extra as any) || {};
+  const onlineUri = useMemo(() => {
+    if (!domain || !token || !id) return undefined;
+    const url = new URL(`https://${domain}/`);
+    url.searchParams.set('id', String(id));
+    url.searchParams.set('token', String(token));
+    return url.toString();
+  }, [domain, token, id]);
 
-  if (showOnline) {
+  if (showOnline && onlineUri) {
     return (
       <View style={{ flex: 1 }}>
         <WebView

@@ -1,5 +1,6 @@
 import React from 'react';
 import { NavigationContainer, DefaultTheme, Theme } from '@react-navigation/native';
+import Constants from 'expo-constants';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
@@ -67,8 +68,13 @@ function Tabs() {
 }
 
 export default function RootNavigator() {
+  // Enable deep linking scheme and domain if provided
+  const { domain } = (Constants.expoConfig?.extra as any) || {};
+  const linking = {
+    prefixes: ['belmonte://', domain ? `https://${domain}` : undefined].filter(Boolean) as string[],
+  };
   return (
-    <NavigationContainer theme={navTheme}>
+    <NavigationContainer theme={navTheme} linking={linking}>
       <Stack.Navigator>
         <Stack.Screen name="Welcome" component={WelcomeScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Main" component={Tabs} options={{ headerShown: false }} />
