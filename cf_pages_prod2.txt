@@ -1,3 +1,10 @@
 ✨ Compiled Worker successfully
 Uploading... (3/7)
 Uploading... (4/7)
+Uploading... (6/7)
+Uploading... (7/7)
+✨ Success! Uploaded 4 files (3 already uploaded) (3.02 sec)
+
+✨ Uploading Functions bundle
+🌎 Deploying...
+✨ Deployment complete! Take a peek over at https://4fc8f46d.belmontapp-dev.pages.dev
