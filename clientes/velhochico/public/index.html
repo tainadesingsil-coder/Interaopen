@@ -20,116 +20,144 @@
       <section class="hero hero--minimal" id="inicio" aria-label="Hero – Portal do Velho Chico">
         <div class="hero__bg" style="--hero-bg: url('https://i.ibb.co/fz4RhNBX/IMG-5471.jpg');" aria-hidden="true"></div>
         <div class="container hero__content">
-          <div class="brand-mark" aria-hidden="true">
-            <svg width="80" height="80" viewBox="0 0 64 64" fill="none" aria-hidden="true">
-              <circle cx="32" cy="32" r="30" stroke="#2c5282" stroke-width="2"></circle>
-              <path d="M8 36c6-6 12-9 24-9s18 3 24 9" stroke="#2c5282" stroke-width="2" fill="none" stroke-linecap="round"></path>
-            </svg>
-          </div>
-          <h1 class="title title--brand">Portal do Velho Chico</h1>
-          <p class="subtitle subtitle--muted">Condomínio fechado de alto padrão às margens do São Francisco</p>
+          <h1 class="title">Seu novo lar às margens do São Francisco.</h1>
+          <p class="subtitle">Um condomínio fechado exclusivo, integrado à natureza e com tudo o que você precisa para viver com qualidade e tranquilidade.</p>
           <div class="hero__ctas">
-            <button class="btn btn-primary" data-modal-open="contact" aria-label="Agende sua visita">Agende sua visita</button>
+            <button class="btn btn-primary" data-modal-open="contact" aria-label="Agende uma visita">Agende uma visita</button>
           </div>
         </div>
       </section>
 
-      <!-- Sobre o Empreendimento -->
-      <section class="about section" id="sobre" aria-label="Sobre o Empreendimento">
+      <!-- Sobre o Empreendimento (light) -->
+      <section class="about section section--light" id="sobre" aria-label="Sobre o Empreendimento">
         <div class="container about__grid">
           <div class="about__text">
-            <h2 class="section-title title--brand">Sobre o Empreendimento</h2>
+            <h2 class="section-title">Sobre o Empreendimento</h2>
             <p class="about__lead">
-              Um espaço exclusivo inspirado na cultura ribeirinha, onde lazer, segurança e natureza se encontram. Um estilo de vida único, com valorização patrimonial garantida.
+              O Portal do Velho Chico foi projetado para oferecer exclusividade, lazer completo e uma conexão única com o Rio São Francisco. Aqui você encontra segurança, valorização e o cenário perfeito para viver momentos inesquecíveis.
             </p>
-            <button class="btn btn-outline-brand" data-scroll="#diferenciais" aria-label="Conheça mais">Conheça mais</button>
+            <ul class="about__bullets">
+              <li>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 12l6 6L21 6" stroke="currentColor" stroke-width="2"/></svg>
+                Condomínio fechado de alto padrão
+              </li>
+              <li>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 12l6 6L21 6" stroke="currentColor" stroke-width="2"/></svg>
+                Área de lazer completa
+              </li>
+              <li>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 12l6 6L21 6" stroke="currentColor" stroke-width="2"/></svg>
+                Vista privilegiada do rio
+              </li>
+              <li>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 12l6 6L21 6" stroke="currentColor" stroke-width="2"/></svg>
+                Segurança 24h
+              </li>
+            </ul>
           </div>
           <figure class="about__image">
-            <img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1400&q=80" alt="Pôr do sol no rio" />
+            <img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1400&q=80" alt="Vista aérea e áreas verdes" />
           </figure>
         </div>
       </section>
 
-      <!-- Diferenciais -->
-      <section class="features section" id="diferenciais" aria-label="Diferenciais">
+      <!-- Diferenciais / Benefícios (deep) -->
+      <section class="features section section--deep" id="diferenciais" aria-label="Diferenciais e Benefícios">
         <div class="container">
-          <h2 class="section-title title--brand center">Diferenciais</h2>
+          <h2 class="section-title center">Diferenciais</h2>
           <div class="features__grid">
-            <article class="feature-card feature-card--brand">
-              <div class="feature-card__icon" aria-hidden="true">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 3l7 4v5c0 5-3.5 8-7 9-3.5-1-7-4-7-9V7l7-4z" stroke="currentColor" stroke-width="1.5"/><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </div>
-              <h3 class="feature-card__title">Segurança 24h</h3>
-              <p class="feature-card__desc">Tecnologia e monitoramento inteligente para sua tranquilidade.</p>
-              <button class="btn btn-light" data-modal-open="interest" data-interest="Segurança 24h">Tenho interesse</button>
+            <article class="feature-card">
+              <div class="feature-card__icon" aria-hidden="true">🏡</div>
+              <h3 class="feature-card__title">Exclusividade</h3>
+              <p class="feature-card__desc">Lotes e casas em harmonia com a natureza.</p>
             </article>
-            <article class="feature-card feature-card--brand">
-              <div class="feature-card__icon" aria-hidden="true">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="6" stroke="currentColor" stroke-width="1.5"/><path d="M4 18h16M6 6h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-              </div>
-              <h3 class="feature-card__title">Clube de lazer completo</h3>
-              <p class="feature-card__desc">Estrutura para toda a família viver momentos únicos.</p>
-              <button class="btn btn-light" data-modal-open="interest" data-interest="Clube de lazer completo">Tenho interesse</button>
+            <article class="feature-card">
+              <div class="feature-card__icon" aria-hidden="true">🌳</div>
+              <h3 class="feature-card__title">Natureza preservada</h3>
+              <p class="feature-card__desc">Viva à beira do rio com qualidade de vida.</p>
             </article>
-            <article class="feature-card feature-card--brand">
-              <div class="feature-card__icon" aria-hidden="true">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M3 17l6-6 4 4 8-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </div>
-              <h3 class="feature-card__title">Acesso exclusivo ao Rio São Francisco</h3>
-              <p class="feature-card__desc">Conexão direta com a natureza às margens do Velho Chico.</p>
-              <button class="btn btn-light" data-modal-open="interest" data-interest="Acesso exclusivo ao Rio São Francisco">Tenho interesse</button>
+            <article class="feature-card">
+              <div class="feature-card__icon" aria-hidden="true">📈</div>
+              <h3 class="feature-card__title">Valorização garantida</h3>
+              <p class="feature-card__desc">Investimento sólido para o futuro.</p>
             </article>
-            <article class="feature-card feature-card--brand">
-              <div class="feature-card__icon" aria-hidden="true">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M14 7h7v7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M3 17l6-6 4 4 8-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </div>
-              <h3 class="feature-card__title">Valorização patrimonial</h3>
-              <p class="feature-card__desc">Investimento sólido com alto potencial de retorno.</p>
-              <button class="btn btn-light" data-modal-open="interest" data-interest="Valorização patrimonial">Tenho interesse</button>
+            <article class="feature-card">
+              <div class="feature-card__icon" aria-hidden="true">🎉</div>
+              <h3 class="feature-card__title">Lazer completo</h3>
+              <p class="feature-card__desc">Clube, piscinas, esportes e muito mais.</p>
             </article>
           </div>
         </div>
       </section>
 
-      <!-- Galeria Visual -->
-      <section class="gallery section" id="experiencia" aria-label="Galeria Visual">
+      <!-- Galeria Visual (light) -->
+      <section class="gallery section section--light" id="experiencia" aria-label="Galeria Visual">
         <div class="container">
-          <h2 class="section-title title--brand center">Experiência</h2>
+          <h2 class="section-title center">Experiência</h2>
           <div class="gallery__grid gallery__grid--symmetric">
-            <figure class="gallery__item"><img data-lightbox src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1400&q=80" alt="Pôr do sol sobre o rio" /></figure>
-            <figure class="gallery__item"><img data-lightbox src="https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=1400&q=80" alt="Pescador no rio ao entardecer" /></figure>
-            <figure class="gallery__item"><img data-lightbox src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1400&q=80" alt="Lazer em família" /></figure>
-            <figure class="gallery__item"><img data-lightbox src="https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1400&q=80" alt="Natureza e águas calmas" /></figure>
-            <figure class="gallery__item"><img data-lightbox src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1400&q=80" alt="Horizonte ao entardecer" /></figure>
-            <figure class="gallery__item"><img data-lightbox src="https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=1400&q=80" alt="Cultura ribeirinha" /></figure>
+            <figure class="gallery__item"><img data-lightbox src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1400&q=80" alt="Casas e lotes" /></figure>
+            <figure class="gallery__item"><img data-lightbox src="https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=1400&q=80" alt="Clube e áreas comuns" /></figure>
+            <figure class="gallery__item"><img data-lightbox src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1400&q=80" alt="Vista do rio e paisagens" /></figure>
+            <figure class="gallery__item"><img data-lightbox src="https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1400&q=80" alt="Natureza" /></figure>
+            <figure class="gallery__item"><img data-lightbox src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1400&q=80" alt="Arquitetura" /></figure>
+            <figure class="gallery__item"><img data-lightbox src="https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=1400&q=80" alt="Família" /></figure>
           </div>
           <div class="gallery__cta center">
-            <button class="btn btn-primary" data-scroll="#contato">Quero viver essa experiência</button>
+            <button class="btn btn-white" data-scroll="#contato">Quero viver essa experiência</button>
           </div>
         </div>
       </section>
 
-      <!-- Seção Comercial (azul profundo) -->
-      <section class="commercial section section--brand" id="planos" aria-label="Opções comerciais">
+      <!-- CTA (Gold) -->
+      <section class="section section--gold" aria-label="Agendamento de Visita">
+        <div class="container center">
+          <h2 class="section-title">Viva o pôr do sol mais bonito do Brasil todos os dias.</h2>
+          <p class="subtitle">Agende sua visita e conheça o Portal do Velho Chico.</p>
+          <button class="btn btn-white" data-modal-open="schedule">Quero conhecer o Portal do Velho Chico</button>
+        </div>
+      </section>
+
+      <!-- Depoimentos (Light Blue) -->
+      <section class="section section--lightblue" aria-label="Depoimentos de Clientes">
         <div class="container">
-          <h2 class="section-title section-title--inverted center">Mais do que um lote, um investimento no seu futuro.</h2>
-          <div class="commercial__actions center">
-            <button class="btn btn-light" data-modal-open="calc">Simular financiamento</button>
-            <a class="btn btn-light-outline" href="https://wa.me/5599999999999?text=Tenho%20interesse%20no%20Portal%20do%20Velho%20Chico" target="_blank" rel="noopener">Falar com um corretor agora</a>
+          <h2 class="section-title center">Depoimentos</h2>
+          <div class="testimonials__grid">
+            <div class="testimonial">
+              <p class="testimonial__quote">Sempre sonhei em morar perto do rio. Aqui encontrei qualidade de vida e um investimento seguro.</p>
+              <p class="testimonial__name">João S.</p>
+            </div>
+            <div class="testimonial">
+              <p class="testimonial__quote">Ambiente tranquilo, estrutura excelente e contato diário com a natureza.</p>
+              <p class="testimonial__name">Maria L.</p>
+            </div>
+            <div class="testimonial">
+              <p class="testimonial__quote">A proposta do empreendimento é única. Me sinto em casa e em paz.</p>
+              <p class="testimonial__name">Carlos P.</p>
+            </div>
           </div>
         </div>
       </section>
 
-      <!-- CTA Final (white with blue glow border) -->
-      <section class="final-cta final-cta--minimal section" id="contato" aria-label="Chamada para ação final">
-        <div class="container final-cta__content center">
-          <h2 class="title title--brand">Seu lugar entre o rio e o pôr do sol.</h2>
-          <div class="hero__ctas">
-            <button class="btn btn-primary" data-modal-open="schedule">Agendar visita presencial</button>
-            <button class="btn btn-outline-brand" data-modal-open="lead">Receber condições especiais</button>
-          </div>
+      <!-- Contato (Deep) -->
+      <section class="section section--deep" id="contato" aria-label="Formulário de Contato">
+        <div class="container center">
+          <h2 class="section-title">Agende sua visita exclusiva.</h2>
+          <form class="form contact__form" data-form="lead">
+            <input type="text" name="nome" placeholder="Nome" required />
+            <input type="email" name="email" placeholder="E-mail" required />
+            <input type="tel" name="telefone" placeholder="Telefone" required />
+            <button class="btn btn-primary" type="submit">Enviar</button>
+          </form>
         </div>
       </section>
+
+      <!-- Footer -->
+      <footer class="footer" role="contentinfo">
+        <div class="container footer__inner">
+          <span>© <span id="year"></span> Portal do Velho Chico</span>
+          <span><a href="#sobre">Sobre</a> · <a href="#diferenciais">Diferenciais</a> · <a href="#contato">Contato</a></span>
+        </div>
+      </footer>
     </main>
 
     <footer class="footer" role="contentinfo">
