@@ -15,18 +15,15 @@ export default function CommerceScreen() {
   const [showOnline, setShowOnline] = useState(false);
   const { domain, token, id } = (Constants.expoConfig?.extra as any) || {};
   const onlineUri = useMemo(() => {
-    if (!domain || !token || !id) return undefined;
-    const url = new URL(`https://${domain}/`);
-    url.searchParams.set('id', String(id));
-    url.searchParams.set('token', String(token));
-    return url.toString();
-  }, [domain, token, id]);
+    if (!domain) return undefined;
+    return `https://${domain}/app`;
+  }, [domain]);
 
   if (showOnline && onlineUri) {
     return (
       <View style={{ flex: 1 }}>
         <WebView
-          source={{ uri: onlineUri }}
+          source={{ uri: onlineUri, headers: { Authorization: `Bearer ${token ?? ''}`, 'X-Client-Id': String(id ?? '') } }}
           userAgent={Platform.select({ ios: undefined, android: 'Mozilla/5.0 (Linux; Android 12; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36' })}
           startInLoadingState
           javaScriptEnabled
