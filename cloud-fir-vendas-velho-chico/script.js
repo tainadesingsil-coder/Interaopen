@@ -13,6 +13,7 @@ revealEls.forEach(el=>io.observe(el));
 // Parallax for hero boat and background
 const boat = document.querySelector('.hero-boat');
 const heroImage = document.querySelector('.hero-image');
+const heroSection = document.getElementById('hero');
 let lastY = 0;
 function onScroll(){
   const y = window.scrollY || window.pageYOffset;
@@ -29,6 +30,28 @@ function onScroll(){
 }
 window.addEventListener('scroll', onScroll, {passive:true});
 onScroll();
+
+// Imgur oEmbed: extract first image as hero background
+async function setHeroFromImgur(){
+  if(!heroSection) return;
+  const albumUrl = heroSection.getAttribute('data-imgur');
+  if(!albumUrl) return;
+  try{
+    const oembedUrl = `https://api.imgur.com/oembed.json?url=${encodeURIComponent(albumUrl)}`;
+    const res = await fetch(oembedUrl, {headers:{'Accept':'application/json'}});
+    if(!res.ok) return;
+    const data = await res.json();
+    // Try to get thumbnail url from oembed; fallback keep current
+    const thumb = data?.thumbnail_url || data?.url || '';
+    if(thumb && heroImage){
+      heroImage.style.backgroundImage = `url('${thumb}')`;
+      heroImage.style.opacity = 0.5;
+    }
+  }catch(err){
+    // silent fail
+  }
+}
+setHeroFromImgur();
 
 // Mobile carousel drag (simple)
 const track = document.querySelector('.carousel-track');
