@@ -1,0 +1,3 @@
+✨ Compiled Worker successfully
+Uploading... (3/7)
+Uploading... (4/7)

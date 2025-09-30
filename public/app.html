@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Belmonte — App Preview</title>
+    <meta name="theme-color" content="#2C4D7B" />
+    <style>
+      :root { --ocean:#2C4D7B; --sky:#4C9ED9; --gold:#F3A64D; --bg:#ffffff; }
+      *{ box-sizing:border-box }
+      html,body{ height:100%; margin:0; background:var(--bg); color:#0f172a; }
+      body{ font-family:Poppins, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, sans-serif; }
+      .app{ max-width:480px; margin:0 auto; width:100%; height:100%; display:flex; flex-direction:column; background:linear-gradient(180deg,#ffffff 0%,#f7fbff 100%); }
+      .header{ position:sticky; top:0; z-index:10; backdrop-filter: blur(10px); background: rgba(255,255,255,0.7); border-bottom:1px solid rgba(76,158,217,.25); padding:14px 16px 10px; display:flex; align-items:center; gap:12px; }
+      .logo{ width:36px; height:36px; border-radius:50%; background:radial-gradient(circle at 30% 30%, #fff 0%, #F3A64D 60%, #c77e33 100%); box-shadow:0 6px 14px rgba(243,166,77,.35); }
+      .title{ font-weight:800; color:var(--ocean); letter-spacing:-.02em; }
+      .content{ flex:1; overflow:auto; -webkit-overflow-scrolling:touch; }
+      .hero{ position:relative; height:260px; border-radius:20px; margin:12px 16px; overflow:hidden; box-shadow: 0 16px 36px rgba(44,77,123,.20); background: radial-gradient(100% 100% at 0% 0%, rgba(76,158,217,.35), transparent 60%), linear-gradient(120deg, rgba(44,77,123,.35), rgba(255,255,255,0)); }
+      .hero .glass{ position:absolute; left:14px; bottom:14px; right:14px; padding:14px; border-radius:14px; background: rgba(255,255,255,.18); backdrop-filter: blur(10px); border:1px solid rgba(255,255,255,.35); color:#0b1320; }
+      .cta{ display:inline-flex; align-items:center; gap:8px; background:var(--gold); color:#fff; padding:10px 14px; border-radius:12px; box-shadow:0 10px 26px rgba(243,166,77,.45), inset 0 2px 8px rgba(255,255,255,.35); font-weight:700; transition: transform .15s ease, box-shadow .15s ease; border:none; }
+      .cta:active{ transform:scale(.98); box-shadow:0 6px 18px rgba(243,166,77,.35); }
+      .section{ padding:12px 16px; }
+      .grid{ display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+      .card{ border-radius:16px; background: rgba(76,158,217,.10); backdrop-filter: blur(10px); border:1px solid rgba(76,158,217,.25); padding:12px; box-shadow:0 12px 28px rgba(44,77,123,.12); }
+      .card h3{ margin:6px 0 8px; font-size:16px; color:var(--ocean); }
+      .badge{ display:inline-block; padding:6px 10px; border-radius:999px; background: rgba(255,255,255,.65); border:1px solid rgba(76,158,217,.25); color:#334155; font-size:12px; }
+      .tabs{ position:sticky; bottom:0; z-index:10; display:flex; gap:6px; justify-content:space-around; padding:8px 10px calc(env(safe-area-inset-bottom, 0) + 8px); border-top:1px solid rgba(76,158,217,.2); background: rgba(255,255,255,.85); backdrop-filter: blur(10px); }
+      .tab{ flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; color:#475569; text-decoration:none; padding:6px 4px; border-radius:10px; transition: background .2s ease, color .2s ease; }
+      .tab.active{ color:var(--ocean); background: rgba(76,158,217,.12); }
+      .tab svg{ width:22px; height:22px; filter: drop-shadow(0 2px 6px rgba(44,77,123,.18)); }
+      .bel{ position:fixed; right:16px; bottom: calc(env(safe-area-inset-bottom, 0) + 86px); z-index:20; display:flex; align-items:center; gap:10px; }
+      .bel .bubble{ max-width: 62vw; background: rgba(255,255,255,.18); backdrop-filter: blur(10px); border:1px solid rgba(255,255,255,.35); padding:10px 12px; border-radius:14px; color:#0b1320; box-shadow:0 10px 26px rgba(44,77,123,.20); animation: float 4s ease-in-out infinite; }
+      .bel .avatar{ width:56px; height:56px; border-radius:50%; background: radial-gradient(circle at 30% 30%, #fff 0%, #4C9ED9 55%, #2C4D7B 100%); box-shadow:0 10px 24px rgba(76,158,217,.45); position:relative; cursor:pointer; }
+      .bel .avatar::after{ content:""; position:absolute; inset:0; border-radius:50%; box-shadow: inset 0 2px 10px rgba(255,255,255,.6); }
+      @keyframes float { 0%,100%{ transform: translateY(0);} 50%{ transform: translateY(-4px);} }
+      .sheet{ position:fixed; left:0; right:0; bottom:-100%; z-index:30; background:#ffffffcc; backdrop-filter: blur(12px); border-top-left-radius:18px; border-top-right-radius:18px; box-shadow:0 -14px 36px rgba(44,77,123,.25); transition: bottom .28s ease; }
+      .sheet.open{ bottom:0; }
+      .sheet .handle{ width:64px; height:5px; background:#cbd5e1; border-radius:999px; margin:8px auto; }
+      .sheet .inner{ padding:12px 16px 22px; display:flex; flex-direction:column; gap:10px; max-height:70vh; }
+      .chat{ flex:1; overflow:auto; display:flex; flex-direction:column; gap:8px; }
+      .msg{ display:flex; gap:8px; }
+      .msg .bubble{ padding:10px 12px; border-radius:14px; max-width:75%; font:500 14px Montserrat, system-ui; }
+      .msg.user{ justify-content:flex-end; }
+      .msg.user .bubble{ background:#fff3e6; border:1px solid rgba(243,166,77,.45); color:#7a4b1f; }
+      .msg.bot .bubble{ background: rgba(255,255,255,.6); border:1px solid rgba(76,158,217,.35); color:#0b1320; backdrop-filter: blur(8px); }
+      .composer{ display:flex; gap:8px; }
+      .composer input{ flex:1; padding:12px; border-radius:12px; border:1px solid rgba(76,158,217,.35); font:500 14px Montserrat, system-ui; }
+      .composer button{ padding:12px 14px; border-radius:12px; background:var(--gold); color:#fff; border:none; font-weight:700; box-shadow:0 8px 20px rgba(243,166,77,.35); }
+      .sr{ position:absolute; left:-9999px; }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <div class="header">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <div class="title">Belmonte</div>
+          <div style="font: 500 12px/1.2 Montserrat, system-ui; color:#475569">Guia de Turismo</div>
+        </div>
+      </div>
+
+      <div class="content" id="content">
+        <div class="hero">
+          <div class="glass">
+            <div style="font:800 22px/1.25 Poppins, system-ui; color:var(--ocean); letter-spacing:-.01em;">Oi, eu sou Bel! Vamos criar seu roteiro?</div>
+            <div style="margin:8px 0 12px; font:500 14px/1.4 Montserrat, system-ui; color:#334155">Descubra praias, cultura e gastronomia de Belmonte com dicas personalizadas.</div>
+            <button class="cta" id="ctaRoute">Criar meu roteiro ▸</button>
+          </div>
+        </div>
+
+        <div class="section">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin:4px 2px 10px;">
+            <div style="font:700 16px/1 Poppins; color:var(--ocean)">Destaques de hoje</div>
+            <span class="badge">Mapa offline</span>
+          </div>
+          <div class="grid">
+            <div class="card"><h3>Praia do Mogiquiçaba</h3><div style="font:500 12px Montserrat">25 min · Tranquila · Família</div></div>
+            <div class="card"><h3>Centro Histórico</h3><div style="font:500 12px Montserrat">Cultura · Casarões · Rio</div></div>
+            <div class="card"><h3>Gastronomia</h3><div style="font:500 12px Montserrat">Frutos do mar · Notas 4.7</div></div>
+            <div class="card"><h3>Comércio Local</h3><div style="font:500 12px Montserrat">Artesanato · Feiras</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bel">
+        <div class="bubble" id="belBubble">Eu posso planejar seu dia. Toque para falar comigo.</div>
+        <div class="avatar" id="belAvatar" title="Falar com Bel"></div>
+      </div>
+
+      <nav class="tabs" id="tabs">
+        <a class="tab active" data-tab="home" href="#home" aria-label="Início">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10.5 3.2 3 9v11h7v-6h4v6h7V9l-7.5-5.8c-.9-.7-2.1-.7-3 0Z"/></svg>
+          <small>Início</small>
+        </a>
+        <a class="tab" data-tab="map" href="#map" aria-label="Mapa">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 3 3 5v16l6-2 6 2 6-2V3l-6 2-6-2Zm0 2.2 6 2V19l-6-2-4 1.3V6.5L9 5.2Z"/></svg>
+          <small>Mapa</small>
+        </a>
+        <a class="tab" data-tab="ai" href="#ai" aria-label="Roteiro">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 4h16v12H7l-3 3V4Zm3 4h10v2H7V8Zm0 4h7v2H7v-2Z"/></svg>
+          <small>Roteiro</small>
+        </a>
+        <a class="tab" data-tab="food" href="#food" aria-label="Gastronomia">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 2v10H5V2H3v10a2 2 0 0 0 2 2h2v8h2v-8h2a2 2 0 0 0 2-2V2h-2v10H9V2H7Zm9 0h2v7h-2V2Zm0 9h2v11h-2V11Z"/></svg>
+          <small>Gastronomia</small>
+        </a>
+        <a class="tab" data-tab="profile" href="#profile" aria-label="Perfil">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a5 5 0 0 0-5 5 5 5 0 1 0 5-5Zm0 12c-5 0-9 3-9 7h18c0-4-4-7-9-7Z"/></svg>
+          <small>Perfil</small>
+        </a>
+      </nav>
+    </div>
+
+    <div class="sheet" id="sheet">
+      <div class="handle"></div>
+      <div class="inner">
+        <div class="chat" id="chat"></div>
+        <form class="composer" id="composer">
+          <label for="msg" class="sr">Mensagem</label>
+          <input id="msg" name="msg" autocomplete="off" placeholder="Pergunte algo à Bel..." />
+          <button type="submit">Enviar</button>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      const sheet = document.getElementById('sheet');
+      const chat = document.getElementById('chat');
+      const composer = document.getElementById('composer');
+      const input = document.getElementById('msg');
+      const belAvatar = document.getElementById('belAvatar');
+      const belBubble = document.getElementById('belBubble');
+
+      function openSheet(){ sheet.classList.add('open'); input.focus(); }
+      function closeSheet(){ sheet.classList.remove('open'); }
+      belAvatar.addEventListener('click', openSheet);
+      belBubble.addEventListener('click', openSheet);
+      sheet.addEventListener('click', e => { if (e.target === sheet) closeSheet(); });
+
+      const messages = [{ role:'system', content:'Você é Bel, guia local de Belmonte. Seja acolhedora, objetiva e prática.' }];
+
+      function addMessage(role, text){
+        const wrap = document.createElement('div');
+        wrap.className = 'msg ' + (role === 'user' ? 'user' : 'bot');
+        const bubble = document.createElement('div');
+        bubble.className = 'bubble';
+        bubble.textContent = text;
+        wrap.appendChild(bubble);
+        chat.appendChild(wrap);
+        chat.scrollTop = chat.scrollHeight;
+      }
+
+      addMessage('bot','Olá! Sou a Bel. Posso montar um roteiro com praias, cultura e gastronomia. O que você curte?');
+
+      composer.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const text = input.value.trim();
+        if(!text) return;
+        input.value = '';
+        addMessage('user', text);
+        const userMsg = { role:'user', content:text };
+        const payload = { messages: messages.concat([userMsg]).filter(m => m.role !== 'system') };
+        try {
+          const res = await fetch('/api/chat', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(payload) });
+          const data = await res.json();
+          const reply = data.reply || 'Sem resposta agora.';
+          addMessage('assistant', reply);
+          messages.push(userMsg, { role:'assistant', content:reply });
+        } catch (err) {
+          addMessage('assistant', 'Desculpe, não consegui responder agora.');
+        }
+      });
+
+      document.getElementById('ctaRoute').addEventListener('click', openSheet);
+    </script>
+  </body>
+</html>
