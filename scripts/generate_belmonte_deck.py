@@ -521,7 +521,11 @@ def add_qr_slide(prs: Presentation, qr_path: str, url: str):
     tf.paragraphs[0].runs[0].font.color.rgb = PRIMARY
     tf.paragraphs[0].runs[0].font.name = "Poppins"
 
-    slide.shapes.add_picture(qr_path, Inches(1.2), Inches(1.6), height=Inches(5.5))
+    qr_shape = slide.shapes.add_picture(qr_path, Inches(1.2), Inches(1.6), height=Inches(5.5))
+    try:
+        qr_shape.click_action.hyperlink.address = url
+    except Exception:
+        pass
 
     cap = slide.shapes.add_textbox(Inches(7.2), Inches(2.2), Inches(5.6), Inches(3.6))
     ctf = cap.text_frame
@@ -533,10 +537,16 @@ def add_qr_slide(prs: Presentation, qr_path: str, url: str):
     p1.font.color.rgb = PRIMARY
     p1.font.name = "Poppins"
     p2 = ctf.add_paragraph()
-    p2.text = url
-    p2.font.size = Pt(16)
-    p2.font.color.rgb = RGBColor(60, 60, 60)
-    p2.font.name = "Montserrat"
+    p2.text = ""
+    run = p2.add_run()
+    run.text = url
+    run.font.size = Pt(16)
+    run.font.color.rgb = RGBColor(60, 60, 60)
+    run.font.name = "Montserrat"
+    try:
+        run.hyperlink.address = url
+    except Exception:
+        pass
 
 
 def build_presentation(output_dir: str) -> str:
