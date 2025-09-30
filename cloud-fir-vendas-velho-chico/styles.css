@@ -37,17 +37,7 @@ img{max-width:100%;display:block}
 .hero{position:relative;min-height:92vh;display:flex;align-items:center;overflow:hidden}
 .hero-bg{position:absolute;inset:0}
 .hero-gradient{position:absolute;inset:0;background:radial-gradient(1200px 800px at 20% 20%, #1b3358 0%, transparent 60%), linear-gradient(180deg, var(--deep-blue) 0%, var(--black) 100%)}
-.hero-tilt{position:absolute;inset:0;perspective:900px;pointer-events:none}
-.hero-image{position:absolute;inset:0;background:#000;opacity:.65;transform-style:preserve-3d;will-change:transform}
-.hero-anim{position:absolute;inset:0;pointer-events:none}
-.sun-glow{position:absolute;top:6%;right:12%;width:140px;height:140px;border-radius:999px;background:radial-gradient(closest-side, rgba(243,166,77,.7), rgba(243,166,77,.25), transparent 70%);filter:blur(2px);animation:sunPulse 4.5s ease-in-out infinite}
-@keyframes sunPulse{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.08);opacity:1}}
-.waves{position:absolute;left:0;right:0;bottom:-10px;width:100%;height:160px;opacity:.7;animation:wavesMove 8s ease-in-out infinite}
-@keyframes wavesMove{0%,100%{transform:translateX(0)}50%{transform:translateX(-12px)}}
-.boat-float{position:absolute;left:10%;bottom:18%;width:220px;filter:drop-shadow(0 8px 16px rgba(0,0,0,.5));animation:floatY 4s ease-in-out infinite}
-.rod-sway{position:absolute;left:18%;bottom:22%;width:140px;height:auto;transform-origin:10px 210px;animation:rodSwing 3.4s ease-in-out infinite}
-@keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
-@keyframes rodSwing{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3.5deg)}}
+.hero-image{position:absolute;inset:0;background:#000;opacity:.65}
 .hero-image{position:absolute;inset:0;background:url('https://images.unsplash.com/photo-1469474968028-56623f02e42e?q=80&w=2400&auto=format&fit=crop') center/cover no-repeat;mix-blend-mode:screen;opacity:.35;transform:translateZ(0);will-change:background-position}
 .hero-boat{position:absolute;left:10%;bottom:18%;width:220px;height:auto;filter:drop-shadow(0 8px 16px rgba(0,0,0,.5))}
 .hero-inner{position:relative;z-index:2}
