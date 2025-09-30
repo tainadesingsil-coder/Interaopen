@@ -25,6 +25,8 @@ function onScroll(){
   if(heroImage){
     const posY = Math.min(40, y * 0.05);
     heroImage.style.backgroundPosition = `center ${posY}px`;
+    heroImage.style.backgroundSize = 'cover';
+    heroImage.style.backgroundRepeat = 'no-repeat';
   }
   lastY = y;
 }
@@ -41,11 +43,12 @@ async function setHeroFromImgur(){
     const res = await fetch(oembedUrl, {headers:{'Accept':'application/json'}});
     if(!res.ok) return;
     const data = await res.json();
-    // Try to get thumbnail url from oembed; fallback keep current
-    const thumb = data?.thumbnail_url || data?.url || '';
-    if(thumb && heroImage){
-      heroImage.style.backgroundImage = `url('${thumb}')`;
-      heroImage.style.opacity = 0.5;
+    let imageUrl = '';
+    if(typeof data?.thumbnail_url === 'string') imageUrl = data.thumbnail_url.replace(/(h|l)\.jpg$/,'h.jpg');
+    if(!imageUrl && typeof data?.url === 'string') imageUrl = data.url;
+    if(imageUrl && heroImage){
+      heroImage.style.backgroundImage = `url('${imageUrl}')`;
+      heroImage.style.opacity = 0.6;
     }
   }catch(err){
     // silent fail
