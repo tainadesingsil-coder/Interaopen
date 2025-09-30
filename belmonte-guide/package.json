@@ -6,7 +6,9 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "pages:deploy": "wrangler pages deploy cloud-pages --project-name belmonte-guide",
+    "pages:preview": "wrangler pages deploy cloud-pages --project-name belmonte-guide --branch preview"
   },
   "dependencies": {
     "@expo-google-fonts/montserrat": "^0.4.2",
