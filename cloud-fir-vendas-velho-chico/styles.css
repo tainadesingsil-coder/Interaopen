@@ -37,7 +37,8 @@ img{max-width:100%;display:block}
 .hero{position:relative;min-height:92vh;display:flex;align-items:center;overflow:hidden}
 .hero-bg{position:absolute;inset:0}
 .hero-gradient{position:absolute;inset:0;background:radial-gradient(1200px 800px at 20% 20%, #1b3358 0%, transparent 60%), linear-gradient(180deg, var(--deep-blue) 0%, var(--black) 100%)}
-.hero-image{position:absolute;inset:0;background:#000;opacity:.65}
+.hero-video{position:absolute;inset:0;overflow:hidden}
+.hero-video-el{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:contrast(105%) saturate(110%);opacity:.85}
 .hero-image{position:absolute;inset:0;background:url('https://images.unsplash.com/photo-1469474968028-56623f02e42e?q=80&w=2400&auto=format&fit=crop') center/cover no-repeat;mix-blend-mode:screen;opacity:.35;transform:translateZ(0);will-change:background-position}
 .hero-boat{position:absolute;left:10%;bottom:18%;width:220px;height:auto;filter:drop-shadow(0 8px 16px rgba(0,0,0,.5))}
 .hero-inner{position:relative;z-index:2}
