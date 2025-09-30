@@ -7,6 +7,13 @@ from pptx.enum.text import PP_ALIGN
 from pptx.dml.color import RGBColor
 from pptx.enum.shapes import MSO_SHAPE
 from PIL import Image, ImageDraw, ImageFont
+try:
+    import qrcode
+    from qrcode.image.styledpil import StyledPilImage
+    from qrcode.image.styles.moduledrawers import RoundedModuleDrawer
+    from qrcode.image.styles.colormasks import RadialGradiantColorMask
+except Exception:  # Fallback if styled features are unavailable
+    import qrcode
 
 PRIMARY = RGBColor(0x2C, 0x4D, 0x7B)      # Azul oceano
 ACCENT = RGBColor(0x4C, 0x9E, 0xD9)       # Azul claro
@@ -456,6 +463,82 @@ def add_mockup_detail_slides(prs: Presentation, mapping: dict[str, str]):
         slide.shapes.add_picture(img_path, Inches(1.2), Inches(1.4), width=Inches(6.5))
 
 
+def _make_center_logo(size: int = 220) -> Image.Image:
+    # Create a simple circular brand mark with GOLD and "Bel"
+    img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img, "RGBA")
+    draw.ellipse([0, 0, size, size], fill=(*GOLD_PIL, 255))
+    font = _ensure_font()
+    text = "Bel"
+    tw = draw.textlength(text, font=font)
+    draw.text(((size - tw) / 2, size / 2 - 24), text, font=font, fill=(255, 255, 255))
+    return img
+
+
+def generate_qr_code(url: str, out_path: str) -> str:
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    try:
+        qr = qrcode.QRCode(
+            version=None,
+            error_correction=qrcode.constants.ERROR_CORRECT_H,
+            box_size=12,
+            border=2,
+        )
+        qr.add_data(url)
+        qr.make(fit=True)
+        try:
+            img = qr.make_image(
+                image_factory=StyledPilImage,
+                module_drawer=RoundedModuleDrawer(),
+                color_mask=RadialGradiantColorMask(center_color=ACCENT_PIL, edge_color=PRIMARY_PIL),
+                back_color=(255, 255, 255),
+            )
+        except Exception:
+            img = qr.make_image(fill_color=ACCENT_PIL, back_color="white")
+
+        img = img.convert("RGBA")
+        # Paste center logo
+        logo = _make_center_logo(220)
+        lw, lh = logo.size
+        iw, ih = img.size
+        img.alpha_composite(logo, (iw // 2 - lw // 2, ih // 2 - lh // 2))
+        img.save(out_path)
+        return out_path
+    except Exception:
+        # Minimal fallback
+        img = qrcode.make(url)
+        img.save(out_path)
+        return out_path
+
+
+def add_qr_slide(prs: Presentation, qr_path: str, url: str):
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    header = slide.shapes.add_textbox(Inches(0.8), Inches(0.6), Inches(8.0), Inches(1.0))
+    tf = header.text_frame
+    tf.text = "Acesse o conteúdo"
+    tf.paragraphs[0].runs[0].font.size = Pt(32)
+    tf.paragraphs[0].runs[0].font.bold = True
+    tf.paragraphs[0].runs[0].font.color.rgb = PRIMARY
+    tf.paragraphs[0].runs[0].font.name = "Poppins"
+
+    slide.shapes.add_picture(qr_path, Inches(1.2), Inches(1.6), height=Inches(5.5))
+
+    cap = slide.shapes.add_textbox(Inches(7.2), Inches(2.2), Inches(5.6), Inches(3.6))
+    ctf = cap.text_frame
+    ctf.clear()
+    p1 = ctf.paragraphs[0]
+    p1.text = "Escaneie para acessar:"
+    p1.font.size = Pt(20)
+    p1.font.bold = True
+    p1.font.color.rgb = PRIMARY
+    p1.font.name = "Poppins"
+    p2 = ctf.add_paragraph()
+    p2.text = url
+    p2.font.size = Pt(16)
+    p2.font.color.rgb = RGBColor(60, 60, 60)
+    p2.font.name = "Montserrat"
+
+
 def build_presentation(output_dir: str) -> str:
     prs = Presentation()
     prs.slide_height = Inches(7.5)
@@ -472,6 +555,12 @@ def build_presentation(output_dir: str) -> str:
     mapping = generate_mockups(mock_dir)
     add_mockup_gallery(prs, "Mockups das Telas", mapping)
     add_mockup_detail_slides(prs, mapping)
+    # QR slide
+    url = os.environ.get("BELMONTE_QR_URL", "https://example.com/belmonte")
+    qr_dir = os.path.join(output_dir, "qr")
+    qr_path = os.path.join(qr_dir, "belmonte_qr.png")
+    generate_qr_code(url, qr_path)
+    add_qr_slide(prs, qr_path, url)
     add_closing_slide(prs)
 
     os.makedirs(output_dir, exist_ok=True)
