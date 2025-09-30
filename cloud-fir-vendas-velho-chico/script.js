@@ -23,8 +23,9 @@ function onScroll(){
     boat.style.transform = `translateY(${dy}px)`;
   }
   if(heroImage){
-    const posY = Math.min(40, y * 0.05);
-    heroImage.style.backgroundPosition = `center ${posY}px`;
+    const basePos = heroSection?.getAttribute('data-hero-pos') || '50%';
+    const posY = Math.min(60, y * 0.05);
+    heroImage.style.backgroundPosition = `center calc(${basePos} + ${posY}px)`;
     heroImage.style.backgroundSize = 'cover';
     heroImage.style.backgroundRepeat = 'no-repeat';
   }
