@@ -13,6 +13,7 @@ revealEls.forEach(el=>io.observe(el));
 // Parallax for hero boat and background
 const boat = document.querySelector('.hero-boat');
 const heroImage = document.querySelector('.hero-image');
+const heroTilt = document.querySelector('.hero-tilt');
 const heroSection = document.getElementById('hero');
 let lastY = 0;
 function onScroll(){
@@ -43,6 +44,26 @@ function setHeroFromImage(){
   heroImage.style.opacity = 0.65;
 }
 setHeroFromImage();
+
+// 3D tilt based on pointer position
+function onPointerMove(e){
+  if(!heroImage || !heroTilt) return;
+  const rect = heroTilt.getBoundingClientRect();
+  const cx = rect.left + rect.width/2;
+  const cy = rect.top + rect.height/2;
+  const dx = (e.clientX - cx) / rect.width;  // -0.5 .. 0.5
+  const dy = (e.clientY - cy) / rect.height; // -0.5 .. 0.5
+  const maxTilt = 6; // degrees
+  const rx = (+dy) * maxTilt; // invert for natural tilt
+  const ry = (-dx) * maxTilt;
+  heroImage.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg) translateZ(0)`;
+}
+function onPointerLeave(){
+  if(!heroImage) return;
+  heroImage.style.transform = 'rotateX(0deg) rotateY(0deg) translateZ(0)';
+}
+window.addEventListener('pointermove', onPointerMove, {passive:true});
+window.addEventListener('pointerleave', onPointerLeave);
 
 // Mobile carousel drag (simple)
 const track = document.querySelector('.carousel-track');
