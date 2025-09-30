@@ -15,7 +15,9 @@ function setHeroFromImage(){
   heroImage.style.backgroundImage = `url('${imageUrl}')`;
   heroImage.style.opacity = 0.65;
   heroImage.style.backgroundPosition = 'center';
-  heroImage.style.backgroundSize = 'contain';
+  const scale = Number(heroSection.getAttribute('data-hero-scale')||'100');
+  const size = Math.max(100, Math.min(200, scale));
+  heroImage.style.backgroundSize = `${size}% auto`;
   heroImage.style.backgroundRepeat = 'no-repeat';
 }
 setHeroFromImage();
