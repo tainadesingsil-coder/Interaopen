@@ -1,39 +1,11 @@
-// Intersection Observer for reveal
+// Disable reveal animations: show all
 const revealEls = Array.from(document.querySelectorAll('.reveal'));
-const io = new IntersectionObserver((entries)=>{
-  for(const entry of entries){
-    if(entry.isIntersecting){
-      entry.target.classList.add('is-visible');
-      io.unobserve(entry.target);
-    }
-  }
-},{threshold:.16, rootMargin:'0px 0px -40px 0px'});
-revealEls.forEach(el=>io.observe(el));
+revealEls.forEach(el=>el.classList.add('is-visible'));
 
-// Parallax for hero boat and background
+// No parallax/scroll transforms
 const boat = document.querySelector('.hero-boat');
 const heroImage = document.querySelector('.hero-image');
-const heroTilt = document.querySelector('.hero-tilt');
 const heroSection = document.getElementById('hero');
-let lastY = 0;
-function onScroll(){
-  const y = window.scrollY || window.pageYOffset;
-  // Apply slight parallax when within hero
-  if(boat){
-    const dy = Math.min(60, y * 0.15);
-    boat.style.transform = `translateY(${dy}px)`;
-  }
-  if(heroImage){
-    const basePos = heroSection?.getAttribute('data-hero-pos') || '50%';
-    const posY = Math.min(60, y * 0.05);
-    heroImage.style.backgroundPosition = `center calc(${basePos} + ${posY}px)`;
-    heroImage.style.backgroundSize = 'cover';
-    heroImage.style.backgroundRepeat = 'no-repeat';
-  }
-  lastY = y;
-}
-window.addEventListener('scroll', onScroll, {passive:true});
-onScroll();
 
 // Set hero from explicit image URL (data-hero-image)
 function setHeroFromImage(){
@@ -42,28 +14,13 @@ function setHeroFromImage(){
   if(!imageUrl) return;
   heroImage.style.backgroundImage = `url('${imageUrl}')`;
   heroImage.style.opacity = 0.65;
+  const basePos = heroSection.getAttribute('data-hero-pos') || '50%';
+  heroImage.style.backgroundPosition = `center ${basePos}`;
+  heroImage.style.backgroundSize = 'cover';
+  heroImage.style.backgroundRepeat = 'no-repeat';
 }
 setHeroFromImage();
-
-// 3D tilt based on pointer position
-function onPointerMove(e){
-  if(!heroImage || !heroTilt) return;
-  const rect = heroTilt.getBoundingClientRect();
-  const cx = rect.left + rect.width/2;
-  const cy = rect.top + rect.height/2;
-  const dx = (e.clientX - cx) / rect.width;  // -0.5 .. 0.5
-  const dy = (e.clientY - cy) / rect.height; // -0.5 .. 0.5
-  const maxTilt = 6; // degrees
-  const rx = (+dy) * maxTilt; // invert for natural tilt
-  const ry = (-dx) * maxTilt;
-  heroImage.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg) translateZ(0)`;
-}
-function onPointerLeave(){
-  if(!heroImage) return;
-  heroImage.style.transform = 'rotateX(0deg) rotateY(0deg) translateZ(0)';
-}
-window.addEventListener('pointermove', onPointerMove, {passive:true});
-window.addEventListener('pointerleave', onPointerLeave);
+// No 3D tilt listeners
 
 // Mobile carousel drag (simple)
 const track = document.querySelector('.carousel-track');

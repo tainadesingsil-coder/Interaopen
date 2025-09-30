@@ -120,8 +120,8 @@ input::placeholder,textarea::placeholder{color:var(--text-3)}
 .footer-bottom{border-top:1px solid rgba(255,255,255,.08);padding:10px 0;color:#aeb8c4}
 
 /* Reveal animations */
-.reveal{opacity:0;transform:translateY(16px);transition:opacity .8s ease, transform .8s ease}
-.reveal.is-visible{opacity:1;transform:translateY(0)}
+.reveal{opacity:1;transform:none;transition:none}
+.reveal.is-visible{opacity:1;transform:none}
 
 /* Responsive */
 section{scroll-margin-top:86px}
