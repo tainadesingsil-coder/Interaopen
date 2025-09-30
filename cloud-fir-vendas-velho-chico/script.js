@@ -14,9 +14,8 @@ function setHeroFromImage(){
   if(!imageUrl) return;
   heroImage.style.backgroundImage = `url('${imageUrl}')`;
   heroImage.style.opacity = 0.65;
-  const basePos = heroSection.getAttribute('data-hero-pos') || '50%';
-  heroImage.style.backgroundPosition = `center ${basePos}`;
-  heroImage.style.backgroundSize = 'cover';
+  heroImage.style.backgroundPosition = 'center';
+  heroImage.style.backgroundSize = 'contain';
   heroImage.style.backgroundRepeat = 'no-repeat';
 }
 setHeroFromImage();
