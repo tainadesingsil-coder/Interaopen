@@ -4,12 +4,17 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>Belmonte — App Preview</title>
+    <link rel="manifest" href="/manifest.webmanifest" />
     <meta name="theme-color" content="#2C4D7B" />
     <style>
       :root { --ocean:#2C4D7B; --sky:#4C9ED9; --gold:#F3A64D; --bg:#ffffff; }
       *{ box-sizing:border-box }
       html,body{ height:100%; margin:0; background:var(--bg); color:#0f172a; }
       body{ font-family:Poppins, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, sans-serif; }
+      .theme-dark{ background:#0b1020; color:#e2e8f0; }
+      .theme-dark .app{ background:linear-gradient(180deg,#0b1020 0%, #0e1530 100%); }
+      .theme-dark .header{ background: rgba(13,19,45,.65); border-color: rgba(76,158,217,.25); }
+      .theme-dark .card{ background: rgba(76,158,217,.08); border-color: rgba(76,158,217,.25); color:#d8e3f0 }
       .app{ max-width:480px; margin:0 auto; width:100%; height:100%; display:flex; flex-direction:column; background:linear-gradient(180deg,#ffffff 0%,#f7fbff 100%); }
       .header{ position:sticky; top:0; z-index:10; backdrop-filter: blur(10px); background: rgba(255,255,255,0.7); border-bottom:1px solid rgba(76,158,217,.25); padding:14px 16px 10px; display:flex; align-items:center; gap:12px; }
       .logo{ width:36px; height:36px; border-radius:50%; background:radial-gradient(circle at 30% 30%, #fff 0%, #F3A64D 60%, #c77e33 100%); box-shadow:0 6px 14px rgba(243,166,77,.35); }
@@ -46,11 +51,18 @@
       .composer{ display:flex; gap:8px; }
       .composer input{ flex:1; padding:12px; border-radius:12px; border:1px solid rgba(76,158,217,.35); font:500 14px Montserrat, system-ui; }
       .composer button{ padding:12px 14px; border-radius:12px; background:var(--gold); color:#fff; border:none; font-weight:700; box-shadow:0 8px 20px rgba(243,166,77,.35); }
+      .toolbar{ position:fixed; right:16px; top:16px; display:flex; gap:8px; z-index:30 }
+      .toolbar button{ border:none; border-radius:10px; padding:8px 10px; background:rgba(76,158,217,.12); color:#334155; }
       .sr{ position:absolute; left:-9999px; }
     </style>
   </head>
   <body>
-    <div class="app">
+    <div class="app" id="appRoot">
+      <div class="toolbar">
+        <button id="toggleTheme">Tema</button>
+        <button id="installBtn" style="display:none">Instalar</button>
+        <button id="voiceBtn">🎤</button>
+      </div>
       <div class="header">
         <div class="logo" aria-hidden="true"></div>
         <div>
@@ -124,6 +136,31 @@
     </div>
 
     <script>
+      // PWA
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js').catch(()=>{});
+      }
+      window.addEventListener('beforeinstallprompt', (e)=>{ e.preventDefault(); window.deferredPrompt = e; document.getElementById('installBtn').style.display='inline-block'; });
+      document.getElementById('installBtn').addEventListener('click', async ()=>{ const p = window.deferredPrompt; if(!p) return; p.prompt(); await p.userChoice; window.deferredPrompt = null; });
+
+      // Theme
+      const appRoot = document.getElementById('appRoot');
+      document.getElementById('toggleTheme').addEventListener('click', ()=>{ document.body.classList.toggle('theme-dark'); });
+
+      // Voice input
+      const voiceBtn = document.getElementById('voiceBtn');
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      let rec;
+      if (SR) {
+        rec = new SR();
+        rec.lang = 'pt-BR';
+        rec.continuous = false; rec.interimResults = false;
+        rec.onresult = (e)=>{ const txt = e.results[0][0].transcript; document.getElementById('msg').value = txt; document.getElementById('composer').dispatchEvent(new Event('submit')); };
+      } else { voiceBtn.style.display='none'; }
+      voiceBtn.addEventListener('click', ()=>{ try{ rec && rec.start(); }catch(_){} });
+
+      // TTS for Bel replies
+      function speak(text){ try{ const u = new SpeechSynthesisUtterance(text); u.lang='pt-BR'; speechSynthesis.speak(u);}catch(_){} }
       const sheet = document.getElementById('sheet');
       const chat = document.getElementById('chat');
       const composer = document.getElementById('composer');
@@ -166,6 +203,7 @@
           const reply = data.reply || 'Sem resposta agora.';
           addMessage('assistant', reply);
           messages.push(userMsg, { role:'assistant', content:reply });
+          speak(reply);
         } catch (err) {
           addMessage('assistant', 'Desculpe, não consegui responder agora.');
         }
