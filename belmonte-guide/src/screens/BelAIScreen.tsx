@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList } from 'react-native';
 import * as Speech from 'expo-speech';
 import { colors, typography } from '@/theme';
+import BelMascot from '@/components/BelMascot';
+import { MotiView } from 'moti';
 import { GlassCard } from '@/components/GlassCard';
 
 type Message = { id: string; role: 'user' | 'bel'; text: string };
@@ -27,6 +29,12 @@ export default function BelAIScreen() {
 
   return (
     <View style={styles.container}>
+      <View style={styles.header}>
+        <MotiView from={{ translateY: -6, opacity: 0 }} animate={{ translateY: 0, opacity: 1 }}>
+          <BelMascot size={48} glow={false} />
+        </MotiView>
+        <Text style={styles.headerTitle}>Bel, sua guia</Text>
+      </View>
       <FlatList
         data={messages}
         keyExtractor={(item) => item.id}
@@ -57,6 +65,8 @@ export default function BelAIScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F7FAFF' },
+  header: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 16 },
+  headerTitle: { fontFamily: typography.bodyBold, color: colors.deepBlue, fontSize: 16 },
   bubble: { maxWidth: '80%', padding: 12, borderRadius: 12 },
   bel: { backgroundColor: '#EAF2FF', alignSelf: 'flex-start' },
   user: { backgroundColor: colors.sunsetGold, alignSelf: 'flex-end' },

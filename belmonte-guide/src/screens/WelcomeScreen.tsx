@@ -1,12 +1,14 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ImageBackground } from 'react-native';
 import { colors, typography } from '@/theme';
 import { BelGradient } from '@/components/BelGradient';
 import { GlassCard } from '@/components/GlassCard';
 import { useNavigation } from '@react-navigation/native';
+import BelIntroAnimation from '@/components/BelIntroAnimation';
 
 export default function WelcomeScreen() {
   const navigation = useNavigation<any>();
+  const [showIntro, setShowIntro] = useState(true);
 
   useEffect(() => {
     // preload assets if needed
@@ -19,6 +21,7 @@ export default function WelcomeScreen() {
       resizeMode="cover"
     >
       <BelGradient style={styles.overlay}>
+        {showIntro && <BelIntroAnimation onFinish={() => setShowIntro(false)} />}
         <View style={styles.content}>
           <GlassCard style={styles.heroCard}>
             <Text style={styles.title}>Olá, eu sou a Bel</Text>
