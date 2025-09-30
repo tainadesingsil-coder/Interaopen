@@ -1,0 +1,10 @@
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mA request to the Cloudflare API (/memberships) failed.[0m
+
+  Authentication error [code: 10000]
+
+
+📎 It looks like you are authenticating Wrangler via a custom API token set in an environment variable.
+Please ensure it has the correct permissions for this operation.
+
+Getting User settings...
