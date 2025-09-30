@@ -56,10 +56,12 @@ img{max-width:100%;display:block}
 /* Benefits */
 .benefits{background:linear-gradient(180deg,var(--deep-blue) 0%, #193a62 100%)}
 .cards{margin-top:26px;display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
-.card{border-radius:18px;padding:22px;background:#111}
-.glass{background:rgba(255,255,255,.06);backdrop-filter:blur(var(--blur));border:1px solid rgba(243,166,77,.35);box-shadow:0 10px 20px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.05);transition:transform .25s ease, box-shadow .25s ease}
-.glass:hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(243,166,77,.25)}
-.card-ico{font-size:28px;margin-bottom:6px;text-shadow:0 6px 16px rgba(76,158,217,.5)}
+.card{border-radius:18px;padding:22px;background:#111;position:relative;overflow:hidden}
+.glass{background:rgba(255,255,255,.06);backdrop-filter:blur(var(--blur));border:1px solid rgba(243,166,77,.35);box-shadow:0 10px 20px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.05);transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease}
+.glass::after{content:"";position:absolute;inset:-1px;border-radius:inherit;background:radial-gradient(600px 200px at -10% -10%, rgba(255,255,255,.15), transparent 40%), radial-gradient(400px 160px at 120% 120%, rgba(243,166,77,.15), transparent 40%);opacity:0;transition:opacity .35s ease}
+.glass:hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(243,166,77,.25);border-color:rgba(243,166,77,.6)}
+.glass:hover::after{opacity:1}
+.card-ico{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:rgba(76,158,217,.14);color:#e8f3ff;margin-bottom:8px}
 .card h3{margin:0 0 6px}
 .card p{margin:0;color:#d5e7fa}
 
