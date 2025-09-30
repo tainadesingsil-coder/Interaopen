@@ -12,6 +12,7 @@ import ItinerariesScreen from '@/screens/ItinerariesScreen';
 import CommerceScreen from '@/screens/CommerceScreen';
 import EventsScreen from '@/screens/EventsScreen';
 import ProfileScreen from '@/screens/ProfileScreen';
+import WebViewScreen from '@/screens/WebViewScreen';
 import { colors } from '@/theme';
 
 const Tab = createBottomTabNavigator();
@@ -62,6 +63,9 @@ function Tabs() {
       <Tab.Screen name="Comércio" component={CommerceScreen} />
       <Tab.Screen name="Eventos" component={EventsScreen} />
       <Tab.Screen name="Perfil" component={ProfileScreen} />
+      <Tab.Screen name="Vendas">
+        {() => <WebViewScreen uri="https://preview.cloud-fir-vendas-velho-chico.pages.dev/" />}
+      </Tab.Screen>
     </Tab.Navigator>
   );
 }
