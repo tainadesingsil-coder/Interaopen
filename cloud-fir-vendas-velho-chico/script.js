@@ -33,28 +33,15 @@ function onScroll(){
 window.addEventListener('scroll', onScroll, {passive:true});
 onScroll();
 
-// Imgur oEmbed: extract first image as hero background
-async function setHeroFromImgur(){
-  if(!heroSection) return;
-  const albumUrl = heroSection.getAttribute('data-imgur');
-  if(!albumUrl) return;
-  try{
-    const oembedUrl = `https://api.imgur.com/oembed.json?url=${encodeURIComponent(albumUrl)}`;
-    const res = await fetch(oembedUrl, {headers:{'Accept':'application/json'}});
-    if(!res.ok) return;
-    const data = await res.json();
-    let imageUrl = '';
-    if(typeof data?.thumbnail_url === 'string') imageUrl = data.thumbnail_url.replace(/(h|l)\.jpg$/,'h.jpg');
-    if(!imageUrl && typeof data?.url === 'string') imageUrl = data.url;
-    if(imageUrl && heroImage){
-      heroImage.style.backgroundImage = `url('${imageUrl}')`;
-      heroImage.style.opacity = 0.6;
-    }
-  }catch(err){
-    // silent fail
-  }
+// Set hero from explicit image URL (data-hero-image)
+function setHeroFromImage(){
+  if(!heroSection || !heroImage) return;
+  const imageUrl = heroSection.getAttribute('data-hero-image');
+  if(!imageUrl) return;
+  heroImage.style.backgroundImage = `url('${imageUrl}')`;
+  heroImage.style.opacity = 0.65;
 }
-setHeroFromImgur();
+setHeroFromImage();
 
 // Mobile carousel drag (simple)
 const track = document.querySelector('.carousel-track');
