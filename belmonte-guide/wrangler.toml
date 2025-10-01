@@ -1,0 +1,6 @@
+name = "belmonte-guide"
+compatibility_date = "2024-10-01"
+
+[vars]
+
+[env.preview]
