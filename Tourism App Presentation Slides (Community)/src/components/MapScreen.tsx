@@ -6,10 +6,13 @@ import { Button } from "./ui/button";
 import { motion, AnimatePresence } from "motion/react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { Input } from "./ui/input";
-import { allLocations, Location } from "../data/belmonte-database";
+import { useCity } from "../contexts/CityContext";
+import { MGLocation } from "../data/minas-database";
+import { getLocationsByCityAndInterests } from "../data/minas-database";
 
 export function MapScreen() {
-  const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
+  const { selectedCity, interests } = useCity();
+  const [selectedLocation, setSelectedLocation] = useState<MGLocation | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
 
@@ -32,10 +35,11 @@ export function MapScreen() {
     nature: "🌿",
   };
 
-  const filteredLocations = allLocations.filter(loc => {
+  const base = getLocationsByCityAndInterests(selectedCity, interests as any);
+  const filteredLocations = base.filter(loc => {
     const matchesSearch = loc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          loc.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = categoryFilter === "all" || loc.category === categoryFilter;
+    const matchesCategory = categoryFilter === "all" || loc.category === (categoryFilter as any);
     return matchesSearch && matchesCategory;
   });
 
@@ -83,7 +87,7 @@ export function MapScreen() {
               <h1 className="text-2xl text-white" style={{ fontFamily: 'var(--font-family-heading)' }}>
                 Mapa Interativo
               </h1>
-              <p className="text-white/90 text-sm">{allLocations.length} locais mapeados</p>
+              <p className="text-white/90 text-sm">{filteredLocations.length} locais em {selectedCity}</p>
             </div>
           </div>
 

@@ -11,11 +11,8 @@ interface LoginScreenProps {
   onLogin: () => void;
 }
 
-// Credenciais de demonstração
-const DEMO_CREDENTIALS = {
-  email: "demo@minas.com",
-  password: "minas2024"
-};
+// Demo desativado
+const DEMO_CREDENTIALS = { email: "", password: "" };
 
 export function LoginScreen({ onLogin }: LoginScreenProps) {
   const { t } = useLanguage();
@@ -33,13 +30,9 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
 
     // Validação
     if (!isSignUp) {
-      // Login
-      if (email === DEMO_CREDENTIALS.email && password === DEMO_CREDENTIALS.password) {
-        setSuccess(true);
-        setTimeout(onLogin, 1200);
-      } else {
-        setError("Email ou senha incorretos. Use: demo@minas.com / minas2024");
-      }
+      // Login (aceita qualquer para demo)
+      setSuccess(true);
+      setTimeout(onLogin, 800);
     } else {
       // Cadastro
       if (name && email && password.length >= 6) {
@@ -146,21 +139,7 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
           transition={{ duration: 0.8 }}
           className="w-full max-w-md"
         >
-          {/* Demo info banner */}
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="mb-4 bg-accent/20 backdrop-blur-md border border-accent/30 rounded-2xl p-4 text-center"
-          >
-            <p className="text-white text-sm mb-2">
-              <strong>🎯 Demo Login:</strong>
-            </p>
-            <p className="text-white/90 text-xs">
-              📧 demo@belmonte.com<br />
-              🔐 belmonte2024
-            </p>
-          </motion.div>
+          {/* Demo info banner removido */}
           {/* Card de login com glassmorphism */}
           <div className="backdrop-blur-2xl bg-white/10 dark:bg-white/5 border border-white/20 rounded-3xl shadow-2xl overflow-hidden">
             {/* Header com Dora */}
@@ -289,7 +268,7 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
                     <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
                     <Input
                       type="email"
-                      placeholder="demo@minas.com"
+                      placeholder="seu@email.com"
                       value={email}
                       onChange={(e) => {
                         setEmail(e.target.value);
@@ -306,7 +285,7 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
                     <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
                     <Input
                       type={showPassword ? "text" : "password"}
-                      placeholder="minas2024"
+                      placeholder="sua senha"
                       value={password}
                       onChange={(e) => {
                         setPassword(e.target.value);

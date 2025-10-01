@@ -3,12 +3,16 @@ import { Button } from "./ui/button";
 import { PremiumCard } from "./PremiumCard";
 import { MapPin, Star, Compass, Utensils, Camera, Calendar, Sparkles, TrendingUp } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
+import { useCity } from "../contexts/CityContext";
+import { recommendLocations } from "../services/locationService";
 
 interface HomeScreenProps {
   onCreateRoute: () => void;
 }
 
 export function HomeScreen({ onCreateRoute }: HomeScreenProps) {
+  const { selectedCity, interests } = useCity();
+  const recs = recommendLocations({ city: selectedCity, interests: interests as any }).slice(0, 2);
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* Hero Section com parallax */}
@@ -96,7 +100,7 @@ export function HomeScreen({ onCreateRoute }: HomeScreenProps) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
         >
-          <div className="relative overflow-hidden rounded-3xl p-8 bg-gradient-to-br from-[#F3A64D] via-[#6ba3d6] to-[#4a7ba7] shadow-2xl">
+          <div className="relative overflow-hidden rounded-3xl p-8 bg-gradient-to-br from-[#F3A64D] via-[#6ba3d6] to-[#4a7ba7] shadow-2xl card-mobile-tight">
             {/* Glossy overlay */}
             <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent" />
             <div className="absolute top-0 left-0 w-32 h-32 bg-white/10 rounded-full blur-3xl" />
@@ -119,12 +123,12 @@ export function HomeScreen({ onCreateRoute }: HomeScreenProps) {
                 <span className="text-white/90 text-sm uppercase tracking-wider">IA Dora Recomenda</span>
               </div>
               
-              <h2 className="text-white text-2xl mb-3" style={{ fontFamily: 'var(--font-family-heading)' }}>
-                Crie seu roteiro personalizado
+            <h2 className="text-white text-2xl mb-3" style={{ fontFamily: 'var(--font-family-heading)' }}>
+              {selectedCity}: experiências personalizadas
               </h2>
               
               <p className="text-white/90 mb-6 text-base">
-                A IA Dora vai criar uma experiência única baseada nos seus interesses
+                A IA Dora vai criar uma experiência única baseada nos seus interesses em {selectedCity}
               </p>
               
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
@@ -172,16 +176,16 @@ export function HomeScreen({ onCreateRoute }: HomeScreenProps) {
               transition={{ delay: 0.7 }}
             >
               <PremiumCard
-                image="https://images.unsplash.com/photo-1727901645818-ee92585251e4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxicmF6aWwlMjBiZWFjaCUyMHByaXN0aW5lJTIwdHJvcGljYWwlMjBjb2FzdHxlbnwxfHx8fDE3NTkyNDU1MzB8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+                image={recs[0]?.image || "https://images.unsplash.com/photo-1509395176047-4a66953fd231?q=80&w=1080&auto=format&fit=crop"}
                 badge="Popular"
                 variant="glass"
                 className="h-64"
               >
                 <div className="absolute bottom-4 left-4 right-4">
-                  <h4 className="text-white mb-1">Praia do Pescador</h4>
+                  <h4 className="text-white mb-1">{recs[0]?.name || selectedCity}</h4>
                   <div className="flex items-center gap-1">
                     <Star className="w-3 h-3 fill-[#F3A64D] text-[#F3A64D]" />
-                    <span className="text-white/90 text-sm">4.8</span>
+                    <span className="text-white/90 text-sm">{recs[0]?.rating ?? "4.8"}</span>
                   </div>
                 </div>
               </PremiumCard>
@@ -193,16 +197,16 @@ export function HomeScreen({ onCreateRoute }: HomeScreenProps) {
               transition={{ delay: 0.8 }}
             >
               <PremiumCard
-                image="https://images.unsplash.com/photo-1596579283654-cfe0767a11b8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxicmF6aWxpYW4lMjB0cmFkaXRpb25hbCUyMGZvb2QlMjBtb3F1ZWNhfGVufDF8fHx8MTc1OTI0NTUzMXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+                image={recs[1]?.image || "https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=1080&auto=format&fit=crop"}
                 badge="Novo"
                 variant="glass"
                 className="h-64"
               >
                 <div className="absolute bottom-4 left-4 right-4">
-                  <h4 className="text-white mb-1">Casa do Acarajé</h4>
+                  <h4 className="text-white mb-1">{recs[1]?.name || "Destaque"}</h4>
                   <div className="flex items-center gap-1 text-white/90 text-sm">
                     <div className="w-2 h-2 bg-[#F3A64D] rounded-full animate-pulse" />
-                    <span>Aberto agora</span>
+                    <span>{selectedCity}</span>
                   </div>
                 </div>
               </PremiumCard>

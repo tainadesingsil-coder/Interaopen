@@ -233,3 +233,10 @@ html {
 .animate-shimmer {
   animation: shimmer 2s infinite;
 }
+
+/* Mobile card refinements */
+@media (max-width: 420px) {
+  .card-mobile-tight .h-64 { height: 14rem; }
+  .card-mobile-tight .p-6 { padding: 1rem; }
+  .card-mobile-tight .text-2xl { font-size: 1.25rem; }
+}

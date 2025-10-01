@@ -3,6 +3,8 @@ import { Button } from "./ui/button";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { Sparkles, MapPin, Heart } from "lucide-react";
 import belMascotImage from "figma:asset/f252610f6e9a8a9c93c9aaea8fde97dff0ee9a53.png";
+import { useCity } from "../contexts/CityContext";
+import { getCitiesFromMG } from "../data/minas-database";
 
 interface WelcomeScreenProps {
   onExplore: () => void;
@@ -10,6 +12,18 @@ interface WelcomeScreenProps {
 }
 
 export function WelcomeScreen({ onExplore, onCreateRoute }: WelcomeScreenProps) {
+  const { selectedCity, interests, setCity, setInterests } = useCity();
+  const cities = getCitiesFromMG();
+  const interestOptions = [
+    { id: 'culture', label: 'Cultura' },
+    { id: 'historical', label: 'História' },
+    { id: 'restaurant', label: 'Gastronomia' },
+    { id: 'hotel', label: 'Hospedagem' },
+    { id: 'shop', label: 'Compras' },
+    { id: 'lake', label: 'Lagos' },
+    { id: 'mountain', label: 'Montanhas' },
+    { id: 'waterfall', label: 'Cachoeiras' },
+  ] as const;
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* Background com parallax */}
@@ -144,7 +158,7 @@ export function WelcomeScreen({ onExplore, onCreateRoute }: WelcomeScreenProps) 
             animate={{ opacity: 1 }}
             transition={{ delay: 0.8 }}
           >
-            Sua guia virtual em Minas Gerais
+            Escolha a cidade e seus interesses para personalizar sua experiência em Minas Gerais
           </motion.p>
 
           <motion.p 
@@ -155,6 +169,55 @@ export function WelcomeScreen({ onExplore, onCreateRoute }: WelcomeScreenProps) 
           >
             Quer que eu monte um roteiro personalizado para você?
           </motion.p>
+        </motion.div>
+
+        {/* Filtros de cidade e interesses */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.0 }}
+          className="w-full max-w-sm mb-6"
+        >
+          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-4 text-white">
+            <div className="mb-4 text-left">
+              <label className="block text-sm mb-2">Cidade</label>
+              <select
+                value={selectedCity}
+                onChange={(e) => setCity(e.target.value)}
+                className="w-full bg-white/10 border border-white/20 rounded-xl px-3 py-2"
+              >
+                {cities.map((c) => (
+                  <option key={c} value={c} className="text-black">{c}</option>
+                ))}
+              </select>
+            </div>
+            <div className="text-left">
+              <label className="block text-sm mb-2">Interesses</label>
+              <div className="flex flex-wrap gap-2">
+                {interestOptions.map((opt) => {
+                  const active = interests.includes(opt.id as any);
+                  return (
+                    <button
+                      key={opt.id}
+                      onClick={() => {
+                        const has = interests.includes(opt.id as any);
+                        setInterests(
+                          has
+                            ? interests.filter((i) => i !== (opt.id as any))
+                            : [...interests, opt.id as any]
+                        );
+                      }}
+                      className={`px-3 py-1 rounded-full text-xs border ${
+                        active ? 'bg-white text-[#0a0e1a]' : 'bg-transparent text-white'
+                      } border-white/40`}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
         </motion.div>
 
         {/* Botões de ação */}

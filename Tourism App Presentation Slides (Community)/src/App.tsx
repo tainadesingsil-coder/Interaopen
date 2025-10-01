@@ -16,6 +16,7 @@ import { BelIntroAnimation } from "./components/BelIntroAnimation";
 import { BelSuggestions } from "./components/BelSuggestions";
 import { BelNotifications } from "./components/BelNotifications";
 import { LanguageProvider } from "./contexts/LanguageContext";
+import { CityProvider } from "./contexts/CityContext";
 
 function AppContent() {
   const [activeTab, setActiveTab] = useState("home");
@@ -142,7 +143,9 @@ function AppContent() {
 export default function App() {
   return (
     <LanguageProvider>
-      <AppContent />
+      <CityProvider>
+        <AppContent />
+      </CityProvider>
     </LanguageProvider>
   );
 }
