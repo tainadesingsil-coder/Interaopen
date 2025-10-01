@@ -5,7 +5,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { LanguageSelector } from "./LanguageSelector";
 import { useLanguage } from "../contexts/LanguageContext";
-import belMascotImage from "figma:asset/f252610f6e9a8a9c93c9aaea8fde97dff0ee9a53.png";
+const belMascotImage = "https://i.postimg.cc/Z58dyFfS/Chat-GPT-Image-30-de-set-de-2025-23-27-13.png";
 
 interface LoginScreenProps {
   onLogin: () => void;

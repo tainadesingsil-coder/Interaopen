@@ -2,7 +2,7 @@ import { motion } from "motion/react";
 import { Button } from "./ui/button";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { Sparkles, MapPin, Heart } from "lucide-react";
-import belMascotImage from "figma:asset/f252610f6e9a8a9c93c9aaea8fde97dff0ee9a53.png";
+const belMascotImage = "https://i.postimg.cc/Z58dyFfS/Chat-GPT-Image-30-de-set-de-2025-23-27-13.png";
 import { useCity } from "../contexts/CityContext";
 import { getCitiesFromMG } from "../data/minas-database";
 import { useCityIntelligence } from "../hooks/useCityIntelligence";

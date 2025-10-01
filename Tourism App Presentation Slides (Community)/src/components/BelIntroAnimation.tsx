@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { MapPin, Sparkles, Compass, Heart, Star } from "lucide-react";
-import belMascotImage from "figma:asset/f252610f6e9a8a9c93c9aaea8fde97dff0ee9a53.png";
+const belMascotImage = "https://i.postimg.cc/Z58dyFfS/Chat-GPT-Image-30-de-set-de-2025-23-27-13.png";
 
 interface BelIntroAnimationProps {
   onComplete: () => void;

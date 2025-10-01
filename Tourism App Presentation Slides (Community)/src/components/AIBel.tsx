@@ -2,7 +2,7 @@ import { MessageCircle, Sparkles, MapPin, Heart, Star, Coffee, Utensils, Bed, Ca
 import { motion, AnimatePresence } from "motion/react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { useState, useEffect } from "react";
-import belMascotImage from "figma:asset/f252610f6e9a8a9c93c9aaea8fde97dff0ee9a53.png";
+const belMascotImage = "https://i.postimg.cc/Z58dyFfS/Chat-GPT-Image-30-de-set-de-2025-23-27-13.png";
 
 interface AIBelProps {
   message: string;
