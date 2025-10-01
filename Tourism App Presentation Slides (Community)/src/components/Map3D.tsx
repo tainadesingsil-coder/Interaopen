@@ -1,3 +1,5 @@
+// Deduplicated: keep a single Map3D export (center as {lat, lon})
+
 import { useEffect, useRef } from "react";
 import maplibregl, { Map } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
