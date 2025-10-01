@@ -140,14 +140,14 @@ export function MapScreen() {
       </div>
 
       {/* Mapa 3D */}
-      <div className="relative flex-1 overflow-hidden bg-gradient-to-b from-[#e8f4f8] to-[#d4e8f0]">
-        <div className="p-4">
+      <div className="relative flex-1 overflow-hidden">
+        <div className="p-4 h-full">
           <Map3D
             center={center}
             markers={filteredLocations.slice(0, 40).map((l) => ({ id: l.id, lat: l.lat || center.lat, lon: l.lon || center.lon, title: l.name }))}
           />
         </div>
-        {/* Removido fundo estático: usando MapLibre */}
+        {/* MapLibre em tela cheia da área útil */}
 
         {/* Grid de coordenadas */}
         <div className="absolute inset-0 opacity-10">
@@ -162,7 +162,7 @@ export function MapScreen() {
         </div>
 
         {/* Pontos dos locais */}
-        <div className="absolute inset-0">
+        <div className="absolute inset-0 pointer-events-none">
           {filteredLocations.map((location, index) => {
             const position = getMapPosition(index, filteredLocations.length);
             const categoryColor = categories.find(c => c.id === location.category)?.color || "#6ba3d6";

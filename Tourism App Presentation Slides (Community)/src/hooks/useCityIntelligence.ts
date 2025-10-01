@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { fetchMinasCities } from "../services/ibge";
+import { fetchWikimediaImage } from "../services/wiki";
 
 interface Place {
   id: string;
@@ -77,7 +78,7 @@ export function useCityIntelligence(city: string, interests: string[]) {
         if (!res.ok) throw new Error(String(res.status));
         const data = await res.json();
         const nodes: any[] = Array.isArray(data?.elements) ? data.elements.filter((e: any) => e.type === "node") : [];
-        const places: Place[] = nodes.slice(0, 40).map((n) => ({
+        const basePlaces: Place[] = nodes.slice(0, 40).map((n) => ({
           id: String(n.id),
           name: n.tags?.name || "Ponto de interesse",
           category: n.tags?.amenity || n.tags?.tourism || n.tags?.shop || n.tags?.natural || "place",
@@ -86,7 +87,14 @@ export function useCityIntelligence(city: string, interests: string[]) {
           lon: n.lon,
           image: undefined,
         }));
-        setState((s) => ({ ...s, places, loadingPlaces: false }));
+        // Enrich with Wikimedia images in parallel (best-effort)
+        const enriched = await Promise.all(
+          basePlaces.map(async (p) => {
+            const img = await fetchWikimediaImage(p.name, city, ctrl.signal).catch(() => undefined);
+            return { ...p, image: img || p.image };
+          })
+        );
+        setState((s) => ({ ...s, places: enriched, loadingPlaces: false }));
       } catch (e: any) {
         setState((s) => ({ ...s, loadingPlaces: false, error: e?.message || "overpass" }));
       }

@@ -179,13 +179,13 @@ export function HomeScreen({ onCreateRoute }: HomeScreenProps) {
               className="h-full"
             >
               <PremiumCard
-                image={recs[0]?.image || "https://images.unsplash.com/photo-1509395176047-4a66953fd231?q=80&w=1080&auto=format&fit=crop"}
+                image={recs[0]?.image || "https://images.unsplash.com/photo-1528821154947-1aa3d1b87b34?q=80&w=1080&auto=format&fit=crop"}
                 badge="Popular"
                 variant="glass"
                 className="h-full min-h-[14rem]"
               >
                 <div className="absolute bottom-4 left-4 right-4">
-                  <h4 className="text-white mb-1">{recs[0]?.name || selectedCity}</h4>
+                  <h4 className="text-white mb-1 truncate">{recs[0]?.name || selectedCity}</h4>
                   <div className="flex items-center gap-1">
                     <Star className="w-3 h-3 fill-[#F3A64D] text-[#F3A64D]" />
                     <span className="text-white/90 text-sm">{recs[0]?.rating ?? "4.8"}</span>
@@ -207,7 +207,7 @@ export function HomeScreen({ onCreateRoute }: HomeScreenProps) {
                 className="h-full min-h-[14rem]"
               >
                 <div className="absolute bottom-4 left-4 right-4">
-                  <h4 className="text-white mb-1">{recs[1]?.name || "Destaque"}</h4>
+                  <h4 className="text-white mb-1 truncate">{recs[1]?.name || "Destaque"}</h4>
                   <div className="flex items-center gap-1 text-white/90 text-sm">
                     <div className="w-2 h-2 bg-[#F3A64D] rounded-full animate-pulse" />
                     <span>{selectedCity}</span>
