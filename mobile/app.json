@@ -1,0 +1,24 @@
+{
+  "expo": {
+    "name": "Dorapp Mobile",
+    "slug": "dorapp-mobile",
+    "version": "0.1.0",
+    "scheme": "dorapp",
+    "sdkVersion": "51.0.0",
+    "platforms": ["ios", "android", "web"],
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0a0e1a"
+    },
+    "ios": { "supportsTablet": true },
+    "android": {
+      "adaptiveIcon": { "foregroundImage": "./assets/adaptive-icon.png", "backgroundColor": "#0a0e1a" },
+      "permissions": []
+    },
+    "web": { "bundler": "metro", "output": "static" }
+  }
+}
+
