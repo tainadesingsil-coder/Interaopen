@@ -32,16 +32,12 @@ export function WelcomeScreen({ onExplore, onCreateRoute }: WelcomeScreenProps) 
       {/* Background com parallax */}
       <motion.div 
         className="absolute inset-0"
-        initial={{ scale: 1.1 }}
-        animate={{ scale: 1 }}
-        transition={{ duration: 20, ease: "linear" }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8 }}
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70 z-10" />
-        <ImageWithFallback
-          src="https://images.unsplash.com/photo-1509395176047-4a66953fd231?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
-          alt="Montanhas de Minas Gerais"
-          className="w-full h-full object-cover"
-        />
+        {/* Fundo dark sem foto */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e1a] via-[#0f172a] to-[#0a0e1a]" />
       </motion.div>
 
       {/* Partículas flutuantes */}
