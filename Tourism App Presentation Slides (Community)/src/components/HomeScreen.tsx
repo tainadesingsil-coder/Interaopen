@@ -169,17 +169,18 @@ export function HomeScreen({ onCreateRoute }: HomeScreenProps) {
             <TrendingUp className="w-5 h-5 text-[#F3A64D]" />
           </motion.div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4 items-stretch">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.7 }}
+              className="h-full"
             >
               <PremiumCard
                 image={recs[0]?.image || "https://images.unsplash.com/photo-1509395176047-4a66953fd231?q=80&w=1080&auto=format&fit=crop"}
                 badge="Popular"
                 variant="glass"
-                className="h-64"
+                className="h-full min-h-[14rem]"
               >
                 <div className="absolute bottom-4 left-4 right-4">
                   <h4 className="text-white mb-1">{recs[0]?.name || selectedCity}</h4>
@@ -195,12 +196,13 @@ export function HomeScreen({ onCreateRoute }: HomeScreenProps) {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8 }}
+              className="h-full"
             >
               <PremiumCard
                 image={recs[1]?.image || "https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=1080&auto=format&fit=crop"}
                 badge="Novo"
                 variant="glass"
-                className="h-64"
+                className="h-full min-h-[14rem]"
               >
                 <div className="absolute bottom-4 left-4 right-4">
                   <h4 className="text-white mb-1">{recs[1]?.name || "Destaque"}</h4>

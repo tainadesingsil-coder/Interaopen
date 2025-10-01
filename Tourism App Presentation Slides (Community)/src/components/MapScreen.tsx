@@ -195,8 +195,8 @@ export function MapScreen() {
                   />
 
                   {/* Label compacto */}
-                  <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
-                    <div className="bg-black/80 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-lg shadow-lg">
+                  <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap">
+                    <div className="bg-black/80 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-lg shadow-lg text-center">
                       {location.name}
                     </div>
                   </div>
