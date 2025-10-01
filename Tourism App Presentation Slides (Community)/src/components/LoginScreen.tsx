@@ -13,8 +13,8 @@ interface LoginScreenProps {
 
 // Credenciais de demonstração
 const DEMO_CREDENTIALS = {
-  email: "demo@belmonte.com",
-  password: "belmonte2024"
+  email: "demo@minas.com",
+  password: "minas2024"
 };
 
 export function LoginScreen({ onLogin }: LoginScreenProps) {
@@ -38,7 +38,7 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
         setSuccess(true);
         setTimeout(onLogin, 1200);
       } else {
-        setError("Email ou senha incorretos. Use: demo@belmonte.com / belmonte2024");
+        setError("Email ou senha incorretos. Use: demo@minas.com / minas2024");
       }
     } else {
       // Cadastro
@@ -163,9 +163,9 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
           </motion.div>
           {/* Card de login com glassmorphism */}
           <div className="backdrop-blur-2xl bg-white/10 dark:bg-white/5 border border-white/20 rounded-3xl shadow-2xl overflow-hidden">
-            {/* Header com Bel */}
+            {/* Header com Dora */}
             <div className="relative bg-gradient-to-br from-[#4C9ED9]/20 via-[#2C4D7B]/20 to-transparent p-8 text-center">
-              {/* Bel Mascot */}
+              {/* Dora Mascot */}
               <motion.div
                 className="mx-auto w-24 h-24 mb-4"
                 initial={{ scale: 0, rotate: -180 }}
@@ -184,7 +184,7 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
                 >
                   <img
                     src={belMascotImage}
-                    alt="Bel"
+                    alt="Dora"
                     className="w-full h-full object-contain drop-shadow-2xl"
                   />
                 </motion.div>
@@ -199,7 +199,7 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
               >
                 {t.welcome}{" "}
                 <span className="bg-gradient-to-r from-[#F3A64D] to-[#4C9ED9] bg-clip-text text-transparent">
-                  Belmonte
+                  Minas Gerais
                 </span>
               </motion.h1>
               
@@ -289,7 +289,7 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
                     <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
                     <Input
                       type="email"
-                      placeholder="demo@belmonte.com"
+                      placeholder="demo@minas.com"
                       value={email}
                       onChange={(e) => {
                         setEmail(e.target.value);
@@ -306,7 +306,7 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
                     <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
                     <Input
                       type={showPassword ? "text" : "password"}
-                      placeholder="belmonte2024"
+                      placeholder="minas2024"
                       value={password}
                       onChange={(e) => {
                         setPassword(e.target.value);
