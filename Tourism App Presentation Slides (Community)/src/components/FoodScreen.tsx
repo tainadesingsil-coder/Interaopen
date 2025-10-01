@@ -4,55 +4,10 @@ import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Star, Clock, MapPin, Phone, Filter, Utensils, Sparkles, ChefHat, TrendingUp } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
+import { useCityContent } from "../hooks/useCityContent";
 
 export function FoodScreen() {
-  const restaurants = [
-    {
-      id: 1,
-      name: "Casa do Acarajé da Dona Maria",
-      type: "Comida Baiana",
-      rating: 4.9,
-      reviews: 248,
-      distance: "800m",
-      priceRange: "$$",
-      image: "https://images.unsplash.com/photo-1703836567326-f5a588ceaaf0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxhY2FyYWplJTIwYmFoaWElMjBzdHJlZXQlMjBmb29kfGVufDF8fHx8MTc1OTI0NTc0M3ww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-      openHours: "08:00 - 22:00",
-      specialties: ["Acarajé Especial", "Vatapá", "Caruru"],
-      status: "Aberto",
-      badge: "Recomendado pela Bel",
-      color: "from-[#F3A64D] to-[#6ba3d6]"
-    },
-    {
-      id: 2,
-      name: "Restaurante Maré Alta",
-      type: "Frutos do Mar",
-      rating: 4.8,
-      reviews: 187,
-      distance: "1.2km",
-      priceRange: "$$$",
-      image: "https://images.unsplash.com/photo-1583085678956-bfd8d20bb7bd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxicmF6aWxpYW4lMjBzZWFmb29kJTIwbW9xdWVjYSUyMHJlc3RhdXJhbnR8ZW58MXx8fHwxNzU5MjQ1NzQxfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-      openHours: "11:00 - 23:00",
-      specialties: ["Moqueca de Peixe", "Casquinha de Siri", "Bobó de Camarão"],
-      status: "Aberto",
-      badge: "Mais Procurado",
-      color: "from-[#6ba3d6] to-[#4a7ba7]"
-    },
-    {
-      id: 3,
-      name: "Sabor da Terra",
-      type: "Regional",
-      rating: 4.7,
-      reviews: 156,
-      distance: "600m",
-      priceRange: "$$",
-      image: "https://images.unsplash.com/photo-1596579283654-cfe0767a11b8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxicmF6aWxpYW4lMjB0cmFkaXRpb25hbCUyMGZvb2QlMjBtb3F1ZWNhfGVufDF8fHx8MTc1OTI0NTUzMXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-      openHours: "10:00 - 22:00",
-      specialties: ["Xinxim de Galinha", "Tapioca Recheada", "Cocada"],
-      status: "Aberto",
-      badge: "Tradicional",
-      color: "from-[#4a7ba7] to-[#F3A64D]"
-    }
-  ];
+  const { city, loading, restaurants } = useCityContent();
 
   const filters = [
     { id: "all", label: "Todos", active: true, icon: Utensils },
@@ -185,7 +140,7 @@ export function FoodScreen() {
           </motion.div>
 
           <div className="space-y-6">
-            {restaurants.map((restaurant, index) => (
+            {restaurants.slice(0, 12).map((restaurant: any, index: number) => (
               <motion.div
                 key={restaurant.id}
                 initial={{ opacity: 0, y: 30 }}
@@ -200,7 +155,7 @@ export function FoodScreen() {
                       transition={{ duration: 0.6 }}
                     >
                       <ImageWithFallback
-                        src={restaurant.image}
+                        src={restaurant.image || "https://upload.wikimedia.org/wikipedia/commons/1/10/Belo_Horizonte_Mercado_Central.jpg"}
                         alt={restaurant.name}
                         className="w-full h-full object-cover"
                       />
@@ -210,7 +165,7 @@ export function FoodScreen() {
                     {/* Badge de destaque */}
                     <div className="absolute top-4 right-4">
                       <Badge className="bg-[#F3A64D]/90 backdrop-blur-md text-white border-white/20 shadow-lg">
-                        {restaurant.badge}
+                        {city}
                       </Badge>
                     </div>
 
@@ -224,7 +179,7 @@ export function FoodScreen() {
 
                     {/* Informações sobrepostas */}
                     <div className="absolute bottom-4 left-4 right-4">
-                      <h3 className="text-white text-lg mb-2" style={{ fontFamily: 'var(--font-family-heading)' }}>
+                      <h3 className="text-white text-lg mb-2 truncate" style={{ fontFamily: 'var(--font-family-heading)' }}>
                         {restaurant.name}
                       </h3>
                       <div className="flex items-center gap-3 text-white/90 text-sm">
