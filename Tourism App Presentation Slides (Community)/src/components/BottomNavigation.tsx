@@ -13,7 +13,7 @@ export function BottomNavigation({ activeTab, onTabChange }: BottomNavigationPro
     { id: "routes", icon: Route, label: "Roteiros" },
     { id: "food", icon: UtensilsCrossed, label: "Comida" },
     { id: "events", icon: Calendar, label: "Eventos" },
-    { id: "favorites", icon: Heart, label: "Favoritos" },
+    { id: "favorites", icon: Heart, label: "Passeios" },
     { id: "profile", icon: User, label: "Perfil" }
   ];
 
