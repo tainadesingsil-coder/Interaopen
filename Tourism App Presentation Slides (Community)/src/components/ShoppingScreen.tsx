@@ -242,10 +242,10 @@ export function ShoppingScreen() {
         <ShoppingBag className="w-6 h-6 mx-auto mb-2" />
         <h3 className="mb-2">Tour de Compras Personalizado</h3>
         <p className="text-sm opacity-90 mb-3">
-          Deixe a IA Bel criar um roteiro de compras baseado nos seus interesses!
+          Deixe a IA Dora criar um roteiro de compras baseado nos seus interesses!
         </p>
         <Button className="bg-white text-[#2C4D7B] hover:bg-white/90">
-          Criar Tour com IA Bel
+          Criar Tour com IA Dora
         </Button>
       </Card>
     </div>

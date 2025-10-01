@@ -138,7 +138,7 @@ export function BelSuggestions({ context, isVisible, onClose, onSuggestionClick 
                 <Star className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h3 className="text-lg text-foreground">Sugestões da Bel</h3>
+                <h3 className="text-lg text-foreground">Sugestões da Dora</h3>
                 <p className="text-sm text-muted-foreground">Especialmente para você</p>
               </div>
             </div>

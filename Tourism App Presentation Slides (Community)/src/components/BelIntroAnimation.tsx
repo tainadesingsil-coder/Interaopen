@@ -85,7 +85,7 @@ export function BelIntroAnimation({ onComplete }: BelIntroAnimationProps) {
       </div>
 
       <div className="relative text-center z-10">
-        {/* Bel's Mascot com entrada espetacular */}
+          {/* Dora's Mascot com entrada espetacular */}
         <motion.div
           className="relative mx-auto mb-12"
           initial={{ scale: 0, y: -100, rotateZ: -180 }}
@@ -130,7 +130,7 @@ export function BelIntroAnimation({ onComplete }: BelIntroAnimationProps) {
             {/* Background circle com gradiente */}
             <div className="absolute inset-0 bg-gradient-to-br from-[#4C9ED9]/30 via-[#2C4D7B]/20 to-transparent rounded-full" />
             
-            {/* Bel mascot */}
+            {/* Dora mascot */}
             <motion.div
               className="relative w-full h-full rounded-full overflow-visible flex items-center justify-center"
               whileHover={{ scale: 1.1 }}
@@ -258,7 +258,7 @@ export function BelIntroAnimation({ onComplete }: BelIntroAnimationProps) {
                   }}
                   transition={{ duration: 3, repeat: Infinity }}
                 >
-                  Bel
+                  Dora
                 </motion.span>
               </motion.h1>
               
@@ -268,7 +268,7 @@ export function BelIntroAnimation({ onComplete }: BelIntroAnimationProps) {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.4 }}
               >
-                Sua assistente virtual em Belmonte
+                Sua assistente virtual em Minas Gerais
               </motion.p>
               
               <motion.div

@@ -28,25 +28,25 @@ function AppContent() {
   const getAIBelMessage = () => {
     switch (activeTab) {
       case "home":
-        return "Oi! 👋 Pronta para descobrir os segredos de Belmonte? Tenho dicas incríveis para você!";
+        return "Oi! 👋 Pronta para explorar Minas Gerais? Tenho dicas incríveis para você!";
       case "map":
-        return "🗺️ Vamos explorar! Cada ponto no mapa esconde uma história única da nossa costa baiana.";
+        return "🗺️ Vamos explorar! Cada ponto no mapa esconde uma história única de Minas Gerais.";
       case "routes":
         return "✨ Hora de criar sua aventura perfeita! Prefere praias, cultura ou gastronomia?";
       case "food":
-        return "🍤 Que delícia! O acarajé da Dona Maria está imperdível hoje. Posso te levar lá!";
+        return "🍽️ Que delícia! Posso te levar aos melhores sabores de Minas!";
       case "events":
         return "🎉 O Festival de São João está chegando! Quer saber todos os detalhes?";
       case "hotels":
-        return "🏨 Encontrei pousadas charmosas com vista para o mar! Qual seu estilo preferido?";
+        return "🏨 Encontrei hospedagens charmosas em MG! Qual seu estilo preferido?";
       case "shopping":
         return "🎨 O artesanato local está maravilhoso! Que tal uma peça única feita pelos artistas daqui?";
       case "favorites":
         return "❤️ Seus gostos são excelentes! Baseado nisso, tenho mais surpresas para você.";
       case "profile":
-        return "🌟 Você já explorou tanto! Que tal desbloquear o badge de 'Expert em Belmonte'?";
+        return "🌟 Você já explorou tanto! Que tal desbloquear o badge de 'Expert em Minas'?";
       default:
-        return "🌊 Belmonte te espera! Vamos juntas nessa jornada incrível?";
+        return "⛰️ Minas Gerais te espera! Vamos juntas nessa jornada incrível?";
     }
   };
 

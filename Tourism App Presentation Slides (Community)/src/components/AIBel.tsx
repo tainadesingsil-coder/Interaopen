@@ -147,9 +147,9 @@ export function AIBel({ message, position = "bottom-right", isVisible = true, co
             </div>
             
             <div className="flex-1">
-              {/* Nome da Bel com status emocional */}
+              {/* Nome da Dora com status emocional */}
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-sm text-[#6ba3d6] dark:text-[#6ba3d6]">Bel</span>
+                <span className="text-sm text-[#6ba3d6] dark:text-[#6ba3d6]">Dora</span>
                 <motion.div
                   animate={{ 
                     scale: currentEmotion === "excited" ? [1, 1.3, 1] : [1, 1.1, 1],
@@ -186,7 +186,7 @@ export function AIBel({ message, position = "bottom-right", isVisible = true, co
           )}
         </motion.div>
         
-        {/* Mascote 3D da Bel com glossy effect */}
+          {/* Mascote 3D da Dora com glossy effect */}
         <motion.div 
           className="absolute -bottom-6 -right-6 w-20 h-20 rounded-full shadow-2xl overflow-visible cursor-pointer"
           whileHover={{ scale: 1.15, y: -2 }}
@@ -207,7 +207,7 @@ export function AIBel({ message, position = "bottom-right", isVisible = true, co
           <div className="relative w-full h-full flex items-center justify-center">
             <img
               src={belMascotImage}
-              alt="Bel Mascot"
+              alt="Dora Mascot"
               className="w-20 h-20 object-contain drop-shadow-2xl"
             />
           </div>

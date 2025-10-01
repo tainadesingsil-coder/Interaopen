@@ -218,10 +218,10 @@ export function HotelsScreen() {
       <Card className="mt-6 p-4 bg-gradient-to-r from-[#F3A64D] to-[#4C9ED9] text-white text-center">
         <h3 className="mb-2">Não encontrou o ideal?</h3>
         <p className="text-sm opacity-90 mb-3">
-          A IA Bel pode ajudar você a encontrar a hospedagem perfeita!
+          A IA Dora pode ajudar você a encontrar a hospedagem perfeita!
         </p>
         <Button className="bg-white text-[#2C4D7B] hover:bg-white/90">
-          Buscar com IA Bel
+          Buscar com IA Dora
         </Button>
       </Card>
     </div>

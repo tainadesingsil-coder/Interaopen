@@ -100,7 +100,7 @@ export function RoutesScreen() {
                 <h1 className="text-3xl text-white mb-1" style={{ fontFamily: 'var(--font-family-heading)' }}>
                   Roteiros Inteligentes
                 </h1>
-                <p className="text-white/90 text-lg">Experiências curadas pela IA Bel</p>
+                <p className="text-white/90 text-lg">Experiências curadas pela IA Dora</p>
               </motion.div>
             </div>
           </div>
@@ -388,7 +388,7 @@ export function RoutesScreen() {
               </h3>
               
               <p className="text-white/95 text-lg mb-8 max-w-md mx-auto leading-relaxed">
-                A Bel pode criar um roteiro 100% personalizado baseado nos seus interesses, tempo e preferências únicas!
+                A Dora pode criar um roteiro 100% personalizado baseado nos seus interesses, tempo e preferências únicas!
               </p>
               
               <motion.div 
@@ -398,7 +398,7 @@ export function RoutesScreen() {
                 <Button className="bg-white text-primary hover:bg-white/90 rounded-2xl px-10 h-14 shadow-2xl text-lg">
                   <span className="flex items-center gap-3">
                     <Sparkles className="w-5 h-5" />
-                    Criar com IA Bel
+                    Criar com IA Dora
                     <ChevronRight className="w-5 h-5" />
                   </span>
                 </Button>

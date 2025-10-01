@@ -103,7 +103,7 @@ export function EventsScreen() {
               <h1 className="text-2xl text-foreground" style={{ fontFamily: 'var(--font-family-heading)' }}>
                 Eventos & Cultura
               </h1>
-              <p className="text-sm text-muted-foreground">Celebre Belmonte conosco</p>
+              <p className="text-sm text-muted-foreground">Celebre Minas Gerais conosco</p>
             </div>
           </div>
         </motion.div>
@@ -318,7 +318,7 @@ export function EventsScreen() {
               </h3>
               
               <p className="text-white/90 mb-6 max-w-md mx-auto">
-                Ative as notificações e a IA Bel te avisa quando houver eventos do seu interesse!
+                Ative as notificações e a IA Dora te avisa quando houver eventos do seu interesse!
               </p>
               
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>

@@ -26,9 +26,9 @@ export function HomeScreen({ onCreateRoute }: HomeScreenProps) {
             animate={{ scale: 1 }}
             transition={{ duration: 20, repeat: Infinity, repeatType: "reverse" }}
           >
-            <ImageWithFallback
-              src="https://images.unsplash.com/photo-1727901645818-ee92585251e4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxicmF6aWwlMjBiZWFjaCUyMHByaXN0aW5lJTIwdHJvcGljYWwlMjBjb2FzdHxlbnwxfHx8fDE3NTkyNDU1MzB8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
-              alt="Belmonte - Praias paradisíacas"
+              <ImageWithFallback
+              src="https://images.unsplash.com/photo-1598899134739-24f11f9b4338?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxfHNlYXJjaHwxfHxNaW5hcyUyMEdlcmFpcyUyMHNlbnJhcmlvfGVufDB8fHx8MTcwNjk2MjE1OQ&ixlib=rb-4.0.3&q=80&w=1080"
+              alt="Minas Gerais - Serra"
               className="w-full h-full object-cover"
             />
           </motion.div>
@@ -53,11 +53,11 @@ export function HomeScreen({ onCreateRoute }: HomeScreenProps) {
             <h1 className="text-white text-4xl mb-3" style={{ fontFamily: 'var(--font-family-heading)' }}>
               Bem-vindo a <br />
               <span className="bg-gradient-to-r from-[#F3A64D] to-[#6ba3d6] bg-clip-text text-transparent">
-                Belmonte
+                Minas Gerais
               </span>
             </h1>
             <p className="text-white/90 text-lg max-w-md">
-              Descubra as maravilhas da costa baiana com a IA mais inteligente do turismo
+              Descubra as maravilhas de Minas Gerais com a IA mais inteligente do turismo
             </p>
           </motion.div>
         </div>
@@ -116,7 +116,7 @@ export function HomeScreen({ onCreateRoute }: HomeScreenProps) {
             <div className="relative z-10">
               <div className="flex items-center gap-2 mb-3">
                 <Sparkles className="w-6 h-6 text-white" />
-                <span className="text-white/90 text-sm uppercase tracking-wider">IA Bel Recomenda</span>
+                <span className="text-white/90 text-sm uppercase tracking-wider">IA Dora Recomenda</span>
               </div>
               
               <h2 className="text-white text-2xl mb-3" style={{ fontFamily: 'var(--font-family-heading)' }}>
@@ -124,7 +124,7 @@ export function HomeScreen({ onCreateRoute }: HomeScreenProps) {
               </h2>
               
               <p className="text-white/90 mb-6 text-base">
-                A IA Bel vai criar uma experiência única baseada nos seus interesses
+                A IA Dora vai criar uma experiência única baseada nos seus interesses
               </p>
               
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
@@ -262,9 +262,9 @@ export function HomeScreen({ onCreateRoute }: HomeScreenProps) {
               <Compass className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h4 className="text-foreground mb-2">Dica da Bel</h4>
+              <h4 className="text-foreground mb-2">Dica da Dora</h4>
               <p className="text-muted-foreground text-sm leading-relaxed">
-                O pôr do sol no Rio Jequitinhonha é imperdível! Entre 17h30 e 18h você terá a melhor vista da cidade.
+                O pôr do sol na Serra do Cipó é imperdível! Entre 17h30 e 18h a vista é incrível.
               </p>
             </div>
           </div>

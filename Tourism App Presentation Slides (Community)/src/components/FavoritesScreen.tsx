@@ -219,7 +219,7 @@ export function FavoritesScreen() {
           <Heart className="w-12 h-12 text-gray-300 mx-auto mb-4" />
           <h3 className="text-[#2C4D7B] mb-2">Nenhum favorito ainda</h3>
           <p className="text-sm text-gray-600 mb-4">
-            Explore Belmonte e salve seus lugares favoritos aqui!
+            Explore Minas Gerais e salve seus lugares favoritos aqui!
           </p>
           <Button className="bg-[#4C9ED9] text-white hover:bg-[#2C4D7B]">
             Descobrir Lugares
@@ -231,7 +231,7 @@ export function FavoritesScreen() {
       <Card className="mt-6 p-4 bg-gradient-to-r from-[#F3A64D] to-[#4C9ED9] text-white text-center">
         <h3 className="mb-2">Descubra mais lugares incríveis</h3>
         <p className="text-sm opacity-90 mb-3">
-          A IA Bel pode sugerir novos lugares baseados nos seus favoritos!
+          A IA Dora pode sugerir novos lugares baseados nos seus favoritos!
         </p>
         <Button className="bg-white text-[#2C4D7B] hover:bg-white/90">
           Receber Sugestões

@@ -124,7 +124,7 @@ export const translations: Record<Language, Translations> = {
   pt: {
     // Login & Auth
     welcome: "Bem-vindo(a) a",
-    welcomeSubtitle: "Entre e descubra os segredos da costa baiana",
+    welcomeSubtitle: "Entre e descubra as belezas de Minas Gerais",
     email: "E-mail",
     password: "Senha",
     login: "Entrar",
@@ -151,7 +151,7 @@ export const translations: Record<Language, Translations> = {
     profile: "Perfil",
     
     // Home
-    discoverBelmonte: "Descubra Belmonte",
+    discoverBelmonte: "Descubra Minas Gerais",
     aiAssistant: "Assistente IA",
     popularPlaces: "Lugares Populares",
     featuredRoutes: "Roteiros em Destaque",
@@ -216,8 +216,8 @@ export const translations: Record<Language, Translations> = {
     scanQRCode: "Escaneie o QR Code",
     
     // Bel AI
-    belGreeting: "Olá! Sou a Bel, sua assistente virtual",
-    askBel: "Pergunte à Bel",
+    belGreeting: "Olá! Sou a Dora, sua assistente virtual",
+    askBel: "Pergunte à Dora",
     suggestions: "Sugestões",
     
     // Common
@@ -242,7 +242,7 @@ export const translations: Record<Language, Translations> = {
   en: {
     // Login & Auth
     welcome: "Welcome to",
-    welcomeSubtitle: "Log in and discover the secrets of the Bahian coast",
+    welcomeSubtitle: "Log in and discover the gems of Minas Gerais",
     email: "Email",
     password: "Password",
     login: "Login",
@@ -269,7 +269,7 @@ export const translations: Record<Language, Translations> = {
     profile: "Profile",
     
     // Home
-    discoverBelmonte: "Discover Belmonte",
+    discoverBelmonte: "Discover Minas Gerais",
     aiAssistant: "AI Assistant",
     popularPlaces: "Popular Places",
     featuredRoutes: "Featured Routes",
@@ -334,8 +334,8 @@ export const translations: Record<Language, Translations> = {
     scanQRCode: "Scan QR Code",
     
     // Bel AI
-    belGreeting: "Hi! I'm Bel, your virtual assistant",
-    askBel: "Ask Bel",
+    belGreeting: "Hi! I'm Dora, your virtual assistant",
+    askBel: "Ask Dora",
     suggestions: "Suggestions",
     
     // Common
@@ -360,7 +360,7 @@ export const translations: Record<Language, Translations> = {
   es: {
     // Login & Auth
     welcome: "Bienvenido a",
-    welcomeSubtitle: "Inicia sesión y descubre los secretos de la costa bahiana",
+    welcomeSubtitle: "Inicia sesión y descubre los encantos de Minas Gerais",
     email: "Correo electrónico",
     password: "Contraseña",
     login: "Iniciar sesión",
@@ -387,7 +387,7 @@ export const translations: Record<Language, Translations> = {
     profile: "Perfil",
     
     // Home
-    discoverBelmonte: "Descubre Belmonte",
+    discoverBelmonte: "Descubre Minas Gerais",
     aiAssistant: "Asistente IA",
     popularPlaces: "Lugares Populares",
     featuredRoutes: "Rutas Destacadas",
@@ -452,8 +452,8 @@ export const translations: Record<Language, Translations> = {
     scanQRCode: "Escanear código QR",
     
     // Bel AI
-    belGreeting: "¡Hola! Soy Bel, tu asistente virtual",
-    askBel: "Pregunta a Bel",
+    belGreeting: "¡Hola! Soy Dora, tu asistente virtual",
+    askBel: "Pregunta a Dora",
     suggestions: "Sugerencias",
     
     // Common
@@ -478,7 +478,7 @@ export const translations: Record<Language, Translations> = {
   fr: {
     // Login & Auth
     welcome: "Bienvenue à",
-    welcomeSubtitle: "Connectez-vous et découvrez les secrets de la côte bahianaise",
+    welcomeSubtitle: "Connectez-vous et découvrez les trésors du Minas Gerais",
     email: "Email",
     password: "Mot de passe",
     login: "Connexion",
@@ -505,7 +505,7 @@ export const translations: Record<Language, Translations> = {
     profile: "Profil",
     
     // Home
-    discoverBelmonte: "Découvrez Belmonte",
+    discoverBelmonte: "Découvrez Minas Gerais",
     aiAssistant: "Assistant IA",
     popularPlaces: "Lieux Populaires",
     featuredRoutes: "Itinéraires en Vedette",
@@ -570,8 +570,8 @@ export const translations: Record<Language, Translations> = {
     scanQRCode: "Scanner le QR Code",
     
     // Bel AI
-    belGreeting: "Bonjour! Je suis Bel, votre assistante virtuelle",
-    askBel: "Demandez à Bel",
+    belGreeting: "Bonjour! Je suis Dora, votre assistante virtuelle",
+    askBel: "Demandez à Dora",
     suggestions: "Suggestions",
     
     // Common

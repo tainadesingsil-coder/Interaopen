@@ -29,7 +29,7 @@ export function BelNotifications({ context }: BelNotificationsProps) {
         {
           id: "map-tip",
           type: "tip",
-          title: "Dica da Bel",
+          title: "Dica da Dora",
           message: "Toque nos pontos laranja para ver informações detalhadas!",
           icon: <MapPin className="w-4 h-4" />,
           duration: 4000
@@ -126,7 +126,7 @@ export function BelNotifications({ context }: BelNotificationsProps) {
             <div className="absolute top-0 left-0 w-full h-1/3 bg-gradient-to-b from-white/20 to-transparent pointer-events-none" />
             
             <div className="flex items-start gap-3">
-              {/* Ícone da Bel */}
+              {/* Ícone da Dora */}
               <div className="flex-shrink-0">
                 <div className="w-8 h-8 bg-gradient-to-br from-[#F3A64D] to-[#6ba3d6] rounded-full flex items-center justify-center shadow-lg">
                   {notification.icon || <Sparkles className="w-4 h-4 text-white" />}

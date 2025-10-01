@@ -108,7 +108,7 @@ export function FoodScreen() {
               <h1 className="text-2xl text-foreground" style={{ fontFamily: 'var(--font-family-heading)' }}>
                 Gastronomia
               </h1>
-              <p className="text-sm text-muted-foreground">Sabores autênticos de Belmonte</p>
+              <p className="text-sm text-muted-foreground">Sabores autênticos de Minas Gerais</p>
             </div>
           </div>
         </motion.div>
@@ -159,7 +159,7 @@ export function FoodScreen() {
               <Sparkles className="w-5 h-5 text-white" />
             </div>
             <div className="flex-1">
-              <h4 className="text-foreground mb-1 text-sm">Dica da Bel</h4>
+              <h4 className="text-foreground mb-1 text-sm">Dica da Dora</h4>
               <p className="text-muted-foreground text-xs leading-relaxed">
                 O acarajé da Dona Maria está imperdível hoje! Ela usa uma receita de família de 60 anos.
               </p>
@@ -319,7 +319,7 @@ export function FoodScreen() {
               </h3>
               
               <p className="text-white/90 mb-6 max-w-md mx-auto">
-                A IA Bel pode recomendar pratos perfeitos baseados no seu gosto e restrições alimentares!
+                A IA Dora pode recomendar pratos perfeitos baseados no seu gosto e restrições alimentares!
               </p>
               
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
