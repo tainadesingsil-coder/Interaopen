@@ -1,7 +1,7 @@
 import { motion } from "motion/react";
 import { Button } from "./ui/button";
 import { PremiumCard } from "./PremiumCard";
-import { MapPin, Star, Compass, Utensils, Camera, Calendar, Sparkles, TrendingUp } from "lucide-react";
+import { MapPin, Star, Compass, Utensils, Camera, Calendar, Sparkles, TrendingUp, PhoneCall, Hospital, Building2, Bus, Shield, LifeBuoy } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { useCity } from "../contexts/CityContext";
 import { recommendLocations } from "../services/locationService";
@@ -218,7 +218,7 @@ export function HomeScreen({ onCreateRoute }: HomeScreenProps) {
           </div>
         </div>
 
-        {/* Acesso rápido */}
+        {/* Serviços da cidade */}
         <div>
           <motion.h3 
             className="text-foreground text-xl mb-6"
@@ -227,15 +227,17 @@ export function HomeScreen({ onCreateRoute }: HomeScreenProps) {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.9 }}
           >
-            Explore por categoria
+            Serviços da cidade
           </motion.h3>
 
           <div className="grid grid-cols-2 gap-4">
             {[
-              { icon: MapPin, label: "Pontos Turísticos", gradient: "from-[#6ba3d6] to-[#4a7ba7]", delay: 1.0 },
-              { icon: Utensils, label: "Gastronomia", gradient: "from-[#F3A64D] to-[#6ba3d6]", delay: 1.1 },
-              { icon: Camera, label: "Cultura & Arte", gradient: "from-[#4a7ba7] to-[#F3A64D]", delay: 1.2 },
-              { icon: Calendar, label: "Eventos", gradient: "from-[#6ba3d6] to-[#F3A64D]", delay: 1.3 }
+              { icon: PhoneCall, label: "Emergências", gradient: "from-[#ef4444] to-[#f97316]", delay: 1.0 },
+              { icon: Hospital, label: "Saúde", gradient: "from-[#10b981] to-[#34d399]", delay: 1.05 },
+              { icon: Building2, label: "Prefeitura", gradient: "from-[#6ba3d6] to-[#4a7ba7]", delay: 1.1 },
+              { icon: Bus, label: "Transporte", gradient: "from-[#F3A64D] to-[#6ba3d6]", delay: 1.15 },
+              { icon: Shield, label: "Segurança", gradient: "from-[#4a7ba7] to-[#F3A64D]", delay: 1.2 },
+              { icon: LifeBuoy, label: "Assistência", gradient: "from-[#22c55e] to-[#16a34a]", delay: 1.25 }
             ].map((item, index) => (
               <motion.div
                 key={index}
@@ -247,7 +249,7 @@ export function HomeScreen({ onCreateRoute }: HomeScreenProps) {
                   icon={item.icon}
                   title={item.label}
                   variant="minimal"
-                  className="h-32"
+                  className="h-28"
                 >
                   <motion.div
                     className={`absolute inset-0 bg-gradient-to-br ${item.gradient} opacity-0 hover:opacity-10 transition-opacity duration-300 rounded-3xl`}

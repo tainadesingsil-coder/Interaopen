@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Mail, Lock, Eye, EyeOff, Chrome, Facebook, Apple, Sparkles, MapPin, Waves, AlertCircle, CheckCircle } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, Chrome, Facebook, Apple, Sparkles, Waves, AlertCircle, CheckCircle } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { LanguageSelector } from "./LanguageSelector";
@@ -200,14 +200,7 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
                   <Sparkles className="w-6 h-6 text-[#F3A64D]" />
                 </motion.div>
               </div>
-              <div className="absolute bottom-4 left-4">
-                <motion.div
-                  animate={{ scale: [1, 1.2, 1] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                >
-                  <MapPin className="w-6 h-6 text-[#4C9ED9]" />
-                </motion.div>
-              </div>
+              {/* Removed location icon */}
             </div>
 
             {/* Formulário */}
