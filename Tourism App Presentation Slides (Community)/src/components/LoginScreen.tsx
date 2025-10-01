@@ -170,7 +170,7 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
               </motion.div>
 
               <motion.h1
-                className="text-2xl text-white mb-1 leading-tight"
+                className="text-xl text-white mb-1 leading-tight"
                 style={{ fontFamily: 'var(--font-family-heading)' }}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -183,7 +183,7 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
               </motion.h1>
               
               <motion.p
-                className="text-white/70 text-sm"
+                className="text-white/70 text-xs"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.6 }}
