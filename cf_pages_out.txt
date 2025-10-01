@@ -1,0 +1,9 @@
+Uploading... (0/6)
+Uploading... (2/6)
+Uploading... (4/6)
+Uploading... (6/6)
+✨ Success! Uploaded 6 files (2.37 sec)
+
+🌎 Deploying...
+✨ Deployment complete! Take a peek over at https://44e078a1.belmontapp-dev.pages.dev
+✨ Deployment alias URL: https://preview.belmontapp-dev.pages.dev

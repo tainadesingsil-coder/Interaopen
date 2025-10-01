@@ -1,0 +1,5 @@
+Uploading... (6/6)
+✨ Success! Uploaded 0 files (6 already uploaded) (0.39 sec)
+
+🌎 Deploying...
+✨ Deployment complete! Take a peek over at https://0d6ef636.belmontapp-dev.pages.dev

@@ -1,0 +1,13 @@
+{
+  "name": "Guia Belmonte",
+  "short_name": "Belmonte",
+  "start_url": "/app.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2C4D7B",
+  "icons": [
+    { "src": "/Belmonte_QR.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/Belmonte_QR.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
+
