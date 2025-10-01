@@ -10,13 +10,25 @@ import { useCity } from "../contexts/CityContext";
 import { MGLocation } from "../data/minas-database";
 import { getLocationsByCityAndInterests } from "../data/minas-database";
 import { useCityIntelligence } from "../hooks/useCityIntelligence";
+import { geocodeCity } from "../services/geocode";
+import { useEffect, useState } from "react";
+import { Map3D } from "./Map3D";
 
 export function MapScreen() {
   const { selectedCity, interests } = useCity();
   const intel = useCityIntelligence(selectedCity, interests as any);
-  const [selectedLocation, setSelectedLocation] = useState<MGLocation | null>(null);
+  const [selectedLocation, setSelectedLocation] = useState<any | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [center, setCenter] = useState<{ lat: number; lon: number }>({ lat: -19.9167, lon: -43.9345 });
+
+  useEffect(() => {
+    const ctrl = new AbortController();
+    geocodeCity(selectedCity, ctrl.signal).then((p) => {
+      if (p) setCenter(p);
+    });
+    return () => ctrl.abort();
+  }, [selectedCity]);
 
   const categories = [
     { id: "all", label: "Todos", color: "#6ba3d6" },
@@ -127,16 +139,15 @@ export function MapScreen() {
         </motion.div>
       </div>
 
-      {/* Mapa com pontos */}
+      {/* Mapa 3D */}
       <div className="relative flex-1 overflow-hidden bg-gradient-to-b from-[#e8f4f8] to-[#d4e8f0]">
-        {/* Imagem de fundo do mapa */}
-        <div className="absolute inset-0">
-          <ImageWithFallback
-            src="https://images.unsplash.com/photo-1509395176047-4a66953fd231?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
-            alt="Mapa de Minas Gerais"
-            className="w-full h-full object-cover opacity-30"
+        <div className="p-4">
+          <Map3D
+            center={center}
+            markers={filteredLocations.slice(0, 40).map((l) => ({ id: l.id, lat: l.lat || center.lat, lon: l.lon || center.lon, title: l.name }))}
           />
         </div>
+        {/* Removido fundo estático: usando MapLibre */}
 
         {/* Grid de coordenadas */}
         <div className="absolute inset-0 opacity-10">
