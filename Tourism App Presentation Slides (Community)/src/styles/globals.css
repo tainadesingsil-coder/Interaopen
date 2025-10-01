@@ -1,28 +1,28 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
 
 @custom-variant dark (&:is(.dark *));
 
 :root {
   --font-size: 16px;
-  --font-family-heading: 'Poppins', system-ui, -apple-system, sans-serif;
-  --font-family-body: 'Montserrat', system-ui, -apple-system, sans-serif;
-  --background: #ffffff;
-  --foreground: #2C4D7B;
-  --card: #ffffff;
-  --card-foreground: #2C4D7B;
-  --popover: #ffffff;
-  --popover-foreground: #2C4D7B;
-  --primary: #2C4D7B;
-  --primary-foreground: #ffffff;
-  --secondary: #4C9ED9;
-  --secondary-foreground: #ffffff;
-  --muted: #f8f9fa;
-  --muted-foreground: #6c757d;
-  --accent: #F3A64D;
-  --accent-foreground: #ffffff;
+  --font-family-heading: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-family-body: 'Inter', system-ui, -apple-system, sans-serif;
+  --background: #0b0f17;
+  --foreground: #e6f1ff;
+  --card: #0f1623;
+  --card-foreground: #e6f1ff;
+  --popover: #0f1623;
+  --popover-foreground: #e6f1ff;
+  --primary: #17a34a; /* verde Minas */
+  --primary-foreground: #0a0e1a;
+  --secondary: #6ba3d6;
+  --secondary-foreground: #0a0e1a;
+  --muted: #0f1623;
+  --muted-foreground: #9ca3af;
+  --accent: #22c55e;
+  --accent-foreground: #0a0e1a;
   --destructive: #d4183d;
   --destructive-foreground: #ffffff;
-  --border: rgba(44, 77, 123, 0.1);
+  --border: rgba(255, 255, 255, 0.08);
   --input: transparent;
   --input-background: #f8f9fa;
   --switch-background: #cbced4;
@@ -35,67 +35,23 @@
   --chart-4: #28a745;
   --chart-5: #6f42c1;
   --radius: 0.75rem;
-  --sidebar: #ffffff;
-  --sidebar-foreground: #2C4D7B;
-  --sidebar-primary: #2C4D7B;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #f8f9fa;
-  --sidebar-accent-foreground: #2C4D7B;
-  --sidebar-border: rgba(44, 77, 123, 0.1);
-  --sidebar-ring: #4C9ED9;
-  
-  /* Cores específicas de Belmonte */
-  --ocean-blue: #2C4D7B;
-  --sky-blue: #4C9ED9;
-  --sunset-gold: #F3A64D;
-  --tropical-white: #ffffff;
-}
-
-.dark {
-  --background: #0a0e1a;
-  --foreground: #e6f1ff;
-  --card: #1a1f2e;
-  --card-foreground: #e6f1ff;
-  --popover: #1a1f2e;
-  --popover-foreground: #e6f1ff;
-  --primary: #6ba3d6;
-  --primary-foreground: #0a0e1a;
-  --secondary: #4a7ba7;
-  --secondary-foreground: #ffffff;
-  --muted: #2a3441;
-  --muted-foreground: #9ca3af;
-  --accent: #F3A64D;
-  --accent-foreground: #0a0e1a;
-  --destructive: #d4183d;
-  --destructive-foreground: #ffffff;
-  --border: rgba(107, 163, 214, 0.2);
-  --input: transparent;
-  --input-background: #2a3441;
-  --switch-background: #4a5568;
-  --font-weight-medium: 500;
-  --font-weight-normal: 400;
-  --ring: #6ba3d6;
-  --chart-1: #6ba3d6;
-  --chart-2: #4a7ba7;
-  --chart-3: #F3A64D;
-  --chart-4: #10b981;
-  --chart-5: #8b5cf6;
-  --radius: 0.75rem;
-  --sidebar: #1a1f2e;
+  --sidebar: #0f1623;
   --sidebar-foreground: #e6f1ff;
-  --sidebar-primary: #6ba3d6;
+  --sidebar-primary: #17a34a;
   --sidebar-primary-foreground: #0a0e1a;
-  --sidebar-accent: #2a3441;
+  --sidebar-accent: #0b0f17;
   --sidebar-accent-foreground: #e6f1ff;
-  --sidebar-border: rgba(107, 163, 214, 0.2);
-  --sidebar-ring: #6ba3d6;
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+  --sidebar-ring: #22c55e;
   
-  /* Cores específicas de Belmonte - Dark Mode */
-  --ocean-blue: #6ba3d6;
-  --sky-blue: #4a7ba7;
-  --sunset-gold: #F3A64D;
+  /* Paleta MG */
+  --ocean-blue: #17a34a;
+  --sky-blue: #6ba3d6;
+  --sunset-gold: #22c55e;
   --tropical-white: #e6f1ff;
 }
+
+.dark { /* já estamos sempre em dark */ }
 
 @theme inline {
   --color-background: var(--background);
@@ -155,23 +111,23 @@
 @layer base {
   h1 {
     font-family: var(--font-family-heading);
-    font-size: 2rem;
+    font-size: 2.25rem;
     font-weight: 700;
-    line-height: 1.2;
-    letter-spacing: -0.025em;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
   }
 
   h2 {
     font-family: var(--font-family-heading);
-    font-size: 1.5rem;
+    font-size: 1.75rem;
     font-weight: 600;
-    line-height: 1.3;
-    letter-spacing: -0.02em;
+    line-height: 1.25;
+    letter-spacing: -0.015em;
   }
 
   h3 {
     font-family: var(--font-family-heading);
-    font-size: 1.25rem;
+    font-size: 1.125rem;
     font-weight: 600;
     line-height: 1.4;
     letter-spacing: -0.01em;
