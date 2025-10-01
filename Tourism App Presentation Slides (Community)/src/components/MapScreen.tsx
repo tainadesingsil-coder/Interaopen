@@ -9,9 +9,11 @@ import { Input } from "./ui/input";
 import { useCity } from "../contexts/CityContext";
 import { MGLocation } from "../data/minas-database";
 import { getLocationsByCityAndInterests } from "../data/minas-database";
+import { useCityIntelligence } from "../hooks/useCityIntelligence";
 
 export function MapScreen() {
   const { selectedCity, interests } = useCity();
+  const intel = useCityIntelligence(selectedCity, interests as any);
   const [selectedLocation, setSelectedLocation] = useState<MGLocation | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
@@ -35,7 +37,7 @@ export function MapScreen() {
     nature: "🌿",
   };
 
-  const base = getLocationsByCityAndInterests(selectedCity, interests as any);
+  const base = (intel.places.length ? intel.places : getLocationsByCityAndInterests(selectedCity, interests as any)) as any[];
   const filteredLocations = base.filter(loc => {
     const matchesSearch = loc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          loc.description.toLowerCase().includes(searchQuery.toLowerCase());

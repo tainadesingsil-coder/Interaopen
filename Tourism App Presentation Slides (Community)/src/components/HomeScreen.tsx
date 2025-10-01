@@ -5,6 +5,7 @@ import { MapPin, Star, Compass, Utensils, Camera, Calendar, Sparkles, TrendingUp
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { useCity } from "../contexts/CityContext";
 import { recommendLocations } from "../services/locationService";
+import { useCityIntelligence } from "../hooks/useCityIntelligence";
 
 interface HomeScreenProps {
   onCreateRoute: () => void;
@@ -12,7 +13,8 @@ interface HomeScreenProps {
 
 export function HomeScreen({ onCreateRoute }: HomeScreenProps) {
   const { selectedCity, interests } = useCity();
-  const recs = recommendLocations({ city: selectedCity, interests: interests as any }).slice(0, 2);
+  const intel = useCityIntelligence(selectedCity, interests as any);
+  const recs = (intel.places.length ? intel.places : recommendLocations({ city: selectedCity, interests: interests as any })).slice(0, 2) as any[];
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* Hero Section com parallax */}

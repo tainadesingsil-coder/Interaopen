@@ -5,6 +5,7 @@ import { Sparkles, MapPin, Heart } from "lucide-react";
 import belMascotImage from "figma:asset/f252610f6e9a8a9c93c9aaea8fde97dff0ee9a53.png";
 import { useCity } from "../contexts/CityContext";
 import { getCitiesFromMG } from "../data/minas-database";
+import { useCityIntelligence } from "../hooks/useCityIntelligence";
 
 interface WelcomeScreenProps {
   onExplore: () => void;
@@ -13,7 +14,9 @@ interface WelcomeScreenProps {
 
 export function WelcomeScreen({ onExplore, onCreateRoute }: WelcomeScreenProps) {
   const { selectedCity, interests, setCity, setInterests } = useCity();
-  const cities = getCitiesFromMG();
+  const localCities = getCitiesFromMG();
+  const intel = useCityIntelligence(selectedCity, interests);
+  const cities = intel.cities.length ? intel.cities : localCities;
   const interestOptions = [
     { id: 'culture', label: 'Cultura' },
     { id: 'historical', label: 'História' },
