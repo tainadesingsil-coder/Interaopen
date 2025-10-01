@@ -21,8 +21,8 @@ export function WelcomeScreen({ onExplore, onCreateRoute }: WelcomeScreenProps) 
       >
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70 z-10" />
         <ImageWithFallback
-          src="https://images.unsplash.com/photo-1711058610230-130c9262de61?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxiYWhpYSUyMGJyYXppbCUyMHN1bnNldCUyMHJpdmVyJTIwamVxdWl0aW5ob25oYXxlbnwxfHx8fDE3NTkyNDU1MzB8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
-          alt="Rio Jequitinhonha ao pôr do sol"
+          src="https://images.unsplash.com/photo-1509395176047-4a66953fd231?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
+          alt="Montanhas de Minas Gerais"
           className="w-full h-full object-cover"
         />
       </motion.div>
@@ -54,7 +54,7 @@ export function WelcomeScreen({ onExplore, onCreateRoute }: WelcomeScreenProps) 
 
       {/* Conteúdo principal */}
       <div className="relative z-30 flex flex-col items-center justify-center min-h-screen px-6 py-12">
-        {/* Mascote Bel 3D */}
+      {/* Mascote Dora 3D */}
         <motion.div
           initial={{ scale: 0, rotateY: -180 }}
           animate={{ scale: 1, rotateY: 0 }}
@@ -84,7 +84,7 @@ export function WelcomeScreen({ onExplore, onCreateRoute }: WelcomeScreenProps) 
                 
                 <img
                   src={belMascotImage}
-                  alt="Bel - Sua guia virtual"
+                  alt="Dora - Sua guia virtual"
                   className="w-36 h-36 object-contain relative z-10 drop-shadow-2xl"
                 />
               </div>
@@ -135,7 +135,7 @@ export function WelcomeScreen({ onExplore, onCreateRoute }: WelcomeScreenProps) 
             className="text-4xl text-white mb-4"
             style={{ fontFamily: 'var(--font-family-heading)' }}
           >
-            Olá, eu sou a <span className="bg-gradient-to-r from-[#F3A64D] to-[#6ba3d6] bg-clip-text text-transparent">Bel</span>
+            Olá, eu sou a <span className="bg-gradient-to-r from-[#F3A64D] to-[#6ba3d6] bg-clip-text text-transparent">Dora</span>
           </motion.h1>
           
           <motion.p 
@@ -144,7 +144,7 @@ export function WelcomeScreen({ onExplore, onCreateRoute }: WelcomeScreenProps) 
             animate={{ opacity: 1 }}
             transition={{ delay: 0.8 }}
           >
-            Sua guia virtual em Belmonte
+            Sua guia virtual em Minas Gerais
           </motion.p>
 
           <motion.p 
@@ -184,7 +184,7 @@ export function WelcomeScreen({ onExplore, onCreateRoute }: WelcomeScreenProps) 
             >
               <span className="relative flex items-center justify-center gap-2">
                 <MapPin className="w-5 h-5" />
-                Explorar Belmonte
+                Explorar Minas Gerais
               </span>
             </Button>
           </motion.div>

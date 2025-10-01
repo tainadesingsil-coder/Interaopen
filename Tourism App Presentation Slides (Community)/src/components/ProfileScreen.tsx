@@ -131,7 +131,7 @@ export function ProfileScreen() {
             <h1 className="text-2xl text-foreground mt-4 mb-1" style={{ fontFamily: 'var(--font-family-heading)' }}>
               João Demo
             </h1>
-            <p className="text-muted-foreground text-sm mb-3">demo@belmonte.com</p>
+            <p className="text-muted-foreground text-sm mb-3">demo@minas.com</p>
             
             <Badge className="bg-gradient-to-r from-accent to-secondary text-white border-0">
               <Trophy className="w-3 h-3 mr-1" />
@@ -409,8 +409,8 @@ export function ProfileScreen() {
 
         {/* App Version */}
         <div className="text-center py-6 text-xs text-muted-foreground">
-          <p>Guia de Turismo de Belmonte</p>
-          <p className="mt-1">Versão 1.0.0 • Made with ❤️ in Bahia</p>
+          <p>Guia de Turismo de Minas Gerais</p>
+          <p className="mt-1">Versão 1.0.0 • Made with ❤️ em Minas</p>
         </div>
       </div>
     </div>
