@@ -1,0 +1,49 @@
+<svg width="384" height="384" viewBox="0 0 384 384" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="45%" r="70%">
+      <stop offset="0%" stop-color="#3a0b0b" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#0A0C0E"/>
+    </radialGradient>
+    <linearGradient id="sosGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#D72638"/>
+      <stop offset="100%" stop-color="#8B0E1A"/>
+    </linearGradient>
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="2" stdDeviation="8" flood-color="#000" flood-opacity="0.55"/>
+    </filter>
+  </defs>
+
+  <clipPath id="screen"><circle cx="192" cy="192" r="184"/></clipPath>
+  <g clip-path="url(#screen)">
+    <rect width="384" height="384" fill="url(#bg)"/>
+
+    <!-- Header -->
+    <g transform="translate(24,20)">
+      <rect x="0" y="0" rx="12" width="336" height="48" fill="#121418" stroke="#21252B"/>
+      <text x="18" y="30" font-family="Inter, Roboto, system-ui" font-size="18" fill="#E6EBF0">SOS • ENIGMA</text>
+    </g>
+
+    <!-- Dial SOS -->
+    <g transform="translate(192,210)" filter="url(#shadow)">
+      <circle cx="0" cy="0" r="96" fill="#121418" stroke="#21252B"/>
+      <circle cx="0" cy="0" r="92" fill="url(#sosGrad)"/>
+      <text x="0" y="6" text-anchor="middle" font-family="Inter, Roboto, system-ui" font-size="36" font-weight="700" fill="#FFF">SOS</text>
+      <text x="0" y="38" text-anchor="middle" font-family="Inter, Roboto, system-ui" font-size="14" fill="#FFE7E7">Segure 3 s para acionar</text>
+    </g>
+
+    <!-- Silent alert status (placeholder info) -->
+    <g transform="translate(24,86)">
+      <rect x="0" y="0" rx="12" width="336" height="60" fill="#121418" stroke="#21252B"/>
+      <circle cx="22" cy="30" r="6" fill="#D72638"/>
+      <text x="40" y="36" font-family="Inter, Roboto, system-ui" font-size="14" fill="#E6EBF0">Alerta silencioso pronto • Localização e vídeo curto</text>
+    </g>
+
+    <!-- Duress PIN -->
+    <g transform="translate(24,300)">
+      <rect x="0" y="0" rx="12" width="336" height="60" fill="#121418" stroke="#21252B"/>
+      <text x="16" y="26" font-family="Inter, Roboto, system-ui" font-size="14" fill="#9AA4AF">PIN de coação</text>
+      <text x="16" y="48" font-family="Inter, Roboto, system-ui" font-size="16" fill="#E6EBF0">Configurar para cancelar visivelmente e manter proteção oculta</text>
+    </g>
+  </g>
+  <circle cx="192" cy="192" r="186" stroke="#D72638" stroke-opacity="0.25" stroke-width="4" fill="none"/>
+</svg>
