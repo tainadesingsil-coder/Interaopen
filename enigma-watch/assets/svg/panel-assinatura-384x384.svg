@@ -1,0 +1,53 @@
+<svg width="384" height="384" viewBox="0 0 384 384" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="45%" r="70%">
+      <stop offset="0%" stop-color="#0B8D3A" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#0A0C0E"/>
+    </radialGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FFCC00"/>
+      <stop offset="100%" stop-color="#F2994A"/>
+    </linearGradient>
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="2" stdDeviation="6" flood-color="#000" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+
+  <clipPath id="screen"><circle cx="192" cy="192" r="184"/></clipPath>
+  <g clip-path="url(#screen)">
+    <rect width="384" height="384" fill="url(#bg)"/>
+
+    <!-- Header -->
+    <g transform="translate(24,20)">
+      <rect x="0" y="0" rx="12" width="336" height="48" fill="#121418" stroke="#21252B"/>
+      <text x="18" y="30" font-family="Inter, Roboto, system-ui" font-size="18" fill="#E6EBF0">Assinatura Emocional</text>
+    </g>
+
+    <!-- Steps -->
+    <g transform="translate(24,86)" filter="url(#shadow)">
+      <rect x="0" y="0" rx="16" width="336" height="84" fill="#121418" stroke="#21252B"/>
+      <text x="16" y="28" font-family="Inter, Roboto, system-ui" font-size="14" fill="#9AA4AF">Passo 1 • Baseline (60 s)</text>
+      <text x="16" y="54" font-family="Inter, Roboto, system-ui" font-size="18" fill="#E6EBF0">Respire e relaxe — estamos calibrando</text>
+      <g transform="translate(280,20)">
+        <rect x="0" y="0" rx="10" width="44" height="24" fill="url(#accent)"/>
+        <text x="22" y="16" text-anchor="middle" font-family="Inter, Roboto, system-ui" font-size="12" fill="#0A0C0E">Iniciar</text>
+      </g>
+    </g>
+
+    <g transform="translate(24,178)" filter="url(#shadow)">
+      <rect x="0" y="0" rx="16" width="336" height="84" fill="#121418" stroke="#21252B"/>
+      <text x="16" y="28" font-family="Inter, Roboto, system-ui" font-size="14" fill="#9AA4AF">Passo 2 • Liveness</text>
+      <text x="16" y="54" font-family="Inter, Roboto, system-ui" font-size="18" fill="#E6EBF0">Diga a palavra‑chave e incline o pulso</text>
+    </g>
+
+    <g transform="translate(24,270)" filter="url(#shadow)">
+      <rect x="0" y="0" rx="16" width="336" height="84" fill="#121418" stroke="#21252B"/>
+      <text x="16" y="28" font-family="Inter, Roboto, system-ui" font-size="14" fill="#9AA4AF">Passo 3 • Token</text>
+      <text x="16" y="54" font-family="Inter, Roboto, system-ui" font-size="18" fill="#E6EBF0">Token criado localmente • validade 24h</text>
+      <text x="260" y="54" font-family="Inter, Roboto, system-ui" font-size="14" fill="#9AA4AF">hash•••3f9</text>
+    </g>
+
+    <text x="192" y="372" text-anchor="middle" font-family="Inter, Roboto, system-ui" font-size="12" fill="#9AA4AF">Nenhum dado bruto sai do relógio</text>
+  </g>
+  <circle cx="192" cy="192" r="186" stroke="#FFCC00" stroke-opacity="0.25" stroke-width="4" fill="none"/>
+</svg>

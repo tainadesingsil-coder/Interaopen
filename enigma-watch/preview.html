@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ENIGMA • Painel SUS Digital</title>
+  <style>
+    :root{
+      --bg:#0A0C0E; --surface:#121418; --ink:#E6EBF0; --muted:#9AA4AF; --brand:#0B8D3A;
+    }
+    html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:Inter,Roboto,system-ui,-apple-system,Segoe UI,Ubuntu,Helvetica,Arial;}
+    .wrap{display:grid;place-items:center;height:100%;padding:24px;}
+    .watch{width:min(92vw,420px);aspect-ratio:1;border-radius:50%;background:radial-gradient(35% 35% at 50% 45%, rgba(11,141,58,.35), transparent 70%);position:relative;}
+    .bezel{position:absolute;inset:-10px;border-radius:50%;border:6px solid rgba(11,141,58,.25);filter:drop-shadow(0 4px 18px rgba(0,0,0,.45));}
+    iframe, img{width:100%;height:100%;border:0;border-radius:50%;}
+    .hint{position:fixed;bottom:12px;left:0;right:0;text-align:center;color:var(--muted);font-size:12px}
+    .bar{position:fixed;top:0;left:0;right:0;display:flex;gap:8px;align-items:center;justify-content:center;padding:10px 12px;background:linear-gradient(180deg, rgba(0,0,0,.45), rgba(0,0,0,0));}
+    .btn{background:#FFCC00;color:#0A0C0E;border-radius:999px;padding:8px 14px;font-weight:600;border:0;cursor:pointer}
+    .btn.secondary{background:#21252B;color:#E6EBF0}
+  </style>
+</head>
+<body>
+  <div class="bar">
+    <button class="btn" onclick="load('assets/svg/panel-sus-384x384.svg')">SUS Digital</button>
+    <button class="btn secondary" onclick="alert('Em breve: SOS, Assinatura, Justiça & Bancos')">Outras telas</button>
+  </div>
+  <div class="wrap">
+    <div class="watch">
+      <div class="bezel"></div>
+      <img id="screen" alt="ENIGMA SUS Panel" src="assets/svg/panel-sus-384x384.svg" />
+    </div>
+  </div>
+  <div class="hint">Abra este arquivo no navegador para pré-visualizar o painel do relógio.</div>
+  <script>
+    function load(src){ document.getElementById('screen').src = src }
+  </script>
+</body>
+</html>
