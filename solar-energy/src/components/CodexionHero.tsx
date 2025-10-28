@@ -7,8 +7,8 @@ export default function CodexionHero() {
   return (
     <section id="inicio" className="relative overflow-hidden min-h-[88vh] flex items-center">
 
-      <div className="container mx-auto grid items-center gap-10 px-4 md:grid-cols-2">
-        <div className="relative z-10">
+      <div className="container mx-auto px-4 flex flex-col items-center text-center">
+        <div className="relative z-10 max-w-3xl">
           <p className="uppercase tracking-[0.22em] text-xs md:text-sm text-softGray">@codexion7</p>
           <h1 className="mt-3 text-4xl md:text-6xl font-medium tracking-wide leading-[1.05] text-softWhite">
             A mudança começa <span className="text-softWhite relative">
@@ -19,7 +19,7 @@ export default function CodexionHero() {
           <p className="mt-4 text-base md:text-lg text-softGray max-w-xl">
             Estratégia, IA e tecnologia para acelerar o crescimento do seu negócio.
           </p>
-          <div className="mt-7 flex items-center gap-4">
+          <div className="mt-7 flex items-center justify-center gap-4">
             <a
               href="#contato"
               className="relative inline-flex items-center justify-center rounded-full px-7 py-3 text-sm font-semibold text-black transition-transform focus:outline-none focus:ring-2 focus:ring-white/50 hover:scale-[1.02]"
@@ -35,29 +35,6 @@ export default function CodexionHero() {
             </a>
             <span className="text-softGray text-sm">Quem sai na frente com IA, lidera o futuro.</span>
           </div>
-        </div>
-
-        <div className="relative">
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: 'easeOut' }}
-            className="relative rounded-[24px] overflow-hidden border border-white/10 bg-white/5 backdrop-blur-md shadow-soft"
-          >
-            <div className="absolute inset-0 bg-gradient-to-tr from-black/30 via-transparent to-[rgba(0,200,255,0.08)]" />
-            <img
-              src={img}
-              alt="Humanoide metálico emergindo de um notebook"
-              className="w-full h-[360px] md:h-[520px] object-cover"
-              style={{ objectPosition: '50% 40%' }}
-            />
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-1.5 bg-metal-sheen opacity-70" />
-          </motion.div>
-          <motion.div
-            className="pointer-events-none absolute -bottom-6 left-1/2 -translate-x-1/2 h-24 w-56 rounded-full bg-white/10 blur-2xl"
-            animate={{ y: [0, -4, 0] }}
-            transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-          />
         </div>
       </div>
     </section>
