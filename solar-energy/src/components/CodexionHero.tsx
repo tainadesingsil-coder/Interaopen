@@ -1,15 +1,10 @@
-import { motion } from 'framer-motion';
-
 export default function CodexionHero() {
-  const img =
-    'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=1920&auto=format&fit=crop';
 
   return (
-    <section id="inicio" className="relative overflow-hidden min-h-[88vh] flex items-center">
+    <section id="inicio" className="relative overflow-hidden min-h-screen flex items-center justify-center">
 
       <div className="container mx-auto px-4 flex flex-col items-center text-center">
         <div className="relative z-10 max-w-3xl">
-          <p className="uppercase tracking-[0.22em] text-xs md:text-sm text-softGray">@codexion7</p>
           <h1 className="mt-3 text-4xl md:text-6xl font-medium tracking-wide leading-[1.05] text-softWhite">
             A mudança começa <span className="text-softWhite relative">
               agora!
