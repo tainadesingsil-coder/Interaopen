@@ -3,12 +3,12 @@ export default function CodexionHero() {
   return (
     <section id="inicio" className="relative overflow-hidden min-h-screen flex items-center justify-center">
 
-      <div className="container mx-auto px-4 flex flex-col items-center text-center">
-        <div className="relative z-10 max-w-7xl">
+      <div className="w-full mx-auto px-4 flex flex-col items-center text-center">
+        <div className="relative z-10 max-w-[1600px]">
           <img
             src="https://i.postimg.cc/htrPzRLK/Codexion-63.png"
             alt="Codexion visual"
-            className="mt-6 w-full max-w-[1200px] md:max-w-[1320px] h-auto mx-auto object-contain"
+            className="mt-6 w-full max-w-[1400px] md:max-w-[1600px] h-auto mx-auto object-contain"
             loading="eager"
           />
           <button
