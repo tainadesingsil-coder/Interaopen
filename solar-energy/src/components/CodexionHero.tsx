@@ -30,24 +30,23 @@ export default function CodexionHero() {
             className="mt-6 w-full max-w-[1400px] md:max-w-[1600px] h-auto mx-auto object-contain"
             loading="eager"
           />
-          {/* Figure pop-out masked layer */}
-          <motion.img
-            src="https://i.postimg.cc/htrPzRLK/Codexion-63.png"
-            alt="Figura saindo do notebook"
-            className="pointer-events-none absolute inset-0 mx-auto w-full max-w-[1400px] md:max-w-[1600px] object-contain"
-            style={{
-              transformStyle: 'preserve-3d',
-              transform: `translateZ(60px) rotateX(${tilt.rx}deg) rotateY(${tilt.ry}deg)` as any,
-              WebkitMaskImage:
-                'radial-gradient(ellipse at 50% 35%, rgba(255,255,255,1) 24%, rgba(255,255,255,0.9) 32%, rgba(255,255,255,0) 50%)',
-              maskImage:
-                'radial-gradient(ellipse at 50% 35%, rgba(255,255,255,1) 24%, rgba(255,255,255,0.9) 32%, rgba(255,255,255,0) 50%)',
-              filter: 'drop-shadow(0 18px 60px rgba(255,255,255,0.08))',
-            }}
-            initial={{ y: 16, opacity: 0.9, scale: 1 }}
-            animate={{ y: [-2, 2, -2], opacity: 1, scale: [1.01, 1.03, 1.01] }}
-            transition={{ duration: 6, ease: 'easeInOut', repeat: Infinity }}
-          />
+          {/* Figure pop-out layer (cropped to top area, computer stays static) */}
+          <div className="pointer-events-none absolute left-0 right-0 top-0 h-[60%] overflow-hidden flex justify-center">
+            <motion.img
+              src="https://i.postimg.cc/htrPzRLK/Codexion-63.png"
+              alt="Figura saindo do notebook"
+              className="w-full max-w-[1400px] md:max-w-[1600px] object-contain"
+              style={{
+                transformStyle: 'preserve-3d',
+                transform: `translateZ(70px) rotateX(${tilt.rx}deg) rotateY(${tilt.ry}deg)` as any,
+                clipPath: 'ellipse(36% 28% at 50% 28%)',
+                filter: 'drop-shadow(0 22px 70px rgba(255,255,255,0.10))',
+              }}
+              initial={{ y: 14, opacity: 0.95, scale: 1.0 }}
+              animate={{ y: [-2, 2, -2], opacity: 1, scale: [1.01, 1.03, 1.01] }}
+              transition={{ duration: 6, ease: 'easeInOut', repeat: Infinity }}
+            />
+          </div>
           <button
             type="button"
             className="mt-6 mx-auto inline-flex items-center justify-center rounded-full bg-white text-black px-7 py-3 text-sm font-semibold hover:scale-[1.02] transition"
