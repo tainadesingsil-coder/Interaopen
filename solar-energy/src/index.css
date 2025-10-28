@@ -14,10 +14,7 @@ html { scroll-behavior: smooth; }
 body {
   @apply font-sans text-softWhite bg-black;
   cursor: auto;
-  background:
-    radial-gradient(1200px 600px at -10% -10%, rgba(158,255,0,0.10), transparent 60%),
-    radial-gradient(1000px 500px at 110% -10%, rgba(158,255,0,0.06), transparent 60%),
-    radial-gradient(1600px 700px at 50% 120%, rgba(255,255,255,0.05), transparent 70%);
+  background: #000000;
   -webkit-touch-callout: none;
 }
 
