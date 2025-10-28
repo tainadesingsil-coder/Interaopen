@@ -51,6 +51,8 @@ export default function CodexionServices() {
           />
         </div>
       </div>
+      {/* Circuit lines subtle background layer */}
+      <div className="pointer-events-none absolute inset-0 opacity-[0.06]" style={{backgroundImage:'linear-gradient(90deg, rgba(255,255,255,0.12) 1px, transparent 1px), linear-gradient(0deg, rgba(255,255,255,0.12) 1px, transparent 1px)', backgroundSize:'48px 48px, 48px 48px'}} />
     </section>
   );
 }
