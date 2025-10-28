@@ -4,11 +4,11 @@ export default function CodexionHero() {
     <section id="inicio" className="relative overflow-hidden min-h-screen flex items-center justify-center">
 
       <div className="container mx-auto px-4 flex flex-col items-center text-center">
-        <div className="relative z-10 max-w-3xl">
+        <div className="relative z-10 max-w-5xl">
           <img
             src="https://i.postimg.cc/htrPzRLK/Codexion-63.png"
             alt="Codexion visual"
-            className="mt-6 w-full max-w-[680px] h-auto mx-auto object-contain"
+            className="mt-6 w-full max-w-[960px] md:max-w-[1024px] h-auto mx-auto object-contain"
             loading="eager"
           />
           <button
