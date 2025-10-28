@@ -3,9 +3,6 @@ import { MessageCircle } from 'lucide-react';
 export default function CodexionContact() {
   return (
     <section id="contato" className="relative py-20 md:py-28 overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-        <div className="h-[320px] w-[320px] rounded-full bg-white/10 blur-3xl" />
-      </div>
       <div className="container mx-auto px-4 relative z-10 text-center">
         <h3 className="text-2xl md:text-3xl font-bold text-softWhite">
           O futuro não espera. Quem domina a IA, lidera.

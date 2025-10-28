@@ -2,8 +2,7 @@ export default function CodexionAbout() {
   const img =
     'https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?q=80&w=1600&auto=format&fit=crop';
   return (
-    <section id="sobre" className="py-16 md:py-24 bg-[#111111] relative overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 opacity-[0.08]" style={{backgroundImage:'linear-gradient(90deg, rgba(255,255,255,0.12) 1px, transparent 1px), linear-gradient(0deg, rgba(255,255,255,0.12) 1px, transparent 1px)', backgroundSize:'40px 40px, 40px 40px', animation:'circuit 16s linear infinite'}} />
+    <section id="sobre" className="py-16 md:py-24 bg-black relative overflow-hidden">
       <div className="container mx-auto px-4 grid md:grid-cols-2 gap-8 md:gap-12 items-center">
         <div>
           <h2 className="section-title text-softWhite">Nosso DNA é entender o seu.</h2>
