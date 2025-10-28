@@ -1,5 +1,3 @@
-import { motion } from 'framer-motion';
-
 export default function CodexionHero() {
 
   return (
@@ -7,14 +5,11 @@ export default function CodexionHero() {
 
       <div className="w-full mx-auto px-4 flex flex-col items-center text-center">
         <div className="relative z-10 max-w-[1600px]">
-          <motion.img
+          <img
             src="https://i.postimg.cc/htrPzRLK/Codexion-63.png"
             alt="Codexion visual"
             className="mt-6 w-full max-w-[1400px] md:max-w-[1600px] h-auto mx-auto object-contain"
             loading="eager"
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: 'easeOut' }}
           />
           <button
             type="button"
