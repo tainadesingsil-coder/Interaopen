@@ -3,7 +3,6 @@ import CodexionHeader from './components/CodexionHeader';
 import CodexionHero from './components/CodexionHero';
 import CodexionAbout from './components/CodexionAbout';
 import CodexionServices from './components/CodexionServices';
-import CodexionPortfolio from './components/CodexionPortfolio';
 import CodexionContact from './components/CodexionContact';
 
 export default function App() {
@@ -14,7 +13,6 @@ export default function App() {
         <CodexionHero />
         <CodexionAbout />
         <CodexionServices />
-        <CodexionPortfolio />
         <CodexionContact />
       </main>
       <footer className='footer py-8'>

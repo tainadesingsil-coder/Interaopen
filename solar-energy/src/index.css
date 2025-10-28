@@ -39,8 +39,8 @@ img { -webkit-user-drag: none; user-drag: none; pointer-events: none; }
 .bob { animation: bob 3s ease-in-out infinite; }
 
 .container-section { @apply container mx-auto px-4; }
-.section-title { @apply text-3xl md:text-5xl font-extrabold tracking-tight; }
-.section-subtitle { @apply text-base md:text-lg text-[var(--muted)]; }
+.section-title { @apply text-3xl md:text-5xl font-medium tracking-[0.02em]; }
+.section-subtitle { @apply text-base md:text-lg text-[color:rgba(255,255,255,0.85)]; }
 
 /* Unified CTA buttons (dark blue theme) */
 .btn-yellow {
