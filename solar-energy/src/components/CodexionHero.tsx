@@ -6,8 +6,6 @@ export default function CodexionHero() {
 
   return (
     <section id="inicio" className="relative overflow-hidden min-h-[88vh] flex items-center">
-      <div className="pointer-events-none absolute -left-24 -top-24 h-[420px] w-[420px] rounded-full bg-white/10 blur-3xl" />
-      <div className="pointer-events-none absolute right-0 top-12 h-[360px] w-[360px] rounded-full bg-white/5 blur-3xl" />
 
       <div className="container mx-auto grid items-center gap-10 px-4 md:grid-cols-2">
         <div className="relative z-10">
@@ -40,7 +38,6 @@ export default function CodexionHero() {
         </div>
 
         <div className="relative">
-          <div className="absolute -inset-6 rounded-[28px] bg-[linear-gradient(135deg,rgba(158,255,0,0.12),rgba(0,200,255,0.1))] blur-2xl" />
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
