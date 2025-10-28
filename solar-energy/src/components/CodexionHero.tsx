@@ -11,12 +11,7 @@ export default function CodexionHero() {
             className="mt-6 w-full max-w-[1400px] md:max-w-[1600px] h-auto mx-auto object-contain"
             loading="eager"
           />
-          <button
-            type="button"
-            className="mt-6 mx-auto inline-flex items-center justify-center rounded-full bg-white text-black px-7 py-3 text-sm font-semibold hover:scale-[1.02] transition"
-          >
-            A mudança começa agora!
-          </button>
+          
         </div>
       </div>
     </section>
