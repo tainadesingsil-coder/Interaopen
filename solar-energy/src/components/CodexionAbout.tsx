@@ -13,7 +13,7 @@ export default function CodexionAbout() {
           </p>
         </div>
         <div className="relative">
-          <div className="absolute -inset-4 rounded-3xl bg-neon/10 blur-2xl" />
+          <div className="absolute -inset-4 rounded-3xl bg-white/10 blur-2xl" />
           <div className="relative rounded-3xl overflow-hidden border border-white/10 bg-white/5 backdrop-blur-md">
             <img
               src={img}

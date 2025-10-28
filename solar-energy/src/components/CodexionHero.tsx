@@ -6,7 +6,7 @@ export default function CodexionHero() {
 
   return (
     <section id="inicio" className="relative overflow-hidden min-h-[88vh] flex items-center">
-      <div className="pointer-events-none absolute -left-24 -top-24 h-[420px] w-[420px] rounded-full bg-neon/20 blur-3xl animate-pulseGreen" />
+      <div className="pointer-events-none absolute -left-24 -top-24 h-[420px] w-[420px] rounded-full bg-white/10 blur-3xl" />
       <div className="pointer-events-none absolute right-0 top-12 h-[360px] w-[360px] rounded-full bg-white/5 blur-3xl" />
 
       <div className="container mx-auto grid items-center gap-10 px-4 md:grid-cols-2">
@@ -21,12 +21,12 @@ export default function CodexionHero() {
           <div className="mt-7 flex items-center gap-4">
             <a
               href="#contato"
-              className="relative inline-flex items-center justify-center rounded-full px-7 py-3 text-sm font-semibold text-black transition-transform focus:outline-none focus:ring-2 focus:ring-neon/60"
+              className="relative inline-flex items-center justify-center rounded-full px-7 py-3 text-sm font-semibold text-black transition-transform focus:outline-none focus:ring-2 focus:ring-white/50"
               style={{
                 background:
-                  'linear-gradient(180deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.55) 48%, rgba(255,255,255,0.85) 100%), linear-gradient(90deg, #93ff00 0%, #9eff00 100%)',
+                  'linear-gradient(180deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.55) 48%, rgba(255,255,255,0.85) 100%)',
                 boxShadow:
-                  '0 10px 22px rgba(158,255,0,0.25), inset 0 1px 0 rgba(255,255,255,0.5), inset 0 -1px 0 rgba(0,0,0,0.2)',
+                  '0 10px 22px rgba(255,255,255,0.15), inset 0 1px 0 rgba(255,255,255,0.5), inset 0 -1px 0 rgba(0,0,0,0.2)',
               }}
             >
               Comece hoje
@@ -36,14 +36,14 @@ export default function CodexionHero() {
         </div>
 
         <div className="relative">
-          <div className="absolute -inset-6 rounded-[28px] bg-neon/10 blur-2xl" />
+          <div className="absolute -inset-6 rounded-[28px] bg-white/10 blur-2xl" />
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: 'easeOut' }}
             className="relative rounded-[24px] overflow-hidden border border-white/10 bg-white/5 backdrop-blur-md shadow-soft"
           >
-            <div className="absolute inset-0 bg-gradient-to-tr from-black/30 via-transparent to-neon/5" />
+            <div className="absolute inset-0 bg-gradient-to-tr from-black/30 via-transparent to-white/10" />
             <img
               src={img}
               alt="Humanoide metálico emergindo de um notebook"
@@ -53,7 +53,7 @@ export default function CodexionHero() {
             <div className="pointer-events-none absolute inset-x-0 top-0 h-1.5 bg-metal-sheen opacity-70" />
           </motion.div>
           <motion.div
-            className="pointer-events-none absolute -bottom-6 left-1/2 -translate-x-1/2 h-24 w-56 rounded-full bg-neon/20 blur-2xl"
+            className="pointer-events-none absolute -bottom-6 left-1/2 -translate-x-1/2 h-24 w-56 rounded-full bg-white/10 blur-2xl"
             animate={{ y: [0, -4, 0] }}
             transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
           />

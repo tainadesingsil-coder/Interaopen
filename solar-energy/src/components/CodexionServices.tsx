@@ -10,8 +10,8 @@ function ServiceCard({
   Icon: React.ComponentType<any>;
 }) {
   return (
-    <div className="group relative rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-md transition-transform hover:-translate-y-1 hover:shadow-neon">
-      <div className="absolute -inset-px rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-tr from-neon/10 to-transparent" />
+    <div className="group relative rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-md transition-transform hover:-translate-y-1 hover:shadow-soft">
+      <div className="absolute -inset-px rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-tr from-white/10 to-transparent" />
       <div className="relative flex items-start gap-4">
         <div className="h-12 w-12 rounded-xl border border-white/15 bg-black/60 flex items-center justify-center">
           <Icon className="h-6 w-6 text-chrome" />
