@@ -17,9 +17,9 @@ export default function CodexionHero() {
           <div className="relative w-full h-[70vh] md:h-[78vh] overflow-hidden">
             <motion.div
               className="absolute top-[36%] md:top-[32%] left-1/2 -translate-x-1/2 -translate-y-1/2 will-change-transform select-none"
-              initial={{ x: '-60vw', opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ duration: 50, ease: 'linear' }}
+              initial={{ x: '-60vw', opacity: 1 }}
+              animate={{ x: 0 }}
+              transition={{ duration: 18, ease: 'easeOut' }}
               style={{ width: 'fit-content' }}
             >
               <div className="relative">
