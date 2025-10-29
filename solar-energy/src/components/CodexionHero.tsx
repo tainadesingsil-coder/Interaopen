@@ -14,27 +14,27 @@ export default function CodexionHero() {
             className="w-[180px] md:w-[240px] h-auto mx-auto object-contain mb-4 md:mb-6"
             loading="eager"
           />
-          <div className="relative w-full h-[58vh] md:h-[62vh] overflow-hidden">
+          <div className="relative w-full h-[70vh] md:h-[78vh] overflow-hidden">
             <motion.div
-              className="absolute top-1/2 -translate-y-1/2 will-change-transform select-none"
+              className="absolute top-[36%] md:top-[32%] left-1/2 -translate-x-1/2 -translate-y-1/2 will-change-transform select-none"
               initial={{ x: '-60vw', opacity: 0 }}
-              animate={{ x: ['-60vw', '120vw'] , opacity: [0, 1] }}
-              transition={{ duration: 30, ease: 'linear', repeat: Infinity, repeatType: 'loop' }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ duration: 50, ease: 'linear' }}
               style={{ width: 'fit-content' }}
             >
               <div className="relative">
                 <img
                   src="https://i.postimg.cc/5NN6rnqy/Chat-GPT-Image-28-de-out-de-2025-21-31-24.png"
                   alt="Codexion visual"
-                  className="h-[42vh] md:h-[48vh] w-auto object-contain"
+                  className="h-[56vh] md:h-[70vh] w-auto object-contain"
                   loading="eager"
                 />
                 {/* Carrinho de dinheiro à frente */}
                 <motion.div
-                  className="absolute bottom-[8%] left-[62%] -translate-x-1/2 flex items-center justify-center rounded-xl border border-white/15 bg-white/8 backdrop-blur px-3 py-2"
+                  className="absolute bottom-[10%] left-[66%] -translate-x-1/2 flex items-center justify-center rounded-xl border border-white/15 bg-white/10 backdrop-blur px-3 py-2"
                   initial={{ y: 0 }}
-                  animate={{ y: [0, -2, 0] }}
-                  transition={{ duration: 2.8, ease: 'easeInOut', repeat: Infinity }}
+                  animate={{ y: [0, -3, 0] }}
+                  transition={{ duration: 3.2, ease: 'easeInOut', repeat: Infinity }}
                 >
                   <ShoppingCart className="h-5 w-5 text-softWhite" />
                   <Banknote className="h-5 w-5 text-softWhite ml-1" />
