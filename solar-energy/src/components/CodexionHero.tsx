@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { ShoppingCart, Banknote } from 'lucide-react';
 
 export default function CodexionHero() {
 
@@ -14,16 +15,32 @@ export default function CodexionHero() {
             loading="eager"
           />
           <div className="relative w-full h-[58vh] md:h-[62vh] overflow-hidden">
-            <motion.img
-              src="https://i.postimg.cc/5NN6rnqy/Chat-GPT-Image-28-de-out-de-2025-21-31-24.png"
-              alt="Codexion visual"
+            <motion.div
               className="absolute top-1/2 -translate-y-1/2 will-change-transform select-none"
-              loading="eager"
-              initial={{ x: '-52vw', opacity: 0 }}
-              animate={{ x: ['-52vw', '52vw', '52vw', '-52vw'], opacity: [0, 1, 1, 0] }}
-              transition={{ duration: 36, ease: 'linear', times: [0, 0.1, 0.9, 1], repeat: Infinity, repeatDelay: 0.6 }}
-              style={{ width: '56vw', maxWidth: '900px' }}
-            />
+              initial={{ x: '-60vw', opacity: 0 }}
+              animate={{ x: ['-60vw', '120vw'] , opacity: [0, 1] }}
+              transition={{ duration: 30, ease: 'linear', repeat: Infinity, repeatType: 'loop' }}
+              style={{ width: 'fit-content' }}
+            >
+              <div className="relative">
+                <img
+                  src="https://i.postimg.cc/5NN6rnqy/Chat-GPT-Image-28-de-out-de-2025-21-31-24.png"
+                  alt="Codexion visual"
+                  className="h-[42vh] md:h-[48vh] w-auto object-contain"
+                  loading="eager"
+                />
+                {/* Carrinho de dinheiro à frente */}
+                <motion.div
+                  className="absolute bottom-[8%] left-[62%] -translate-x-1/2 flex items-center justify-center rounded-xl border border-white/15 bg-white/8 backdrop-blur px-3 py-2"
+                  initial={{ y: 0 }}
+                  animate={{ y: [0, -2, 0] }}
+                  transition={{ duration: 2.8, ease: 'easeInOut', repeat: Infinity }}
+                >
+                  <ShoppingCart className="h-5 w-5 text-softWhite" />
+                  <Banknote className="h-5 w-5 text-softWhite ml-1" />
+                </motion.div>
+              </div>
+            </motion.div>
           </div>
         </div>
       </div>
