@@ -14,9 +14,9 @@ export default function CodexionHero() {
             className="w-[180px] md:w-[240px] h-auto mx-auto object-contain mb-4 md:mb-6"
             loading="eager"
           />
-          <div className="relative w-full h-[70vh] md:h-[78vh] overflow-hidden">
+          <div className="relative w-full h-[90vh] md:h-[92vh] overflow-hidden">
             <motion.div
-              className="absolute top-[30%] md:top-[28%] left-1/2 -translate-x-1/2 -translate-y-1/2 will-change-transform select-none"
+              className="absolute top-[26%] md:top-[24%] left-1/2 -translate-x-1/2 -translate-y-1/2 will-change-transform select-none"
               initial={{ x: '-60vw', opacity: 1 }}
               animate={{ x: 0 }}
               transition={{ duration: 24, ease: 'easeOut' }}
