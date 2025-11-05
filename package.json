@@ -1,0 +1,14 @@
+{
+  "name": "portal-velho-chico-landing",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Landing page clean e minimalista para o empreendimento Portal do Velho Chico (corretores)",
+  "scripts": {
+    "dev": "python3 -m http.server 8080",
+    "deploy:pages": "wrangler pages deploy . --project-name portal-velho-chico --branch production"
+  },
+  "devDependencies": {
+    "wrangler": "^3.90.0"
+  }
+}
+
