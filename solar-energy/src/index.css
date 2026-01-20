@@ -245,6 +245,8 @@ section {
   letter-spacing: 0.3em;
   text-transform: uppercase;
   color: var(--muted);
+  display: inline-block;
+  margin-bottom: 8px;
 }
 
 .section-tag.light {
@@ -254,7 +256,7 @@ section {
 .split-grid {
   display: grid;
   gap: 40px;
-  align-items: center;
+  align-items: start;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 }
 
@@ -307,7 +309,7 @@ section {
   display: grid;
   gap: 40px;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  align-items: center;
+  align-items: start;
 }
 
 .location-copy h2 {
@@ -439,6 +441,7 @@ section {
 .feature-cards {
   display: grid;
   gap: 24px;
+  align-items: stretch;
 }
 
 .feature-card {
@@ -451,6 +454,7 @@ section {
   border: 1px solid var(--line);
   box-shadow: 0 20px 45px rgba(15, 30, 45, 0.08);
   transition: transform 0.25s ease, box-shadow 0.25s ease;
+  height: 100%;
 }
 
 .feature-card:hover {
@@ -518,6 +522,8 @@ section {
   border: 1px solid var(--line);
   box-shadow: 0 28px 60px rgba(15, 30, 45, 0.1);
   text-align: center;
+  max-width: 920px;
+  margin: 0 auto;
 }
 
 .audience-card h2 {
@@ -654,13 +660,8 @@ section {
 }
 
 @media (min-width: 900px) {
-  .feature-card {
-    flex-direction: row;
-    align-items: center;
-  }
-
-  .feature-media {
-    flex: 0 0 42%;
+  .feature-cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 

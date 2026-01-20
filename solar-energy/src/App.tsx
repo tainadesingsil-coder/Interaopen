@@ -3,7 +3,7 @@ import './index.css';
 
 const whatsappNumber = '5571999999999';
 const whatsappMessage = encodeURIComponent(
-  'Ola! Quero entender mais sobre o Bella Vista Beach Residence.'
+  'Olá! Quero entender mais sobre o Bella Vista Beach Residence.'
 );
 const whatsappLink = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`;
 
@@ -23,7 +23,7 @@ const experienceImage =
 
 const empreendimentoCards = [
   {
-    title: 'Studios funcionais',
+    title: 'Stúdios funcionais',
     description:
       'Plantas inteligentes com metragem otimizada para morar bem ou rentabilizar com temporada.',
     image: empreendimentoImages[0],
@@ -31,28 +31,28 @@ const empreendimentoCards = [
   {
     title: 'Projeto moderno',
     description:
-      'Arquitetura contemporanea, linguagem clean e ambientes pensados para o estilo de vida do litoral.',
+      'Arquitetura contemporânea, linguagem clean e ambientes pensados para o estilo de vida do litoral.',
     image: empreendimentoImages[1],
   },
   {
-    title: 'Regiao em crescimento',
+    title: 'Região em crescimento',
     description:
-      'Fluxo turistico em alta, novos investimentos e demanda constante por hospedagem qualificada.',
+      'Fluxo turístico em alta, novos investimentos e demanda constante por hospedagem qualificada.',
     image: empreendimentoImages[2],
   },
 ];
 
 const perfilList = [
   'Investidores patrimoniais',
-  'Compradores de segunda residencia',
+  'Compradores de segunda residência',
   'Renda com temporada',
-  'Visao de longo prazo',
+  'Visão de longo prazo',
 ];
 
 const destaqueList = [
-  'Studios funcionais',
+  'Stúdios funcionais',
   'Projeto moderno',
-  'Regiao em crescimento',
+  'Região em crescimento',
   'Ideal para morar ou investir',
 ];
 
@@ -153,7 +153,7 @@ export default function App() {
             target='_blank'
             rel='noreferrer'
           >
-            WhatsApp consultivo
+            Falar no WhatsApp
           </a>
         </div>
       </header>
@@ -167,7 +167,7 @@ export default function App() {
           <div className='hero-overlay' />
           <div className='container-section hero-content'>
             <span className='hero-eyebrow' data-reveal>
-              BR-367 • Litoral sul da Bahia
+              BR-367 • Litoral Sul da Bahia
             </span>
             <h1 data-reveal>
               Viva perto do mar.
@@ -175,8 +175,8 @@ export default function App() {
               Invista onde o futuro passa.
             </h1>
             <p data-reveal>
-              Studios e apartamentos em uma das regioes mais desejadas da Bahia,
-              com localizacao estrategica e alto potencial de valorizacao.
+              Stúdios e apartamentos em uma das regiões mais desejadas da Bahia,
+              com localização estratégica e alto potencial de valorização.
             </p>
             <div className='hero-actions' data-reveal>
               <a
@@ -188,7 +188,7 @@ export default function App() {
                 Falar com um especialista no WhatsApp
               </a>
               <span className='cta-note'>
-                Atendimento consultivo, reservado e sem pressao.
+                Atendimento consultivo, reservado e sem pressão.
               </span>
             </div>
           </div>
@@ -201,14 +201,14 @@ export default function App() {
           <div className='container-section split-grid'>
             <div className='context-copy' data-reveal>
               <span className='section-tag'>Contexto da Bahia</span>
-              <h2>A Bahia vive uma explosao turistica.</h2>
+              <h2>A Bahia vive uma explosão turística.</h2>
               <p>
-                Quando o mundo deseja um lugar, o mercado responde. A combinacao
+                Quando o mundo deseja um lugar, o mercado responde. A combinação
                 de turismo, infraestrutura e mobilidade cria um ciclo natural de
-                valorizacao imobiliaria.
+                valorização imobiliária.
               </p>
               <p className='context-highlight'>
-                Bella Vista nasce nesse encontro entre desejo e estrategia.
+                Bella Vista nasce nesse encontro entre desejo e estratégia.
               </p>
             </div>
             <div className='context-media'>
@@ -224,7 +224,7 @@ export default function App() {
               <div className='image-card offset' data-reveal>
                 <img
                   src={contextImages[1]}
-                  alt='Por do sol no litoral'
+                  alt='Pôr do sol no litoral'
                   className='parallax-image'
                   data-parallax='0.15'
                   loading='lazy'
@@ -241,13 +241,13 @@ export default function App() {
         >
           <div className='container-section location-grid'>
             <div className='location-copy' data-reveal>
-              <span className='section-tag'>Localizacao estrategica</span>
+              <span className='section-tag'>Localização estratégica</span>
               <h2>
-                Entre a BR-367 e o azul do mar, nasce uma decisao bem posicionada.
+                Entre a BR-367 e o azul do mar, nasce uma decisão bem posicionada.
               </h2>
               <p>
-                Acesso facil, visibilidade alta e proximidade com os polos
-                turisticos mais procurados do estado. Um ponto de equilibrio
+                Acesso fácil, visibilidade alta e proximidade com os polos
+                turísticos mais procurados do estado. Um ponto de equilíbrio
                 entre fluxo e privacidade.
               </p>
             </div>
@@ -277,7 +277,7 @@ export default function App() {
               <span className='section-tag'>O empreendimento</span>
               <h2>
                 O Bella Vista Beach Residence foi pensado para quem entende que
-                investir bem comeca pela localizacao certa.
+                investir bem começa pela localização certa.
               </h2>
             </div>
             <div className='feature-cards'>
@@ -305,11 +305,13 @@ export default function App() {
         <section id='perfil' className='section audience-section'>
           <div className='container-section'>
             <div className='audience-card' data-reveal>
-              <span className='section-tag'>Para quem e</span>
-              <h2>Este projeto e ideal para quem busca patrimonio, nao impulso.</h2>
+              <span className='section-tag'>Para quem é</span>
+              <h2>
+                Este projeto é ideal para quem busca patrimônio, não impulso.
+              </h2>
               <p>
                 Uma escolha racional, mas com carga emocional clara: praia,
-                liquidez e valorizacao. Sem promessas vazias.
+                liquidez e valorização. Sem promessas vazias.
               </p>
               <ul className='audience-list'>
                 {perfilList.map((item) => (
@@ -327,8 +329,8 @@ export default function App() {
           />
           <div className='experience-overlay' />
           <div className='container-section experience-content' data-reveal>
-            <span className='section-tag light'>Experiencia e futuro</span>
-            <h2>Alguns lugares voce entende. Outros voce sente.</h2>
+            <span className='section-tag light'>Experiência e futuro</span>
+            <h2>Alguns lugares você entende. Outros você sente.</h2>
             <p>
               O Bella Vista equilibra desejo e previsibilidade. Um convite para
               desacelerar, mas com retorno claro para quem pensa no longo prazo.
@@ -338,10 +340,10 @@ export default function App() {
 
         <section id='cta' className='final-cta'>
           <div className='container-section final-cta-inner' data-reveal>
-            <h2>Quando fizer sentido, voce vai saber.</h2>
+            <h2>Quando fizer sentido, você vai saber.</h2>
             <p>
               Converse com um especialista e avalie o Bella Vista como ativo
-              imobiliario estrategico. Sem formularios. Sem pressa.
+              imobiliário estratégico. Sem formulários. Sem pressa.
             </p>
             <a
               className='cta-primary cta-glow'
@@ -362,8 +364,8 @@ export default function App() {
             <span className='brand-subtitle'>Beach Residence • Bahia</span>
           </div>
           <p>
-            Empreendimento imobiliario voltado para investimento patrimonial e
-            segunda residencia. Atendimento consultivo via WhatsApp.
+            Empreendimento imobiliário voltado para investimento patrimonial e
+            segunda residência. Atendimento consultivo via WhatsApp.
           </p>
         </div>
       </footer>
