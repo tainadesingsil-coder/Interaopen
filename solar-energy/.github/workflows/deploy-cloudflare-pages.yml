@@ -34,5 +34,5 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           projectName: solarenergy-5h5
-          directory: ./solar-energy/dist
+          directory: ./solar-energy/out
           branch: production

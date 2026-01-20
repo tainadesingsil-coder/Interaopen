@@ -40,7 +40,7 @@ jobs:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
           projectName: solarenergy-5h5
-          directory: solar-energy/dist
+          directory: solar-energy/out
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ github.ref == 'refs/heads/main' && 'main' || github.ref_name }}
           wranglerVersion: '3'
