@@ -124,7 +124,7 @@ export default function HomePage() {
         opacity: 1,
         transition: reduceMotion
           ? { duration: 0 }
-          : { duration: 1.6, ease: 'easeInOut' },
+          : { duration: 1.6, ease: [0.42, 0, 0.58, 1] },
       },
     }),
     [reduceMotion]
