@@ -5,52 +5,118 @@ import { motion, MotionConfig, useReducedMotion } from 'framer-motion';
 import { Building2, Compass, KeyRound, Landmark, MapPin } from 'lucide-react';
 
 const whatsappNumber = '5571999999999';
-const whatsappMessage =
-  'Olá! Quero entender mais sobre o Bella Vista Beach Residence.';
+
+const copy = {
+  whatsappMessage:
+    'Olá! Quero entender mais sobre o Bella Vista Beach Residence.',
+  header: {
+    brand: 'Bella Vista',
+    cta: 'Conversar no WhatsApp',
+  },
+  hero: {
+    eyebrow: 'BR-367 • Litoral Sul da Bahia',
+    title: 'Viva perto do mar.\nInvista onde o futuro passa.',
+    subtitle:
+      'Stúdios e apartamentos em uma das regiões mais desejadas da Bahia, com localização estratégica e alto potencial de valorização.',
+    primaryCta: 'Falar com um especialista no WhatsApp',
+    secondaryCta: 'Ver localização',
+    note: 'Atendimento consultivo, reservado e sem pressão.',
+  },
+  context: {
+    tag: 'Contexto da Bahia',
+    title: 'A Bahia vive uma explosão turística.',
+    body:
+      'Turismo, mobilidade e infraestrutura aceleram a valorização. O mercado responde quando o desejo encontra acesso.',
+    bullets: [
+      'Fluxo turístico em alta com ocupação constante.',
+      'Infraestrutura e mobilidade avançando a cada temporada.',
+      'Demanda por imóveis com liquidez e renda recorrente.',
+    ],
+    caption: 'Entre natureza e mobilidade estratégica',
+    imageAlt: 'Vista do litoral sul da Bahia',
+  },
+  location: {
+    tag: 'Localização estratégica',
+    title:
+      'Entre a BR-367 e o azul do mar, nasce uma decisão bem posicionada.',
+    body:
+      'Acesso direto, visibilidade e proximidade com os polos mais desejados do litoral sul. Um ponto de equilíbrio entre fluxo turístico e privacidade.',
+    badge: 'BR-367',
+    mapNote: 'BR-367 → polos turísticos → Bella Vista Beach Residence',
+    pinLabel: 'Bella Vista',
+    chips: [
+      { label: 'Porto Seguro', top: '18%', left: '12%' },
+      { label: 'Coroa Vermelha', top: '32%', left: '58%' },
+      { label: "Arraial d'Ajuda", top: '58%', left: '16%' },
+      { label: 'Trancoso', top: '70%', left: '62%' },
+    ],
+  },
+  product: {
+    tag: 'Proposta do produto',
+    title:
+      'Pensado para quem entende que investir bem começa pela localização certa.',
+    cards: [
+      {
+        title: 'Stúdios funcionais',
+        description:
+          'Plantas inteligentes, metragem otimizada e facilidade de operação.',
+        icon: Building2,
+      },
+      {
+        title: 'Projeto contemporâneo',
+        description:
+          'Arquitetura limpa, acabamentos consistentes e presença premium.',
+        icon: Compass,
+      },
+      {
+        title: 'Região em crescimento',
+        description: 'Demanda turística crescente, valorização sustentada.',
+        icon: Landmark,
+      },
+      {
+        title: 'Ideal para morar ou investir',
+        description:
+          'Uso próprio com liquidez para temporada e renda passiva.',
+        icon: KeyRound,
+      },
+    ],
+  },
+  audience: {
+    tag: 'Para quem é',
+    title: 'Este projeto é ideal para quem busca patrimônio, não impulso.',
+    body:
+      'Perfil racional, sensível ao lugar certo. Uma escolha feita com calma e visão de longo prazo.',
+    items: ['Investidor patrimonial', 'Segunda residência', 'Renda com temporada'],
+  },
+  experience: {
+    tag: 'Experiência',
+    title: 'Alguns lugares você entende. Outros você sente.',
+    body:
+      'O Bella Vista equilibra desejo e previsibilidade. Um convite para viver o litoral com segurança patrimonial.',
+    cta: 'Conversar com um especialista',
+  },
+  cta: {
+    tag: 'Conversão',
+    title: 'Quando fizer sentido, você vai saber.',
+    body:
+      'Converse com um especialista e avalie o Bella Vista como ativo imobiliário estratégico. Sem formulários. Sem pressa.',
+    button: 'Conversar agora no WhatsApp',
+    footer: 'Bella Vista Beach Residence • Bahia',
+  },
+  floating: {
+    label: 'WhatsApp',
+    ariaLabel: 'Abrir conversa no WhatsApp',
+  },
+};
+
 const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
-  whatsappMessage
+  copy.whatsappMessage
 )}`;
 
 const heroImage =
   'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=2400&q=80';
 const contextImage =
   'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1800&q=80';
-
-const mapChips = [
-  { label: 'Porto Seguro', top: '18%', left: '12%' },
-  { label: 'Coroa Vermelha', top: '32%', left: '58%' },
-  { label: "Arraial d'Ajuda", top: '58%', left: '16%' },
-  { label: 'Trancoso', top: '70%', left: '62%' },
-];
-
-const productCards = [
-  {
-    title: 'Stúdios funcionais',
-    description: 'Plantas inteligentes com metragem otimizada e alto potencial.',
-    icon: Building2,
-  },
-  {
-    title: 'Projeto contemporâneo',
-    description: 'Arquitetura clean, acabamentos consistentes e leitura premium.',
-    icon: Compass,
-  },
-  {
-    title: 'Região em crescimento',
-    description: 'Demanda turística crescente e valorização sustentada.',
-    icon: Landmark,
-  },
-  {
-    title: 'Ideal para morar ou investir',
-    description: 'Uso próprio com liquidez para temporada e renda passiva.',
-    icon: KeyRound,
-  },
-];
-
-const audience = [
-  'Investidor patrimonial',
-  'Segunda residência',
-  'Renda com temporada',
-];
 
 function Reveal({
   children,
@@ -99,15 +165,15 @@ function Header() {
     >
       <div className='mx-auto flex max-w-6xl items-center justify-between px-6 py-4'>
         <span className='font-display text-xs uppercase tracking-[0.35em] text-ink'>
-          Bella Vista
+          {copy.header.brand}
         </span>
         <a
           href={whatsappLink}
           target='_blank'
           rel='noreferrer'
-          className='rounded-full bg-ocean px-5 py-2 text-sm font-semibold text-white shadow-soft transition hover:-translate-y-0.5 hover:shadow-glow focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ocean'
+          className='rounded-full bg-ocean/95 px-5 py-2 text-sm font-semibold text-white shadow-soft transition hover:-translate-y-0.5 hover:shadow-glow focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ocean'
         >
-          Falar no WhatsApp
+          {copy.header.cta}
         </a>
       </div>
     </header>
@@ -136,109 +202,103 @@ export default function HomePage() {
         <main className='pt-20'>
           <section
             id='inicio'
-            className='relative flex min-h-screen items-center overflow-hidden pt-16'
+            className='relative flex min-h-screen items-center overflow-hidden pt-20'
           >
             <div
               className='absolute inset-0 bg-cover bg-center'
               style={{ backgroundImage: `url(${heroImage})` }}
               aria-hidden='true'
             />
-            <div className='absolute inset-0 bg-gradient-to-b from-black/45 via-black/55 to-black/70' />
+            <div className='absolute inset-0 bg-gradient-to-b from-black/35 via-black/55 to-black/80' />
+            <div className='absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.12),transparent_55%)]' />
             <div className='absolute inset-0 vignette' />
-            <div className='relative z-10 mx-auto w-full max-w-6xl px-6 pb-16 pt-20 text-white'>
+            <div className='relative z-10 mx-auto w-full max-w-6xl px-6 pb-20 pt-24 text-white'>
               <Reveal>
                 <p className='text-[0.65rem] uppercase tracking-[0.42em] text-white/70'>
-                  BR-367 • Litoral Sul da Bahia
+                  {copy.hero.eyebrow}
                 </p>
               </Reveal>
               <Reveal delay={0.1}>
-                <h1 className='mt-4 max-w-3xl text-balance text-4xl font-semibold leading-tight md:text-6xl'>
-                  Viva perto do mar.
-                  <br />
-                  Invista onde o futuro passa.
+                <h1 className='mt-4 max-w-3xl text-balance text-5xl font-semibold leading-[1.05] tracking-tight md:text-7xl'>
+                  {copy.hero.title.split('\n').map((line) => (
+                    <span key={line} className='block'>
+                      {line}
+                    </span>
+                  ))}
                 </h1>
               </Reveal>
               <Reveal delay={0.2}>
                 <p className='mt-6 max-w-2xl text-lg text-white/80 md:text-xl'>
-                  Stúdios e apartamentos em uma das regiões mais desejadas da
-                  Bahia, com localização estratégica e alto potencial de
-                  valorização.
+                  {copy.hero.subtitle}
                 </p>
               </Reveal>
-              <Reveal delay={0.3} className='mt-10 flex flex-col gap-4 md:flex-row'>
+              <Reveal
+                delay={0.3}
+                className='mt-10 flex flex-col gap-4 md:flex-row md:items-center'
+              >
                 <a
                   href={whatsappLink}
                   target='_blank'
                   rel='noreferrer'
-                  className='inline-flex items-center justify-center rounded-full bg-white px-7 py-3 text-sm font-semibold text-ocean shadow-card transition hover:-translate-y-0.5 hover:shadow-glow focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white'
+                  className='inline-flex items-center justify-center rounded-full bg-white/95 px-7 py-3 text-sm font-semibold text-ocean shadow-card transition hover:-translate-y-0.5 hover:shadow-glow focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white'
                 >
-                  Falar com um especialista no WhatsApp
+                  {copy.hero.primaryCta}
                 </a>
                 <a
                   href='#localizacao'
                   className='inline-flex items-center justify-center text-sm font-semibold text-white/80 transition hover:text-white'
                 >
-                  Ver localização
+                  {copy.hero.secondaryCta}
                 </a>
               </Reveal>
               <Reveal delay={0.4}>
-                <p className='mt-4 text-sm text-white/70'>
-                  Atendimento consultivo, reservado e sem pressão.
-                </p>
+                <p className='mt-4 text-sm text-white/70'>{copy.hero.note}</p>
               </Reveal>
             </div>
           </section>
 
           <section
             id='contexto'
-            className='scroll-mt-24 bg-sand py-24'
+            className='scroll-mt-24 bg-sand py-28'
           >
             <div className='mx-auto grid max-w-6xl items-center gap-12 px-6 md:grid-cols-[1.05fr_1fr]'>
               <div className='space-y-5'>
                 <Reveal>
                   <p className='text-xs uppercase tracking-[0.32em] text-muted'>
-                    Contexto da Bahia
+                    {copy.context.tag}
                   </p>
                 </Reveal>
                 <Reveal delay={0.1}>
                   <h2 className='text-3xl font-semibold text-balance md:text-4xl'>
-                    A Bahia vive uma explosão turística.
+                    {copy.context.title}
                   </h2>
                 </Reveal>
                 <Reveal delay={0.2}>
                   <p className='text-base text-muted md:text-lg'>
-                    O ciclo é claro: quando turismo e infraestrutura evoluem, o
-                    mercado responde com valorização consistente e demanda
-                    sustentável.
+                    {copy.context.body}
                   </p>
                 </Reveal>
                 <Reveal delay={0.3}>
                   <ul className='space-y-3 text-sm text-ink/80'>
-                    <li className='flex items-center gap-3'>
-                      <span className='h-1.5 w-1.5 rounded-full bg-gold' />
-                      Fluxo turístico em alta com ocupação crescente.
-                    </li>
-                    <li className='flex items-center gap-3'>
-                      <span className='h-1.5 w-1.5 rounded-full bg-gold' />
-                      Investimentos em infraestrutura e mobilidade.
-                    </li>
-                    <li className='flex items-center gap-3'>
-                      <span className='h-1.5 w-1.5 rounded-full bg-gold' />
-                      Procura por ativos com liquidez e lastro real.
-                    </li>
+                    {copy.context.bullets.map((item) => (
+                      <li key={item} className='flex items-center gap-3'>
+                        <span className='h-1.5 w-1.5 rounded-full bg-gold' />
+                        {item}
+                      </li>
+                    ))}
                   </ul>
                 </Reveal>
               </div>
               <Reveal delay={0.2}>
-                <figure className='rounded-2xl bg-white p-3 shadow-soft'>
+                <figure className='rounded-2xl border border-white/70 bg-white/75 p-3 shadow-soft backdrop-blur'>
                   <img
                     src={contextImage}
-                    alt='Vista do litoral sul da Bahia'
+                    alt={copy.context.imageAlt}
                     className='h-[360px] w-full rounded-xl object-cover'
                     loading='lazy'
                   />
                   <figcaption className='mt-3 text-xs uppercase tracking-[0.28em] text-muted'>
-                    Entre natureza e mobilidade estratégica
+                    {copy.context.caption}
                   </figcaption>
                 </figure>
               </Reveal>
@@ -247,33 +307,30 @@ export default function HomePage() {
 
           <section
             id='localizacao'
-            className='scroll-mt-24 bg-white py-24'
+            className='scroll-mt-24 bg-white py-28'
           >
             <div className='mx-auto grid max-w-6xl gap-12 px-6 lg:grid-cols-[1fr_1.1fr]'>
               <div className='space-y-5'>
                 <Reveal>
                   <p className='text-xs uppercase tracking-[0.32em] text-muted'>
-                    Localização estratégica
+                    {copy.location.tag}
                   </p>
                 </Reveal>
                 <Reveal delay={0.1}>
                   <h2 className='text-3xl font-semibold text-balance md:text-4xl'>
-                    Entre a BR-367 e o azul do mar, nasce uma decisão bem
-                    posicionada.
+                    {copy.location.title}
                   </h2>
                 </Reveal>
                 <Reveal delay={0.2}>
                   <p className='text-base text-muted md:text-lg'>
-                    Acesso direto, visibilidade e proximidade com os polos mais
-                    desejados do litoral sul. Um ponto de equilíbrio entre fluxo
-                    turístico e privacidade.
+                    {copy.location.body}
                   </p>
                 </Reveal>
               </div>
               <Reveal delay={0.1}>
-                <div className='relative rounded-2xl border border-slate-200 bg-white p-6 shadow-card'>
-                  <div className='absolute inset-0 rounded-2xl ring-1 ring-gold/20' />
-                  <div className='relative h-[320px] rounded-xl bg-sand/70'>
+                <div className='relative rounded-2xl border border-white/70 bg-white/70 p-6 shadow-card backdrop-blur'>
+                  <div className='absolute inset-0 rounded-2xl bg-gradient-to-br from-white/60 via-white/30 to-transparent' />
+                  <div className='relative h-[320px] rounded-xl bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.7),rgba(246,241,234,0.8)_55%,rgba(246,241,234,0.6)_100%)]'>
                     <motion.svg
                       className='absolute inset-0 h-full w-full'
                       viewBox='0 0 640 320'
@@ -291,20 +348,24 @@ export default function HomePage() {
                       />
                     </motion.svg>
 
+                    <span className='absolute left-5 top-5 rounded-full border border-white/70 bg-white/80 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-ocean'>
+                      {copy.location.badge}
+                    </span>
+
                     <div className='absolute right-[18%] top-[46%] flex items-center'>
                       <span className='relative flex h-4 w-4 items-center justify-center'>
                         <span className='absolute inline-flex h-full w-full rounded-full bg-gold/30 motion-safe:animate-ping' />
-                        <span className='relative inline-flex h-3 w-3 rounded-full bg-gold' />
+                        <span className='relative inline-flex h-3 w-3 rounded-full bg-gold shadow-[0_0_12px_rgba(183,146,90,0.45)]' />
                       </span>
-                      <span className='ml-3 rounded-full border border-white/60 bg-white/80 px-3 py-1 text-xs font-semibold text-ocean'>
-                        Bella Vista
+                      <span className='ml-3 rounded-full border border-white/60 bg-white/85 px-3 py-1 text-xs font-semibold text-ocean shadow-sm'>
+                        {copy.location.pinLabel}
                       </span>
                     </div>
 
-                    {mapChips.map((chip) => (
+                    {copy.location.chips.map((chip) => (
                       <span
                         key={chip.label}
-                        className='absolute rounded-full border border-white/70 bg-white/80 px-3 py-1 text-xs text-ink shadow-sm'
+                        className='absolute rounded-full border border-white/70 bg-white/80 px-3 py-1 text-xs text-ink shadow-sm backdrop-blur'
                         style={{ top: chip.top, left: chip.left }}
                       >
                         {chip.label}
@@ -313,7 +374,7 @@ export default function HomePage() {
                   </div>
                   <div className='mt-5 flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-muted'>
                     <MapPin className='h-4 w-4 text-gold' />
-                    BR-367 → polos turísticos → Bella Vista Beach Residence
+                    {copy.location.mapNote}
                   </div>
                 </div>
               </Reveal>
@@ -322,29 +383,28 @@ export default function HomePage() {
 
           <section
             id='proposta'
-            className='scroll-mt-24 bg-sand py-24'
+            className='scroll-mt-24 bg-sand py-28'
           >
             <div className='mx-auto max-w-6xl px-6'>
               <div className='mb-12 max-w-3xl space-y-4'>
                 <Reveal>
                   <p className='text-xs uppercase tracking-[0.32em] text-muted'>
-                    Proposta do produto
+                    {copy.product.tag}
                   </p>
                 </Reveal>
                 <Reveal delay={0.1}>
                   <h2 className='text-3xl font-semibold text-balance md:text-4xl'>
-                    Pensado para quem entende que investir bem começa pela
-                    localização certa.
+                    {copy.product.title}
                   </h2>
                 </Reveal>
               </div>
               <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-4'>
-                {productCards.map((card, index) => {
+                {copy.product.cards.map((card, index) => {
                   const Icon = card.icon;
                   return (
                     <Reveal key={card.title} delay={0.1 + index * 0.08}>
-                      <div className='group h-full rounded-2xl border border-white/70 bg-white px-5 py-6 shadow-soft transition hover:-translate-y-1 hover:shadow-card'>
-                        <Icon className='h-6 w-6 text-ocean/80' />
+                      <div className='group h-full rounded-2xl border border-white/70 bg-white/80 px-5 py-6 shadow-soft backdrop-blur transition hover:-translate-y-1 hover:shadow-card'>
+                        <Icon className='h-6 w-6 text-ocean/80 transition group-hover:text-ocean' />
                         <h3 className='mt-4 text-lg font-semibold text-ink'>
                           {card.title}
                         </h3>
@@ -359,25 +419,24 @@ export default function HomePage() {
             </div>
           </section>
 
-          <section id='perfil' className='scroll-mt-24 bg-white py-24'>
+          <section id='perfil' className='scroll-mt-24 bg-white py-28'>
             <div className='mx-auto max-w-6xl px-6'>
               <Reveal>
-                <div className='rounded-2xl border border-slate-200 bg-sand px-6 py-12 text-center shadow-soft md:px-12'>
+                <div className='rounded-2xl border border-white/70 bg-sand/90 px-6 py-12 text-center shadow-soft backdrop-blur md:px-12'>
                   <p className='text-xs uppercase tracking-[0.32em] text-muted'>
-                    Para quem é
+                    {copy.audience.tag}
                   </p>
                   <h2 className='mt-4 text-3xl font-semibold md:text-4xl'>
-                    Este projeto é ideal para quem busca patrimônio, não impulso.
+                    {copy.audience.title}
                   </h2>
                   <p className='mx-auto mt-4 max-w-2xl text-base text-muted md:text-lg'>
-                    Uma escolha racional com o conforto emocional de estar perto
-                    do mar. Sem promessas vazias. Só consistência.
+                    {copy.audience.body}
                   </p>
                   <div className='mt-10 grid gap-4 md:grid-cols-3'>
-                    {audience.map((item) => (
+                    {copy.audience.items.map((item) => (
                       <div
                         key={item}
-                        className='rounded-xl border border-white/70 bg-white px-4 py-4 text-sm font-semibold text-ink shadow-sm'
+                        className='rounded-xl border border-white/70 bg-white/80 px-4 py-4 text-sm font-semibold text-ink shadow-sm backdrop-blur'
                       >
                         {item}
                       </div>
@@ -390,24 +449,23 @@ export default function HomePage() {
 
           <section
             id='experiencia'
-            className='grain scroll-mt-24 bg-ocean py-24 text-white'
+            className='grain scroll-mt-24 bg-ocean py-28 text-white'
           >
             <div className='mx-auto flex max-w-6xl flex-col gap-8 px-6 lg:flex-row lg:items-center lg:justify-between'>
               <div className='space-y-4'>
                 <Reveal>
                   <p className='text-xs uppercase tracking-[0.32em] text-white/60'>
-                    Experiência
+                    {copy.experience.tag}
                   </p>
                 </Reveal>
                 <Reveal delay={0.1}>
                   <h2 className='text-3xl font-semibold text-balance md:text-4xl'>
-                    Alguns lugares você entende. Outros você sente.
+                    {copy.experience.title}
                   </h2>
                 </Reveal>
                 <Reveal delay={0.2}>
                   <p className='max-w-xl text-base text-white/70 md:text-lg'>
-                    A sensação do litoral, com a segurança de um investimento
-                    estruturado. Uma pausa emocional com lógica financeira.
+                    {copy.experience.body}
                   </p>
                 </Reveal>
               </div>
@@ -418,28 +476,27 @@ export default function HomePage() {
                   rel='noreferrer'
                   className='inline-flex items-center justify-center rounded-full border border-white/40 px-7 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-white/10'
                 >
-                  Falar com um especialista
+                  {copy.experience.cta}
                 </a>
               </Reveal>
             </div>
           </section>
 
-          <section id='cta' className='bg-ocean py-24 text-white'>
+          <section id='cta' className='grain bg-ocean py-28 text-white'>
             <div className='mx-auto flex max-w-6xl flex-col gap-8 px-6'>
               <Reveal>
                 <p className='text-xs uppercase tracking-[0.32em] text-white/60'>
-                  Conversão
+                  {copy.cta.tag}
                 </p>
               </Reveal>
               <Reveal delay={0.1}>
                 <h2 className='text-3xl font-semibold md:text-4xl'>
-                  Quando fizer sentido, você vai saber.
+                  {copy.cta.title}
                 </h2>
               </Reveal>
               <Reveal delay={0.2}>
                 <p className='max-w-2xl text-base text-white/70 md:text-lg'>
-                  Converse com um especialista e avalie o Bella Vista como ativo
-                  imobiliário estratégico. Sem formulários. Sem pressa.
+                  {copy.cta.body}
                 </p>
               </Reveal>
               <Reveal delay={0.3}>
@@ -447,14 +504,14 @@ export default function HomePage() {
                   href={whatsappLink}
                   target='_blank'
                   rel='noreferrer'
-                  className='inline-flex w-fit items-center justify-center rounded-full bg-white px-8 py-3 text-sm font-semibold text-ocean shadow-glow transition hover:-translate-y-0.5'
+                  className='inline-flex w-fit items-center justify-center rounded-full bg-white/95 px-8 py-3 text-sm font-semibold text-ocean shadow-glow transition hover:-translate-y-0.5 hover:shadow-[0_20px_60px_rgba(8,38,58,0.25)]'
                 >
-                  Conversar agora no WhatsApp
+                  {copy.cta.button}
                 </a>
               </Reveal>
               <Reveal delay={0.4}>
                 <p className='text-xs uppercase tracking-[0.3em] text-white/50'>
-                  Bella Vista Beach Residence • Bahia
+                  {copy.cta.footer}
                 </p>
               </Reveal>
             </div>
@@ -465,10 +522,10 @@ export default function HomePage() {
           href={whatsappLink}
           target='_blank'
           rel='noreferrer'
-          aria-label='Abrir conversa no WhatsApp'
-          className='fixed bottom-6 right-6 z-50 inline-flex items-center gap-2 rounded-full bg-ocean px-4 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-white shadow-glow transition hover:-translate-y-0.5'
+          aria-label={copy.floating.ariaLabel}
+          className='fixed bottom-6 right-6 z-50 inline-flex items-center gap-2 rounded-full bg-ocean/95 px-4 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-white shadow-glow backdrop-blur transition hover:-translate-y-0.5 hover:shadow-[0_18px_48px_rgba(8,38,58,0.25)]'
         >
-          WhatsApp
+          {copy.floating.label}
         </a>
       </div>
     </MotionConfig>
