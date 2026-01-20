@@ -42,5 +42,5 @@ jobs:
           projectName: solarenergy-5h5
           directory: solar-energy/out
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref == 'refs/heads/main' && 'main' || github.ref_name }}
+          branch: ${{ github.ref == 'refs/heads/cursor/landing-page-bella-vista-7d69' && 'cursor-landing-page-bella-vi' || github.ref == 'refs/heads/main' && 'main' || github.ref_name }}
           wranglerVersion: '3'
