@@ -6,10 +6,11 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "postbuild": "rm -rf dist && cp -R out dist",
     "start": "next start",
     "lint": "next lint",
-    "deploy:cf": "wrangler pages deploy out --project-name=solarenergy-5h5 --branch=production",
-    "deploy:cf:preview": "wrangler pages deploy out --project-name=solarenergy-5h5 --branch=preview"
+    "deploy:cf": "wrangler pages deploy dist --project-name=solarenergy-5h5 --branch=production",
+    "deploy:cf:preview": "wrangler pages deploy dist --project-name=solarenergy-5h5 --branch=preview"
   },
   "dependencies": {
     "framer-motion": "^12.23.12",
