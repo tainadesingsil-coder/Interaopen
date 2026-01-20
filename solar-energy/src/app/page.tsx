@@ -122,9 +122,7 @@ export default function HomePage() {
       visible: {
         pathLength: 1,
         opacity: 1,
-        transition: reduceMotion
-          ? { duration: 0 }
-          : { duration: 1.6, ease: [0.42, 0, 0.58, 1] },
+        transition: reduceMotion ? { duration: 0 } : { duration: 1.6 },
       },
     }),
     [reduceMotion]
