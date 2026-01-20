@@ -17,11 +17,11 @@ const manrope = Manrope({
 export const metadata: Metadata = {
   title: 'Bella Vista Beach Residence | Bahia',
   description:
-    'Studios e apartamentos com localização estratégica no litoral sul da Bahia. Atendimento consultivo via WhatsApp.',
+    'Stúdios e apartamentos com localização estratégica no Litoral Sul da Bahia. Atendimento consultivo via WhatsApp.',
   openGraph: {
     title: 'Bella Vista Beach Residence | Bahia',
     description:
-      'Investimento imobiliário estratégico no litoral sul da Bahia, com alto potencial de valorização.',
+      'Investimento imobiliário estratégico no Litoral Sul da Bahia, com alto potencial de valorização.',
     type: 'website',
   },
 };
