@@ -452,23 +452,23 @@ export default function HomePage() {
 
         </main>
 
-        <a
-          href={whatsappLink}
-          target='_blank'
-          rel='noreferrer'
-          aria-label={copy.floating.ariaLabel}
-          className='fixed bottom-6 right-4 z-50 flex items-center gap-3 rounded-full border border-white/20 bg-ocean/85 px-3 py-2 shadow-[0_0_24px_rgba(8,38,58,0.28)] backdrop-blur transition hover:-translate-y-0.5 hover:shadow-[0_0_30px_rgba(8,38,58,0.4)]'
-        >
+        <div className='fixed bottom-6 right-4 z-50 flex items-center gap-3'>
           <img
             src={mascotImage}
             alt='Mascote Bella Vista'
-            className='h-20 w-20 rounded-full object-cover md:h-24 md:w-24'
+            className='h-20 w-20 rounded-full object-cover shadow-[0_0_26px_rgba(8,38,58,0.28)] md:h-24 md:w-24'
             loading='lazy'
           />
-          <span className='inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white shadow-[0_0_12px_rgba(255,255,255,0.18)]'>
-            <MessageCircle className='h-3.5 w-3.5' />
-          </span>
-        </a>
+          <a
+            href={whatsappLink}
+            target='_blank'
+            rel='noreferrer'
+            aria-label={copy.floating.ariaLabel}
+            className='inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/30 bg-ocean/80 text-white shadow-[0_0_14px_rgba(255,255,255,0.18)] backdrop-blur transition hover:-translate-y-0.5 hover:shadow-[0_0_18px_rgba(255,255,255,0.25)]'
+          >
+            <MessageCircle className='h-4 w-4' />
+          </a>
+        </div>
       </div>
     </MotionConfig>
   );
