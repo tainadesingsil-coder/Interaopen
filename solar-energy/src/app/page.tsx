@@ -1,10 +1,19 @@
 'use client';
 
-import { useMemo } from 'react';
-import { motion, MotionConfig, useReducedMotion } from 'framer-motion';
+import { useEffect, useMemo, useState } from 'react';
+import {
+  AnimatePresence,
+  motion,
+  MotionConfig,
+  useReducedMotion,
+} from 'framer-motion';
 import { Building2, Compass, KeyRound, Landmark, MapPin } from 'lucide-react';
 
 const whatsappNumber = '5571999999999';
+
+const heroImage = 'https://i.postimg.cc/JnndrxRf/FOTO-PRAIA.png';
+const contextImage =
+  'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1800&q=80';
 
 const copy = {
   whatsappMessage:
@@ -99,9 +108,10 @@ const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
   copy.whatsappMessage
 )}`;
 
-const heroImage = 'https://i.postimg.cc/JnndrxRf/FOTO-PRAIA.png';
-const contextImage =
-  'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1800&q=80';
+const contextSlides = [
+  { src: contextImage, alt: copy.context.imageAlt },
+  { src: heroImage, alt: 'Vista da Costa do Descobrimento' },
+];
 
 function Reveal({
   children,
@@ -132,6 +142,8 @@ function Reveal({
 
 export default function HomePage() {
   const reduceMotion = useReducedMotion();
+  const [contextIndex, setContextIndex] = useState(0);
+  const slideCount = contextSlides.length;
   const mapLineVariants = useMemo(
     () => ({
       hidden: reduceMotion ? { pathLength: 1, opacity: 1 } : { pathLength: 0 },
@@ -143,6 +155,14 @@ export default function HomePage() {
     }),
     [reduceMotion]
   );
+
+  useEffect(() => {
+    if (reduceMotion || slideCount < 2) return;
+    const interval = window.setInterval(() => {
+      setContextIndex((prev) => (prev + 1) % slideCount);
+    }, 5200);
+    return () => window.clearInterval(interval);
+  }, [reduceMotion, slideCount]);
 
   return (
     <MotionConfig reducedMotion='user'>
@@ -235,25 +255,26 @@ export default function HomePage() {
                 </Reveal>
               </div>
               <Reveal delay={0.2}>
-                <motion.figure
-                  className='rounded-2xl border border-white/70 bg-white/75 p-3 shadow-soft backdrop-blur'
-                  animate={reduceMotion ? undefined : { y: [0, -8, 0] }}
-                  transition={
-                    reduceMotion
-                      ? undefined
-                      : { duration: 8, repeat: Infinity, ease: 'easeInOut' }
-                  }
-                >
-                  <img
-                    src={contextImage}
-                    alt={copy.context.imageAlt}
-                    className='h-[420px] w-full rounded-xl object-cover md:h-[480px]'
-                    loading='lazy'
-                  />
+                <figure className='rounded-2xl border border-white/70 bg-white/75 p-3 shadow-soft backdrop-blur'>
+                  <div className='relative h-[420px] w-full overflow-hidden rounded-xl md:h-[480px]'>
+                    <AnimatePresence mode='wait'>
+                      <motion.img
+                        key={contextSlides[contextIndex]?.src}
+                        src={contextSlides[contextIndex]?.src}
+                        alt={contextSlides[contextIndex]?.alt}
+                        className='absolute inset-0 h-full w-full object-cover'
+                        initial={reduceMotion ? { opacity: 1 } : { opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={reduceMotion ? { opacity: 1 } : { opacity: 0 }}
+                        transition={reduceMotion ? { duration: 0 } : { duration: 0.8 }}
+                        loading='lazy'
+                      />
+                    </AnimatePresence>
+                  </div>
                   <figcaption className='mt-3 text-xs uppercase tracking-[0.28em] text-muted'>
                     {copy.context.caption}
                   </figcaption>
-                </motion.figure>
+                </figure>
               </Reveal>
             </div>
           </section>
