@@ -14,13 +14,12 @@ const copy = {
     cta: 'Conversar no WhatsApp',
   },
   hero: {
-    eyebrow: 'BR-367 • Litoral Sul da Bahia',
+    eyebrow: 'Costa do Descobrimento • Bahia',
     title: 'Viva perto do mar.\nInvista onde o futuro passa.',
     subtitle:
       'Stúdios e apartamentos em uma das regiões mais desejadas da Bahia, com localização estratégica e alto potencial de valorização.',
     primaryCta: 'Falar com um especialista no WhatsApp',
     secondaryCta: 'Ver localização',
-    note: 'Atendimento consultivo, reservado e sem pressão.',
   },
   context: {
     tag: 'Contexto da Bahia',
@@ -240,9 +239,6 @@ export default function HomePage() {
                 >
                   {copy.hero.secondaryCta}
                 </a>
-              </Reveal>
-              <Reveal delay={0.4}>
-                <p className='mt-4 text-sm text-white/70'>{copy.hero.note}</p>
               </Reveal>
             </div>
           </section>
