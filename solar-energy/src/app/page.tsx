@@ -36,7 +36,6 @@ const copy = {
       'Infraestrutura e mobilidade avançando a cada temporada.',
       'Demanda por imóveis com liquidez e renda recorrente.',
     ],
-    caption: 'Entre natureza e mobilidade estratégica',
     imageAlt: 'Vista do litoral sul da Bahia',
   },
   location: {
@@ -271,9 +270,6 @@ export default function HomePage() {
                       />
                     </AnimatePresence>
                   </div>
-                  <figcaption className='mt-3 text-xs uppercase tracking-[0.28em] text-muted'>
-                    {copy.context.caption}
-                  </figcaption>
                 </figure>
               </Reveal>
             </div>
