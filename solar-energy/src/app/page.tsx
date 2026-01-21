@@ -7,11 +7,20 @@ import {
   MotionConfig,
   useReducedMotion,
 } from 'framer-motion';
-import { Building2, Compass, KeyRound, Landmark, MapPin } from 'lucide-react';
+import {
+  Building2,
+  Compass,
+  KeyRound,
+  Landmark,
+  MapPin,
+  MessageCircle,
+} from 'lucide-react';
 
 const whatsappNumber = '5571999999999';
 
 const heroImage = 'https://i.postimg.cc/JnndrxRf/FOTO-PRAIA.png';
+const mascotImage =
+  'https://i.postimg.cc/jjtwpkR2/Design-sem-nome-2026-01-20T224646-526.png';
 const contextImage =
   'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1800&q=80';
 
@@ -98,7 +107,6 @@ const copy = {
       'O Bella Vista equilibra desejo e previsibilidade. Um convite para viver o litoral com segurança patrimonial.',
   },
   floating: {
-    label: 'WhatsApp',
     ariaLabel: 'Abrir conversa no WhatsApp',
   },
 };
@@ -449,9 +457,17 @@ export default function HomePage() {
           target='_blank'
           rel='noreferrer'
           aria-label={copy.floating.ariaLabel}
-          className='fixed bottom-6 right-6 z-50 inline-flex items-center gap-2 rounded-full bg-ocean/95 px-4 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-white shadow-glow backdrop-blur transition hover:-translate-y-0.5 hover:shadow-[0_18px_48px_rgba(8,38,58,0.25)]'
+          className='fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-full border border-white/30 bg-ocean/90 px-3 py-2 shadow-[0_0_26px_rgba(8,38,58,0.35)] backdrop-blur transition hover:-translate-y-0.5 hover:shadow-[0_0_32px_rgba(8,38,58,0.5)]'
         >
-          {copy.floating.label}
+          <img
+            src={mascotImage}
+            alt='Mascote Bella Vista'
+            className='h-14 w-14 rounded-full object-cover md:h-16 md:w-16'
+            loading='lazy'
+          />
+          <span className='inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/40 bg-white/10 text-white shadow-[0_0_16px_rgba(255,255,255,0.2)]'>
+            <MessageCircle className='h-4 w-4' />
+          </span>
         </a>
       </div>
     </MotionConfig>
