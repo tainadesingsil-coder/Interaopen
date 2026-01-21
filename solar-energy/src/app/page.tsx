@@ -138,6 +138,50 @@ function Reveal({
   );
 }
 
+function HeroNav() {
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 12);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  return (
+    <header
+      className={`fixed inset-x-0 top-0 z-50 transition ${
+        scrolled ? 'bg-white/15 shadow-sm' : 'bg-white/5'
+      } backdrop-blur-lg`}
+    >
+      <nav className='mx-auto flex max-w-6xl items-center justify-between px-6 py-4 text-white'>
+        <span className='font-display text-xs uppercase tracking-[0.35em] text-white/80'>
+          Bella Vista
+        </span>
+        <div className='hidden items-center gap-6 text-xs uppercase tracking-[0.28em] text-white/70 md:flex'>
+          <a href='#localizacao' className='transition hover:text-white'>
+            Localização
+          </a>
+          <a href='#proposta' className='transition hover:text-white'>
+            Projeto
+          </a>
+          <a href='#perfil' className='transition hover:text-white'>
+            Investimento
+          </a>
+          <a
+            href={whatsappLink}
+            target='_blank'
+            rel='noreferrer'
+            className='transition hover:text-white'
+          >
+            Contato
+          </a>
+        </div>
+      </nav>
+    </header>
+  );
+}
+
 export default function HomePage() {
   const reduceMotion = useReducedMotion();
   const [contextIndex, setContextIndex] = useState(0);
@@ -165,7 +209,8 @@ export default function HomePage() {
   return (
     <MotionConfig reducedMotion='user'>
       <div className='bg-sand text-ink'>
-        <main className='pt-4'>
+        <HeroNav />
+        <main className='pt-20'>
           <section
             id='inicio'
             className='grain relative flex min-h-screen items-center overflow-hidden pt-20'
@@ -175,12 +220,13 @@ export default function HomePage() {
               style={{ backgroundImage: `url(${heroImage})` }}
               aria-hidden='true'
             />
-            <div className='absolute inset-0 bg-gradient-to-b from-black/60 via-[#061825]/75 to-[#030b12]/95' />
-            <div className='absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(183,146,90,0.14),transparent_55%)]' />
-            <div className='absolute inset-0 bg-[linear-gradient(120deg,rgba(6,24,37,0.4),rgba(246,241,234,0.05)_45%,rgba(183,146,90,0.12)_100%)]' />
+            <div className='absolute inset-0 bg-gradient-to-b from-black/70 via-[#061825]/75 to-transparent' />
+            <div className='absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(183,146,90,0.16),transparent_55%)]' />
+            <div className='absolute inset-0 bg-[linear-gradient(120deg,rgba(6,24,37,0.55),rgba(246,241,234,0.06)_45%,rgba(183,146,90,0.18)_100%)]' />
             <div className='absolute inset-0 vignette' />
             <div className='relative z-10 mx-auto w-full max-w-6xl px-6 pb-24 pt-24 text-white'>
-              <div className='mx-auto max-w-2xl text-center'>
+              <div className='grid items-center gap-12 md:grid-cols-[1.1fr_0.9fr]'>
+                <div className='max-w-[720px] text-center md:text-left'>
                   <Reveal>
                     <p className='text-[0.65rem] uppercase tracking-[0.42em] text-white/70'>
                       {copy.hero.eyebrow}
@@ -201,13 +247,13 @@ export default function HomePage() {
                     </h1>
                   </Reveal>
                   <Reveal delay={0.2}>
-                    <p className='mx-auto mt-6 max-w-2xl text-lg text-white/78 md:text-xl'>
+                    <p className='mt-8 max-w-[720px] text-base text-white/80 md:text-lg'>
                       {copy.hero.subtitle}
                     </p>
                   </Reveal>
                   <Reveal
                     delay={0.3}
-                    className='mt-10 flex flex-col items-center gap-4 md:flex-row md:items-center md:justify-center'
+                    className='mt-12 flex flex-col items-center gap-4 md:flex-row md:items-center md:justify-start'
                   >
                     <a
                       href={whatsappLink}
@@ -218,6 +264,18 @@ export default function HomePage() {
                       {copy.hero.primaryCta}
                     </a>
                   </Reveal>
+                </div>
+                <Reveal delay={0.2} className='flex justify-center md:justify-end'>
+                  <motion.img
+                    src='https://i.postimg.cc/0QTq3jSg/Chat-GPT-Image-20-de-jan-de-2026-23-22-32.png'
+                    alt='Mascote Bella Vista'
+                    className='w-full max-w-[360px] md:max-w-[460px] lg:max-w-[520px]'
+                    initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={reduceMotion ? { duration: 0 } : { duration: 0.5, ease: 'easeOut' }}
+                    loading='lazy'
+                  />
+                </Reveal>
               </div>
             </div>
           </section>
@@ -444,14 +502,6 @@ export default function HomePage() {
           </section>
 
         </main>
-        <div className='fixed bottom-4 right-2 z-40 pointer-events-none'>
-          <img
-            src='https://i.postimg.cc/0QTq3jSg/Chat-GPT-Image-20-de-jan-de-2026-23-22-32.png'
-            alt='Mascote Bella Vista'
-            className='h-40 w-40 object-contain drop-shadow-[0_12px_28px_rgba(8,38,58,0.25)] md:h-48 md:w-48'
-            loading='lazy'
-          />
-        </div>
       </div>
     </MotionConfig>
   );
