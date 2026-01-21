@@ -269,7 +269,7 @@ export default function HomePage() {
                   <motion.img
                     src='https://i.postimg.cc/0QTq3jSg/Chat-GPT-Image-20-de-jan-de-2026-23-22-32.png'
                     alt='Mascote Bella Vista'
-                    className='w-full max-w-[360px] md:max-w-[460px] lg:max-w-[520px]'
+                    className='w-full max-w-[360px] md:max-w-[460px] lg:max-w-[520px] md:translate-x-6 lg:translate-x-10 md:translate-y-6 lg:translate-y-8'
                     initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={reduceMotion ? { duration: 0 } : { duration: 0.5, ease: 'easeOut' }}
