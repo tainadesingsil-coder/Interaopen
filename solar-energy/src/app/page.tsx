@@ -210,12 +210,6 @@ export default function HomePage() {
                 >
                   {copy.hero.primaryCta}
                 </a>
-                <a
-                  href='#localizacao'
-                  className='inline-flex items-center justify-center text-sm font-semibold text-white/80 transition hover:text-white'
-                >
-                  {copy.hero.secondaryCta}
-                </a>
               </Reveal>
             </div>
           </section>
