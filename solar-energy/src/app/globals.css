@@ -8,14 +8,30 @@
   }
 
   body {
-    @apply bg-sand text-ink font-sans antialiased text-[17px] leading-[1.7];
+    @apply bg-sand text-ink font-sans antialiased;
+    font-size: 17px;
+    line-height: 1.8;
+    letter-spacing: 0.004em;
+    text-rendering: optimizeLegibility;
   }
 
   h1,
   h2,
   h3,
   h4 {
-    @apply font-display tracking-tight;
+    @apply font-display;
+    letter-spacing: -0.02em;
+    font-weight: 600;
+  }
+
+  h2,
+  h3,
+  h4 {
+    letter-spacing: -0.015em;
+  }
+
+  p {
+    letter-spacing: 0.005em;
   }
 }
 
@@ -55,5 +71,11 @@
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+}
+
+@media (min-width: 768px) {
+  body {
+    font-size: 18px;
   }
 }
