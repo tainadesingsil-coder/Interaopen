@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Inter, Manrope } from 'next/font/google';
+import { Inter, Sora } from 'next/font/google';
 import './globals.css';
 
 const inter = Inter({
@@ -8,9 +8,9 @@ const inter = Inter({
   display: 'swap',
 });
 
-const manrope = Manrope({
+const sora = Sora({
   subsets: ['latin'],
-  variable: '--font-manrope',
+  variable: '--font-display',
   display: 'swap',
 });
 
@@ -33,7 +33,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang='pt-BR'>
-      <body className={`${inter.className} ${manrope.variable}`}>{children}</body>
+      <body className={`${inter.className} ${sora.variable}`}>{children}</body>
     </html>
   );
 }

@@ -21,7 +21,7 @@ export default {
       },
       fontFamily: {
         sans: ['var(--font-inter)', 'Inter', 'system-ui', 'sans-serif'],
-        display: ['var(--font-manrope)', 'Manrope', 'system-ui', 'sans-serif'],
+        display: ['var(--font-display)', 'Sora', 'system-ui', 'sans-serif'],
       },
     },
   },

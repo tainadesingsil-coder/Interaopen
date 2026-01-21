@@ -202,14 +202,14 @@ export default function HomePage() {
             <div className='absolute inset-0 bg-gradient-to-b from-black/35 via-black/55 to-black/80' />
             <div className='absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.12),transparent_55%)]' />
             <div className='absolute inset-0 vignette' />
-            <div className='relative z-10 mx-auto w-full max-w-6xl px-6 pb-20 pt-24 text-white'>
+            <div className='relative z-10 mx-auto w-full max-w-5xl px-6 pb-20 pt-24 text-center text-white'>
               <Reveal>
                 <p className='text-[0.65rem] uppercase tracking-[0.42em] text-white/70'>
                   {copy.hero.eyebrow}
                 </p>
               </Reveal>
               <Reveal delay={0.1}>
-                <h1 className='mt-4 max-w-3xl text-balance text-5xl font-semibold leading-[1.05] tracking-tight md:text-7xl'>
+                <h1 className='mt-4 text-balance text-5xl font-semibold leading-[1.02] tracking-[-0.02em] md:text-7xl'>
                   {copy.hero.title.split('\n').map((line) => (
                     <span key={line} className='block'>
                       {line}
@@ -218,13 +218,13 @@ export default function HomePage() {
                 </h1>
               </Reveal>
               <Reveal delay={0.2}>
-                <p className='mt-6 max-w-2xl text-lg text-white/80 md:text-xl'>
+                <p className='mx-auto mt-6 max-w-2xl text-lg text-white/80 md:text-xl'>
                   {copy.hero.subtitle}
                 </p>
               </Reveal>
               <Reveal
                 delay={0.3}
-                className='mt-10 flex flex-col gap-4 md:flex-row md:items-center'
+                className='mt-10 flex flex-col items-center gap-4 md:flex-row md:justify-center'
               >
                 <a
                   href={whatsappLink}
