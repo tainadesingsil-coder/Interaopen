@@ -224,7 +224,7 @@ export default function HomePage() {
             <div className='absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(183,146,90,0.16),transparent_55%)]' />
             <div className='absolute inset-0 bg-[linear-gradient(120deg,rgba(6,24,37,0.55),rgba(246,241,234,0.06)_45%,rgba(183,146,90,0.18)_100%)]' />
             <div className='absolute inset-0 vignette' />
-            <div className='relative z-10 mx-auto w-full max-w-6xl px-6 pb-24 pt-24 text-white'>
+            <div className='relative z-10 mx-auto w-full max-w-6xl px-6 pb-32 pt-24 text-white'>
               <div className='grid items-center gap-12 md:grid-cols-[1.1fr_0.9fr]'>
                 <div className='max-w-[720px] text-center md:text-left'>
                   <Reveal>
@@ -265,11 +265,14 @@ export default function HomePage() {
                     </a>
                   </Reveal>
                 </div>
-                <Reveal delay={0.2} className='flex justify-center md:justify-end'>
+                <Reveal
+                  delay={0.2}
+                  className='flex justify-center md:mt-8 md:justify-end md:pr-2 lg:mt-10'
+                >
                   <motion.img
                     src='https://i.postimg.cc/0QTq3jSg/Chat-GPT-Image-20-de-jan-de-2026-23-22-32.png'
                     alt='Mascote Bella Vista'
-                    className='w-full max-w-[360px] md:max-w-[460px] lg:max-w-[520px] md:translate-x-6 lg:translate-x-10 md:translate-y-6 lg:translate-y-8'
+                    className='w-full max-w-[360px] md:max-w-[460px] lg:max-w-[520px] md:translate-x-10 lg:translate-x-14'
                     initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={reduceMotion ? { duration: 0 } : { duration: 0.5, ease: 'easeOut' }}
