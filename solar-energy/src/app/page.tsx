@@ -23,7 +23,7 @@ const copy = {
     title: 'Viva perto do mar.\nInvista onde o futuro passa.',
     subtitle:
       'Stúdios e apartamentos em uma das regiões mais desejadas da Bahia. Localização estratégica e alto potencial de valorização.',
-    primaryCta: 'Conversar com um especialista no WhatsApp',
+    primaryCta: 'Falar com um especialista',
     secondaryCta: 'Ver localização',
   },
   context: {
@@ -175,42 +175,58 @@ export default function HomePage() {
               style={{ backgroundImage: `url(${heroImage})` }}
               aria-hidden='true'
             />
-            <div className='absolute inset-0 bg-gradient-to-b from-black/55 via-[#061825]/70 to-[#030b12]/90' />
-            <div className='absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(183,146,90,0.12),transparent_55%)]' />
+            <div className='absolute inset-0 bg-gradient-to-b from-black/60 via-[#061825]/75 to-[#030b12]/95' />
+            <div className='absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(183,146,90,0.14),transparent_55%)]' />
+            <div className='absolute inset-0 bg-[linear-gradient(120deg,rgba(6,24,37,0.4),rgba(246,241,234,0.05)_45%,rgba(183,146,90,0.12)_100%)]' />
             <div className='absolute inset-0 vignette' />
-            <div className='relative z-10 mx-auto w-full max-w-5xl px-6 pb-20 pt-24 text-center text-white'>
-              <Reveal>
-                <p className='text-[0.65rem] uppercase tracking-[0.42em] text-white/70'>
-                  {copy.hero.eyebrow}
-                </p>
-              </Reveal>
-              <Reveal delay={0.1}>
-                <h1 className='hero-title-glow mt-4 text-balance text-5xl font-medium leading-[1.08] tracking-[-0.02em] md:text-7xl'>
-                  {copy.hero.title.split('\n').map((line) => (
-                    <span key={line} className='block'>
-                      {line}
-                    </span>
-                  ))}
-                </h1>
-              </Reveal>
-              <Reveal delay={0.2}>
-                <p className='mx-auto mt-6 max-w-2xl text-lg text-white/80 md:text-xl'>
-                  {copy.hero.subtitle}
-                </p>
-              </Reveal>
-              <Reveal
-                delay={0.3}
-                className='mt-10 flex flex-col items-center gap-4 md:flex-row md:justify-center'
-              >
-                <a
-                  href={whatsappLink}
-                  target='_blank'
-                  rel='noreferrer'
-                  className='hero-cta-glow inline-flex items-center justify-center rounded-full border border-gold/40 bg-ocean/90 px-7 py-3 text-sm font-semibold text-white shadow-card transition duration-500 hover:-translate-y-0.5 hover:shadow-[0_18px_50px_rgba(183,146,90,0.22)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white'
-                >
-                  {copy.hero.primaryCta}
-                </a>
-              </Reveal>
+            <div className='relative z-10 mx-auto w-full max-w-6xl px-6 pb-24 pt-24 text-white'>
+              <div className='grid items-center gap-12 md:grid-cols-[1.1fr_0.9fr]'>
+                <div className='text-center md:text-left'>
+                  <Reveal>
+                    <p className='text-[0.65rem] uppercase tracking-[0.42em] text-white/70'>
+                      {copy.hero.eyebrow}
+                    </p>
+                  </Reveal>
+                  <Reveal delay={0.1}>
+                    <h1 className='hero-title-glow mt-4 text-balance text-5xl font-medium leading-[1.1] tracking-[-0.02em] md:text-7xl'>
+                      {copy.hero.title.split('\n').map((line) => (
+                        <span key={line} className='block'>
+                          {line}
+                        </span>
+                      ))}
+                    </h1>
+                  </Reveal>
+                  <Reveal delay={0.2}>
+                    <p className='mt-6 max-w-2xl text-lg text-white/78 md:text-xl'>
+                      {copy.hero.subtitle}
+                    </p>
+                  </Reveal>
+                  <Reveal
+                    delay={0.3}
+                    className='mt-10 flex flex-col items-center gap-4 md:flex-row md:items-center md:justify-start'
+                  >
+                    <a
+                      href={whatsappLink}
+                      target='_blank'
+                      rel='noreferrer'
+                      className='hero-cta-glow inline-flex items-center justify-center rounded-full border border-gold/40 bg-ocean/90 px-8 py-3 text-sm font-semibold text-white shadow-card transition duration-500 hover:-translate-y-0.5 hover:shadow-[0_18px_50px_rgba(183,146,90,0.22)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white'
+                    >
+                      {copy.hero.primaryCta}
+                    </a>
+                  </Reveal>
+                </div>
+                <Reveal delay={0.2} className='flex justify-center md:justify-end'>
+                  <motion.img
+                    src='https://i.postimg.cc/jjtwpkR2/Design-sem-nome-2026-01-20T224646-526.png'
+                    alt='Mascote Bella Vista'
+                    className='w-full max-w-[360px] md:max-w-[420px] lg:max-w-[480px]'
+                    initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={reduceMotion ? { duration: 0 } : { duration: 0.5, ease: 'easeOut' }}
+                    loading='lazy'
+                  />
+                </Reveal>
+              </div>
             </div>
           </section>
 
