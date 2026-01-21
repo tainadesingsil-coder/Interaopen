@@ -93,7 +93,6 @@ const copy = {
     title: 'Alguns lugares você entende. Outros você sente.',
     body:
       'O Bella Vista equilibra desejo e previsibilidade. Um convite para viver o litoral com segurança patrimonial.',
-    cta: 'Conversar com um especialista',
   },
   cta: {
     tag: 'Conversão',
@@ -468,16 +467,6 @@ export default function HomePage() {
                   </p>
                 </Reveal>
               </div>
-              <Reveal delay={0.2}>
-                <a
-                  href={whatsappLink}
-                  target='_blank'
-                  rel='noreferrer'
-                  className='inline-flex items-center justify-center rounded-full border border-white/40 px-7 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-white/10'
-                >
-                  {copy.experience.cta}
-                </a>
-              </Reveal>
             </div>
           </section>
 
