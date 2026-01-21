@@ -457,16 +457,16 @@ export default function HomePage() {
           target='_blank'
           rel='noreferrer'
           aria-label={copy.floating.ariaLabel}
-          className='fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-full border border-white/30 bg-ocean/90 px-3 py-2 shadow-[0_0_26px_rgba(8,38,58,0.35)] backdrop-blur transition hover:-translate-y-0.5 hover:shadow-[0_0_32px_rgba(8,38,58,0.5)]'
+          className='fixed bottom-6 right-4 z-50 flex items-center gap-3 rounded-full border border-white/20 bg-ocean/85 px-3 py-2 shadow-[0_0_24px_rgba(8,38,58,0.28)] backdrop-blur transition hover:-translate-y-0.5 hover:shadow-[0_0_30px_rgba(8,38,58,0.4)]'
         >
           <img
             src={mascotImage}
             alt='Mascote Bella Vista'
-            className='h-14 w-14 rounded-full object-cover md:h-16 md:w-16'
+            className='h-20 w-20 rounded-full object-cover md:h-24 md:w-24'
             loading='lazy'
           />
-          <span className='inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/40 bg-white/10 text-white shadow-[0_0_16px_rgba(255,255,255,0.2)]'>
-            <MessageCircle className='h-4 w-4' />
+          <span className='inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white shadow-[0_0_12px_rgba(255,255,255,0.18)]'>
+            <MessageCircle className='h-3.5 w-3.5' />
           </span>
         </a>
       </div>
