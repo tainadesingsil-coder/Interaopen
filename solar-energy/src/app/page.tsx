@@ -20,7 +20,7 @@ const copy = {
     'Olá! Quero entender mais sobre o Bella Vista Beach Residence.',
   hero: {
     eyebrow: 'Costa do Descobrimento · Bahia',
-    title: 'Viva perto do mar.\nInvista onde o futuro passa.',
+    title: 'Viva perto do mar. \nInvista onde o futuro passa.',
     subtitle:
       'Stúdios e apartamentos em uma das regiões mais desejadas da Bahia. Localização estratégica e alto potencial de valorização.',
     primaryCta: 'Falar com um especialista',
