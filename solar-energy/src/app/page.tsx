@@ -225,7 +225,7 @@ export default function HomePage() {
             <div className='absolute inset-0 bg-[linear-gradient(120deg,rgba(6,24,37,0.55),rgba(246,241,234,0.06)_45%,rgba(183,146,90,0.18)_100%)]' />
             <div className='absolute inset-0 vignette' />
             <div className='relative z-10 mx-auto w-full max-w-6xl px-6 pb-32 pt-24 text-white'>
-              <div className='grid items-center gap-12 md:grid-cols-[1.1fr_0.9fr]'>
+              <div className='grid items-center gap-12 md:min-h-[70vh] md:grid-cols-[1.1fr_0.9fr]'>
                 <div className='max-w-[720px] text-center md:text-left'>
                   <Reveal>
                     <p className='text-[0.65rem] uppercase tracking-[0.42em] text-white/70'>
@@ -267,17 +267,27 @@ export default function HomePage() {
                 </div>
                 <Reveal
                   delay={0.2}
-                  className='flex justify-center md:mt-8 md:justify-end md:pr-0 lg:mt-10'
+                  className='flex justify-center md:justify-end md:self-end md:pb-6'
                 >
-                  <motion.img
-                    src='https://i.postimg.cc/0QTq3jSg/Chat-GPT-Image-20-de-jan-de-2026-23-22-32.png'
-                    alt='Mascote Bella Vista'
-                    className='w-full max-w-[360px] md:max-w-[460px] lg:max-w-[520px] md:translate-x-16 lg:translate-x-20'
-                    initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={reduceMotion ? { duration: 0 } : { duration: 0.5, ease: 'easeOut' }}
-                    loading='lazy'
-                  />
+                  <div className='relative flex items-end justify-end'>
+                    <div className='absolute bottom-6 right-6 h-40 w-40 rounded-full bg-black/30 blur-3xl' />
+                    <motion.img
+                      src='https://i.postimg.cc/0QTq3jSg/Chat-GPT-Image-20-de-jan-de-2026-23-22-32.png'
+                      alt='Mascote Bella Vista'
+                      className='relative z-10 h-[34vh] w-auto object-contain md:h-[42vh] lg:h-[46vh] md:translate-x-10 lg:translate-x-14'
+                      initial={
+                        reduceMotion ? { opacity: 1 } : { opacity: 0, y: 12 }
+                      }
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={
+                        reduceMotion
+                          ? { duration: 0 }
+                          : { duration: 0.5, ease: 'easeOut' }
+                      }
+                      loading='lazy'
+                    />
+                    <div className='absolute -bottom-2 right-10 h-6 w-36 rounded-full bg-black/50 blur-xl opacity-60' />
+                  </div>
                 </Reveal>
               </div>
             </div>
