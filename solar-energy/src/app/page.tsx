@@ -439,11 +439,11 @@ export default function HomePage() {
           </section>
 
         </main>
-        <div className='fixed bottom-6 right-4 z-40 pointer-events-none'>
+        <div className='fixed bottom-4 right-2 z-40 pointer-events-none'>
           <img
-            src='https://i.postimg.cc/jjtwpkR2/Design-sem-nome-2026-01-20T224646-526.png'
+            src='https://i.postimg.cc/0QTq3jSg/Chat-GPT-Image-20-de-jan-de-2026-23-22-32.png'
             alt='Mascote Bella Vista'
-            className='h-24 w-24 object-contain mix-blend-multiply drop-shadow-[0_12px_28px_rgba(8,38,58,0.25)] md:h-28 md:w-28'
+            className='h-28 w-28 object-contain drop-shadow-[0_12px_28px_rgba(8,38,58,0.25)] md:h-32 md:w-32'
             loading='lazy'
           />
         </div>
