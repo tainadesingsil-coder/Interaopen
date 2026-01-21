@@ -268,14 +268,14 @@ export default function HomePage() {
               </div>
               <Reveal
                 delay={0.2}
-                className='pointer-events-none absolute bottom-0 right-0 flex justify-end pb-4 pr-4 md:pb-6 md:pr-6'
+                className='pointer-events-none absolute bottom-0 right-0 flex justify-end pb-0 pr-0 md:pb-2 md:pr-2'
               >
                 <div className='relative flex items-end justify-end'>
-                  <div className='absolute bottom-6 right-6 h-40 w-40 rounded-full bg-black/30 blur-3xl' />
+                  <div className='absolute bottom-4 right-2 h-40 w-40 rounded-full bg-black/30 blur-3xl' />
                   <motion.img
                     src='https://i.postimg.cc/0QTq3jSg/Chat-GPT-Image-20-de-jan-de-2026-23-22-32.png'
                     alt='Mascote Bella Vista'
-                    className='relative z-10 h-[32vh] w-auto object-contain md:h-[40vh] lg:h-[44vh]'
+                    className='relative z-10 h-[32vh] w-auto object-contain md:h-[40vh] lg:h-[44vh] md:translate-x-8 lg:translate-x-12'
                     initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={
@@ -283,7 +283,7 @@ export default function HomePage() {
                     }
                     loading='lazy'
                   />
-                  <div className='absolute -bottom-2 right-10 h-6 w-36 rounded-full bg-black/50 blur-xl opacity-60' />
+                  <div className='absolute -bottom-2 right-4 h-6 w-36 rounded-full bg-black/50 blur-xl opacity-60' />
                 </div>
               </Reveal>
             </div>
