@@ -188,8 +188,13 @@ export default function HomePage() {
                   </Reveal>
                   <Reveal delay={0.1}>
                     <h1 className='hero-title-glow mt-4 text-balance text-5xl font-medium leading-[1.1] tracking-[-0.02em] md:text-7xl'>
-                      {copy.hero.title.split('\n').map((line) => (
-                        <span key={line} className='block'>
+                      {copy.hero.title.split('\n').map((line, index) => (
+                        <span
+                          key={line}
+                          className={`block ${
+                            index === 1 ? 'md:whitespace-nowrap' : ''
+                          }`}
+                        >
                           {line}
                         </span>
                       ))}
@@ -443,7 +448,7 @@ export default function HomePage() {
           <img
             src='https://i.postimg.cc/0QTq3jSg/Chat-GPT-Image-20-de-jan-de-2026-23-22-32.png'
             alt='Mascote Bella Vista'
-            className='h-32 w-32 object-contain drop-shadow-[0_12px_28px_rgba(8,38,58,0.25)] md:h-36 md:w-36'
+            className='h-40 w-40 object-contain drop-shadow-[0_12px_28px_rgba(8,38,58,0.25)] md:h-48 md:w-48'
             loading='lazy'
           />
         </div>
