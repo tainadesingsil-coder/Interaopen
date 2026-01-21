@@ -265,31 +265,27 @@ export default function HomePage() {
                     </a>
                   </Reveal>
                 </div>
-                <Reveal
-                  delay={0.2}
-                  className='flex justify-center md:justify-end md:self-end md:pb-6'
-                >
-                  <div className='relative flex items-end justify-end'>
-                    <div className='absolute bottom-6 right-6 h-40 w-40 rounded-full bg-black/30 blur-3xl' />
-                    <motion.img
-                      src='https://i.postimg.cc/0QTq3jSg/Chat-GPT-Image-20-de-jan-de-2026-23-22-32.png'
-                      alt='Mascote Bella Vista'
-                      className='relative z-10 h-[34vh] w-auto object-contain md:h-[42vh] lg:h-[46vh] md:translate-x-10 lg:translate-x-14'
-                      initial={
-                        reduceMotion ? { opacity: 1 } : { opacity: 0, y: 12 }
-                      }
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={
-                        reduceMotion
-                          ? { duration: 0 }
-                          : { duration: 0.5, ease: 'easeOut' }
-                      }
-                      loading='lazy'
-                    />
-                    <div className='absolute -bottom-2 right-10 h-6 w-36 rounded-full bg-black/50 blur-xl opacity-60' />
-                  </div>
-                </Reveal>
               </div>
+              <Reveal
+                delay={0.2}
+                className='pointer-events-none absolute bottom-0 right-0 flex justify-end pb-4 pr-4 md:pb-6 md:pr-6'
+              >
+                <div className='relative flex items-end justify-end'>
+                  <div className='absolute bottom-6 right-6 h-40 w-40 rounded-full bg-black/30 blur-3xl' />
+                  <motion.img
+                    src='https://i.postimg.cc/0QTq3jSg/Chat-GPT-Image-20-de-jan-de-2026-23-22-32.png'
+                    alt='Mascote Bella Vista'
+                    className='relative z-10 h-[32vh] w-auto object-contain md:h-[40vh] lg:h-[44vh]'
+                    initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={
+                      reduceMotion ? { duration: 0 } : { duration: 0.5, ease: 'easeOut' }
+                    }
+                    loading='lazy'
+                  />
+                  <div className='absolute -bottom-2 right-10 h-6 w-36 rounded-full bg-black/50 blur-xl opacity-60' />
+                </div>
+              </Reveal>
             </div>
           </section>
 
