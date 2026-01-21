@@ -226,7 +226,7 @@ export default function HomePage() {
             <div className='absolute inset-0 vignette' />
             <div className='relative z-10 mx-auto w-full max-w-6xl px-6 pb-32 pt-24 text-white'>
               <div className='grid items-center gap-12 md:min-h-[70vh] md:grid-cols-[1.1fr_0.9fr]'>
-                <div className='max-w-[720px] text-center md:text-left'>
+                <div className='max-w-[720px] text-center md:pr-[36%] md:text-left'>
                   <Reveal>
                     <p className='text-[0.65rem] uppercase tracking-[0.42em] text-white/70'>
                       {copy.hero.eyebrow}
@@ -271,11 +271,11 @@ export default function HomePage() {
                 className='pointer-events-none absolute bottom-0 right-0 flex justify-end pb-0 pr-0 md:pb-2 md:pr-2'
               >
                 <div className='relative flex items-end justify-end'>
-                  <div className='absolute bottom-4 right-2 h-40 w-40 rounded-full bg-black/30 blur-3xl' />
+                  <div className='absolute bottom-3 right-0 h-44 w-44 rounded-full bg-black/30 blur-3xl' />
                   <motion.img
                     src='https://i.postimg.cc/0QTq3jSg/Chat-GPT-Image-20-de-jan-de-2026-23-22-32.png'
                     alt='Mascote Bella Vista'
-                    className='relative z-10 h-[32vh] w-auto object-contain md:h-[40vh] lg:h-[44vh] md:translate-x-8 lg:translate-x-12'
+                    className='relative z-10 h-[34vh] w-auto object-contain md:h-[42vh] lg:h-[46vh] md:translate-x-12 lg:translate-x-16'
                     initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={
@@ -283,7 +283,7 @@ export default function HomePage() {
                     }
                     loading='lazy'
                   />
-                  <div className='absolute -bottom-2 right-4 h-6 w-36 rounded-full bg-black/50 blur-xl opacity-60' />
+                  <div className='absolute -bottom-2 right-2 h-6 w-36 rounded-full bg-black/50 blur-xl opacity-60' />
                 </div>
               </Reveal>
             </div>
