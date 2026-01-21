@@ -94,13 +94,6 @@ const copy = {
     body:
       'O Bella Vista equilibra desejo e previsibilidade. Um convite para viver o litoral com segurança patrimonial.',
   },
-  cta: {
-    tag: 'Conversão',
-    title: 'Quando fizer sentido, você vai saber.',
-    body:
-      'Converse com um especialista e avalie o Bella Vista como ativo imobiliário estratégico. Sem formulários. Sem pressa.',
-    button: 'Conversar agora no WhatsApp',
-  },
   floating: {
     label: 'WhatsApp',
     ariaLabel: 'Abrir conversa no WhatsApp',
@@ -470,35 +463,6 @@ export default function HomePage() {
             </div>
           </section>
 
-          <section id='cta' className='grain bg-ocean py-28 text-white'>
-            <div className='mx-auto flex max-w-6xl flex-col gap-8 px-6'>
-              <Reveal>
-                <p className='text-xs uppercase tracking-[0.32em] text-white/60'>
-                  {copy.cta.tag}
-                </p>
-              </Reveal>
-              <Reveal delay={0.1}>
-                <h2 className='text-3xl font-semibold md:text-4xl'>
-                  {copy.cta.title}
-                </h2>
-              </Reveal>
-              <Reveal delay={0.2}>
-                <p className='max-w-2xl text-base text-white/70 md:text-lg'>
-                  {copy.cta.body}
-                </p>
-              </Reveal>
-              <Reveal delay={0.3}>
-                <a
-                  href={whatsappLink}
-                  target='_blank'
-                  rel='noreferrer'
-                  className='inline-flex w-fit items-center justify-center rounded-full bg-white/95 px-8 py-3 text-sm font-semibold text-ocean shadow-glow transition hover:-translate-y-0.5 hover:shadow-[0_20px_60px_rgba(8,38,58,0.25)]'
-                >
-                  {copy.cta.button}
-                </a>
-              </Reveal>
-            </div>
-          </section>
         </main>
 
         <a
