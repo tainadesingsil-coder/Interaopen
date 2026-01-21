@@ -235,17 +235,25 @@ export default function HomePage() {
                 </Reveal>
               </div>
               <Reveal delay={0.2}>
-                <figure className='rounded-2xl border border-white/70 bg-white/75 p-3 shadow-soft backdrop-blur'>
+                <motion.figure
+                  className='rounded-2xl border border-white/70 bg-white/75 p-3 shadow-soft backdrop-blur'
+                  animate={reduceMotion ? undefined : { y: [0, -8, 0] }}
+                  transition={
+                    reduceMotion
+                      ? undefined
+                      : { duration: 8, repeat: Infinity, ease: 'easeInOut' }
+                  }
+                >
                   <img
                     src={contextImage}
                     alt={copy.context.imageAlt}
-                    className='h-[360px] w-full rounded-xl object-cover'
+                    className='h-[420px] w-full rounded-xl object-cover md:h-[480px]'
                     loading='lazy'
                   />
                   <figcaption className='mt-3 text-xs uppercase tracking-[0.28em] text-muted'>
                     {copy.context.caption}
                   </figcaption>
-                </figure>
+                </motion.figure>
               </Reveal>
             </div>
           </section>
