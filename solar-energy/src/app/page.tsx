@@ -180,7 +180,7 @@ export default function HomePage() {
             <div className='absolute inset-0 bg-[linear-gradient(120deg,rgba(6,24,37,0.4),rgba(246,241,234,0.05)_45%,rgba(183,146,90,0.12)_100%)]' />
             <div className='absolute inset-0 vignette' />
             <div className='relative z-10 mx-auto w-full max-w-6xl px-6 pb-24 pt-24 text-white'>
-              <div className='max-w-2xl text-left'>
+              <div className='mx-auto max-w-2xl text-center'>
                   <Reveal>
                     <p className='text-[0.65rem] uppercase tracking-[0.42em] text-white/70'>
                       {copy.hero.eyebrow}
@@ -196,13 +196,13 @@ export default function HomePage() {
                     </h1>
                   </Reveal>
                   <Reveal delay={0.2}>
-                    <p className='mt-6 max-w-2xl text-lg text-white/78 md:text-xl'>
+                    <p className='mx-auto mt-6 max-w-2xl text-lg text-white/78 md:text-xl'>
                       {copy.hero.subtitle}
                     </p>
                   </Reveal>
                   <Reveal
                     delay={0.3}
-                    className='mt-10 flex flex-col items-center gap-4 md:flex-row md:items-center md:justify-start'
+                    className='mt-10 flex flex-col items-center gap-4 md:flex-row md:items-center md:justify-center'
                   >
                     <a
                       href={whatsappLink}
@@ -443,7 +443,7 @@ export default function HomePage() {
           <img
             src='https://i.postimg.cc/0QTq3jSg/Chat-GPT-Image-20-de-jan-de-2026-23-22-32.png'
             alt='Mascote Bella Vista'
-            className='h-28 w-28 object-contain drop-shadow-[0_12px_28px_rgba(8,38,58,0.25)] md:h-32 md:w-32'
+            className='h-32 w-32 object-contain drop-shadow-[0_12px_28px_rgba(8,38,58,0.25)] md:h-36 md:w-36'
             loading='lazy'
           />
         </div>
