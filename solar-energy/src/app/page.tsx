@@ -219,7 +219,7 @@ export default function HomePage() {
                   <motion.img
                     src='https://i.postimg.cc/jjtwpkR2/Design-sem-nome-2026-01-20T224646-526.png'
                     alt='Mascote Bella Vista'
-                    className='w-full max-w-[360px] md:max-w-[420px] lg:max-w-[480px]'
+                    className='w-full max-w-[320px] md:max-w-[380px] lg:max-w-[430px] md:translate-x-6 lg:translate-x-10'
                     initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={reduceMotion ? { duration: 0 } : { duration: 0.5, ease: 'easeOut' }}
