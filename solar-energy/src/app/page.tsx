@@ -226,7 +226,7 @@ export default function HomePage() {
             <div className='absolute inset-0 vignette' />
             <div className='relative z-10 mx-auto w-full max-w-6xl px-6 pb-32 pt-24 text-white'>
               <div className='grid items-center gap-12 md:min-h-[70vh] md:grid-cols-[1.1fr_0.9fr]'>
-                <div className='max-w-[720px] text-center md:pr-[36%] md:text-left'>
+                <div className='max-w-[720px] text-center md:pr-[32%] md:text-left'>
                   <Reveal>
                     <p className='text-[0.65rem] uppercase tracking-[0.42em] text-white/70'>
                       {copy.hero.eyebrow}
@@ -275,7 +275,7 @@ export default function HomePage() {
                   <motion.img
                     src='https://i.postimg.cc/NjQc6jZF/Design-sem-nome-2026-01-21T203912-886.png'
                     alt='Mascote Bella Vista'
-                    className='relative z-10 h-[34vh] w-auto object-contain md:h-[42vh] lg:h-[46vh] md:translate-x-12 lg:translate-x-16'
+                    className='relative z-10 h-[38vh] w-auto object-contain md:h-[48vh] lg:h-[54vh] md:translate-x-12 lg:translate-x-16'
                     initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={
