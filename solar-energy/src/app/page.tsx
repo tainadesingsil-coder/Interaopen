@@ -19,11 +19,11 @@ const copy = {
   whatsappMessage:
     'Olá! Quero entender mais sobre o Bella Vista Beach Residence.',
   hero: {
-    eyebrow: 'Costa do Descobrimento • Bahia',
+    eyebrow: 'Costa do Descobrimento · Bahia',
     title: 'Viva perto do mar.\nInvista onde o futuro passa.',
     subtitle:
-      'Stúdios e apartamentos em uma das regiões mais desejadas da Bahia, com localização estratégica e alto potencial de valorização.',
-    primaryCta: 'Falar com um especialista no WhatsApp',
+      'Stúdios e apartamentos em uma das regiões mais desejadas da Bahia. Localização estratégica e alto potencial de valorização.',
+    primaryCta: 'Conversar com um especialista no WhatsApp',
     secondaryCta: 'Ver localização',
   },
   context: {
@@ -168,15 +168,15 @@ export default function HomePage() {
         <main className='pt-4'>
           <section
             id='inicio'
-            className='relative flex min-h-screen items-center overflow-hidden pt-20'
+            className='grain relative flex min-h-screen items-center overflow-hidden pt-20'
           >
             <div
               className='absolute inset-0 bg-cover bg-center'
               style={{ backgroundImage: `url(${heroImage})` }}
               aria-hidden='true'
             />
-            <div className='absolute inset-0 bg-gradient-to-b from-black/35 via-black/55 to-black/80' />
-            <div className='absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.12),transparent_55%)]' />
+            <div className='absolute inset-0 bg-gradient-to-b from-black/55 via-[#061825]/70 to-[#030b12]/90' />
+            <div className='absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(183,146,90,0.12),transparent_55%)]' />
             <div className='absolute inset-0 vignette' />
             <div className='relative z-10 mx-auto w-full max-w-5xl px-6 pb-20 pt-24 text-center text-white'>
               <Reveal>
@@ -185,7 +185,7 @@ export default function HomePage() {
                 </p>
               </Reveal>
               <Reveal delay={0.1}>
-                <h1 className='mt-4 text-balance text-5xl font-semibold leading-[1.02] tracking-[-0.02em] md:text-7xl'>
+                <h1 className='hero-title-glow mt-4 text-balance text-5xl font-medium leading-[1.08] tracking-[-0.02em] md:text-7xl'>
                   {copy.hero.title.split('\n').map((line) => (
                     <span key={line} className='block'>
                       {line}
@@ -206,7 +206,7 @@ export default function HomePage() {
                   href={whatsappLink}
                   target='_blank'
                   rel='noreferrer'
-                  className='inline-flex items-center justify-center rounded-full bg-white/95 px-7 py-3 text-sm font-semibold text-ocean shadow-card transition hover:-translate-y-0.5 hover:shadow-glow focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white'
+                  className='hero-cta-glow inline-flex items-center justify-center rounded-full border border-gold/40 bg-ocean/90 px-7 py-3 text-sm font-semibold text-white shadow-card transition duration-500 hover:-translate-y-0.5 hover:shadow-[0_18px_50px_rgba(183,146,90,0.22)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white'
                 >
                   {copy.hero.primaryCta}
                 </a>
