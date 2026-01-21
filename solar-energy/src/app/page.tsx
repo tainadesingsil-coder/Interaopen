@@ -267,12 +267,12 @@ export default function HomePage() {
                 </div>
                 <Reveal
                   delay={0.2}
-                  className='flex justify-center md:mt-8 md:justify-end md:pr-2 lg:mt-10'
+                  className='flex justify-center md:mt-8 md:justify-end md:pr-0 lg:mt-10'
                 >
                   <motion.img
                     src='https://i.postimg.cc/0QTq3jSg/Chat-GPT-Image-20-de-jan-de-2026-23-22-32.png'
                     alt='Mascote Bella Vista'
-                    className='w-full max-w-[360px] md:max-w-[460px] lg:max-w-[520px] md:translate-x-10 lg:translate-x-14'
+                    className='w-full max-w-[360px] md:max-w-[460px] lg:max-w-[520px] md:translate-x-16 lg:translate-x-20'
                     initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={reduceMotion ? { duration: 0 } : { duration: 0.5, ease: 'easeOut' }}
