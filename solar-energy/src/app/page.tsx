@@ -180,8 +180,7 @@ export default function HomePage() {
             <div className='absolute inset-0 bg-[linear-gradient(120deg,rgba(6,24,37,0.4),rgba(246,241,234,0.05)_45%,rgba(183,146,90,0.12)_100%)]' />
             <div className='absolute inset-0 vignette' />
             <div className='relative z-10 mx-auto w-full max-w-6xl px-6 pb-24 pt-24 text-white'>
-              <div className='grid items-center gap-12 md:grid-cols-[1.1fr_0.9fr]'>
-                <div className='text-center md:text-left'>
+              <div className='max-w-2xl text-left'>
                   <Reveal>
                     <p className='text-[0.65rem] uppercase tracking-[0.42em] text-white/70'>
                       {copy.hero.eyebrow}
@@ -214,18 +213,6 @@ export default function HomePage() {
                       {copy.hero.primaryCta}
                     </a>
                   </Reveal>
-                </div>
-                <Reveal delay={0.2} className='flex justify-center md:justify-end'>
-                  <motion.img
-                    src='https://i.postimg.cc/jjtwpkR2/Design-sem-nome-2026-01-20T224646-526.png'
-                    alt='Mascote Bella Vista'
-                    className='w-full max-w-[320px] md:max-w-[380px] lg:max-w-[430px] md:translate-x-6 lg:translate-x-10'
-                    initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={reduceMotion ? { duration: 0 } : { duration: 0.5, ease: 'easeOut' }}
-                    loading='lazy'
-                  />
-                </Reveal>
               </div>
             </div>
           </section>
@@ -452,7 +439,14 @@ export default function HomePage() {
           </section>
 
         </main>
-
+        <div className='fixed bottom-6 right-4 z-40 pointer-events-none'>
+          <img
+            src='https://i.postimg.cc/jjtwpkR2/Design-sem-nome-2026-01-20T224646-526.png'
+            alt='Mascote Bella Vista'
+            className='h-24 w-24 object-contain mix-blend-multiply drop-shadow-[0_12px_28px_rgba(8,38,58,0.25)] md:h-28 md:w-28'
+            loading='lazy'
+          />
+        </div>
       </div>
     </MotionConfig>
   );
