@@ -101,7 +101,6 @@ const copy = {
     body:
       'Converse com um especialista e avalie o Bella Vista como ativo imobiliário estratégico. Sem formulários. Sem pressa.',
     button: 'Conversar agora no WhatsApp',
-    footer: 'Bella Vista Beach Residence • Bahia',
   },
   floating: {
     label: 'WhatsApp',
@@ -508,11 +507,6 @@ export default function HomePage() {
                 >
                   {copy.cta.button}
                 </a>
-              </Reveal>
-              <Reveal delay={0.4}>
-                <p className='text-xs uppercase tracking-[0.3em] text-white/50'>
-                  {copy.cta.footer}
-                </p>
               </Reveal>
             </div>
           </section>
