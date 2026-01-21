@@ -273,7 +273,7 @@ export default function HomePage() {
                 <div className='relative flex items-end justify-end'>
                   <div className='absolute bottom-3 right-0 h-44 w-44 rounded-full bg-black/30 blur-3xl' />
                   <motion.img
-                    src='https://i.postimg.cc/0QTq3jSg/Chat-GPT-Image-20-de-jan-de-2026-23-22-32.png'
+                    src='https://i.postimg.cc/NjQc6jZF/Design-sem-nome-2026-01-21T203912-886.png'
                     alt='Mascote Bella Vista'
                     className='relative z-10 h-[34vh] w-auto object-contain md:h-[42vh] lg:h-[46vh] md:translate-x-12 lg:translate-x-16'
                     initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 12 }}
