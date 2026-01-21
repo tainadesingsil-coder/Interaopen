@@ -7,20 +7,11 @@ import {
   MotionConfig,
   useReducedMotion,
 } from 'framer-motion';
-import {
-  Building2,
-  Compass,
-  KeyRound,
-  Landmark,
-  MapPin,
-  MessageCircle,
-} from 'lucide-react';
+import { Building2, Compass, KeyRound, Landmark, MapPin } from 'lucide-react';
 
 const whatsappNumber = '5571999999999';
 
 const heroImage = 'https://i.postimg.cc/JnndrxRf/FOTO-PRAIA.png';
-const mascotImage =
-  'https://i.postimg.cc/jjtwpkR2/Design-sem-nome-2026-01-20T224646-526.png';
 const contextImage =
   'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1800&q=80';
 
@@ -452,23 +443,6 @@ export default function HomePage() {
 
         </main>
 
-        <div className='fixed bottom-6 right-4 z-50 flex items-center gap-3'>
-          <img
-            src={mascotImage}
-            alt='Mascote Bella Vista'
-            className='h-20 w-20 rounded-full object-cover shadow-[0_0_26px_rgba(8,38,58,0.28)] md:h-24 md:w-24'
-            loading='lazy'
-          />
-          <a
-            href={whatsappLink}
-            target='_blank'
-            rel='noreferrer'
-            aria-label={copy.floating.ariaLabel}
-            className='inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/30 bg-ocean/80 text-white shadow-[0_0_14px_rgba(255,255,255,0.18)] backdrop-blur transition hover:-translate-y-0.5 hover:shadow-[0_0_18px_rgba(255,255,255,0.25)]'
-          >
-            <MessageCircle className='h-4 w-4' />
-          </a>
-        </div>
       </div>
     </MotionConfig>
   );
