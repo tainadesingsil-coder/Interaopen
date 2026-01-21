@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { motion, MotionConfig, useReducedMotion } from 'framer-motion';
 import { Building2, Compass, KeyRound, Landmark, MapPin } from 'lucide-react';
 
@@ -9,10 +9,6 @@ const whatsappNumber = '5571999999999';
 const copy = {
   whatsappMessage:
     'Olá! Quero entender mais sobre o Bella Vista Beach Residence.',
-  header: {
-    brand: 'Bella Vista',
-    cta: 'Conversar no WhatsApp',
-  },
   hero: {
     eyebrow: 'Costa do Descobrimento • Bahia',
     title: 'Viva perto do mar.\nInvista onde o futuro passa.',
@@ -134,41 +130,6 @@ function Reveal({
   );
 }
 
-function Header() {
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12);
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
-
-  return (
-    <header
-      className={`fixed inset-x-0 top-0 z-50 transition ${
-        scrolled
-          ? 'bg-sand/80 backdrop-blur-lg shadow-sm'
-          : 'bg-transparent'
-      }`}
-    >
-      <div className='mx-auto flex max-w-6xl items-center justify-between px-6 py-4'>
-        <span className='font-display text-xs uppercase tracking-[0.35em] text-ink'>
-          {copy.header.brand}
-        </span>
-        <a
-          href={whatsappLink}
-          target='_blank'
-          rel='noreferrer'
-          className='rounded-full bg-ocean/95 px-5 py-2 text-sm font-semibold text-white shadow-soft transition hover:-translate-y-0.5 hover:shadow-glow focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ocean'
-        >
-          {copy.header.cta}
-        </a>
-      </div>
-    </header>
-  );
-}
-
 export default function HomePage() {
   const reduceMotion = useReducedMotion();
   const mapLineVariants = useMemo(
@@ -186,9 +147,7 @@ export default function HomePage() {
   return (
     <MotionConfig reducedMotion='user'>
       <div className='bg-sand text-ink'>
-        <Header />
-
-        <main className='pt-20'>
+        <main className='pt-4'>
           <section
             id='inicio'
             className='relative flex min-h-screen items-center overflow-hidden pt-20'
