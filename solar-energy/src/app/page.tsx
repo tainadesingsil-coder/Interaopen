@@ -153,13 +153,13 @@ function HeroNav() {
     <header
       className={`fixed inset-x-0 top-0 z-50 transition ${
         scrolled ? 'bg-white/15 shadow-sm' : 'bg-white/5'
-      } backdrop-blur-lg`}
+      } backdrop-blur-lg lg:bg-white/10 lg:backdrop-blur-xl`}
     >
-      <nav className='mx-auto flex max-w-6xl items-center justify-between px-6 py-4 text-white'>
+      <nav className='mx-auto flex max-w-6xl items-center justify-between px-6 py-4 text-white lg:py-6'>
         <span className='font-display text-xs uppercase tracking-[0.35em] text-white/80'>
           Bella Vista
         </span>
-        <div className='hidden items-center gap-6 text-xs uppercase tracking-[0.28em] text-white/70 md:flex'>
+        <div className='hidden items-center gap-6 text-xs uppercase tracking-[0.28em] text-white/70 md:flex lg:gap-8'>
           <a href='#localizacao' className='transition hover:text-white'>
             Localização
           </a>
@@ -270,21 +270,21 @@ export default function HomePage() {
               style={{ backgroundImage: `url(${heroImage})` }}
               aria-hidden='true'
             />
-            <div className='absolute inset-0 bg-gradient-to-b from-black/70 via-[#061825]/75 to-transparent' />
-            <div className='absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(183,146,90,0.16),transparent_55%)]' />
-            <div className='absolute inset-0 bg-[linear-gradient(120deg,rgba(6,24,37,0.55),rgba(246,241,234,0.06)_45%,rgba(183,146,90,0.18)_100%)]' />
+            <div className='absolute inset-0 bg-gradient-to-b from-black/70 via-[#061825]/75 to-transparent lg:from-black/55 lg:via-[#061825]/60' />
+            <div className='absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(183,146,90,0.16),transparent_55%)] lg:opacity-80' />
+            <div className='absolute inset-0 bg-[linear-gradient(120deg,rgba(6,24,37,0.55),rgba(246,241,234,0.06)_45%,rgba(183,146,90,0.18)_100%)] lg:opacity-75' />
             <div className='absolute inset-0 vignette' />
             <div className='relative z-10 mx-auto w-full max-w-6xl px-6 pb-36 pt-24 text-white'>
-              <div className='grid gap-12 lg:min-h-[70vh] lg:grid-cols-[3fr_2fr] lg:items-end'>
+              <div className='grid gap-12 lg:min-h-[70vh] lg:grid-cols-[3fr_2fr] lg:items-center'>
                 <div className='order-1 text-center lg:text-left'>
-                  <div className='inline-block w-full max-w-[640px] rounded-[28px] border border-white/10 bg-black/10 p-6 backdrop-blur-sm md:p-7'>
+                  <div className='inline-block w-full max-w-[640px] rounded-[28px] border border-white/10 bg-black/10 p-6 backdrop-blur-sm md:p-7 lg:max-w-[600px] lg:border-transparent lg:bg-white/5 lg:p-2 lg:backdrop-blur-[2px] lg:rounded-[24px]'>
                     <Reveal>
-                      <p className='text-center text-[0.6rem] uppercase tracking-[0.5em] text-white/60 lg:text-left'>
+                      <p className='text-center text-[0.6rem] uppercase tracking-[0.5em] text-white/60 lg:mx-auto lg:max-w-[600px] lg:text-center'>
                         {copy.hero.eyebrow}
                       </p>
                     </Reveal>
                     <Reveal delay={0.1}>
-                      <h1 className='hero-title-glow mt-4 text-balance text-4xl font-medium leading-[1.2] tracking-[-0.02em] md:text-5xl lg:text-6xl'>
+                      <h1 className='hero-title-glow mt-4 text-balance text-4xl font-medium leading-[1.2] tracking-[-0.02em] md:text-5xl lg:max-w-[600px] lg:text-5xl lg:leading-[1.25] lg:tracking-[-0.03em]'>
                         {copy.hero.title.split('\n').map((line) => (
                           <span key={line} className='block'>
                             {line}
@@ -293,11 +293,11 @@ export default function HomePage() {
                       </h1>
                     </Reveal>
                     <Reveal delay={0.2}>
-                      <p className='mt-6 max-w-[620px] text-sm text-white/80 md:text-base'>
+                      <p className='mt-6 max-w-[620px] text-sm text-white/80 md:text-base lg:mt-8 lg:max-w-[520px] lg:text-white/85'>
                         {copy.hero.subtitle}
                       </p>
                     </Reveal>
-                    <Reveal delay={0.3} className='mt-10 flex justify-center lg:justify-start'>
+                    <Reveal delay={0.3} className='mt-10 flex justify-center lg:mt-8 lg:justify-start'>
                       <a
                         href={whatsappLink}
                         target='_blank'
@@ -309,6 +309,7 @@ export default function HomePage() {
                     </Reveal>
                   </div>
                 </div>
+                <div className='hidden lg:block' aria-hidden='true' />
               </div>
             </div>
           </section>
