@@ -160,7 +160,7 @@ function HeroNav() {
     >
       <nav className='mx-auto flex max-w-6xl items-center justify-between px-6 py-4 text-white lg:py-6'>
         <span className='font-display text-xs uppercase tracking-[0.35em] text-white/80'>
-          Bella Vista
+          Bela Vista
         </span>
         <div className='hidden items-center gap-6 text-xs uppercase tracking-[0.28em] text-white/70 md:flex lg:gap-8 lg:text-white/85'>
           <a href='#localizacao' className='transition hover:text-white'>
