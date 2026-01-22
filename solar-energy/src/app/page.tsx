@@ -283,16 +283,16 @@ export default function HomePage() {
             <div className='absolute inset-0 hidden lg:block lg:bg-[linear-gradient(90deg,rgba(5,14,22,0.72)_0%,rgba(5,14,22,0.45)_45%,rgba(5,14,22,0.1)_100%)]' />
             <div className='absolute inset-0 vignette' />
             <div className='relative z-10 mx-auto w-full max-w-6xl px-6 pb-36 pt-24 text-white'>
-              <div className='grid gap-12 lg:min-h-[70vh] lg:grid-cols-[3fr_2fr] lg:items-center'>
+              <div className='grid gap-12 lg:min-h-[70vh] lg:flex lg:items-center lg:justify-center'>
                 <div className='order-1 text-center lg:text-center'>
-                  <div className='inline-block w-full max-w-[640px] rounded-[28px] border border-white/10 bg-black/10 p-6 backdrop-blur-sm md:p-7 lg:mx-auto lg:max-w-[620px]'>
+                  <div className='inline-block w-full max-w-[640px] rounded-[28px] border border-white/10 bg-black/10 p-6 backdrop-blur-sm md:p-7 lg:mx-auto lg:max-w-[760px] lg:rounded-[32px] lg:p-10'>
                     <Reveal>
-                      <p className='text-center text-[0.6rem] uppercase tracking-[0.5em] text-white/60 lg:mx-auto lg:max-w-[620px] lg:text-center lg:tracking-[0.6em] lg:text-white/55'>
+                      <p className='text-center text-[0.6rem] uppercase tracking-[0.5em] text-white/60 lg:mx-auto lg:max-w-[720px] lg:text-center lg:tracking-[0.6em] lg:text-white/55'>
                         {copy.hero.eyebrow}
                       </p>
                     </Reveal>
                     <Reveal delay={0.1}>
-                      <h1 className='hero-title-glow mt-4 text-balance text-4xl font-medium leading-[1.2] tracking-[-0.02em] md:text-5xl lg:mx-auto lg:max-w-[600px] lg:text-5xl lg:leading-[1.1] lg:tracking-[-0.02em] lg:font-semibold xl:text-6xl'>
+                      <h1 className='hero-title-glow mt-4 text-balance text-4xl font-medium leading-[1.2] tracking-[-0.02em] md:text-5xl lg:mx-auto lg:max-w-[680px] lg:text-5xl lg:leading-[1.1] lg:tracking-[-0.02em] lg:font-semibold xl:text-6xl'>
                         {copy.hero.title.split('\n').map((line) => (
                           <span key={line} className='block'>
                             {line}
@@ -304,7 +304,7 @@ export default function HomePage() {
                       <p className='mt-6 max-w-[620px] text-sm text-white/80 md:text-base lg:hidden'>
                         {copy.hero.subtitle}
                       </p>
-                      <p className='mt-8 hidden max-w-[520px] text-lg text-white/85 lg:mx-auto lg:block'>
+                      <p className='mt-8 hidden max-w-[560px] text-lg text-white/85 lg:mx-auto lg:block'>
                         {copy.hero.subtitleDesktop}
                       </p>
                     </Reveal>
