@@ -14,6 +14,7 @@ const whatsappNumber = '5571999999999';
 const heroImage = 'https://i.postimg.cc/JnndrxRf/FOTO-PRAIA.png';
 const contextImage =
   'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1800&q=80';
+const contextImageAlt = 'https://i.postimg.cc/43W59dty/FOTO-AEREA.png';
 
 const copy = {
   whatsappMessage:
@@ -111,7 +112,7 @@ const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
 
 const contextSlides = [
   { src: contextImage, alt: copy.context.imageAlt },
-  { src: heroImage, alt: 'Vista da Costa do Descobrimento' },
+  { src: contextImageAlt, alt: 'Foto aérea do empreendimento' },
 ];
 
 function Reveal({
