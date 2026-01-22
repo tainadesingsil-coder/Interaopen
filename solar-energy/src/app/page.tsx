@@ -20,10 +20,10 @@ const copy = {
     'Olá! Quero entender mais sobre o Bella Vista Beach Residence.',
   hero: {
     eyebrow: 'Costa do Descobrimento · Bahia',
-    title: 'Viva perto do mar. \nInvista onde o futuro passa.',
+    title: 'Viva perto do mar.\nInvista onde o futuro passa.',
     subtitle:
-      'Stúdios e apartamentos em uma das regiões mais desejadas da Bahia. Localização estratégica e alto potencial de valorização.',
-    primaryCta: 'Falar com um especialista',
+      'Studios e apartamentos em uma das regiões mais desejadas da Bahia, com alto potencial de valorização.',
+    primaryCta: 'Conhecer o projeto',
     secondaryCta: 'Ver localização',
   },
   context: {
@@ -140,6 +140,7 @@ function Reveal({
 
 function HeroNav() {
   const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -177,7 +178,56 @@ function HeroNav() {
             Contato
           </a>
         </div>
+        <button
+          type='button'
+          aria-label='Abrir menu'
+          aria-expanded={menuOpen}
+          aria-controls='hero-menu'
+          onClick={() => setMenuOpen((open) => !open)}
+          className='inline-flex items-center justify-center rounded-full border border-white/20 bg-white/10 px-3 py-2 text-xs uppercase tracking-[0.3em] text-white/80 transition hover:text-white md:hidden'
+        >
+          Menu
+        </button>
       </nav>
+      {menuOpen && (
+        <div
+          id='hero-menu'
+          className='md:hidden border-t border-white/10 bg-white/10 backdrop-blur-lg'
+        >
+          <div className='flex flex-col gap-4 px-6 py-4 text-xs uppercase tracking-[0.28em] text-white/75'>
+            <a
+              href='#localizacao'
+              className='transition hover:text-white'
+              onClick={() => setMenuOpen(false)}
+            >
+              Localização
+            </a>
+            <a
+              href='#proposta'
+              className='transition hover:text-white'
+              onClick={() => setMenuOpen(false)}
+            >
+              Projeto
+            </a>
+            <a
+              href='#perfil'
+              className='transition hover:text-white'
+              onClick={() => setMenuOpen(false)}
+            >
+              Investimento
+            </a>
+            <a
+              href={whatsappLink}
+              target='_blank'
+              rel='noreferrer'
+              className='transition hover:text-white'
+              onClick={() => setMenuOpen(false)}
+            >
+              Contato
+            </a>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
@@ -225,55 +275,47 @@ export default function HomePage() {
             <div className='absolute inset-0 bg-[linear-gradient(120deg,rgba(6,24,37,0.55),rgba(246,241,234,0.06)_45%,rgba(183,146,90,0.18)_100%)]' />
             <div className='absolute inset-0 vignette' />
             <div className='relative z-10 mx-auto w-full max-w-6xl px-6 pb-36 pt-24 text-white'>
-              <div className='relative md:min-h-[70vh]'>
-                <div className='max-w-[640px] md:pr-[38%]'>
-                  <div className='rounded-[32px] border border-white/10 bg-black/15 p-6 backdrop-blur-sm md:p-8'>
+              <div className='grid gap-12 lg:min-h-[70vh] lg:grid-cols-[3fr_2fr] lg:items-end'>
+                <div className='order-1 text-center lg:text-left'>
+                  <div className='inline-block w-full max-w-[640px] rounded-[28px] border border-white/10 bg-black/10 p-6 backdrop-blur-sm md:p-7'>
                     <Reveal>
-                      <p className='text-center text-[0.6rem] uppercase tracking-[0.5em] text-white/60'>
+                      <p className='text-center text-[0.6rem] uppercase tracking-[0.5em] text-white/60 lg:text-left'>
                         {copy.hero.eyebrow}
                       </p>
                     </Reveal>
                     <Reveal delay={0.1}>
-                      <h1 className='hero-title-glow mt-5 text-balance text-4xl font-medium leading-[1.18] tracking-[-0.02em] md:text-6xl'>
-                        {copy.hero.title.split('\n').map((line, index) => (
-                          <span
-                            key={line}
-                            className={`block ${
-                              index === 1 ? 'md:whitespace-nowrap' : ''
-                            }`}
-                          >
+                      <h1 className='hero-title-glow mt-4 text-balance text-4xl font-medium leading-[1.2] tracking-[-0.02em] md:text-5xl lg:text-6xl'>
+                        {copy.hero.title.split('\n').map((line) => (
+                          <span key={line} className='block'>
                             {line}
                           </span>
                         ))}
                       </h1>
                     </Reveal>
                     <Reveal delay={0.2}>
-                      <p className='mt-6 max-w-[640px] text-sm text-white/80 md:text-base'>
+                      <p className='mt-6 max-w-[620px] text-sm text-white/80 md:text-base'>
                         {copy.hero.subtitle}
                       </p>
                     </Reveal>
-                    <Reveal
-                      delay={0.3}
-                      className='mt-10 flex justify-center'
-                    >
+                    <Reveal delay={0.3} className='mt-10 flex justify-center lg:justify-start'>
                       <a
                         href={whatsappLink}
                         target='_blank'
                         rel='noreferrer'
-                        className='hero-cta-glow inline-flex items-center justify-center rounded-full bg-white/10 px-7 py-2.5 text-sm font-medium text-white/90 shadow-[0_14px_34px_rgba(183,146,90,0.18)] transition duration-500 hover:-translate-y-0.5 hover:bg-white/15'
+                        className='hero-cta-glow inline-flex items-center justify-center rounded-full bg-ocean/90 px-7 py-3 text-sm font-medium text-white shadow-[0_14px_34px_rgba(183,146,90,0.18)] transition duration-500 hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(183,146,90,0.22)]'
                       >
                         {copy.hero.primaryCta}
                       </a>
                     </Reveal>
                   </div>
                 </div>
-                <Reveal delay={0.2} className='pointer-events-none'>
-                  <div className='absolute bottom-0 right-0 flex items-end justify-end pb-2 pr-2 md:pb-4 md:pr-4'>
-                    <div className='absolute bottom-4 right-6 h-48 w-48 rounded-full bg-black/30 blur-3xl' />
+                <Reveal delay={0.2} className='order-2 flex items-end justify-center lg:justify-end'>
+                  <div className='relative flex items-end justify-end'>
+                    <div className='absolute bottom-6 right-6 h-52 w-52 rounded-full bg-black/25 blur-3xl' />
                     <motion.img
                       src='https://i.postimg.cc/NjQc6jZF/Design-sem-nome-2026-01-21T203912-886.png'
                       alt='Mascote Bella Vista'
-                      className='relative z-10 h-[48vh] w-auto object-contain md:h-[64vh] lg:h-[70vh]'
+                      className='relative z-10 h-[52vh] w-auto object-contain sm:h-[56vh] md:h-[60vh] lg:h-[70vh] xl:h-[74vh]'
                       initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 12 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={
@@ -281,7 +323,7 @@ export default function HomePage() {
                       }
                       loading='lazy'
                     />
-                    <div className='absolute -bottom-2 right-6 h-6 w-40 rounded-full bg-black/50 blur-xl opacity-60' />
+                    <div className='absolute -bottom-2 right-8 h-6 w-44 rounded-full bg-black/45 blur-xl opacity-60' />
                   </div>
                 </Reveal>
               </div>
