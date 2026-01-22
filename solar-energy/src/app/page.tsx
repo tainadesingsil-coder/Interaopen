@@ -23,7 +23,7 @@ const copy = {
     title: 'Viva perto do mar. \nInvista onde o futuro passa.',
     subtitle:
       'Stúdios e apartamentos em uma das regiões mais desejadas da Bahia. Localização estratégica e alto potencial de valorização.',
-    primaryCta: 'Conhecer o Bella Vista',
+    primaryCta: 'Falar com um especialista',
     secondaryCta: 'Ver localização',
   },
   context: {
