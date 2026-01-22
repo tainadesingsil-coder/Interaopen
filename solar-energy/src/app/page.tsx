@@ -23,7 +23,7 @@ const copy = {
     title: 'Viva perto do mar. \nInvista onde o futuro passa.',
     subtitle:
       'Stúdios e apartamentos em uma das regiões mais desejadas da Bahia. Localização estratégica e alto potencial de valorização.',
-    primaryCta: 'Falar com um especialista',
+    primaryCta: 'Conhecer o Bella Vista',
     secondaryCta: 'Ver localização',
   },
   context: {
@@ -225,16 +225,16 @@ export default function HomePage() {
             <div className='absolute inset-0 bg-[linear-gradient(120deg,rgba(6,24,37,0.55),rgba(246,241,234,0.06)_45%,rgba(183,146,90,0.18)_100%)]' />
             <div className='absolute inset-0 vignette' />
             <div className='relative z-10 mx-auto w-full max-w-6xl px-6 pb-36 pt-24 text-white'>
-              <div className='grid items-center gap-12 md:min-h-[70vh] md:grid-cols-[1.05fr_0.95fr]'>
-                <div className='text-left'>
-                  <div className='rounded-3xl border border-white/10 bg-black/20 p-6 backdrop-blur-sm md:p-8'>
+              <div className='relative md:min-h-[70vh]'>
+                <div className='max-w-[640px] md:pr-[38%]'>
+                  <div className='rounded-[32px] border border-white/10 bg-black/15 p-6 backdrop-blur-sm md:p-8'>
                     <Reveal>
-                      <p className='text-[0.65rem] uppercase tracking-[0.42em] text-white/70'>
+                      <p className='text-center text-[0.6rem] uppercase tracking-[0.5em] text-white/60'>
                         {copy.hero.eyebrow}
                       </p>
                     </Reveal>
                     <Reveal delay={0.1}>
-                      <h1 className='hero-title-glow mt-4 text-balance text-5xl font-medium leading-[1.1] tracking-[-0.02em] md:text-7xl'>
+                      <h1 className='hero-title-glow mt-5 text-balance text-4xl font-medium leading-[1.18] tracking-[-0.02em] md:text-6xl'>
                         {copy.hero.title.split('\n').map((line, index) => (
                           <span
                             key={line}
@@ -248,28 +248,28 @@ export default function HomePage() {
                       </h1>
                     </Reveal>
                     <Reveal delay={0.2}>
-                      <p className='mt-8 max-w-[720px] text-base text-white/80 md:text-lg'>
+                      <p className='mt-6 max-w-[640px] text-sm text-white/80 md:text-base'>
                         {copy.hero.subtitle}
                       </p>
                     </Reveal>
                     <Reveal
                       delay={0.3}
-                      className='mt-12 flex flex-col items-start gap-4'
+                      className='mt-10 flex justify-center'
                     >
                       <a
                         href={whatsappLink}
                         target='_blank'
                         rel='noreferrer'
-                        className='hero-cta-glow inline-flex items-center justify-center rounded-2xl border border-gold/40 bg-ocean/90 px-8 py-3 text-sm font-semibold text-white shadow-card transition duration-500 hover:-translate-y-0.5 hover:shadow-[0_18px_50px_rgba(183,146,90,0.22)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white'
+                        className='hero-cta-glow inline-flex items-center justify-center rounded-full bg-white/10 px-7 py-2.5 text-sm font-medium text-white/90 shadow-[0_14px_34px_rgba(183,146,90,0.18)] transition duration-500 hover:-translate-y-0.5 hover:bg-white/15'
                       >
                         {copy.hero.primaryCta}
                       </a>
                     </Reveal>
                   </div>
                 </div>
-                <Reveal delay={0.2} className='flex justify-end md:items-end md:pb-6'>
-                  <div className='relative flex items-end justify-end'>
-                    <div className='absolute bottom-4 right-6 h-44 w-44 rounded-full bg-black/30 blur-3xl' />
+                <Reveal delay={0.2} className='pointer-events-none'>
+                  <div className='absolute bottom-0 right-0 flex items-end justify-end pb-2 pr-2 md:pb-4 md:pr-4'>
+                    <div className='absolute bottom-4 right-6 h-48 w-48 rounded-full bg-black/30 blur-3xl' />
                     <motion.img
                       src='https://i.postimg.cc/NjQc6jZF/Design-sem-nome-2026-01-21T203912-886.png'
                       alt='Mascote Bella Vista'
@@ -281,7 +281,7 @@ export default function HomePage() {
                       }
                       loading='lazy'
                     />
-                    <div className='absolute -bottom-2 right-8 h-6 w-40 rounded-full bg-black/50 blur-xl opacity-60' />
+                    <div className='absolute -bottom-2 right-6 h-6 w-40 rounded-full bg-black/50 blur-xl opacity-60' />
                   </div>
                 </Reveal>
               </div>
