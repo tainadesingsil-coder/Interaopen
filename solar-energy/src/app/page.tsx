@@ -25,8 +25,8 @@ const copy = {
       'Studios e apartamentos em uma das regiões mais desejadas da Bahia, com alto potencial de valorização.',
     subtitleDesktop:
       'Studios e apartamentos na Costa do Descobrimento, com localização estratégica e potencial de valorização.',
-    primaryCta: 'Conhecer o projeto',
-    primaryCtaDesktop: 'Falar no WhatsApp',
+    primaryCta: 'Falar com um especialista',
+    primaryCtaDesktop: 'Falar com um especialista',
     secondaryCta: 'Ver localização',
   },
   context: {
@@ -159,9 +159,12 @@ function HeroNav() {
       } backdrop-blur-lg lg:bg-white/10 lg:backdrop-blur-xl`}
     >
       <nav className='mx-auto flex max-w-6xl items-center justify-between px-6 py-4 text-white lg:py-6'>
-        <span className='font-display text-xs uppercase tracking-[0.35em] text-white/80'>
-          Bela Vista
-        </span>
+        <img
+          src='https://i.postimg.cc/65fCvgVb/Prancheta-1.png'
+          alt='Bela Vista'
+          className='h-7 w-auto md:h-8 lg:h-9'
+          loading='lazy'
+        />
         <div className='hidden items-center gap-6 text-xs uppercase tracking-[0.28em] text-white/70 md:flex lg:gap-8 lg:text-white/85'>
           <a href='#localizacao' className='transition hover:text-white'>
             Localização
@@ -310,7 +313,7 @@ export default function HomePage() {
                         href={whatsappLink}
                         target='_blank'
                         rel='noreferrer'
-                        className='hero-cta-glow inline-flex items-center justify-center rounded-full bg-ocean/90 px-7 py-3 text-sm font-medium text-white shadow-[0_14px_34px_rgba(10,46,70,0.22)] transition duration-500 hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(10,46,70,0.28)] lg:border lg:border-white/10 lg:bg-[#0E2A3B]'
+                        className='hero-cta-glow inline-flex items-center justify-center rounded-full border border-[#B7925A]/40 bg-[#0E2A3B] px-7 py-3 text-sm font-medium text-white shadow-[0_14px_34px_rgba(10,46,70,0.22)] transition duration-500 hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(10,46,70,0.28)]'
                       >
                         <span className='lg:hidden'>{copy.hero.primaryCta}</span>
                         <span className='hidden lg:inline'>{copy.hero.primaryCtaDesktop}</span>
