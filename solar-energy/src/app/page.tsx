@@ -225,67 +225,66 @@ export default function HomePage() {
             <div className='absolute inset-0 bg-[linear-gradient(120deg,rgba(6,24,37,0.55),rgba(246,241,234,0.06)_45%,rgba(183,146,90,0.18)_100%)]' />
             <div className='absolute inset-0 vignette' />
             <div className='relative z-10 mx-auto w-full max-w-6xl px-6 pb-36 pt-24 text-white'>
-              <div className='grid items-center gap-12 md:min-h-[70vh] md:grid-cols-[1.1fr_0.9fr]'>
-                <div className='max-w-[720px] text-center md:pr-[18%] md:text-left'>
-                  <Reveal>
-                    <p className='text-[0.65rem] uppercase tracking-[0.42em] text-white/70'>
-                      {copy.hero.eyebrow}
-                    </p>
-                  </Reveal>
-                  <Reveal delay={0.1}>
-                    <h1 className='hero-title-glow mt-4 text-balance text-5xl font-medium leading-[1.1] tracking-[-0.02em] md:text-7xl'>
-                      {copy.hero.title.split('\n').map((line, index) => (
-                        <span
-                          key={line}
-                          className={`block ${
-                            index === 1 ? 'md:whitespace-nowrap' : ''
-                          }`}
-                        >
-                          {line}
-                        </span>
-                      ))}
-                    </h1>
-                  </Reveal>
-                  <Reveal delay={0.2}>
-                    <p className='mt-8 max-w-[720px] text-base text-white/80 md:text-lg'>
-                      {copy.hero.subtitle}
-                    </p>
-                  </Reveal>
-                  <Reveal
-                    delay={0.3}
-                    className='mt-12 flex flex-col items-center gap-4 md:flex-row md:items-center md:justify-start'
-                  >
-                    <a
-                      href={whatsappLink}
-                      target='_blank'
-                      rel='noreferrer'
-                      className='hero-cta-glow inline-flex items-center justify-center rounded-full border border-gold/40 bg-ocean/90 px-8 py-3 text-sm font-semibold text-white shadow-card transition duration-500 hover:-translate-y-0.5 hover:shadow-[0_18px_50px_rgba(183,146,90,0.22)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white'
+              <div className='grid items-center gap-12 md:min-h-[70vh] md:grid-cols-[1.05fr_0.95fr]'>
+                <div className='text-left'>
+                  <div className='rounded-3xl border border-white/10 bg-black/20 p-6 backdrop-blur-sm md:p-8'>
+                    <Reveal>
+                      <p className='text-[0.65rem] uppercase tracking-[0.42em] text-white/70'>
+                        {copy.hero.eyebrow}
+                      </p>
+                    </Reveal>
+                    <Reveal delay={0.1}>
+                      <h1 className='hero-title-glow mt-4 text-balance text-5xl font-medium leading-[1.1] tracking-[-0.02em] md:text-7xl'>
+                        {copy.hero.title.split('\n').map((line, index) => (
+                          <span
+                            key={line}
+                            className={`block ${
+                              index === 1 ? 'md:whitespace-nowrap' : ''
+                            }`}
+                          >
+                            {line}
+                          </span>
+                        ))}
+                      </h1>
+                    </Reveal>
+                    <Reveal delay={0.2}>
+                      <p className='mt-8 max-w-[720px] text-base text-white/80 md:text-lg'>
+                        {copy.hero.subtitle}
+                      </p>
+                    </Reveal>
+                    <Reveal
+                      delay={0.3}
+                      className='mt-12 flex flex-col items-start gap-4'
                     >
-                      {copy.hero.primaryCta}
-                    </a>
-                  </Reveal>
+                      <a
+                        href={whatsappLink}
+                        target='_blank'
+                        rel='noreferrer'
+                        className='hero-cta-glow inline-flex items-center justify-center rounded-2xl border border-gold/40 bg-ocean/90 px-8 py-3 text-sm font-semibold text-white shadow-card transition duration-500 hover:-translate-y-0.5 hover:shadow-[0_18px_50px_rgba(183,146,90,0.22)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white'
+                      >
+                        {copy.hero.primaryCta}
+                      </a>
+                    </Reveal>
+                  </div>
                 </div>
+                <Reveal delay={0.2} className='flex justify-end md:items-end md:pb-6'>
+                  <div className='relative flex items-end justify-end'>
+                    <div className='absolute bottom-4 right-6 h-44 w-44 rounded-full bg-black/30 blur-3xl' />
+                    <motion.img
+                      src='https://i.postimg.cc/NjQc6jZF/Design-sem-nome-2026-01-21T203912-886.png'
+                      alt='Mascote Bella Vista'
+                      className='relative z-10 h-[48vh] w-auto object-contain md:h-[64vh] lg:h-[70vh]'
+                      initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={
+                        reduceMotion ? { duration: 0 } : { duration: 0.5, ease: 'easeOut' }
+                      }
+                      loading='lazy'
+                    />
+                    <div className='absolute -bottom-2 right-8 h-6 w-40 rounded-full bg-black/50 blur-xl opacity-60' />
+                  </div>
+                </Reveal>
               </div>
-              <Reveal
-                delay={0.2}
-                className='pointer-events-none absolute bottom-0 right-0 flex justify-end pb-0 pr-0 md:pb-2 md:pr-2'
-              >
-                <div className='relative flex items-end justify-end'>
-                  <div className='absolute bottom-3 right-0 h-44 w-44 rounded-full bg-black/30 blur-3xl' />
-                  <motion.img
-                    src='https://i.postimg.cc/NjQc6jZF/Design-sem-nome-2026-01-21T203912-886.png'
-                    alt='Mascote Bella Vista'
-                    className='relative z-10 h-[56vh] w-auto object-contain md:h-[74vh] lg:h-[82vh] md:translate-x-14 lg:translate-x-20'
-                    initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={
-                      reduceMotion ? { duration: 0 } : { duration: 0.5, ease: 'easeOut' }
-                    }
-                    loading='lazy'
-                  />
-                  <div className='absolute -bottom-2 right-2 h-6 w-36 rounded-full bg-black/50 blur-xl opacity-60' />
-                </div>
-              </Reveal>
             </div>
           </section>
 
