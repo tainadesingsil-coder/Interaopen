@@ -281,19 +281,18 @@ export default function HomePage() {
             <div className='absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(183,146,90,0.16),transparent_55%)] lg:opacity-80' />
             <div className='absolute inset-0 bg-[linear-gradient(120deg,rgba(6,24,37,0.55),rgba(246,241,234,0.06)_45%,rgba(183,146,90,0.18)_100%)] lg:opacity-75' />
             <div className='absolute inset-0 hidden lg:block lg:bg-[linear-gradient(90deg,rgba(5,14,22,0.72)_0%,rgba(5,14,22,0.45)_45%,rgba(5,14,22,0.1)_100%)]' />
-            <div className='absolute inset-0 hidden lg:block lg:bg-[linear-gradient(90deg,rgba(5,14,22,0.72)_0%,rgba(5,14,22,0.45)_45%,rgba(5,14,22,0.1)_100%)]' />
             <div className='absolute inset-0 vignette' />
             <div className='relative z-10 mx-auto w-full max-w-6xl px-6 pb-36 pt-24 text-white'>
               <div className='grid gap-12 lg:min-h-[70vh] lg:grid-cols-[3fr_2fr] lg:items-center'>
-                <div className='order-1 text-center lg:text-left'>
-                  <div className='inline-block w-full max-w-[640px] rounded-[28px] border border-white/10 bg-black/10 p-6 backdrop-blur-sm md:p-7 lg:max-w-[620px] lg:rounded-none lg:border-transparent lg:bg-transparent lg:p-0 lg:backdrop-blur-0'>
+                <div className='order-1 text-center lg:text-center'>
+                  <div className='inline-block w-full max-w-[640px] rounded-[28px] border border-white/10 bg-black/10 p-6 backdrop-blur-sm md:p-7 lg:mx-auto lg:max-w-[620px]'>
                     <Reveal>
                       <p className='text-center text-[0.6rem] uppercase tracking-[0.5em] text-white/60 lg:mx-auto lg:max-w-[620px] lg:text-center lg:tracking-[0.6em] lg:text-white/55'>
                         {copy.hero.eyebrow}
                       </p>
                     </Reveal>
                     <Reveal delay={0.1}>
-                      <h1 className='hero-title-glow mt-4 text-balance text-4xl font-medium leading-[1.2] tracking-[-0.02em] md:text-5xl lg:max-w-[600px] lg:text-5xl lg:leading-[1.1] lg:tracking-[-0.02em] lg:font-semibold xl:text-6xl'>
+                      <h1 className='hero-title-glow mt-4 text-balance text-4xl font-medium leading-[1.2] tracking-[-0.02em] md:text-5xl lg:mx-auto lg:max-w-[600px] lg:text-5xl lg:leading-[1.1] lg:tracking-[-0.02em] lg:font-semibold xl:text-6xl'>
                         {copy.hero.title.split('\n').map((line) => (
                           <span key={line} className='block'>
                             {line}
@@ -305,11 +304,11 @@ export default function HomePage() {
                       <p className='mt-6 max-w-[620px] text-sm text-white/80 md:text-base lg:hidden'>
                         {copy.hero.subtitle}
                       </p>
-                      <p className='mt-8 hidden max-w-[520px] text-lg text-white/85 lg:block'>
+                      <p className='mt-8 hidden max-w-[520px] text-lg text-white/85 lg:mx-auto lg:block'>
                         {copy.hero.subtitleDesktop}
                       </p>
                     </Reveal>
-                    <Reveal delay={0.3} className='mt-10 flex justify-center lg:mt-8 lg:justify-start'>
+                    <Reveal delay={0.3} className='mt-10 flex justify-center lg:mt-8 lg:justify-center'>
                       <a
                         href={whatsappLink}
                         target='_blank'
