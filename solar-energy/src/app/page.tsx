@@ -23,7 +23,10 @@ const copy = {
     title: 'Viva perto do mar.\nInvista onde o futuro passa.',
     subtitle:
       'Studios e apartamentos em uma das regiões mais desejadas da Bahia, com alto potencial de valorização.',
+    subtitleDesktop:
+      'Studios e apartamentos na Costa do Descobrimento, com localização estratégica e potencial de valorização.',
     primaryCta: 'Conhecer o projeto',
+    primaryCtaDesktop: 'Falar no WhatsApp',
     secondaryCta: 'Ver localização',
   },
   context: {
@@ -159,7 +162,7 @@ function HeroNav() {
         <span className='font-display text-xs uppercase tracking-[0.35em] text-white/80'>
           Bella Vista
         </span>
-        <div className='hidden items-center gap-6 text-xs uppercase tracking-[0.28em] text-white/70 md:flex lg:gap-8'>
+        <div className='hidden items-center gap-6 text-xs uppercase tracking-[0.28em] text-white/70 md:flex lg:gap-8 lg:text-white/85'>
           <a href='#localizacao' className='transition hover:text-white'>
             Localização
           </a>
@@ -273,18 +276,20 @@ export default function HomePage() {
             <div className='absolute inset-0 bg-gradient-to-b from-black/70 via-[#061825]/75 to-transparent lg:from-black/55 lg:via-[#061825]/60' />
             <div className='absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(183,146,90,0.16),transparent_55%)] lg:opacity-80' />
             <div className='absolute inset-0 bg-[linear-gradient(120deg,rgba(6,24,37,0.55),rgba(246,241,234,0.06)_45%,rgba(183,146,90,0.18)_100%)] lg:opacity-75' />
+            <div className='absolute inset-0 hidden lg:block lg:bg-[linear-gradient(90deg,rgba(5,14,22,0.72)_0%,rgba(5,14,22,0.45)_45%,rgba(5,14,22,0.1)_100%)]' />
+            <div className='absolute inset-0 hidden lg:block lg:bg-[linear-gradient(90deg,rgba(5,14,22,0.72)_0%,rgba(5,14,22,0.45)_45%,rgba(5,14,22,0.1)_100%)]' />
             <div className='absolute inset-0 vignette' />
             <div className='relative z-10 mx-auto w-full max-w-6xl px-6 pb-36 pt-24 text-white'>
               <div className='grid gap-12 lg:min-h-[70vh] lg:grid-cols-[3fr_2fr] lg:items-center'>
                 <div className='order-1 text-center lg:text-left'>
-                  <div className='inline-block w-full max-w-[640px] rounded-[28px] border border-white/10 bg-black/10 p-6 backdrop-blur-sm md:p-7 lg:max-w-[600px] lg:border-transparent lg:bg-white/5 lg:p-2 lg:backdrop-blur-[2px] lg:rounded-[24px]'>
+                  <div className='inline-block w-full max-w-[640px] rounded-[28px] border border-white/10 bg-black/10 p-6 backdrop-blur-sm md:p-7 lg:max-w-[620px] lg:rounded-none lg:border-transparent lg:bg-transparent lg:p-0 lg:backdrop-blur-0'>
                     <Reveal>
-                      <p className='text-center text-[0.6rem] uppercase tracking-[0.5em] text-white/60 lg:mx-auto lg:max-w-[600px] lg:text-center'>
+                      <p className='text-center text-[0.6rem] uppercase tracking-[0.5em] text-white/60 lg:mx-auto lg:max-w-[620px] lg:text-center lg:tracking-[0.6em] lg:text-white/55'>
                         {copy.hero.eyebrow}
                       </p>
                     </Reveal>
                     <Reveal delay={0.1}>
-                      <h1 className='hero-title-glow mt-4 text-balance text-4xl font-medium leading-[1.2] tracking-[-0.02em] md:text-5xl lg:max-w-[600px] lg:text-5xl lg:leading-[1.25] lg:tracking-[-0.03em]'>
+                      <h1 className='hero-title-glow mt-4 text-balance text-4xl font-medium leading-[1.2] tracking-[-0.02em] md:text-5xl lg:max-w-[600px] lg:text-5xl lg:leading-[1.1] lg:tracking-[-0.02em] lg:font-semibold xl:text-6xl'>
                         {copy.hero.title.split('\n').map((line) => (
                           <span key={line} className='block'>
                             {line}
@@ -293,8 +298,11 @@ export default function HomePage() {
                       </h1>
                     </Reveal>
                     <Reveal delay={0.2}>
-                      <p className='mt-6 max-w-[620px] text-sm text-white/80 md:text-base lg:mt-8 lg:max-w-[520px] lg:text-white/85'>
+                      <p className='mt-6 max-w-[620px] text-sm text-white/80 md:text-base lg:hidden'>
                         {copy.hero.subtitle}
+                      </p>
+                      <p className='mt-8 hidden max-w-[520px] text-lg text-white/85 lg:block'>
+                        {copy.hero.subtitleDesktop}
                       </p>
                     </Reveal>
                     <Reveal delay={0.3} className='mt-10 flex justify-center lg:mt-8 lg:justify-start'>
@@ -302,9 +310,10 @@ export default function HomePage() {
                         href={whatsappLink}
                         target='_blank'
                         rel='noreferrer'
-                        className='hero-cta-glow inline-flex items-center justify-center rounded-full bg-ocean/90 px-7 py-3 text-sm font-medium text-white shadow-[0_14px_34px_rgba(183,146,90,0.18)] transition duration-500 hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(183,146,90,0.22)]'
+                        className='hero-cta-glow inline-flex items-center justify-center rounded-full bg-ocean/90 px-7 py-3 text-sm font-medium text-white shadow-[0_14px_34px_rgba(10,46,70,0.22)] transition duration-500 hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(10,46,70,0.28)] lg:border lg:border-white/10 lg:bg-[#0E2A3B]'
                       >
-                        {copy.hero.primaryCta}
+                        <span className='lg:hidden'>{copy.hero.primaryCta}</span>
+                        <span className='hidden lg:inline'>{copy.hero.primaryCtaDesktop}</span>
                       </a>
                     </Reveal>
                   </div>
