@@ -309,23 +309,6 @@ export default function HomePage() {
                     </Reveal>
                   </div>
                 </div>
-                <Reveal delay={0.2} className='order-2 flex items-end justify-center lg:justify-end'>
-                  <div className='relative flex items-end justify-end'>
-                    <div className='absolute bottom-6 right-6 h-52 w-52 rounded-full bg-black/25 blur-3xl' />
-                    <motion.img
-                      src='https://i.postimg.cc/NjQc6jZF/Design-sem-nome-2026-01-21T203912-886.png'
-                      alt='Mascote Bella Vista'
-                      className='relative z-10 h-[52vh] w-auto object-contain sm:h-[56vh] md:h-[60vh] lg:h-[70vh] xl:h-[74vh]'
-                      initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 12 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={
-                        reduceMotion ? { duration: 0 } : { duration: 0.5, ease: 'easeOut' }
-                      }
-                      loading='lazy'
-                    />
-                    <div className='absolute -bottom-2 right-8 h-6 w-44 rounded-full bg-black/45 blur-xl opacity-60' />
-                  </div>
-                </Reveal>
               </div>
             </div>
           </section>
