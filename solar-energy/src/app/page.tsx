@@ -26,7 +26,7 @@ const copy = {
       'Studios e apartamentos em uma das regiões mais desejadas da Bahia, com alto potencial de valorização.',
     subtitleDesktop:
       'Studios e apartamentos na Costa do Descobrimento, com localização estratégica e potencial de valorização.',
-    primaryCta: 'Falar com um especialista',
+    primaryCta: 'Solicitar apresentação exclusiva',
     primaryCtaDesktop: 'Solicitar apresentação exclusiva',
     secondaryCta: 'Ver localização',
   },
@@ -143,22 +143,10 @@ function Reveal({
 }
 
 function HeroNav() {
-  const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12);
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
-
   return (
-    <header
-      className={`fixed inset-x-0 top-0 z-50 transition ${
-        scrolled ? 'bg-white/15 shadow-sm' : 'bg-white/5'
-      } backdrop-blur-lg lg:bg-white/10 lg:backdrop-blur-xl`}
-    >
+    <header className='fixed inset-x-0 top-0 z-50 bg-[rgba(8,18,28,0.65)] backdrop-blur-lg shadow-sm'>
       <nav className='mx-auto flex max-w-6xl items-center justify-between px-6 py-4 text-white lg:py-6'>
         <img
           src='https://i.postimg.cc/65fCvgVb/Prancheta-1.png'
@@ -166,22 +154,22 @@ function HeroNav() {
           className='h-7 w-auto md:h-8 lg:h-9'
           loading='lazy'
         />
-        <div className='hidden items-center gap-6 text-xs uppercase tracking-[0.28em] text-white/70 md:flex lg:gap-8 lg:text-white/85'>
+        <div className='hidden items-center gap-6 text-xs uppercase tracking-[0.28em] text-white/80 md:flex lg:gap-8 lg:text-white/90'>
           <a
             href='#localizacao'
-            className='transition hover:text-[#B7925A] hover:drop-shadow-[0_0_8px_rgba(183,146,90,0.45)]'
+            className='transition hover:text-white hover:underline hover:decoration-white/35 hover:decoration-2'
           >
             Localização
           </a>
           <a
             href='#proposta'
-            className='transition hover:text-[#B7925A] hover:drop-shadow-[0_0_8px_rgba(183,146,90,0.45)]'
+            className='transition hover:text-white hover:underline hover:decoration-white/35 hover:decoration-2'
           >
             Projeto
           </a>
           <a
             href='#perfil'
-            className='transition hover:text-[#B7925A] hover:drop-shadow-[0_0_8px_rgba(183,146,90,0.45)]'
+            className='transition hover:text-white hover:underline hover:decoration-white/35 hover:decoration-2'
           >
             Investimento
           </a>
@@ -189,7 +177,7 @@ function HeroNav() {
             href={whatsappLink}
             target='_blank'
             rel='noreferrer'
-            className='transition hover:text-[#B7925A] hover:drop-shadow-[0_0_8px_rgba(183,146,90,0.45)]'
+            className='transition hover:text-white hover:underline hover:decoration-white/35 hover:decoration-2'
           >
             Contato
           </a>
@@ -282,7 +270,7 @@ export default function HomePage() {
             className='grain relative flex min-h-screen items-center overflow-hidden pt-20'
           >
             <div
-              className='absolute inset-0 bg-cover bg-center'
+              className='absolute inset-0 bg-cover bg-center hero-bg'
               style={{ backgroundImage: `url(${heroImage})` }}
               aria-hidden='true'
             />
@@ -294,14 +282,14 @@ export default function HomePage() {
             <div className='relative z-10 mx-auto w-full max-w-6xl px-6 pb-36 pt-24 text-white'>
               <div className='grid gap-12 lg:min-h-[70vh] lg:flex lg:items-center lg:justify-center'>
                 <div className='order-1 text-center lg:text-center'>
-                  <div className='inline-block w-full max-w-[640px] rounded-[28px] border border-white/10 bg-black/10 p-6 backdrop-blur-sm md:p-7 lg:mx-auto lg:max-w-[900px] lg:rounded-[36px] lg:border-white/15 lg:bg-white/10 lg:p-12 lg:backdrop-blur-md'>
+                  <div className='inline-block w-full max-w-[640px] rounded-[28px] border border-white/10 bg-black/10 p-6 backdrop-blur-sm md:p-7 lg:mx-auto lg:w-[min(92vw,920px)] lg:max-w-[920px] lg:rounded-[28px] lg:border-white/10 lg:bg-[rgba(10,20,30,0.45)] lg:p-14 lg:backdrop-blur-[18px] lg:shadow-[0_28px_70px_rgba(4,10,16,0.45),0_0_30px_rgba(183,146,90,0.08)]'>
                     <Reveal>
                       <p className='text-center text-[0.6rem] uppercase tracking-[0.5em] text-white/60 lg:mx-auto lg:max-w-[720px] lg:text-center lg:tracking-[0.6em] lg:text-white/55'>
                         {copy.hero.eyebrow}
                       </p>
                     </Reveal>
                     <Reveal delay={0.1}>
-                      <h1 className='hero-title-glow mt-4 text-balance text-4xl font-medium leading-[1.2] tracking-[-0.02em] md:text-5xl lg:mx-auto lg:max-w-[600px] lg:text-[2.75rem] lg:leading-[1.2] lg:tracking-[-0.02em] lg:font-semibold xl:text-[3.25rem]'>
+                      <h1 className='hero-title-glow mt-4 text-balance text-4xl font-medium leading-[1.2] tracking-[-0.02em] md:text-5xl lg:mx-auto lg:max-w-[600px] lg:text-[clamp(40px,4.4vw,68px)] lg:leading-[1.05] lg:tracking-[-0.03em] lg:font-semibold'>
                         {copy.hero.title.split('\n').map((line) => (
                           <span key={line} className='block'>
                             {line}
@@ -313,7 +301,7 @@ export default function HomePage() {
                       <p className='mt-6 max-w-[620px] text-sm text-white/80 md:text-base lg:hidden'>
                         {copy.hero.subtitle}
                       </p>
-                      <p className='mt-8 hidden max-w-[520px] text-lg text-white/85 lg:mx-auto lg:block'>
+                      <p className='mt-8 hidden max-w-[520px] text-[18px] text-white/85 lg:mx-auto lg:block lg:leading-[1.6]'>
                         {copy.hero.subtitleDesktop}
                       </p>
                     </Reveal>
@@ -322,15 +310,17 @@ export default function HomePage() {
                         href={whatsappLink}
                         target='_blank'
                         rel='noreferrer'
-                        className='hero-cta-glow inline-flex items-center justify-center rounded-full border border-[#B7925A]/40 bg-[#0E2A3B] px-7 py-3 text-sm font-semibold text-white shadow-[0_14px_34px_rgba(10,46,70,0.22)] transition duration-500 hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(10,46,70,0.28)] lg:bg-gradient-to-r lg:from-[#0E2A3B] lg:to-[#0B2231] lg:px-9 lg:py-3.5'
+                        className='hero-cta-glow inline-flex w-full items-center justify-center rounded-full border border-white/12 bg-[#0B2A3A] px-7 py-3 text-sm font-semibold text-white shadow-[0_14px_34px_rgba(10,46,70,0.22)] transition duration-500 hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(11,42,58,0.35)] lg:w-auto lg:bg-gradient-to-r lg:from-[#0B2A3A] lg:to-[#0A2231] lg:px-9 lg:py-4'
                       >
                         <span className='lg:hidden'>{copy.hero.primaryCta}</span>
                         <span className='hidden lg:inline'>{copy.hero.primaryCtaDesktop}</span>
                       </a>
                     </Reveal>
+                    <p className='mt-3 text-xs text-white/70'>
+                      Atendimento consultivo. Sem formulários. Sem pressão.
+                    </p>
                   </div>
                 </div>
-                <div className='hidden lg:block' aria-hidden='true' />
               </div>
             </div>
           </section>

@@ -8,7 +8,8 @@
   }
 
   body {
-    @apply bg-sand text-ink font-sans antialiased;
+    @apply text-ink font-sans antialiased;
+    background: #07131D;
     font-size: 17px;
     line-height: 1.8;
     letter-spacing: 0.004em;
@@ -75,6 +76,10 @@
     box-shadow:
       0 16px 36px rgba(8, 38, 58, 0.4),
       0 0 26px rgba(183, 146, 90, 0.18);
+  }
+
+  .hero-bg {
+    filter: saturate(1.02) contrast(1.05);
   }
 }
 
