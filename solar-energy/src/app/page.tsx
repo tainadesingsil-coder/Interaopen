@@ -269,11 +269,28 @@ export default function HomePage() {
             id='inicio'
             className='grain relative flex min-h-screen items-center overflow-hidden pt-20'
           >
-            <div
-              className='absolute inset-0 bg-cover bg-center hero-bg'
-              style={{ backgroundImage: `url(${heroImage})` }}
-              aria-hidden='true'
-            />
+            <div className='absolute inset-0' aria-hidden='true'>
+              <img
+                src={heroImage}
+                alt=''
+                className='absolute inset-0 h-full w-full object-cover hero-media'
+                loading='lazy'
+              />
+              <video
+                className='absolute inset-0 h-full w-full object-cover hero-media'
+                autoPlay
+                loop
+                muted
+                playsInline
+                preload='metadata'
+                poster={heroImage}
+              >
+                <source
+                  src='https://res.cloudinary.com/dwedcl97k/video/upload/v1769134219/Design_sem_nome_-_2026-01-22T230551.829_pddcpm.mp4'
+                  type='video/mp4'
+                />
+              </video>
+            </div>
             <div className='absolute inset-0 bg-gradient-to-b from-black/70 via-[#061825]/75 to-transparent lg:from-black/55 lg:via-[#061825]/60' />
             <div className='absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(183,146,90,0.16),transparent_55%)] lg:opacity-70' />
             <div className='absolute inset-0 bg-[linear-gradient(120deg,rgba(6,24,37,0.55),rgba(246,241,234,0.06)_45%,rgba(183,146,90,0.18)_100%)] lg:opacity-65' />

@@ -78,7 +78,7 @@
       0 0 26px rgba(183, 146, 90, 0.18);
   }
 
-  .hero-bg {
+  .hero-media {
     filter: saturate(1.02) contrast(1.05);
   }
 }
