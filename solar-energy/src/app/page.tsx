@@ -157,19 +157,19 @@ function HeroNav() {
         <div className='hidden items-center gap-6 text-xs uppercase tracking-[0.28em] text-white/80 md:flex lg:gap-8 lg:text-white/90'>
           <a
             href='#localizacao'
-            className='transition hover:text-white hover:underline hover:decoration-white/35 hover:decoration-2'
+            className='transition hover:text-[#B7925A] hover:drop-shadow-[0_0_10px_rgba(183,146,90,0.55)]'
           >
             Localização
           </a>
           <a
             href='#proposta'
-            className='transition hover:text-white hover:underline hover:decoration-white/35 hover:decoration-2'
+            className='transition hover:text-[#B7925A] hover:drop-shadow-[0_0_10px_rgba(183,146,90,0.55)]'
           >
             Projeto
           </a>
           <a
             href='#perfil'
-            className='transition hover:text-white hover:underline hover:decoration-white/35 hover:decoration-2'
+            className='transition hover:text-[#B7925A] hover:drop-shadow-[0_0_10px_rgba(183,146,90,0.55)]'
           >
             Investimento
           </a>
@@ -177,7 +177,7 @@ function HeroNav() {
             href={whatsappLink}
             target='_blank'
             rel='noreferrer'
-            className='transition hover:text-white hover:underline hover:decoration-white/35 hover:decoration-2'
+            className='transition hover:text-[#B7925A] hover:drop-shadow-[0_0_10px_rgba(183,146,90,0.55)]'
           >
             Contato
           </a>
@@ -201,21 +201,21 @@ function HeroNav() {
           <div className='flex flex-col gap-4 px-6 py-4 text-xs uppercase tracking-[0.28em] text-white/75'>
             <a
               href='#localizacao'
-              className='transition hover:text-[#B7925A] hover:drop-shadow-[0_0_8px_rgba(183,146,90,0.45)]'
+              className='transition hover:text-[#B7925A] hover:drop-shadow-[0_0_10px_rgba(183,146,90,0.55)]'
               onClick={() => setMenuOpen(false)}
             >
               Localização
             </a>
             <a
               href='#proposta'
-              className='transition hover:text-[#B7925A] hover:drop-shadow-[0_0_8px_rgba(183,146,90,0.45)]'
+              className='transition hover:text-[#B7925A] hover:drop-shadow-[0_0_10px_rgba(183,146,90,0.55)]'
               onClick={() => setMenuOpen(false)}
             >
               Projeto
             </a>
             <a
               href='#perfil'
-              className='transition hover:text-[#B7925A] hover:drop-shadow-[0_0_8px_rgba(183,146,90,0.45)]'
+              className='transition hover:text-[#B7925A] hover:drop-shadow-[0_0_10px_rgba(183,146,90,0.55)]'
               onClick={() => setMenuOpen(false)}
             >
               Investimento
@@ -224,7 +224,7 @@ function HeroNav() {
               href={whatsappLink}
               target='_blank'
               rel='noreferrer'
-              className='transition hover:text-[#B7925A] hover:drop-shadow-[0_0_8px_rgba(183,146,90,0.45)]'
+              className='transition hover:text-[#B7925A] hover:drop-shadow-[0_0_10px_rgba(183,146,90,0.55)]'
               onClick={() => setMenuOpen(false)}
             >
               Contato
@@ -310,15 +310,12 @@ export default function HomePage() {
                         href={whatsappLink}
                         target='_blank'
                         rel='noreferrer'
-                        className='hero-cta-glow inline-flex w-full items-center justify-center rounded-full border border-white/12 bg-[#0B2A3A] px-7 py-3 text-sm font-semibold text-white shadow-[0_14px_34px_rgba(10,46,70,0.22)] transition duration-500 hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(11,42,58,0.35)] lg:w-auto lg:bg-gradient-to-r lg:from-[#0B2A3A] lg:to-[#0A2231] lg:px-9 lg:py-4'
+                        className='hero-cta-glow inline-flex w-full items-center justify-center rounded-full border border-white/12 bg-[#0B2A3A] px-7 py-3 text-sm font-semibold text-white shadow-[0_14px_34px_rgba(10,46,70,0.22)] transition duration-500 hover:-translate-y-0.5 hover:shadow-[0_0_18px_rgba(183,146,90,0.45)] lg:w-auto lg:bg-gradient-to-r lg:from-[#0B2A3A] lg:to-[#0A2231] lg:px-9 lg:py-4'
                       >
                         <span className='lg:hidden'>{copy.hero.primaryCta}</span>
                         <span className='hidden lg:inline'>{copy.hero.primaryCtaDesktop}</span>
                       </a>
                     </Reveal>
-                    <p className='mt-3 text-xs text-white/70'>
-                      Atendimento consultivo. Sem formulários. Sem pressão.
-                    </p>
                   </div>
                 </div>
               </div>
