@@ -286,7 +286,7 @@ export default function HomePage() {
                 poster={heroImage}
               >
                 <source
-                  src='https://res.cloudinary.com/dwedcl97k/video/upload/v1769134219/Design_sem_nome_-_2026-01-22T230551.829_pddcpm.mp4'
+                  src='https://res.cloudinary.com/dwedcl97k/video/upload/q_auto:best/v1769134219/Design_sem_nome_-_2026-01-22T230551.829_pddcpm.mp4'
                   type='video/mp4'
                 />
               </video>
