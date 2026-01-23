@@ -11,7 +11,8 @@ import { Building2, Compass, KeyRound, Landmark, MapPin } from 'lucide-react';
 
 const whatsappNumber = '5571999999999';
 
-const heroImage = 'https://i.postimg.cc/JnndrxRf/FOTO-PRAIA.png';
+const heroPoster =
+  'https://res.cloudinary.com/dwedcl97k/video/upload/so_0,f_jpg,w_1600/v1769199580/Design_sem_nome_-_2026-01-23T171932.339_fjulxo.mp4';
 const contextImage =
   'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1800&q=80';
 const contextImageAlt = 'https://i.postimg.cc/43W59dty/FOTO-AEREA.png';
@@ -271,7 +272,7 @@ export default function HomePage() {
           >
             <div className='absolute inset-0' aria-hidden='true'>
               <img
-                src={heroImage}
+                src={heroPoster}
                 alt=''
                 className='absolute inset-0 h-full w-full object-cover hero-media'
                 loading='lazy'
@@ -283,10 +284,10 @@ export default function HomePage() {
                 muted
                 playsInline
                 preload='metadata'
-                poster={heroImage}
+                poster={heroPoster}
               >
                 <source
-                  src='https://res.cloudinary.com/dwedcl97k/video/upload/f_auto,q_auto:good,w_1080/v1769199580/Design_sem_nome_-_2026-01-23T171932.339_fjulxo.mp4'
+                  src='https://res.cloudinary.com/dwedcl97k/video/upload/f_auto,q_auto:best,w_1280/v1769199580/Design_sem_nome_-_2026-01-23T171932.339_fjulxo.mp4'
                   type='video/mp4'
                   media='(max-width: 768px)'
                 />
@@ -297,10 +298,10 @@ export default function HomePage() {
                 />
               </video>
             </div>
-            <div className='absolute inset-0 bg-gradient-to-b from-black/45 via-[#061825]/40 to-transparent lg:from-black/30 lg:via-[#061825]/28' />
-            <div className='absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(198,155,78,0.06),transparent_55%)] lg:opacity-50' />
-            <div className='absolute inset-0 bg-[linear-gradient(120deg,rgba(6,24,37,0.35),rgba(246,241,234,0.04)_45%,rgba(183,146,90,0.10)_100%)] lg:opacity-45' />
-            <div className='absolute inset-0 hidden lg:block lg:bg-[linear-gradient(90deg,rgba(5,14,22,0.45)_0%,rgba(5,14,22,0.18)_55%,rgba(5,14,22,0.03)_100%)]' />
+            <div className='absolute inset-0 bg-gradient-to-b from-black/35 via-[#061825]/30 to-transparent lg:from-black/25 lg:via-[#061825]/22' />
+            <div className='absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(198,155,78,0.05),transparent_55%)] lg:opacity-40' />
+            <div className='absolute inset-0 bg-[linear-gradient(120deg,rgba(6,24,37,0.28),rgba(246,241,234,0.04)_45%,rgba(183,146,90,0.08)_100%)] lg:opacity-38' />
+            <div className='absolute inset-0 hidden lg:block lg:bg-[linear-gradient(90deg,rgba(5,14,22,0.35)_0%,rgba(5,14,22,0.12)_55%,rgba(5,14,22,0.02)_100%)]' />
             <div className='absolute inset-0 vignette' />
             <div className='relative z-10 mx-auto w-full max-w-6xl px-6 pb-36 pt-24 text-white'>
               <div className='grid gap-12 lg:min-h-[70vh] lg:flex lg:items-center lg:justify-center'>
