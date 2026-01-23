@@ -286,21 +286,21 @@ export default function HomePage() {
                 poster={heroImage}
               >
                 <source
-                  src='https://res.cloudinary.com/dwedcl97k/video/upload/f_auto,q_auto:eco,w_900/v1769199580/Design_sem_nome_-_2026-01-23T171932.339_fjulxo.mp4'
+                  src='https://res.cloudinary.com/dwedcl97k/video/upload/f_auto,q_auto:good,w_1080/v1769199580/Design_sem_nome_-_2026-01-23T171932.339_fjulxo.mp4'
                   type='video/mp4'
                   media='(max-width: 768px)'
                 />
                 <source
-                  src='https://res.cloudinary.com/dwedcl97k/video/upload/f_auto,q_auto:good,w_1600/v1769199580/Design_sem_nome_-_2026-01-23T171932.339_fjulxo.mp4'
+                  src='https://res.cloudinary.com/dwedcl97k/video/upload/f_auto,q_auto:best,w_1920/v1769199580/Design_sem_nome_-_2026-01-23T171932.339_fjulxo.mp4'
                   type='video/mp4'
                   media='(min-width: 769px)'
                 />
               </video>
             </div>
-            <div className='absolute inset-0 bg-gradient-to-b from-black/60 via-[#061825]/60 to-transparent lg:from-black/45 lg:via-[#061825]/45' />
-            <div className='absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(198,155,78,0.08),transparent_55%)] lg:opacity-60' />
-            <div className='absolute inset-0 bg-[linear-gradient(120deg,rgba(6,24,37,0.45),rgba(246,241,234,0.06)_45%,rgba(183,146,90,0.14)_100%)] lg:opacity-55' />
-            <div className='absolute inset-0 hidden lg:block lg:bg-[linear-gradient(90deg,rgba(5,14,22,0.6)_0%,rgba(5,14,22,0.25)_55%,rgba(5,14,22,0.05)_100%)]' />
+            <div className='absolute inset-0 bg-gradient-to-b from-black/45 via-[#061825]/40 to-transparent lg:from-black/30 lg:via-[#061825]/28' />
+            <div className='absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(198,155,78,0.06),transparent_55%)] lg:opacity-50' />
+            <div className='absolute inset-0 bg-[linear-gradient(120deg,rgba(6,24,37,0.35),rgba(246,241,234,0.04)_45%,rgba(183,146,90,0.10)_100%)] lg:opacity-45' />
+            <div className='absolute inset-0 hidden lg:block lg:bg-[linear-gradient(90deg,rgba(5,14,22,0.45)_0%,rgba(5,14,22,0.18)_55%,rgba(5,14,22,0.03)_100%)]' />
             <div className='absolute inset-0 vignette' />
             <div className='relative z-10 mx-auto w-full max-w-6xl px-6 pb-36 pt-24 text-white'>
               <div className='grid gap-12 lg:min-h-[70vh] lg:flex lg:items-center lg:justify-center'>
