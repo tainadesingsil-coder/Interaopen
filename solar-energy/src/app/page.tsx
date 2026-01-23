@@ -167,20 +167,29 @@ function HeroNav() {
           loading='lazy'
         />
         <div className='hidden items-center gap-6 text-xs uppercase tracking-[0.28em] text-white/70 md:flex lg:gap-8 lg:text-white/85'>
-          <a href='#localizacao' className='transition hover:text-white'>
+          <a
+            href='#localizacao'
+            className='transition hover:text-[#B7925A] hover:drop-shadow-[0_0_8px_rgba(183,146,90,0.45)]'
+          >
             Localização
           </a>
-          <a href='#proposta' className='transition hover:text-white'>
+          <a
+            href='#proposta'
+            className='transition hover:text-[#B7925A] hover:drop-shadow-[0_0_8px_rgba(183,146,90,0.45)]'
+          >
             Projeto
           </a>
-          <a href='#perfil' className='transition hover:text-white'>
+          <a
+            href='#perfil'
+            className='transition hover:text-[#B7925A] hover:drop-shadow-[0_0_8px_rgba(183,146,90,0.45)]'
+          >
             Investimento
           </a>
           <a
             href={whatsappLink}
             target='_blank'
             rel='noreferrer'
-            className='transition hover:text-white'
+            className='transition hover:text-[#B7925A] hover:drop-shadow-[0_0_8px_rgba(183,146,90,0.45)]'
           >
             Contato
           </a>
@@ -204,21 +213,21 @@ function HeroNav() {
           <div className='flex flex-col gap-4 px-6 py-4 text-xs uppercase tracking-[0.28em] text-white/75'>
             <a
               href='#localizacao'
-              className='transition hover:text-white'
+              className='transition hover:text-[#B7925A] hover:drop-shadow-[0_0_8px_rgba(183,146,90,0.45)]'
               onClick={() => setMenuOpen(false)}
             >
               Localização
             </a>
             <a
               href='#proposta'
-              className='transition hover:text-white'
+              className='transition hover:text-[#B7925A] hover:drop-shadow-[0_0_8px_rgba(183,146,90,0.45)]'
               onClick={() => setMenuOpen(false)}
             >
               Projeto
             </a>
             <a
               href='#perfil'
-              className='transition hover:text-white'
+              className='transition hover:text-[#B7925A] hover:drop-shadow-[0_0_8px_rgba(183,146,90,0.45)]'
               onClick={() => setMenuOpen(false)}
             >
               Investimento
@@ -227,7 +236,7 @@ function HeroNav() {
               href={whatsappLink}
               target='_blank'
               rel='noreferrer'
-              className='transition hover:text-white'
+              className='transition hover:text-[#B7925A] hover:drop-shadow-[0_0_8px_rgba(183,146,90,0.45)]'
               onClick={() => setMenuOpen(false)}
             >
               Contato
