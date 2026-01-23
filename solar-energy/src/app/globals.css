@@ -80,6 +80,9 @@
 
   .hero-media {
     filter: saturate(1.02) contrast(1.05);
+    backface-visibility: hidden;
+    transform: translateZ(0);
+    will-change: transform;
   }
 }
 
