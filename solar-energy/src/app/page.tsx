@@ -151,7 +151,7 @@ function HeroNav() {
         <img
           src='https://i.postimg.cc/65fCvgVb/Prancheta-1.png'
           alt='Bela Vista'
-          className='h-7 w-auto md:h-8 lg:h-9'
+          className='h-8 w-auto md:h-9 lg:h-10'
           loading='lazy'
         />
         <div className='hidden items-center gap-6 text-xs uppercase tracking-[0.28em] text-white/80 md:flex lg:gap-8 lg:text-white/90'>
