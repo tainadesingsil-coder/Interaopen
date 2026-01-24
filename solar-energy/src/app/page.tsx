@@ -417,51 +417,41 @@ export default function HomePage() {
           >
             <div className='mx-auto grid max-w-6xl items-center gap-12 px-6 md:grid-cols-[1.05fr_1fr]'>
               <div className='space-y-5'>
-                <Reveal>
-                  <p className='text-xs uppercase tracking-[0.32em] text-muted'>
-                    {copy.context.tag}
-                  </p>
-                </Reveal>
-                <Reveal delay={0.1}>
-                  <h2 className='text-3xl font-semibold text-balance md:text-4xl'>
-                    {copy.context.title}
-                  </h2>
-                </Reveal>
-                <Reveal delay={0.2}>
-                  <p className='text-base text-muted md:text-lg'>
-                    {copy.context.body}
-                  </p>
-                </Reveal>
-                <Reveal delay={0.3}>
-                  <ul className='space-y-3 text-sm text-ink/80'>
-                    {copy.context.bullets.map((item) => (
-                      <li key={item} className='flex items-center gap-3'>
-                        <span className='h-1.5 w-1.5 rounded-full bg-gold' />
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                </Reveal>
+                <p className='text-xs uppercase tracking-[0.32em] text-muted'>
+                  {copy.context.tag}
+                </p>
+                <h2 className='text-3xl font-semibold text-balance md:text-4xl'>
+                  {copy.context.title}
+                </h2>
+                <p className='text-base text-muted md:text-lg'>
+                  {copy.context.body}
+                </p>
+                <ul className='space-y-3 text-sm text-ink/80'>
+                  {copy.context.bullets.map((item) => (
+                    <li key={item} className='flex items-center gap-3'>
+                      <span className='h-1.5 w-1.5 rounded-full bg-gold' />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <Reveal delay={0.2}>
-                <figure className='rounded-2xl border border-white/70 bg-white/75 p-3 shadow-soft backdrop-blur'>
-                  <div className='relative h-[420px] w-full overflow-hidden rounded-xl md:h-[480px]'>
-                    <AnimatePresence mode='wait'>
-                      <motion.img
-                        key={contextSlides[contextIndex]?.src}
-                        src={contextSlides[contextIndex]?.src}
-                        alt={contextSlides[contextIndex]?.alt}
-                        className='absolute inset-0 h-full w-full object-cover'
-                        initial={reduceMotion ? { opacity: 1 } : { opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={reduceMotion ? { opacity: 1 } : { opacity: 0 }}
-                        transition={reduceMotion ? { duration: 0 } : { duration: 0.8 }}
-                        loading='lazy'
-                      />
-                    </AnimatePresence>
-                  </div>
-                </figure>
-              </Reveal>
+              <figure className='rounded-2xl border border-white/70 bg-white/75 p-3 shadow-soft backdrop-blur'>
+                <div className='relative h-[420px] w-full overflow-hidden rounded-xl md:h-[480px]'>
+                  <AnimatePresence mode='wait'>
+                    <motion.img
+                      key={contextSlides[contextIndex]?.src}
+                      src={contextSlides[contextIndex]?.src}
+                      alt={contextSlides[contextIndex]?.alt}
+                      className='absolute inset-0 h-full w-full object-cover'
+                      initial={reduceMotion ? { opacity: 1 } : { opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={reduceMotion ? { opacity: 1 } : { opacity: 0 }}
+                      transition={reduceMotion ? { duration: 0 } : { duration: 0.8 }}
+                      loading='lazy'
+                    />
+                  </AnimatePresence>
+                </div>
+              </figure>
             </div>
             <div className='mx-auto mt-12 max-w-6xl px-6'>
               <div className='flex flex-col gap-3'>
