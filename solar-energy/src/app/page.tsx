@@ -94,6 +94,27 @@ const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
   copy.whatsappMessage
 )}`;
 
+const showcaseItems = [
+  {
+    label: 'PLANTA',
+    title: 'Planta inteligente',
+    desc: 'Metragem otimizada e funcional.',
+    image: '/images/showcase-planta.svg',
+  },
+  {
+    label: 'STUDIO',
+    title: 'Ambiente completo',
+    desc: 'Integração e conforto real.',
+    image: '/images/showcase-studio.svg',
+  },
+  {
+    label: 'ÁREA COMPLETA',
+    title: 'Tudo no lugar',
+    desc: 'Cozinha, descanso e rotina fluida.',
+    image: '/images/showcase-area.svg',
+  },
+];
+
 
 function Reveal({
   children,
@@ -216,6 +237,50 @@ function HeroNav() {
   );
 }
 
+function StudioShowcaseCard({
+  label,
+  title,
+  desc,
+  image,
+}: {
+  label: string;
+  title: string;
+  desc: string;
+  image: string;
+}) {
+  return (
+    <motion.article
+      className='group relative min-w-[85%] snap-center overflow-hidden rounded-3xl border border-white/10 bg-[rgba(7,27,36,0.45)] shadow-[0_20px_40px_rgba(5,12,18,0.35)] backdrop-blur-[14px] transition-shadow duration-500 hover:shadow-[0_28px_55px_rgba(5,12,18,0.45),0_0_30px_rgba(183,146,90,0.22)] active:shadow-[0_28px_55px_rgba(5,12,18,0.45),0_0_30px_rgba(183,146,90,0.18)] md:min-w-0'
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      whileHover={{ y: -6, scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+    >
+      <div className='relative aspect-[16/10] w-full overflow-hidden'>
+        <img
+          src={image}
+          alt={title}
+          className='h-full w-full object-cover transition duration-500 group-hover:scale-105'
+          loading='lazy'
+        />
+        <div className='absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/70 via-black/20 to-transparent' />
+      </div>
+      <div className='space-y-3 p-6'>
+        <span className='inline-flex rounded-full border border-[#B7925A]/40 bg-white/5 px-3 py-1 text-[0.6rem] uppercase tracking-[0.4em] text-[#D9BE86]'>
+          {label}
+        </span>
+        <div>
+          <h3 className='text-lg font-semibold text-white'>{title}</h3>
+          <p className='mt-1 text-sm text-white/70'>{desc}</p>
+        </div>
+        <div className='text-sm text-white/70'>Ver detalhes →</div>
+      </div>
+    </motion.article>
+  );
+}
+
 export default function HomePage() {
   const reduceMotion = useReducedMotion();
   const mapLineVariants = useMemo(
@@ -311,6 +376,27 @@ export default function HomePage() {
                     </Reveal>
                   </div>
                 </div>
+              </div>
+            </div>
+          </section>
+
+          <section
+            id='contexto'
+            className='scroll-mt-24 bg-sand py-28'
+          >
+            <div className='mx-auto max-w-6xl px-6'>
+              <div className='flex flex-col gap-3'>
+                <p className='text-xs uppercase tracking-[0.32em] text-muted'>
+                  Vitrine do Studio
+                </p>
+                <h3 className='text-2xl font-semibold text-ink'>
+                  Explore o interior pensado para viver e investir bem.
+                </h3>
+              </div>
+              <div className='mt-6 flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory md:grid md:grid-cols-2 md:gap-6 md:overflow-visible md:snap-none lg:grid-cols-3'>
+                {showcaseItems.map((item) => (
+                  <StudioShowcaseCard key={item.label} {...item} />
+                ))}
               </div>
             </div>
           </section>
