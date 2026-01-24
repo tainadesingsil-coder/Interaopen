@@ -147,7 +147,7 @@ function HeroNav() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <header className='fixed inset-x-0 top-0 z-50 bg-[rgba(8,18,28,0.65)] backdrop-blur-lg shadow-sm'>
+    <header className='fixed inset-x-0 top-0 z-50 bg-[#07131D]/85 backdrop-blur-lg shadow-[0_8px_24px_rgba(5,12,18,0.35)] md:bg-[rgba(8,18,28,0.65)]'>
       <nav className='mx-auto flex max-w-6xl items-center justify-between px-6 py-4 text-white lg:py-6'>
         <img
           src='https://i.postimg.cc/65fCvgVb/Prancheta-1.png'
@@ -303,7 +303,7 @@ export default function HomePage() {
         <main>
           <section
             id='inicio'
-            className='grain relative flex min-h-screen items-center overflow-hidden bg-[#07131D] pt-20'
+            className='grain relative flex min-h-[100svh] items-start overflow-hidden bg-[#07131D] pt-24 md:min-h-screen md:items-center md:pt-20'
           >
             <div className='absolute inset-0' aria-hidden='true'>
               <img
@@ -344,7 +344,7 @@ export default function HomePage() {
             <div className='absolute inset-0 bg-[linear-gradient(120deg,rgba(6,24,37,0.28),rgba(246,241,234,0.04)_45%,rgba(183,146,90,0.08)_100%)] lg:opacity-38' />
             <div className='absolute inset-0 hidden lg:block lg:bg-[linear-gradient(90deg,rgba(5,14,22,0.35)_0%,rgba(5,14,22,0.12)_55%,rgba(5,14,22,0.02)_100%)]' />
             <div className='absolute inset-0 vignette' />
-            <div className='relative z-10 mx-auto w-full max-w-6xl px-6 pb-36 pt-24 text-white'>
+            <div className='relative z-10 mx-auto w-full max-w-6xl px-6 pb-28 pt-24 text-white md:pb-36'>
               <div className='grid gap-12 lg:min-h-[70vh] lg:flex lg:items-center lg:justify-center'>
                 <div className='order-1 text-center lg:text-center'>
                   <div className='inline-block w-full max-w-[640px] rounded-[28px] border border-white/10 bg-black/10 p-6 backdrop-blur-sm md:p-7 lg:mx-auto lg:w-[min(92vw,920px)] lg:max-w-[920px] lg:rounded-[28px] lg:border-white/10 lg:bg-[rgba(10,20,30,0.45)] lg:p-14 lg:backdrop-blur-[18px] lg:shadow-[0_28px_70px_rgba(4,10,16,0.45),0_0_30px_rgba(183,146,90,0.08)]'>
