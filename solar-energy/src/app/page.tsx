@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   motion,
   MotionConfig,
@@ -12,10 +12,6 @@ const whatsappNumber = '5571999999999';
 
 const heroPoster =
   'https://res.cloudinary.com/dwedcl97k/video/upload/so_0,f_jpg,w_1600/v1769199580/Design_sem_nome_-_2026-01-23T171932.339_fjulxo.mp4';
-const contextImage =
-  'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1800&q=80';
-const contextImageAlt = 'https://i.postimg.cc/43W59dty/FOTO-AEREA.png';
-
 const copy = {
   whatsappMessage:
     'Olá! Quero entender mais sobre o Bella Vista Beach Residence.',
@@ -29,18 +25,6 @@ const copy = {
     primaryCta: 'Solicitar apresentação exclusiva',
     primaryCtaDesktop: 'Solicitar apresentação exclusiva',
     secondaryCta: 'Ver localização',
-  },
-  context: {
-    tag: 'Contexto da Bahia',
-    title: 'A Bahia vive uma explosão turística.',
-    body:
-      'Turismo, mobilidade e infraestrutura aceleram a valorização. O mercado responde quando o desejo encontra acesso.',
-    bullets: [
-      'Fluxo turístico em alta com ocupação constante.',
-      'Infraestrutura e mobilidade avançando a cada temporada.',
-      'Demanda por imóveis com liquidez e renda recorrente.',
-    ],
-    imageAlt: 'Vista do litoral sul da Bahia',
   },
   location: {
     tag: 'Localização estratégica',
@@ -110,31 +94,6 @@ const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
   copy.whatsappMessage
 )}`;
 
-const contextSlides = [
-  { src: contextImage, alt: copy.context.imageAlt },
-  { src: contextImageAlt, alt: 'Foto aérea do empreendimento' },
-];
-
-const showcaseItems = [
-  {
-    label: 'PLANTA',
-    title: 'Planta inteligente',
-    desc: 'Metragem otimizada e funcional.',
-    image: '/images/showcase-planta.svg',
-  },
-  {
-    label: 'STUDIO',
-    title: 'Ambiente completo',
-    desc: 'Integração e conforto real.',
-    image: '/images/showcase-studio.svg',
-  },
-  {
-    label: 'ÁREA COMPLETA',
-    title: 'Tudo no lugar',
-    desc: 'Cozinha, descanso e rotina fluida.',
-    image: '/images/showcase-area.svg',
-  },
-];
 
 function Reveal({
   children,
@@ -257,54 +216,8 @@ function HeroNav() {
   );
 }
 
-function StudioShowcaseCard({
-  label,
-  title,
-  desc,
-  image,
-}: {
-  label: string;
-  title: string;
-  desc: string;
-  image: string;
-}) {
-  return (
-    <motion.article
-      className='group relative min-w-[85%] snap-center overflow-hidden rounded-3xl border border-white/10 bg-[rgba(7,27,36,0.45)] shadow-[0_20px_40px_rgba(5,12,18,0.35)] backdrop-blur-[14px] transition-shadow duration-500 hover:shadow-[0_28px_55px_rgba(5,12,18,0.45),0_0_30px_rgba(183,146,90,0.22)] active:shadow-[0_28px_55px_rgba(5,12,18,0.45),0_0_30px_rgba(183,146,90,0.18)] md:min-w-0'
-      initial={{ opacity: 0, y: 16 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.2 }}
-      whileHover={{ y: -6, scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
-      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-    >
-      <div className='relative aspect-[16/10] w-full overflow-hidden'>
-        <img
-          src={image}
-          alt={title}
-          className='h-full w-full object-cover transition duration-500 group-hover:scale-105'
-          loading='lazy'
-        />
-        <div className='absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/70 via-black/20 to-transparent' />
-      </div>
-      <div className='space-y-3 p-6'>
-        <span className='inline-flex rounded-full border border-[#B7925A]/40 bg-white/5 px-3 py-1 text-[0.6rem] uppercase tracking-[0.4em] text-[#D9BE86]'>
-          {label}
-        </span>
-        <div>
-          <h3 className='text-lg font-semibold text-white'>{title}</h3>
-          <p className='mt-1 text-sm text-white/70'>{desc}</p>
-        </div>
-        <div className='text-sm text-white/70'>Ver detalhes →</div>
-      </div>
-    </motion.article>
-  );
-}
-
 export default function HomePage() {
   const reduceMotion = useReducedMotion();
-  const [contextIndex, setContextIndex] = useState(0);
-  const slideCount = contextSlides.length;
   const mapLineVariants = useMemo(
     () => ({
       hidden: reduceMotion ? { pathLength: 1, opacity: 1 } : { pathLength: 0 },
@@ -316,14 +229,6 @@ export default function HomePage() {
     }),
     [reduceMotion]
   );
-
-  useEffect(() => {
-    if (reduceMotion || slideCount < 2) return;
-    const interval = window.setInterval(() => {
-      setContextIndex((prev) => (prev + 1) % slideCount);
-    }, 5200);
-    return () => window.clearInterval(interval);
-  }, [reduceMotion, slideCount]);
 
   return (
     <MotionConfig reducedMotion='user'>
@@ -406,58 +311,6 @@ export default function HomePage() {
                     </Reveal>
                   </div>
                 </div>
-              </div>
-            </div>
-          </section>
-
-          <section
-            id='contexto'
-            className='scroll-mt-24 bg-sand py-28'
-          >
-            <div className='mx-auto grid max-w-6xl items-center gap-12 px-6 md:grid-cols-[1.05fr_1fr]'>
-              <div className='space-y-5'>
-                <p className='text-xs uppercase tracking-[0.32em] text-muted'>
-                  {copy.context.tag}
-                </p>
-                <h2 className='text-3xl font-semibold text-balance md:text-4xl'>
-                  {copy.context.title}
-                </h2>
-                <p className='text-base text-muted md:text-lg'>
-                  {copy.context.body}
-                </p>
-                <ul className='space-y-3 text-sm text-ink/80'>
-                  {copy.context.bullets.map((item) => (
-                    <li key={item} className='flex items-center gap-3'>
-                      <span className='h-1.5 w-1.5 rounded-full bg-gold' />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <figure className='rounded-2xl border border-white/70 bg-white/75 p-3 shadow-soft backdrop-blur'>
-                <div className='relative h-[420px] w-full overflow-hidden rounded-xl md:h-[480px]'>
-                  <img
-                    src={contextSlides[contextIndex]?.src}
-                    alt={contextSlides[contextIndex]?.alt}
-                    className='absolute inset-0 h-full w-full object-cover'
-                    loading='lazy'
-                  />
-                </div>
-              </figure>
-            </div>
-            <div className='mx-auto mt-12 max-w-6xl px-6'>
-              <div className='flex flex-col gap-3'>
-                <p className='text-xs uppercase tracking-[0.32em] text-muted'>
-                  Vitrine do Studio
-                </p>
-                <h3 className='text-2xl font-semibold text-ink'>
-                  Explore o interior pensado para viver e investir bem.
-                </h3>
-              </div>
-              <div className='mt-6 flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory md:grid md:grid-cols-2 md:gap-6 md:overflow-visible md:snap-none lg:grid-cols-3'>
-                {showcaseItems.map((item) => (
-                  <StudioShowcaseCard key={item.label} {...item} />
-                ))}
               </div>
             </div>
           </section>
