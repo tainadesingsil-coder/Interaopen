@@ -96,16 +96,16 @@ const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
 
 const showcaseItems = [
   {
+    label: 'STUDIO',
+    title: 'Ambiente completo',
+    desc: 'Integração e conforto real.',
+    image: 'https://i.postimg.cc/mksDjFhJ/Whats-App-Image-2026-01-22-at-12-04-21.jpg',
+  },
+  {
     label: 'PLANTA',
     title: 'Planta inteligente',
     desc: 'Metragem otimizada e funcional.',
     image: '/images/showcase-planta.svg',
-  },
-  {
-    label: 'STUDIO',
-    title: 'Ambiente completo',
-    desc: 'Integração e conforto real.',
-    image: '/images/showcase-studio.svg',
   },
   {
     label: 'ÁREA COMPLETA',
