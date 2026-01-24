@@ -283,6 +283,7 @@ function StudioShowcaseCard({
 
 export default function HomePage() {
   const reduceMotion = useReducedMotion();
+  const [heroVideoReady, setHeroVideoReady] = useState(false);
   const mapLineVariants = useMemo(
     () => ({
       hidden: reduceMotion ? { pathLength: 1, opacity: 1 } : { pathLength: 0 },
@@ -308,17 +309,23 @@ export default function HomePage() {
               <img
                 src={heroPoster}
                 alt=''
-                className='absolute inset-0 h-full w-full object-cover hero-media'
+                className={`absolute inset-0 h-full w-full object-cover hero-media transition-opacity duration-1000 ${
+                  heroVideoReady ? 'opacity-0' : 'opacity-100'
+                }`}
                 loading='lazy'
               />
               <video
-                className='absolute inset-0 h-full w-full object-cover hero-media'
+                className={`absolute inset-0 h-full w-full object-cover hero-media transition-opacity duration-1000 ${
+                  heroVideoReady ? 'opacity-100' : 'opacity-0'
+                }`}
                 autoPlay
                 loop
                 muted
                 playsInline
                 preload='metadata'
                 poster={heroPoster}
+                onLoadedData={() => setHeroVideoReady(true)}
+                onCanPlay={() => setHeroVideoReady(true)}
               >
                 <source
                   src='https://res.cloudinary.com/dwedcl97k/video/upload/f_auto,q_auto:good,w_960/v1769199580/Design_sem_nome_-_2026-01-23T171932.339_fjulxo.mp4'
