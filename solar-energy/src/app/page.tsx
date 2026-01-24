@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import {
-  AnimatePresence,
   motion,
   MotionConfig,
   useReducedMotion,
@@ -437,19 +436,12 @@ export default function HomePage() {
               </div>
               <figure className='rounded-2xl border border-white/70 bg-white/75 p-3 shadow-soft backdrop-blur'>
                 <div className='relative h-[420px] w-full overflow-hidden rounded-xl md:h-[480px]'>
-                  <AnimatePresence mode='wait'>
-                    <motion.img
-                      key={contextSlides[contextIndex]?.src}
-                      src={contextSlides[contextIndex]?.src}
-                      alt={contextSlides[contextIndex]?.alt}
-                      className='absolute inset-0 h-full w-full object-cover'
-                      initial={reduceMotion ? { opacity: 1 } : { opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={reduceMotion ? { opacity: 1 } : { opacity: 0 }}
-                      transition={reduceMotion ? { duration: 0 } : { duration: 0.8 }}
-                      loading='lazy'
-                    />
-                  </AnimatePresence>
+                  <img
+                    src={contextSlides[contextIndex]?.src}
+                    alt={contextSlides[contextIndex]?.alt}
+                    className='absolute inset-0 h-full w-full object-cover'
+                    loading='lazy'
+                  />
                 </div>
               </figure>
             </div>
