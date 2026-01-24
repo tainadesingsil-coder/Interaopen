@@ -300,7 +300,7 @@ export default function HomePage() {
     <MotionConfig reducedMotion='user'>
       <div className='bg-sand text-ink'>
         <HeroNav />
-        <main className='pt-20'>
+        <main>
           <section
             id='inicio'
             className='grain relative flex min-h-screen items-center overflow-hidden bg-[#07131D] pt-20'
