@@ -7,7 +7,19 @@ import {
   MotionConfig,
   useReducedMotion,
 } from 'framer-motion';
-import { Building2, Compass, KeyRound, Landmark, MapPin } from 'lucide-react';
+import {
+  Bath,
+  BedDouble,
+  Building2,
+  CarFront,
+  Compass,
+  KeyRound,
+  Landmark,
+  MapPin,
+  Ruler,
+  X,
+} from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
 const whatsappNumber = '5571999999999';
 
@@ -128,6 +140,13 @@ const showcaseItems = [
       'https://i.postimg.cc/qq67pXS1/Design-sem-nome-2026-01-24T013356-074.png',
     ],
   },
+];
+
+const showcaseDetails = [
+  { icon: Ruler, label: 'Área', value: '48 m²' },
+  { icon: BedDouble, label: 'Quartos', value: '1' },
+  { icon: Bath, label: 'Banheiros', value: '1' },
+  { icon: CarFront, label: 'Vagas', value: '1' },
 ];
 
 
@@ -257,15 +276,19 @@ function StudioShowcaseCard({
   title,
   desc,
   images,
+  details,
 }: {
   label: string;
   title: string;
   desc: string;
   images: string[];
+  details?: Array<{ icon: LucideIcon; label: string; value: string }>;
 }) {
   const reduceMotion = useReducedMotion();
   const [imageIndex, setImageIndex] = useState(0);
+  const [isOpen, setIsOpen] = useState(false);
   const hasCarousel = images.length > 1;
+  const resolvedDetails = details ?? showcaseDetails;
 
   useEffect(() => {
     if (!hasCarousel) return undefined;
@@ -275,9 +298,23 @@ function StudioShowcaseCard({
     return () => window.clearInterval(interval);
   }, [hasCarousel, images.length]);
 
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsOpen(false);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen]);
+
   return (
-    <motion.article
-      className='group relative min-w-[85%] snap-center overflow-hidden rounded-3xl border border-white/10 bg-[rgba(7,27,36,0.45)] shadow-[0_20px_40px_rgba(5,12,18,0.35)] backdrop-blur-[14px] transition-shadow duration-500 hover:shadow-[0_28px_55px_rgba(5,12,18,0.45),0_0_30px_rgba(183,146,90,0.22)] active:shadow-[0_28px_55px_rgba(5,12,18,0.45),0_0_30px_rgba(183,146,90,0.18)] md:min-w-0'
+    <>
+      <motion.button
+        type='button'
+        onClick={() => setIsOpen(true)}
+        aria-haspopup='dialog'
+        aria-expanded={isOpen}
+        className='group relative min-w-[85%] snap-center overflow-hidden rounded-3xl border border-white/10 bg-[rgba(7,27,36,0.45)] text-left shadow-[0_20px_40px_rgba(5,12,18,0.35)] backdrop-blur-[14px] transition-shadow duration-500 hover:shadow-[0_28px_55px_rgba(5,12,18,0.45),0_0_30px_rgba(183,146,90,0.22)] active:shadow-[0_28px_55px_rgba(5,12,18,0.45),0_0_30px_rgba(183,146,90,0.18)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B7925A]/60 md:min-w-0'
       initial={{ opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.2 }}
@@ -311,7 +348,73 @@ function StudioShowcaseCard({
         </div>
         <div className='text-sm text-white/70'>Ver detalhes →</div>
       </div>
-    </motion.article>
+      </motion.button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            className='fixed inset-0 z-[60] flex items-center justify-center p-6'
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <div
+              className='absolute inset-0 bg-black/60 backdrop-blur-sm'
+              onClick={() => setIsOpen(false)}
+              aria-hidden='true'
+            />
+            <motion.div
+              role='dialog'
+              aria-modal='true'
+              aria-label={`Detalhes do card ${title}`}
+              className='relative z-10 w-full max-w-md rounded-3xl border border-white/10 bg-[rgba(7,27,36,0.95)] p-6 text-white shadow-[0_24px_60px_rgba(5,12,18,0.55),0_0_40px_rgba(183,146,90,0.15)]'
+              initial={{ y: 16, opacity: 0, scale: 0.98 }}
+              animate={{ y: 0, opacity: 1, scale: 1 }}
+              exit={{ y: 12, opacity: 0, scale: 0.98 }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              onClick={(event) => event.stopPropagation()}
+            >
+              <button
+                type='button'
+                onClick={() => setIsOpen(false)}
+                className='absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/70 transition hover:text-white'
+                aria-label='Fechar'
+              >
+                <X className='h-4 w-4' />
+              </button>
+              <span className='inline-flex rounded-full border border-[#B7925A]/40 bg-white/5 px-3 py-1 text-[0.6rem] uppercase tracking-[0.4em] text-[#D9BE86]'>
+                {label}
+              </span>
+              <h3 className='mt-4 text-xl font-semibold'>{title}</h3>
+              <p className='mt-2 text-sm text-white/70'>{desc}</p>
+              <div className='mt-5 grid grid-cols-2 gap-3'>
+                {resolvedDetails.map((detail) => {
+                  const Icon = detail.icon;
+                  return (
+                    <div
+                      key={detail.label}
+                      className='flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3'
+                    >
+                      <span className='inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-[#D9BE86]'>
+                        <Icon className='h-4 w-4' />
+                      </span>
+                      <div>
+                        <p className='text-xs uppercase tracking-[0.2em] text-white/50'>
+                          {detail.label}
+                        </p>
+                        <p className='text-sm font-semibold text-white'>
+                          {detail.value}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
 
