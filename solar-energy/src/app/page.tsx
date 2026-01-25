@@ -248,7 +248,6 @@ const locationPins = [
   },
 ];
 
-const seasonLabels = ['Baixa', 'Média', 'Alta', 'Feriados'];
 
 
 function Reveal({
@@ -608,7 +607,6 @@ function MapPin3D({
 export default function HomePage() {
   const reduceMotion = useReducedMotion();
   const [heroVideoReady, setHeroVideoReady] = useState(false);
-  const activeSeasonIndex = 2;
   const [activePinId, setActivePinId] = useState(locationPins[0]?.id ?? '');
   const [hoverPinId, setHoverPinId] = useState<string | null>(null);
   const [mapOffset, setMapOffset] = useState({ x: 0, y: 0 });
@@ -1144,34 +1142,6 @@ export default function HomePage() {
                         </div>
                       );
                     })}
-                  </div>
-                  <div className='panel-strong rounded-[20px] px-5 py-5 text-white/80'>
-                    <p className='text-xs uppercase tracking-[0.2em] text-white/50'>
-                      Sazonalidade
-                    </p>
-                    <div className='mt-4 h-px w-full bg-white/15' />
-                    <div className='mt-4 flex items-start justify-between gap-2'>
-                      {seasonLabels.map((label, index) => (
-                        <div
-                          key={label}
-                          className='flex flex-1 flex-col items-center gap-2'
-                        >
-                          <span className='relative flex h-3 w-3 items-center justify-center'>
-                            <span className='absolute h-2 w-2 rounded-full bg-white/25' />
-                            {index === activeSeasonIndex && (
-                              <span className='absolute h-3 w-3 rounded-full bg-[var(--gold)]' />
-                            )}
-                          </span>
-                          <span
-                            className={`text-[10px] uppercase tracking-[0.2em] ${
-                              index === activeSeasonIndex ? 'text-white' : 'text-white/50'
-                            }`}
-                          >
-                            {label}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
                   </div>
                 </div>
               </div>
