@@ -438,6 +438,15 @@ function PremiumPin({ label }: { label: string }) {
   );
 }
 
+function SectionSeparator() {
+  return (
+    <div className='relative h-10 bg-[#07131D]' aria-hidden='true'>
+      <div className='absolute inset-x-10 top-1/2 h-px -translate-y-1/2 bg-[linear-gradient(90deg,transparent,rgba(183,146,90,0.65),transparent)] opacity-80' />
+      <div className='absolute inset-x-12 top-1/2 h-2 -translate-y-1/2 bg-[radial-gradient(circle,rgba(183,146,90,0.18),transparent_70%)] blur-lg opacity-70' />
+    </div>
+  );
+}
+
 export default function HomePage() {
   const reduceMotion = useReducedMotion();
   const [heroVideoReady, setHeroVideoReady] = useState(false);
@@ -608,6 +617,8 @@ export default function HomePage() {
             </div>
           </section>
 
+          <SectionSeparator />
+
           <section
             id='localizacao'
             className='relative scroll-mt-24 section-dark section-pad'
@@ -689,6 +700,8 @@ export default function HomePage() {
               </motion.div>
             </div>
           </section>
+
+          <SectionSeparator />
 
           <section
             id='proposta'
