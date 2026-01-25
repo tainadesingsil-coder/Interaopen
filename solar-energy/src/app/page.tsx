@@ -608,7 +608,7 @@ function MapPin3D({
 export default function HomePage() {
   const reduceMotion = useReducedMotion();
   const [heroVideoReady, setHeroVideoReady] = useState(false);
-  const [seasonIndex, setSeasonIndex] = useState(2);
+  const activeSeasonIndex = 2;
   const [activePinId, setActivePinId] = useState(locationPins[0]?.id ?? '');
   const [hoverPinId, setHoverPinId] = useState<string | null>(null);
   const [mapOffset, setMapOffset] = useState({ x: 0, y: 0 });
@@ -938,7 +938,7 @@ export default function HomePage() {
                           setPlatformFee(preset.values.platformFee);
                           setActivePreset(preset.label);
                         }}
-                        className={`flex-shrink-0 rounded-full border px-4 py-2 text-xs uppercase tracking-[0.2em] transition ${
+                        className={`flex-shrink-0 rounded-full border px-3 py-2 text-[10px] uppercase tracking-[0.2em] transition ${
                           activePreset === preset.label
                             ? 'border-[var(--gold)]/60 bg-[var(--panel-strong)] text-white'
                             : 'border-white/15 bg-white/5 text-white/70 hover:border-[var(--gold)]/40'
@@ -958,7 +958,7 @@ export default function HomePage() {
                 >
                   <div className='space-y-5 text-white'>
                     <div className='grid gap-4 sm:grid-cols-2'>
-                      <label className='space-y-2 text-xs text-white/60'>
+                      <label className='space-y-2 text-[11px] text-white/60'>
                         <span>Valor do imóvel (R$)</span>
                         <input
                           type='number'
@@ -966,10 +966,10 @@ export default function HomePage() {
                           onChange={(event) =>
                             setPropertyValue(Number(event.target.value))
                           }
-                          className='w-full rounded-xl border border-white/12 bg-[var(--panel)] px-4 py-3 text-[13px] text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/40'
+                          className='w-full rounded-xl border border-white/12 bg-[var(--panel)] px-3 py-2.5 text-[12px] text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/40'
                         />
                       </label>
-                      <label className='space-y-2 text-xs text-white/60'>
+                      <label className='space-y-2 text-[11px] text-white/60'>
                         <span>Diária média (R$)</span>
                         <input
                           type='number'
@@ -977,13 +977,13 @@ export default function HomePage() {
                           onChange={(event) =>
                             setDailyRate(Number(event.target.value))
                           }
-                          className='w-full rounded-xl border border-white/12 bg-[var(--panel)] px-4 py-3 text-[13px] text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/40'
+                          className='w-full rounded-xl border border-white/12 bg-[var(--panel)] px-3 py-2.5 text-[12px] text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/40'
                         />
                       </label>
-                      <label className='space-y-2 text-xs text-white/60 sm:col-span-2'>
+                      <label className='space-y-2 text-[11px] text-white/60 sm:col-span-2'>
                         <div className='flex items-end justify-between'>
                           <span>Ocupação (%)</span>
-                          <span className='text-lg font-semibold text-white'>
+                          <span className='text-base font-semibold text-white'>
                             {occupancy}%
                           </span>
                         </div>
@@ -998,7 +998,7 @@ export default function HomePage() {
                           className='h-2 w-full cursor-pointer appearance-none rounded-full bg-white/10 accent-[#C9A46A] transition'
                         />
                       </label>
-                      <label className='space-y-2 text-xs text-white/60'>
+                      <label className='space-y-2 text-[11px] text-white/60'>
                         <span>Custos mensais (R$)</span>
                         <input
                           type='number'
@@ -1006,10 +1006,10 @@ export default function HomePage() {
                           onChange={(event) =>
                             setMonthlyCosts(Number(event.target.value))
                           }
-                          className='w-full rounded-xl border border-white/12 bg-[var(--panel)] px-4 py-3 text-[13px] text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/40'
+                          className='w-full rounded-xl border border-white/12 bg-[var(--panel)] px-3 py-2.5 text-[12px] text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/40'
                         />
                       </label>
-                      <label className='space-y-2 text-xs text-white/60'>
+                      <label className='space-y-2 text-[11px] text-white/60'>
                         <span>Taxa de plataforma (%)</span>
                         <input
                           type='number'
@@ -1017,59 +1017,59 @@ export default function HomePage() {
                           onChange={(event) =>
                             setPlatformFee(Number(event.target.value))
                           }
-                          className='w-full rounded-xl border border-white/12 bg-[var(--panel)] px-4 py-3 text-[13px] text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/40'
+                          className='w-full rounded-xl border border-white/12 bg-[var(--panel)] px-3 py-2.5 text-[12px] text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/40'
                         />
                       </label>
                     </div>
                     <div className='grid grid-cols-2 gap-3'>
-                      <div className='panel-strong flex items-center gap-3 px-4 py-3 text-white/80'>
-                        <span className='inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-[var(--gold)]'>
+                      <div className='panel-strong flex items-center gap-3 px-3 py-2.5 text-white/80'>
+                        <span className='inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-[var(--gold)]'>
                           <Coins className='h-4 w-4' />
                         </span>
                         <div>
-                          <p className='text-[10px] uppercase tracking-[0.2em] text-white/50'>
+                          <p className='text-[9px] uppercase tracking-[0.2em] text-white/50'>
                             Faturamento
                           </p>
-                          <p className='mt-1 text-lg font-semibold text-white'>
+                          <p className='mt-1 text-base font-semibold text-white'>
                             {formatCurrency(animatedResults.grossMonthly)}
                           </p>
                         </div>
                       </div>
-                      <div className='panel-strong flex items-center gap-3 px-4 py-3 text-white/80'>
-                        <span className='inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-[var(--gold)]'>
+                      <div className='panel-strong flex items-center gap-3 px-3 py-2.5 text-white/80'>
+                        <span className='inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-[var(--gold)]'>
                           <Wallet className='h-4 w-4' />
                         </span>
                         <div>
-                          <p className='text-[10px] uppercase tracking-[0.2em] text-white/50'>
+                          <p className='text-[9px] uppercase tracking-[0.2em] text-white/50'>
                             Lucro mensal
                           </p>
-                          <p className='mt-1 text-lg font-semibold text-white'>
+                          <p className='mt-1 text-base font-semibold text-white'>
                             {formatCurrency(animatedResults.netMonthly)}
                           </p>
                         </div>
                       </div>
-                      <div className='panel-strong flex items-center gap-3 px-4 py-3 text-white/80'>
-                        <span className='inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-[var(--gold)]'>
+                      <div className='panel-strong flex items-center gap-3 px-3 py-2.5 text-white/80'>
+                        <span className='inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-[var(--gold)]'>
                           <TrendingUp className='h-4 w-4' />
                         </span>
                         <div>
-                          <p className='text-[10px] uppercase tracking-[0.2em] text-white/50'>
+                          <p className='text-[9px] uppercase tracking-[0.2em] text-white/50'>
                             Retorno anual
                           </p>
-                          <p className='mt-1 text-lg font-semibold text-white'>
+                          <p className='mt-1 text-base font-semibold text-white'>
                             {animatedResults.annualReturn.toFixed(1)}%
                           </p>
                         </div>
                       </div>
-                      <div className='panel-strong flex items-center gap-3 px-4 py-3 text-white/80'>
-                        <span className='inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-[var(--gold)]'>
+                      <div className='panel-strong flex items-center gap-3 px-3 py-2.5 text-white/80'>
+                        <span className='inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-[var(--gold)]'>
                           <Clock className='h-4 w-4' />
                         </span>
                         <div>
-                          <p className='text-[10px] uppercase tracking-[0.2em] text-white/50'>
+                          <p className='text-[9px] uppercase tracking-[0.2em] text-white/50'>
                             Payback
                           </p>
-                          <p className='mt-1 text-lg font-semibold text-white'>
+                          <p className='mt-1 text-base font-semibold text-white'>
                             {animatedResults.paybackYears
                               ? `${animatedResults.paybackYears.toFixed(1)} anos`
                               : '—'}
@@ -1082,18 +1082,18 @@ export default function HomePage() {
                         href={whatsappLink}
                         target='_blank'
                         rel='noreferrer'
-                        className='inline-flex flex-1 items-center justify-center rounded-full bg-[var(--gold)] px-6 py-3 text-sm font-semibold text-[#0c1116] shadow-[0_12px_30px_rgba(201,164,106,0.25)] transition hover:brightness-110'
+                        className='inline-flex flex-1 items-center justify-center rounded-full bg-[var(--gold)] px-6 py-3 text-xs font-semibold text-[#0c1116] shadow-[0_12px_30px_rgba(201,164,106,0.25)] transition hover:brightness-110'
                       >
                         Receber simulação no WhatsApp
                       </a>
                       <a
                         href='/simulacao.pdf'
-                        className='text-center text-sm text-white/70 underline-offset-4 transition hover:text-white hover:underline'
+                        className='text-center text-xs text-white/60 underline-offset-4 transition hover:text-white hover:underline'
                       >
                         Baixar PDF da simulação
                       </a>
                     </div>
-                    <p className='text-xs text-white/50'>
+                    <p className='text-[11px] text-white/50'>
                       Estimativa. Não substitui análise financeira.
                     </p>
                   </div>
@@ -1152,26 +1152,24 @@ export default function HomePage() {
                     <div className='mt-4 h-px w-full bg-white/15' />
                     <div className='mt-4 flex items-start justify-between gap-2'>
                       {seasonLabels.map((label, index) => (
-                        <button
+                        <div
                           key={label}
-                          type='button'
-                          onClick={() => setSeasonIndex(index)}
                           className='flex flex-1 flex-col items-center gap-2'
                         >
                           <span className='relative flex h-3 w-3 items-center justify-center'>
                             <span className='absolute h-2 w-2 rounded-full bg-white/25' />
-                            {index === seasonIndex && (
+                            {index === activeSeasonIndex && (
                               <span className='absolute h-3 w-3 rounded-full bg-[var(--gold)]' />
                             )}
                           </span>
                           <span
                             className={`text-[10px] uppercase tracking-[0.2em] ${
-                              index === seasonIndex ? 'text-white' : 'text-white/50'
+                              index === activeSeasonIndex ? 'text-white' : 'text-white/50'
                             }`}
                           >
                             {label}
                           </span>
-                        </button>
+                        </div>
                       ))}
                     </div>
                   </div>
