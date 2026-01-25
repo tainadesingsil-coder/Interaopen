@@ -1078,13 +1078,13 @@ export default function HomePage() {
                   </motion.ul>
                 </motion.div>
                 <div className='space-y-6'>
-                  <div className='flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory md:grid md:grid-cols-1 md:gap-4 md:overflow-visible md:snap-none'>
+                  <div className='flex w-full gap-4 overflow-x-auto pb-2 snap-x snap-mandatory scroll-px-6 md:grid md:grid-cols-1 md:gap-4 md:overflow-visible md:snap-none'>
                     {bahiaIndicators.map((item) => {
                       const Icon = item.icon;
                       return (
                         <motion.div
                           key={item.title}
-                          className='min-w-[75%] snap-center rounded-[20px] border border-white/10 bg-[var(--panel)] p-5 text-white/80 transition hover:border-[var(--gold)]/50 md:min-w-0'
+                          className='min-w-[85%] snap-center rounded-[20px] border border-white/10 bg-[var(--panel)] p-5 text-white/80 transition hover:border-[var(--gold)]/50 md:min-w-0'
                           whileHover={reduceMotion ? undefined : { y: -4 }}
                         >
                           <div className='flex items-start gap-3'>
