@@ -547,77 +547,83 @@ export default function HomePage() {
 
           <section
             id='localizacao'
-            className='scroll-mt-24 bg-white py-28'
+            className='relative scroll-mt-24 bg-[#07131D] py-28'
           >
-            <div className='mx-auto grid max-w-6xl gap-12 px-6 lg:grid-cols-[1fr_1.1fr]'>
-              <div className='space-y-5'>
-                <Reveal>
-                  <p className='text-xs uppercase tracking-[0.32em] text-muted'>
-                    {copy.location.tag}
-                  </p>
-                </Reveal>
-                <Reveal delay={0.1}>
-                  <h2 className='text-3xl font-semibold text-balance md:text-4xl'>
-                    {copy.location.title}
-                  </h2>
-                </Reveal>
-                <Reveal delay={0.2}>
-                  <p className='text-base text-muted md:text-lg'>
-                    {copy.location.body}
-                  </p>
-                </Reveal>
-              </div>
-              <Reveal delay={0.1}>
-                <div className='relative rounded-2xl border border-white/70 bg-white/70 p-6 shadow-card backdrop-blur'>
-                  <div className='absolute inset-0 rounded-2xl bg-gradient-to-br from-white/60 via-white/30 to-transparent' />
-                  <div className='relative h-[320px] rounded-xl bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.7),rgba(246,241,234,0.8)_55%,rgba(246,241,234,0.6)_100%)]'>
-                    <motion.svg
-                      className='absolute inset-0 h-full w-full'
-                      viewBox='0 0 640 320'
-                      initial='hidden'
-                      whileInView='visible'
-                      viewport={{ once: true, amount: 0.6 }}
-                    >
-                      <motion.path
-                        d='M30 250 C140 180 210 200 280 140 C360 70 460 40 610 30'
-                        stroke='#08263A'
-                        strokeWidth='3'
-                        strokeLinecap='round'
-                        fill='none'
-                        variants={mapLineVariants}
-                      />
-                    </motion.svg>
-
-                    <span className='absolute left-5 top-5 rounded-full border border-white/70 bg-white/80 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-ocean'>
-                      {copy.location.badge}
-                    </span>
-
-                    <div className='absolute right-[18%] top-[46%] flex items-center'>
-                      <span className='relative flex h-4 w-4 items-center justify-center'>
-                        <span className='absolute inline-flex h-full w-full rounded-full bg-gold/30 motion-safe:animate-ping' />
-                        <span className='relative inline-flex h-3 w-3 rounded-full bg-gold shadow-[0_0_12px_rgba(183,146,90,0.45)]' />
-                      </span>
-                      <span className='ml-3 rounded-full border border-white/60 bg-white/85 px-3 py-1 text-xs font-semibold text-ocean shadow-sm'>
-                        {copy.location.pinLabel}
-                      </span>
-                    </div>
-
-                    {copy.location.chips.map((chip) => (
-                      <span
-                        key={chip.label}
-                        className='absolute rounded-full border border-white/70 bg-white/80 px-3 py-1 text-xs text-ink shadow-sm backdrop-blur'
-                        style={{ top: chip.top, left: chip.left }}
-                      >
-                        {chip.label}
-                      </span>
-                    ))}
+            <div
+              className='absolute inset-0 bg-[linear-gradient(180deg,rgba(8,12,16,0.82)_0%,rgba(8,12,16,0.62)_45%,rgba(8,12,16,0.86)_100%)]'
+              aria-hidden='true'
+            />
+            <div className='relative mx-auto max-w-6xl px-6'>
+              <motion.div
+                className='rounded-[22px] border border-white/10 bg-[rgba(18,24,30,0.55)] p-6 shadow-[0_18px_45px_rgba(5,12,18,0.35)] backdrop-blur-[10px] md:p-8 lg:p-10'
+                initial={reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 14 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={reduceMotion ? { duration: 0 } : { duration: 0.6 }}
+              >
+                <div className='grid items-center gap-8 lg:grid-cols-[1fr_1.1fr] lg:gap-10'>
+                  <div className='space-y-5 text-center lg:text-left'>
+                    <p className='text-xs uppercase tracking-[0.32em] text-white/50'>
+                      {copy.location.tag}
+                    </p>
+                    <h2 className='text-[clamp(28px,7vw,40px)] font-semibold text-balance text-white md:text-4xl'>
+                      {copy.location.title}
+                    </h2>
+                    <p className='text-base text-white/70 md:text-lg'>
+                      {copy.location.body}
+                    </p>
                   </div>
-                  <div className='mt-5 flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-muted'>
-                    <MapPin className='h-4 w-4 text-gold' />
-                    {copy.location.mapNote}
+                  <div className='relative rounded-[18px] border border-white/10 bg-white/5 p-5 md:p-6'>
+                    <div className='absolute inset-0 rounded-[18px] bg-gradient-to-br from-white/10 via-white/5 to-transparent' />
+                    <div className='relative h-[320px] rounded-[16px] bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.18),rgba(255,255,255,0.06)_55%,rgba(255,255,255,0.03)_100%)]'>
+                      <motion.svg
+                        className='absolute inset-0 h-full w-full'
+                        viewBox='0 0 640 320'
+                        initial='hidden'
+                        whileInView='visible'
+                        viewport={{ once: true, amount: 0.6 }}
+                      >
+                        <motion.path
+                          d='M30 250 C140 180 210 200 280 140 C360 70 460 40 610 30'
+                          stroke='#D9BE86'
+                          strokeWidth='3'
+                          strokeLinecap='round'
+                          fill='none'
+                          variants={mapLineVariants}
+                        />
+                      </motion.svg>
+
+                      <span className='absolute left-5 top-5 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-white/80'>
+                        {copy.location.badge}
+                      </span>
+
+                      <div className='absolute right-[18%] top-[46%] flex items-center'>
+                        <span className='relative flex h-4 w-4 items-center justify-center'>
+                          <span className='absolute inline-flex h-full w-full rounded-full bg-gold/30 motion-safe:animate-ping' />
+                          <span className='relative inline-flex h-3 w-3 rounded-full bg-gold shadow-[0_0_12px_rgba(183,146,90,0.45)]' />
+                        </span>
+                        <span className='ml-3 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold text-white/80 shadow-sm'>
+                          {copy.location.pinLabel}
+                        </span>
+                      </div>
+
+                      {copy.location.chips.map((chip) => (
+                        <span
+                          key={chip.label}
+                          className='absolute rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs text-white/70 shadow-sm backdrop-blur'
+                          style={{ top: chip.top, left: chip.left }}
+                        >
+                          {chip.label}
+                        </span>
+                      ))}
+                    </div>
+                    <div className='mt-5 flex items-center justify-center gap-2 text-xs uppercase tracking-[0.3em] text-white/50 lg:justify-start'>
+                      <MapPin className='h-4 w-4 text-gold' />
+                      {copy.location.mapNote}
+                    </div>
                   </div>
                 </div>
-              </Reveal>
+              </motion.div>
             </div>
           </section>
 
