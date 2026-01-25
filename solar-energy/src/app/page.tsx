@@ -906,25 +906,6 @@ export default function HomePage() {
                       />
                     ))}
                   </motion.div>
-                  <div className='mt-5 flex items-center justify-between gap-3 text-xs uppercase tracking-[0.3em] text-[var(--muted)]'>
-                    <span className='flex items-center gap-2'>
-                      <MapPin className='h-4 w-4 text-[var(--gold)]' />
-                      {copy.location.mapNote}
-                    </span>
-                    <span className='hidden text-white/50 sm:inline'>Visual interativo</span>
-                  </div>
-                  <AnimatePresence mode='wait'>
-                    <motion.p
-                      key={activePin?.id}
-                      initial={{ opacity: 0, y: 6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -6 }}
-                      transition={{ duration: reduceMotion ? 0 : 0.2 }}
-                      className='mt-3 text-sm text-[var(--muted)]'
-                    >
-                      {activePin?.note}
-                    </motion.p>
-                  </AnimatePresence>
                 </motion.div>
                 <motion.div
                   className='order-3 flex flex-wrap justify-center gap-3 text-sm text-white/80 lg:col-start-1 lg:justify-start'
