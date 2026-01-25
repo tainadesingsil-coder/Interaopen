@@ -729,7 +729,7 @@ export default function HomePage() {
             <div className='section-inner'>
               <div className='flex flex-col gap-3'>
                 <p className='text-xs uppercase tracking-[0.32em] text-[var(--muted)]'>
-                  Vitrine do Studio
+                  Vitrine do Bella Vista Beach Residence
                 </p>
                 <h3 className='section-title font-semibold text-[var(--text)]'>
                   Explore o interior pensado para viver e investir bem.
