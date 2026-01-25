@@ -121,7 +121,7 @@ const showcaseItems = [
     label: 'ÁREA COMPLETA',
     title: 'Tudo no lugar',
     desc: 'Cozinha, descanso e rotina fluida.',
-    images: ['/images/showcase-area.svg'],
+    images: ['https://i.postimg.cc/kX7Z3XSm/Design-sem-nome-2026-01-24T013513-644.png'],
   },
 ];
 
