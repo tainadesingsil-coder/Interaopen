@@ -53,18 +53,17 @@ const copy = {
   },
   location: {
     tag: 'LOCALIZAÇÃO ESTRATÉGICA',
-    title: 'Localização que transforma férias em demanda.',
+    title: 'Localização que vira demanda.',
     body:
-      'Entre a BR-367 e os polos turísticos do litoral sul, o Bella Vista combina acesso rápido, demanda constante e privacidade na medida.',
+      'Entre BR-367 e os polos turísticos, acesso rápido e liquidez para uso próprio ou renda.',
+    benefits: [
+      'Acesso pela BR-367',
+      'Fluxo turístico constante',
+      'Equilíbrio: privacidade + movimento',
+    ],
     badge: 'BR-367',
     mapNote: 'BR-367 → polos turísticos → Bella Vista Beach Residence',
     pinLabel: 'Bella Vista',
-    chips: [
-      { label: 'Porto Seguro', top: '18%', left: '12%' },
-      { label: 'Coroa Vermelha', top: '32%', left: '58%' },
-      { label: "Arraial d'Ajuda", top: '58%', left: '16%' },
-      { label: 'Trancoso', top: '70%', left: '62%' },
-    ],
   },
   simulator: {
     tag: 'INVESTIMENTO',
@@ -79,15 +78,9 @@ const copy = {
   },
   bahia: {
     tag: 'CENÁRIO',
-    title: 'Bahia em alta: turismo forte, demanda constante.',
+    title: 'Bahia em alta: turismo que sustenta renda.',
     body:
-      'O litoral sul vive um ciclo de valorização puxado por fluxo turístico, melhorias de acesso e procura por estadias curtas. Para quem investe com visão, o movimento já está em curso.',
-    bullets: [
-      'Alta ocupação em temporadas e feriados prolongados',
-      'Mobilidade e infraestrutura fortalecendo a região',
-      'Liquidez e potencial de renda recorrente',
-    ],
-    highlights: ['Alta temporada', 'Feriados', 'Praias e experiências'],
+      'O litoral sul combina fluxo constante, acesso em evolução e procura por estadias curtas — cenário perfeito para locação por temporada.',
   },
   finalCta: {
     title: 'Tudo pronto para sua próxima decisão patrimonial.',
@@ -210,6 +203,52 @@ const bahiaIndicators = [
     desc: 'Busca ativa por estadias curtas.',
   },
 ];
+
+const locationPins = [
+  {
+    id: 'bella-vista',
+    label: 'Bella Vista',
+    top: '54%',
+    left: '58%',
+    tooltip: '~10 min da BR-367',
+    note: 'Demanda turística forte nessa rota principal.',
+    primary: true,
+  },
+  {
+    id: 'arraial',
+    label: "Arraial d'Ajuda",
+    top: '58%',
+    left: '28%',
+    tooltip: '~25 min',
+    note: 'Destino premium com alta procura por temporada.',
+  },
+  {
+    id: 'porto',
+    label: 'Porto Seguro',
+    top: '22%',
+    left: '18%',
+    tooltip: '~35 min',
+    note: 'Hub turístico que impulsiona fluxo contínuo.',
+  },
+  {
+    id: 'trancoso',
+    label: 'Trancoso',
+    top: '72%',
+    left: '72%',
+    tooltip: '~40 min',
+    note: 'Experiência sofisticada com alto ticket.',
+  },
+  {
+    id: 'coroa',
+    label: 'Coroa Vermelha',
+    top: '36%',
+    left: '52%',
+    tooltip: '~18 min',
+    note: 'Movimento diário de visitantes e serviços.',
+  },
+];
+
+const seasonLabels = ['Baixa', 'Média', 'Alta', 'Feriados'];
 
 
 function Reveal({
@@ -488,55 +527,91 @@ function StudioShowcaseCard({
   );
 }
 
-function PremiumPin({
-  label,
-  onHoverChange,
+function MapPin3D({
+  pin,
+  isActive,
+  onSelect,
+  onHover,
 }: {
-  label: string;
-  onHoverChange?: (hover: boolean) => void;
+  pin: {
+    id: string;
+    label: string;
+    top: string;
+    left: string;
+    tooltip: string;
+    primary?: boolean;
+  };
+  isActive: boolean;
+  onSelect: (id: string) => void;
+  onHover: (id: string | null) => void;
 }) {
   const reduceMotion = useReducedMotion();
-  const [isVisible, setIsVisible] = useState(false);
   return (
-    <motion.div
-      className='group flex items-center'
-      initial={reduceMotion ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.96 }}
-      whileInView={{ opacity: 1, scale: 1 }}
-      viewport={{ once: true, amount: 0.5 }}
-      transition={reduceMotion ? { duration: 0 } : { duration: 0.25 }}
-      onViewportEnter={() => setIsVisible(true)}
-      onViewportLeave={() => setIsVisible(false)}
-      onMouseEnter={() => onHoverChange?.(true)}
-      onMouseLeave={() => onHoverChange?.(false)}
+    <motion.button
+      type='button'
+      onClick={() => onSelect(pin.id)}
+      onMouseEnter={() => onHover(pin.id)}
+      onMouseLeave={() => onHover(null)}
+      onFocus={() => onHover(pin.id)}
+      onBlur={() => onHover(null)}
+      className='group absolute flex -translate-x-1/2 -translate-y-1/2 items-center gap-2 text-left'
+      style={{ top: pin.top, left: pin.left }}
+      whileHover={reduceMotion ? undefined : { scale: 1.05 }}
+      whileTap={reduceMotion ? undefined : { scale: 0.98 }}
+      aria-pressed={isActive}
+      aria-label={`${pin.label} ${pin.tooltip}`}
     >
-      <div className='relative flex h-9 w-9 items-center justify-center'>
-        <span className='absolute inset-0 rounded-full border border-[var(--gold)]/40 shadow-[0_0_10px_rgba(201,164,106,0.2)]' />
+      <span
+        className={`absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border border-white/15 bg-black/60 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-white/80 opacity-0 transition ${
+          isActive ? 'opacity-100' : 'group-hover:opacity-100'
+        }`}
+      >
+        {pin.tooltip}
+      </span>
+      <span className='relative flex items-center justify-center'>
         <span
-          className={`absolute inset-0 rounded-full bg-[var(--gold)]/10 ${
-            isVisible ? 'pin-pulse' : ''
+          className={`absolute -inset-3 rounded-full bg-[var(--gold)]/15 ${
+            isActive && !reduceMotion ? 'pin-pulse' : ''
           }`}
         />
-        <svg
-          viewBox='0 0 24 32'
-          className='relative h-4 w-4 text-[var(--gold)] drop-shadow-[0_0_6px_rgba(201,164,106,0.35)]'
-          fill='currentColor'
-          aria-hidden='true'
-        >
-          <path d='M12 1.5C7.3 1.5 3.5 5.3 3.5 10c0 6.4 8.5 20.5 8.5 20.5S20.5 16.4 20.5 10c0-4.7-3.8-8.5-8.5-8.5zm0 12.1c-2 0-3.6-1.6-3.6-3.6S10 6.4 12 6.4s3.6 1.6 3.6 3.6S14 13.6 12 13.6z' />
-        </svg>
-      </div>
-      <span className='ml-3 rounded-full border border-white/15 bg-black/30 px-3 py-1 text-xs font-medium text-white/85 transition group-hover:border-white/30 group-hover:bg-white/12'>
-        {label}
+        <span
+          className={`absolute inset-0 rounded-full ${
+            pin.primary
+              ? 'shadow-[0_10px_22px_rgba(0,0,0,0.35),0_0_16px_rgba(201,164,106,0.45)]'
+              : 'shadow-[0_8px_18px_rgba(0,0,0,0.35),0_0_12px_rgba(201,164,106,0.25)]'
+          }`}
+        />
+        <span
+          className={`relative block ${
+            pin.primary ? 'h-5 w-5' : 'h-4 w-4'
+          } rotate-45 rounded-[6px] bg-[linear-gradient(145deg,#f5dfb0,#c6903a)]`}
+        />
+        <span
+          className={`absolute ${
+            pin.primary ? '-bottom-2 h-2 w-2' : '-bottom-1.5 h-1.5 w-1.5'
+          } rotate-45 rounded-[4px] bg-[linear-gradient(145deg,#f5dfb0,#c6903a)] shadow-[0_6px_14px_rgba(0,0,0,0.35)]`}
+        />
       </span>
-    </motion.div>
+      <span
+        className={`rounded-full border border-white/15 bg-black/40 px-3 py-1 text-xs font-medium text-white/85 transition ${
+          isActive
+            ? 'border-[var(--gold)]/40 bg-white/10'
+            : 'group-hover:border-white/30 group-hover:bg-white/10'
+        }`}
+      >
+        {pin.label}
+      </span>
+    </motion.button>
   );
 }
 
 export default function HomePage() {
   const reduceMotion = useReducedMotion();
   const [heroVideoReady, setHeroVideoReady] = useState(false);
-  const [isPinHover, setIsPinHover] = useState(false);
-  const [highlightIndex, setHighlightIndex] = useState(0);
+  const [seasonIndex, setSeasonIndex] = useState(2);
+  const [activePinId, setActivePinId] = useState(locationPins[0]?.id ?? '');
+  const [hoverPinId, setHoverPinId] = useState<string | null>(null);
+  const [mapOffset, setMapOffset] = useState({ x: 0, y: 0 });
   const [propertyValue, setPropertyValue] = useState(250000);
   const [dailyRate, setDailyRate] = useState(250);
   const [occupancy, setOccupancy] = useState(55);
@@ -598,6 +673,19 @@ export default function HomePage() {
     frame = window.requestAnimationFrame(animate);
     return () => window.cancelAnimationFrame(frame);
   }, [reduceMotion, simulatorResults]);
+
+  useEffect(() => {
+    if (reduceMotion) return undefined;
+    const interval = window.setInterval(() => {
+      setSeasonIndex((prev) => (prev + 1) % seasonLabels.length);
+    }, 3200);
+    return () => window.clearInterval(interval);
+  }, [reduceMotion]);
+
+  const activePin = useMemo(
+    () => locationPins.find((pin) => pin.id === activePinId) ?? locationPins[0],
+    [activePinId]
+  );
   const mapLineVariants = useMemo(
     () => ({
       hidden: reduceMotion ? { pathLength: 1, opacity: 1 } : { pathLength: 0 },
@@ -724,7 +812,7 @@ export default function HomePage() {
 
           <section
             id='contexto'
-            className='section-shell section-base section-glow scroll-mt-24'
+            className='section-shell section-glow scroll-mt-24 bg-[var(--bg-0)]'
           >
             <div className='section-inner'>
               <div className='flex flex-col gap-3'>
@@ -748,89 +836,113 @@ export default function HomePage() {
             className='section-shell section-alt section-glow section-divider scroll-mt-24'
           >
             <div className='section-inner'>
-              <motion.div
-                className='glass-panel p-6 md:p-8 lg:p-10'
-                initial={reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 14 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.3 }}
-                transition={reduceMotion ? { duration: 0 } : { duration: 0.6 }}
-              >
-                <div className='split-grid'>
+              <div className='grid gap-8 lg:grid-cols-[1fr_1.1fr] lg:gap-10 lg:items-start'>
+                <motion.div
+                  className='order-1 space-y-5 text-center lg:text-left'
+                  initial={reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.4 }}
+                  transition={reduceMotion ? { duration: 0 } : { duration: 0.25 }}
+                >
+                  <p className='text-xs uppercase tracking-[0.32em] text-[var(--muted)]'>
+                    {copy.location.tag}
+                  </p>
+                  <h2 className='section-title font-semibold text-[var(--text)]'>
+                    {copy.location.title}
+                  </h2>
+                  <p className='text-base text-[var(--muted)] md:text-lg lg:max-w-[42ch]'>
+                    {copy.location.body}
+                  </p>
+                </motion.div>
+                <motion.div
+                  className='order-2 glass-map relative p-5 md:p-6 lg:row-span-2'
+                  initial={reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.3 }}
+                  transition={reduceMotion ? { duration: 0 } : { duration: 0.35 }}
+                  onMouseMove={(event) => {
+                    if (reduceMotion) return;
+                    if (window.innerWidth < 1024) return;
+                    const rect = event.currentTarget.getBoundingClientRect();
+                    const x =
+                      ((event.clientX - rect.left) / rect.width - 0.5) * 8;
+                    const y =
+                      ((event.clientY - rect.top) / rect.height - 0.5) * 8;
+                    setMapOffset({ x, y });
+                  }}
+                  onMouseLeave={() => setMapOffset({ x: 0, y: 0 })}
+                >
+                  <div className='absolute inset-0 rounded-[28px] bg-[linear-gradient(135deg,rgba(201,164,106,0.15),rgba(6,16,26,0.92))]' />
+                  <div className='absolute inset-0 rounded-[28px] bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.15),transparent_40%)] opacity-60' />
                   <motion.div
-                    className='space-y-5 text-center lg:text-left'
-                    initial={reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, amount: 0.4 }}
-                    transition={reduceMotion ? { duration: 0 } : { duration: 0.25 }}
+                    className='relative h-[320px] rounded-[22px] transition-transform duration-300'
+                    style={{
+                      transform: `translate3d(${mapOffset.x}px, ${mapOffset.y}px, 0)`,
+                    }}
                   >
-                    <p className='text-xs uppercase tracking-[0.32em] text-[var(--muted)]'>
-                      {copy.location.tag}
-                    </p>
-                    <h2 className='section-title font-semibold text-[var(--text)]'>
-                      {copy.location.title}
-                    </h2>
-                    <p className='text-base text-[var(--muted)] md:text-lg lg:max-w-[42ch]'>
-                      {copy.location.body}
-                    </p>
-                  </motion.div>
-                  <motion.div
-                    className='glass-map relative p-5 md:p-6'
-                    initial={reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, amount: 0.3 }}
-                    transition={reduceMotion ? { duration: 0 } : { duration: 0.35 }}
-                  >
-                    <div className='absolute inset-0 rounded-[28px] bg-gradient-to-br from-white/10 via-white/5 to-transparent' />
-                    <motion.div
-                      className='relative h-[320px] rounded-[20px] bg-[rgba(255,255,255,0.03)]'
-                      whileHover={reduceMotion ? undefined : { scale: 1.005 }}
+                    <motion.svg
+                      className='absolute inset-0 h-full w-full'
+                      viewBox='0 0 640 320'
+                      initial='hidden'
+                      whileInView='visible'
+                      viewport={{ once: true, amount: 0.6 }}
                     >
-                      <motion.svg
-                        className='absolute inset-0 h-full w-full'
-                        viewBox='0 0 640 320'
-                        initial='hidden'
-                        whileInView='visible'
-                        viewport={{ once: true, amount: 0.6 }}
-                      >
-                        <motion.path
-                          d='M30 250 C140 180 210 200 280 140 C360 70 460 40 610 30'
-                          stroke='var(--gold)'
-                          className='transition-[stroke-width] duration-200'
-                          strokeLinecap='round'
-                          fill='none'
-                          variants={mapLineVariants}
-                          style={{ strokeWidth: isPinHover ? 4 : 3 }}
-                        />
-                      </motion.svg>
-
-                      <span className='absolute left-5 top-5 rounded-full border border-white/15 bg-black/30 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-white/80'>
-                        {copy.location.badge}
-                      </span>
-
-                      <div className='absolute right-[18%] top-[46%]'>
-                        <PremiumPin
-                          label={copy.location.pinLabel}
-                          onHoverChange={setIsPinHover}
-                        />
-                      </div>
-
-                      {copy.location.chips.map((chip) => (
-                        <span
-                          key={chip.label}
-                          className='absolute rounded-full border border-white/15 bg-black/30 px-3 py-1 text-xs text-white/70 shadow-sm backdrop-blur'
-                          style={{ top: chip.top, left: chip.left }}
-                        >
-                          {chip.label}
-                        </span>
-                      ))}
-                    </motion.div>
-                    <div className='mt-5 flex items-center justify-center gap-2 text-xs uppercase tracking-[0.3em] text-[var(--muted)] lg:justify-start'>
+                      <motion.path
+                        d='M50 250 C140 190 220 210 300 150 C380 90 470 70 590 50'
+                        stroke='var(--gold)'
+                        strokeLinecap='round'
+                        fill='none'
+                        variants={mapLineVariants}
+                        style={{ strokeWidth: hoverPinId ? 4 : 3 }}
+                      />
+                    </motion.svg>
+                    {locationPins.map((pin) => (
+                      <MapPin3D
+                        key={pin.id}
+                        pin={pin}
+                        isActive={pin.id === activePinId}
+                        onSelect={setActivePinId}
+                        onHover={setHoverPinId}
+                      />
+                    ))}
+                  </motion.div>
+                  <div className='mt-5 flex items-center justify-between gap-3 text-xs uppercase tracking-[0.3em] text-[var(--muted)]'>
+                    <span className='flex items-center gap-2'>
                       <MapPin className='h-4 w-4 text-[var(--gold)]' />
                       {copy.location.mapNote}
-                    </div>
-                  </motion.div>
-                </div>
-              </motion.div>
+                    </span>
+                    <span className='hidden text-white/50 sm:inline'>Visual interativo</span>
+                  </div>
+                  <AnimatePresence mode='wait'>
+                    <motion.p
+                      key={activePin?.id}
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -6 }}
+                      transition={{ duration: reduceMotion ? 0 : 0.2 }}
+                      className='mt-3 text-sm text-[var(--muted)]'
+                    >
+                      {activePin?.note}
+                    </motion.p>
+                  </AnimatePresence>
+                </motion.div>
+                <motion.div
+                  className='order-3 flex flex-wrap justify-center gap-3 text-sm text-white/80 lg:col-start-1 lg:justify-start'
+                  initial={reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.4 }}
+                  transition={reduceMotion ? { duration: 0 } : { duration: 0.25 }}
+                >
+                  {copy.location.benefits.map((item) => (
+                    <span
+                      key={item}
+                      className='rounded-full border border-white/10 bg-[var(--panel)] px-4 py-2'
+                    >
+                      {item}
+                    </span>
+                  ))}
+                </motion.div>
+              </div>
             </div>
           </section>
 
@@ -840,7 +952,7 @@ export default function HomePage() {
           >
             <div className='section-inner'>
               <div className='grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-start'>
-                <div className='space-y-5 text-center lg:text-left'>
+                <div className='space-y-6 text-center lg:text-left'>
                   <p className='text-xs uppercase tracking-[0.32em] text-[var(--muted)]'>
                     {copy.simulator.tag}
                   </p>
@@ -861,38 +973,38 @@ export default function HomePage() {
                       </li>
                     ))}
                   </ul>
+                  <div className='flex gap-2 overflow-x-auto pb-1 lg:flex-wrap lg:justify-start lg:overflow-visible'>
+                    {simulatorPresets.map((preset) => (
+                      <button
+                        key={preset.label}
+                        type='button'
+                        onClick={() => {
+                          setPropertyValue(preset.values.propertyValue);
+                          setDailyRate(preset.values.dailyRate);
+                          setOccupancy(preset.values.occupancy);
+                          setMonthlyCosts(preset.values.monthlyCosts);
+                          setPlatformFee(preset.values.platformFee);
+                          setActivePreset(preset.label);
+                        }}
+                        className={`flex-shrink-0 rounded-full border px-4 py-2 text-xs uppercase tracking-[0.2em] transition ${
+                          activePreset === preset.label
+                            ? 'border-[var(--gold)]/60 bg-[var(--panel-strong)] text-white'
+                            : 'border-white/15 bg-white/5 text-white/70 hover:border-[var(--gold)]/40'
+                        }`}
+                      >
+                        {preset.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
                 <motion.div
-                  className='glass-panel p-6 md:p-8'
+                  className='glass-panel bg-[linear-gradient(180deg,rgba(10,18,24,0.7),rgba(6,12,18,0.95))] p-6 md:p-8'
                   initial={reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 14 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, amount: 0.3 }}
                   transition={reduceMotion ? { duration: 0 } : { duration: 0.6 }}
                 >
                   <div className='space-y-5 text-white'>
-                    <div className='flex flex-wrap gap-2'>
-                      {simulatorPresets.map((preset) => (
-                        <button
-                          key={preset.label}
-                          type='button'
-                          onClick={() => {
-                            setPropertyValue(preset.values.propertyValue);
-                            setDailyRate(preset.values.dailyRate);
-                            setOccupancy(preset.values.occupancy);
-                            setMonthlyCosts(preset.values.monthlyCosts);
-                            setPlatformFee(preset.values.platformFee);
-                            setActivePreset(preset.label);
-                          }}
-                          className={`rounded-full border px-4 py-2 text-xs uppercase tracking-[0.2em] transition ${
-                            activePreset === preset.label
-                              ? 'border-[var(--gold)]/60 bg-[var(--panel-strong)] text-white'
-                              : 'border-white/15 bg-white/5 text-white/70 hover:border-[var(--gold)]/40'
-                          }`}
-                        >
-                          {preset.label}
-                        </button>
-                      ))}
-                    </div>
                     <div className='grid gap-4 sm:grid-cols-2'>
                       <label className='space-y-2 text-sm text-white/70'>
                         <span>Valor do imóvel (R$)</span>
@@ -917,9 +1029,11 @@ export default function HomePage() {
                         />
                       </label>
                       <label className='space-y-2 text-sm text-white/70 sm:col-span-2'>
-                        <div className='flex items-center justify-between'>
+                        <div className='flex items-end justify-between'>
                           <span>Ocupação (%)</span>
-                          <span className='text-white/80'>{occupancy}%</span>
+                          <span className='text-2xl font-semibold text-white'>
+                            {occupancy}%
+                          </span>
                         </div>
                         <input
                           type='range'
@@ -964,7 +1078,7 @@ export default function HomePage() {
                           <p className='text-xs uppercase tracking-[0.2em] text-white/50'>
                             Faturamento
                           </p>
-                          <p className='mt-1 text-sm font-semibold text-white'>
+                          <p className='mt-1 text-2xl font-semibold text-white'>
                             {formatCurrency(animatedResults.grossMonthly)}
                           </p>
                         </div>
@@ -977,7 +1091,7 @@ export default function HomePage() {
                           <p className='text-xs uppercase tracking-[0.2em] text-white/50'>
                             Lucro mensal
                           </p>
-                          <p className='mt-1 text-sm font-semibold text-white'>
+                          <p className='mt-1 text-2xl font-semibold text-white'>
                             {formatCurrency(animatedResults.netMonthly)}
                           </p>
                         </div>
@@ -990,7 +1104,7 @@ export default function HomePage() {
                           <p className='text-xs uppercase tracking-[0.2em] text-white/50'>
                             Retorno anual
                           </p>
-                          <p className='mt-1 text-sm font-semibold text-white'>
+                          <p className='mt-1 text-2xl font-semibold text-white'>
                             {animatedResults.annualReturn.toFixed(1)}%
                           </p>
                         </div>
@@ -1003,7 +1117,7 @@ export default function HomePage() {
                           <p className='text-xs uppercase tracking-[0.2em] text-white/50'>
                             Payback
                           </p>
-                          <p className='mt-1 text-sm font-semibold text-white'>
+                          <p className='mt-1 text-2xl font-semibold text-white'>
                             {animatedResults.paybackYears
                               ? `${animatedResults.paybackYears.toFixed(1)} anos`
                               : '—'}
@@ -1041,7 +1155,7 @@ export default function HomePage() {
             className='section-shell section-alt section-glow section-divider scroll-mt-24'
           >
             <div className='section-inner'>
-              <div className='grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-start'>
+              <div className='grid gap-10 lg:grid-cols-[1fr_1fr] lg:items-start'>
                 <motion.div
                   className='space-y-5 text-center lg:text-left'
                   initial={reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
@@ -1058,34 +1172,22 @@ export default function HomePage() {
                   <p className='text-base text-[var(--muted)] md:text-lg lg:max-w-[42ch]'>
                     {copy.bahia.body}
                   </p>
-                  <motion.ul
-                    className='space-y-3 text-sm text-white/70'
+                </motion.div>
+                <div className='space-y-6'>
+                  <motion.div
+                    className='flex w-full gap-4 overflow-x-auto pb-2 snap-x snap-mandatory scroll-px-6 md:grid md:grid-cols-1 md:gap-4 md:overflow-visible md:snap-none'
                     initial='hidden'
                     whileInView='visible'
                     viewport={{ once: true, amount: 0.3 }}
                     variants={scenarioListVariants}
                   >
-                    {copy.bahia.bullets.map((item) => (
-                      <motion.li
-                        key={item}
-                        variants={scenarioItemVariants}
-                        className='flex items-center justify-center gap-3 text-left lg:justify-start'
-                      >
-                        <span className='h-1.5 w-1.5 rounded-full bg-[var(--gold)]' />
-                        {item}
-                      </motion.li>
-                    ))}
-                  </motion.ul>
-                </motion.div>
-                <div className='space-y-6'>
-                  <div className='flex w-full gap-4 overflow-x-auto pb-2 snap-x snap-mandatory scroll-px-6 md:grid md:grid-cols-1 md:gap-4 md:overflow-visible md:snap-none'>
                     {bahiaIndicators.map((item) => {
                       const Icon = item.icon;
                       return (
                         <motion.div
                           key={item.title}
-                          className='min-w-[85%] snap-center rounded-[20px] border border-white/10 bg-[var(--panel)] p-5 text-white/80 transition hover:border-[var(--gold)]/50 md:min-w-0'
-                          whileHover={reduceMotion ? undefined : { y: -4 }}
+                          variants={scenarioItemVariants}
+                          className='min-w-[80%] snap-center rounded-[20px] border border-white/10 bg-[var(--panel)] p-5 text-white/80 transition hover:-translate-y-1 hover:border-[var(--gold)]/50 hover:shadow-[0_18px_40px_rgba(0,0,0,0.35)] md:min-w-0'
                         >
                           <div className='flex items-start gap-3'>
                             <span className='inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/5 text-[var(--gold)]'>
@@ -1103,33 +1205,38 @@ export default function HomePage() {
                         </motion.div>
                       );
                     })}
-                  </div>
-                  <div className='panel-strong rounded-[20px] px-5 py-4 text-center text-white/80'>
-                    <AnimatePresence mode='wait'>
-                      <motion.p
-                        key={copy.bahia.highlights[highlightIndex]}
-                        initial={{ opacity: 0, y: 6 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -6 }}
-                        transition={{ duration: reduceMotion ? 0 : 0.2 }}
-                        className='text-sm font-semibold text-white'
-                      >
-                        {copy.bahia.highlights[highlightIndex]}
-                      </motion.p>
-                    </AnimatePresence>
-                    <div className='mt-4 flex items-center justify-center gap-2'>
-                      {copy.bahia.highlights.map((_, index) => (
+                  </motion.div>
+                  <div className='panel-strong rounded-[20px] px-5 py-5 text-white/80'>
+                    <p className='text-xs uppercase tracking-[0.2em] text-white/50'>
+                      Sazonalidade
+                    </p>
+                    <div className='mt-4 h-px w-full bg-white/15' />
+                    <div className='mt-4 flex items-start justify-between gap-2'>
+                      {seasonLabels.map((label, index) => (
                         <button
-                          key={index}
+                          key={label}
                           type='button'
-                          onClick={() => setHighlightIndex(index)}
-                          className={`h-2 w-2 rounded-full transition ${
-                            index === highlightIndex
-                              ? 'bg-[var(--gold)]'
-                              : 'bg-white/20 hover:bg-white/40'
-                          }`}
-                          aria-label={`Slide ${index + 1}`}
-                        />
+                          onClick={() => setSeasonIndex(index)}
+                          className='flex flex-1 flex-col items-center gap-2'
+                        >
+                          <span className='relative flex h-3 w-3 items-center justify-center'>
+                            <span className='absolute h-2 w-2 rounded-full bg-white/25' />
+                            {index === seasonIndex && (
+                              <motion.span
+                                layoutId='season-dot'
+                                className='absolute h-3 w-3 rounded-full bg-[var(--gold)]'
+                                transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+                              />
+                            )}
+                          </span>
+                          <span
+                            className={`text-[10px] uppercase tracking-[0.2em] ${
+                              index === seasonIndex ? 'text-white' : 'text-white/50'
+                            }`}
+                          >
+                            {label}
+                          </span>
+                        </button>
                       ))}
                     </div>
                   </div>

@@ -104,11 +104,11 @@
   }
 
   .section-base {
-    background: var(--bg-0);
+    background: linear-gradient(180deg, var(--bg-0) 0%, #050b11 100%);
   }
 
   .section-alt {
-    background: var(--bg-1);
+    background: linear-gradient(180deg, var(--bg-1) 0%, #050e15 100%);
   }
 
   .section-glow::before {
@@ -166,6 +166,7 @@
     background: var(--panel-strong);
     border: 1px solid var(--stroke);
     border-radius: 24px;
+    backdrop-filter: blur(8px);
   }
 
   .glass-map {
