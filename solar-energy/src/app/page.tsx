@@ -674,14 +674,6 @@ export default function HomePage() {
     return () => window.cancelAnimationFrame(frame);
   }, [reduceMotion, simulatorResults]);
 
-  useEffect(() => {
-    if (reduceMotion) return undefined;
-    const interval = window.setInterval(() => {
-      setSeasonIndex((prev) => (prev + 1) % seasonLabels.length);
-    }, 3200);
-    return () => window.clearInterval(interval);
-  }, [reduceMotion]);
-
   const activePin = useMemo(
     () => locationPins.find((pin) => pin.id === activePinId) ?? locationPins[0],
     [activePinId]
@@ -693,27 +685,6 @@ export default function HomePage() {
         pathLength: 1,
         opacity: 1,
         transition: reduceMotion ? { duration: 0 } : { duration: 0.8 },
-      },
-    }),
-    [reduceMotion]
-  );
-  const scenarioListVariants = useMemo(
-    () => ({
-      hidden: { opacity: 1 },
-      visible: {
-        opacity: 1,
-        transition: reduceMotion ? { duration: 0 } : { staggerChildren: 0.1 },
-      },
-    }),
-    [reduceMotion]
-  );
-  const scenarioItemVariants = useMemo(
-    () => ({
-      hidden: reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 8 },
-      visible: {
-        opacity: 1,
-        y: 0,
-        transition: reduceMotion ? { duration: 0 } : { duration: 0.3 },
       },
     }),
     [reduceMotion]
@@ -987,7 +958,7 @@ export default function HomePage() {
                 >
                   <div className='space-y-5 text-white'>
                     <div className='grid gap-4 sm:grid-cols-2'>
-                      <label className='space-y-2 text-sm text-white/70'>
+                      <label className='space-y-2 text-xs text-white/60'>
                         <span>Valor do imóvel (R$)</span>
                         <input
                           type='number'
@@ -995,10 +966,10 @@ export default function HomePage() {
                           onChange={(event) =>
                             setPropertyValue(Number(event.target.value))
                           }
-                          className='w-full rounded-xl border border-white/12 bg-[var(--panel)] px-4 py-3 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/40'
+                          className='w-full rounded-xl border border-white/12 bg-[var(--panel)] px-4 py-3 text-[13px] text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/40'
                         />
                       </label>
-                      <label className='space-y-2 text-sm text-white/70'>
+                      <label className='space-y-2 text-xs text-white/60'>
                         <span>Diária média (R$)</span>
                         <input
                           type='number'
@@ -1006,13 +977,13 @@ export default function HomePage() {
                           onChange={(event) =>
                             setDailyRate(Number(event.target.value))
                           }
-                          className='w-full rounded-xl border border-white/12 bg-[var(--panel)] px-4 py-3 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/40'
+                          className='w-full rounded-xl border border-white/12 bg-[var(--panel)] px-4 py-3 text-[13px] text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/40'
                         />
                       </label>
-                      <label className='space-y-2 text-sm text-white/70 sm:col-span-2'>
+                      <label className='space-y-2 text-xs text-white/60 sm:col-span-2'>
                         <div className='flex items-end justify-between'>
                           <span>Ocupação (%)</span>
-                          <span className='text-2xl font-semibold text-white'>
+                          <span className='text-lg font-semibold text-white'>
                             {occupancy}%
                           </span>
                         </div>
@@ -1027,7 +998,7 @@ export default function HomePage() {
                           className='h-2 w-full cursor-pointer appearance-none rounded-full bg-white/10 accent-[#C9A46A] transition'
                         />
                       </label>
-                      <label className='space-y-2 text-sm text-white/70'>
+                      <label className='space-y-2 text-xs text-white/60'>
                         <span>Custos mensais (R$)</span>
                         <input
                           type='number'
@@ -1035,10 +1006,10 @@ export default function HomePage() {
                           onChange={(event) =>
                             setMonthlyCosts(Number(event.target.value))
                           }
-                          className='w-full rounded-xl border border-white/12 bg-[var(--panel)] px-4 py-3 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/40'
+                          className='w-full rounded-xl border border-white/12 bg-[var(--panel)] px-4 py-3 text-[13px] text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/40'
                         />
                       </label>
-                      <label className='space-y-2 text-sm text-white/70'>
+                      <label className='space-y-2 text-xs text-white/60'>
                         <span>Taxa de plataforma (%)</span>
                         <input
                           type='number'
@@ -1046,7 +1017,7 @@ export default function HomePage() {
                           onChange={(event) =>
                             setPlatformFee(Number(event.target.value))
                           }
-                          className='w-full rounded-xl border border-white/12 bg-[var(--panel)] px-4 py-3 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/40'
+                          className='w-full rounded-xl border border-white/12 bg-[var(--panel)] px-4 py-3 text-[13px] text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/40'
                         />
                       </label>
                     </div>
@@ -1056,10 +1027,10 @@ export default function HomePage() {
                           <Coins className='h-4 w-4' />
                         </span>
                         <div>
-                          <p className='text-xs uppercase tracking-[0.2em] text-white/50'>
+                          <p className='text-[10px] uppercase tracking-[0.2em] text-white/50'>
                             Faturamento
                           </p>
-                          <p className='mt-1 text-2xl font-semibold text-white'>
+                          <p className='mt-1 text-lg font-semibold text-white'>
                             {formatCurrency(animatedResults.grossMonthly)}
                           </p>
                         </div>
@@ -1069,10 +1040,10 @@ export default function HomePage() {
                           <Wallet className='h-4 w-4' />
                         </span>
                         <div>
-                          <p className='text-xs uppercase tracking-[0.2em] text-white/50'>
+                          <p className='text-[10px] uppercase tracking-[0.2em] text-white/50'>
                             Lucro mensal
                           </p>
-                          <p className='mt-1 text-2xl font-semibold text-white'>
+                          <p className='mt-1 text-lg font-semibold text-white'>
                             {formatCurrency(animatedResults.netMonthly)}
                           </p>
                         </div>
@@ -1082,10 +1053,10 @@ export default function HomePage() {
                           <TrendingUp className='h-4 w-4' />
                         </span>
                         <div>
-                          <p className='text-xs uppercase tracking-[0.2em] text-white/50'>
+                          <p className='text-[10px] uppercase tracking-[0.2em] text-white/50'>
                             Retorno anual
                           </p>
-                          <p className='mt-1 text-2xl font-semibold text-white'>
+                          <p className='mt-1 text-lg font-semibold text-white'>
                             {animatedResults.annualReturn.toFixed(1)}%
                           </p>
                         </div>
@@ -1095,10 +1066,10 @@ export default function HomePage() {
                           <Clock className='h-4 w-4' />
                         </span>
                         <div>
-                          <p className='text-xs uppercase tracking-[0.2em] text-white/50'>
+                          <p className='text-[10px] uppercase tracking-[0.2em] text-white/50'>
                             Payback
                           </p>
-                          <p className='mt-1 text-2xl font-semibold text-white'>
+                          <p className='mt-1 text-lg font-semibold text-white'>
                             {animatedResults.paybackYears
                               ? `${animatedResults.paybackYears.toFixed(1)} anos`
                               : '—'}
@@ -1137,13 +1108,7 @@ export default function HomePage() {
           >
             <div className='section-inner'>
               <div className='grid gap-10 lg:grid-cols-[1fr_1fr] lg:items-start'>
-                <motion.div
-                  className='space-y-5 text-center lg:text-left'
-                  initial={reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, amount: 0.3 }}
-                  transition={reduceMotion ? { duration: 0 } : { duration: 0.3 }}
-                >
+                <div className='space-y-5 text-center lg:text-left'>
                   <p className='text-xs uppercase tracking-[0.32em] text-[var(--muted)]'>
                     {copy.bahia.tag}
                   </p>
@@ -1153,22 +1118,15 @@ export default function HomePage() {
                   <p className='text-base text-[var(--muted)] md:text-lg lg:max-w-[42ch]'>
                     {copy.bahia.body}
                   </p>
-                </motion.div>
+                </div>
                 <div className='space-y-6'>
-                  <motion.div
-                    className='flex w-full gap-4 overflow-x-auto pb-2 snap-x snap-mandatory scroll-px-6 md:grid md:grid-cols-1 md:gap-4 md:overflow-visible md:snap-none'
-                    initial='hidden'
-                    whileInView='visible'
-                    viewport={{ once: true, amount: 0.3 }}
-                    variants={scenarioListVariants}
-                  >
+                  <div className='flex w-full gap-4 overflow-x-auto pb-2 snap-x snap-mandatory scroll-px-6 md:grid md:grid-cols-1 md:gap-4 md:overflow-visible md:snap-none'>
                     {bahiaIndicators.map((item) => {
                       const Icon = item.icon;
                       return (
-                        <motion.div
+                        <div
                           key={item.title}
-                          variants={scenarioItemVariants}
-                          className='min-w-[80%] snap-center rounded-[20px] border border-white/10 bg-[var(--panel)] p-5 text-white/80 transition hover:-translate-y-1 hover:border-[var(--gold)]/50 hover:shadow-[0_18px_40px_rgba(0,0,0,0.35)] md:min-w-0'
+                          className='min-w-[80%] snap-center rounded-[20px] border border-white/10 bg-[var(--panel)] p-5 text-white/80 md:min-w-0'
                         >
                           <div className='flex items-start gap-3'>
                             <span className='inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/5 text-[var(--gold)]'>
@@ -1183,10 +1141,10 @@ export default function HomePage() {
                               </p>
                             </div>
                           </div>
-                        </motion.div>
+                        </div>
                       );
                     })}
-                  </motion.div>
+                  </div>
                   <div className='panel-strong rounded-[20px] px-5 py-5 text-white/80'>
                     <p className='text-xs uppercase tracking-[0.2em] text-white/50'>
                       Sazonalidade
@@ -1203,11 +1161,7 @@ export default function HomePage() {
                           <span className='relative flex h-3 w-3 items-center justify-center'>
                             <span className='absolute h-2 w-2 rounded-full bg-white/25' />
                             {index === seasonIndex && (
-                              <motion.span
-                                layoutId='season-dot'
-                                className='absolute h-3 w-3 rounded-full bg-[var(--gold)]'
-                                transition={{ type: 'spring', stiffness: 260, damping: 20 }}
-                              />
+                              <span className='absolute h-3 w-3 rounded-full bg-[var(--gold)]' />
                             )}
                           </span>
                           <span
