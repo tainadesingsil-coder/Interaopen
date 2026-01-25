@@ -110,7 +110,7 @@ const showcaseItems = [
     label: 'PLANTA',
     title: 'Planta inteligente',
     desc: 'Metragem otimizada e funcional.',
-    images: ['/images/showcase-planta.svg'],
+    images: ['https://i.postimg.cc/pV5VhCch/Whats-App-Image-2026-01-22-at-12-04-20.jpg'],
   },
   {
     label: 'ÁREA COMPLETA',
