@@ -69,7 +69,7 @@ const copy = {
     tag: 'INVESTIMENTO',
     title: 'Simule seu retorno com aluguel de temporada.',
     subtitle:
-      'Ajuste os números e veja uma estimativa de faturamento, custos e retorno anual. (Valores ilustrativos.)',
+      'Ajuste os números e veja uma estimativa de faturamento, custos e retorno anual. Valores ilustrativos.',
     bullets: [
       'Demanda sazonal favorece ocupação consistente.',
       'Modelo flexível para uso próprio ou renda.',
@@ -80,7 +80,7 @@ const copy = {
     tag: 'CENÁRIO',
     title: 'Bahia em alta: turismo que sustenta renda.',
     body:
-      'O litoral sul combina fluxo constante, acesso em evolução e procura por estadias curtas — cenário perfeito para locação por temporada.',
+      'O litoral sul combina fluxo constante, acesso em evolução e procura por estadias curtas. Cenário perfeito para locação por temporada.',
   },
   finalCta: {
     title: 'Tudo pronto para sua próxima decisão patrimonial.',
