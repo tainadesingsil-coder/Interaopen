@@ -526,14 +526,14 @@ export default function HomePage() {
 
           <section
             id='contexto'
-            className='scroll-mt-24 bg-sand py-28'
+            className='scroll-mt-24 bg-[#07131D] py-28'
           >
             <div className='mx-auto max-w-6xl px-6'>
               <div className='flex flex-col gap-3'>
-                <p className='text-xs uppercase tracking-[0.32em] text-muted'>
+                <p className='text-xs uppercase tracking-[0.32em] text-white/50'>
                   Vitrine do Studio
                 </p>
-                <h3 className='text-2xl font-semibold text-ink'>
+                <h3 className='text-2xl font-semibold text-white'>
                   Explore o interior pensado para viver e investir bem.
                 </h3>
               </div>
