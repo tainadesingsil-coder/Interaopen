@@ -19,9 +19,7 @@ import {
   Ruler,
   TrendingUp,
   Wallet,
-  Waves,
   X,
-  Zap,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -75,12 +73,6 @@ const copy = {
       'Modelo flexível para uso próprio ou renda.',
       'Operação enxuta com potencial recorrente.',
     ],
-  },
-  bahia: {
-    tag: 'CENÁRIO',
-    title: 'Bahia em alta: turismo que sustenta renda.',
-    body:
-      'O litoral sul combina fluxo constante, acesso em evolução e procura por estadias curtas. Cenário perfeito para locação por temporada.',
   },
   finalCta: {
     title: 'Tudo pronto para sua próxima decisão patrimonial.',
@@ -183,24 +175,6 @@ const simulatorPresets = [
       monthlyCosts: 720,
       platformFee: 12,
     },
-  },
-];
-
-const bahiaIndicators = [
-  {
-    icon: Waves,
-    title: 'Fluxo turístico',
-    desc: 'Movimento forte em temporadas e feriados.',
-  },
-  {
-    icon: TrendingUp,
-    title: 'Ocupação média',
-    desc: 'Taxas consistentes sustentando a diária.',
-  },
-  {
-    icon: Zap,
-    title: 'Liquidez e demanda',
-    desc: 'Busca ativa por estadias curtas.',
   },
 ];
 
@@ -1096,70 +1070,6 @@ export default function HomePage() {
                     </p>
                   </div>
                 </motion.div>
-              </div>
-            </div>
-          </section>
-
-          <section
-            id='perfil'
-            className='section-shell section-alt section-glow section-divider scroll-mt-24'
-          >
-            <div className='section-inner'>
-              <div className='grid gap-10 lg:grid-cols-[1fr_1fr] lg:items-start'>
-                <div className='space-y-5 text-center lg:text-left'>
-                  <p className='text-xs uppercase tracking-[0.32em] text-[var(--muted)]'>
-                    {copy.bahia.tag}
-                  </p>
-                  <h2 className='section-title font-semibold text-[var(--text)]'>
-                    {copy.bahia.title}
-                  </h2>
-                  <p className='text-base text-[var(--muted)] md:text-lg lg:max-w-[42ch]'>
-                    {copy.bahia.body}
-                  </p>
-                </div>
-                <div className='space-y-6'>
-                  <div className='flex w-full gap-4 overflow-x-auto pb-2 snap-x snap-mandatory scroll-px-6 md:grid md:grid-cols-1 md:gap-4 md:overflow-visible md:snap-none'>
-                    {bahiaIndicators.map((item) => {
-                      const Icon = item.icon;
-                      return (
-                        <div
-                          key={item.title}
-                          className='min-w-[80%] snap-center rounded-[20px] border border-white/10 bg-[var(--panel)] p-5 text-white/80 md:min-w-0'
-                        >
-                          <div className='flex items-start gap-3'>
-                            <span className='inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/5 text-[var(--gold)]'>
-                              <Icon className='h-5 w-5' />
-                            </span>
-                            <div>
-                              <p className='text-sm font-semibold text-white'>
-                                {item.title}
-                              </p>
-                              <p className='mt-1 text-sm text-white/60'>
-                                {item.desc}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-              <div className='mt-10 flex flex-col items-center gap-3 text-center'>
-                <a
-                  href='#proposta'
-                  className='inline-flex items-center justify-center rounded-full bg-[var(--gold)] px-6 py-3 text-sm font-semibold text-[#0c1116] transition hover:brightness-110'
-                >
-                  Ver oportunidades de investimento
-                </a>
-                <a
-                  href={whatsappLink}
-                  target='_blank'
-                  rel='noreferrer'
-                  className='text-sm text-white/70 underline-offset-4 transition hover:text-white hover:underline'
-                >
-                  Falar com especialista
-                </a>
               </div>
             </div>
           </section>
