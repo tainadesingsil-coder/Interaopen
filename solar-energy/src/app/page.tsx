@@ -1,7 +1,8 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
+  AnimatePresence,
   motion,
   MotionConfig,
   useReducedMotion,
@@ -99,19 +100,22 @@ const showcaseItems = [
     label: 'STUDIO',
     title: 'Ambiente completo',
     desc: 'Integração e conforto real.',
-    image: 'https://i.postimg.cc/mksDjFhJ/Whats-App-Image-2026-01-22-at-12-04-21.jpg',
+    images: [
+      'https://i.postimg.cc/mksDjFhJ/Whats-App-Image-2026-01-22-at-12-04-21.jpg',
+      'https://i.postimg.cc/GpTm1jyg/Whats-App-Image-2026-01-22-at-12-04-21-(2).jpg',
+    ],
   },
   {
     label: 'PLANTA',
     title: 'Planta inteligente',
     desc: 'Metragem otimizada e funcional.',
-    image: '/images/showcase-planta.svg',
+    images: ['/images/showcase-planta.svg'],
   },
   {
     label: 'ÁREA COMPLETA',
     title: 'Tudo no lugar',
     desc: 'Cozinha, descanso e rotina fluida.',
-    image: '/images/showcase-area.svg',
+    images: ['/images/showcase-area.svg'],
   },
 ];
 
@@ -241,13 +245,25 @@ function StudioShowcaseCard({
   label,
   title,
   desc,
-  image,
+  images,
 }: {
   label: string;
   title: string;
   desc: string;
-  image: string;
+  images: string[];
 }) {
+  const reduceMotion = useReducedMotion();
+  const [imageIndex, setImageIndex] = useState(0);
+  const hasCarousel = images.length > 1;
+
+  useEffect(() => {
+    if (!hasCarousel) return undefined;
+    const interval = window.setInterval(() => {
+      setImageIndex((prev) => (prev + 1) % images.length);
+    }, 4200);
+    return () => window.clearInterval(interval);
+  }, [hasCarousel, images.length]);
+
   return (
     <motion.article
       className='group relative min-w-[85%] snap-center overflow-hidden rounded-3xl border border-white/10 bg-[rgba(7,27,36,0.45)] shadow-[0_20px_40px_rgba(5,12,18,0.35)] backdrop-blur-[14px] transition-shadow duration-500 hover:shadow-[0_28px_55px_rgba(5,12,18,0.45),0_0_30px_rgba(183,146,90,0.22)] active:shadow-[0_28px_55px_rgba(5,12,18,0.45),0_0_30px_rgba(183,146,90,0.18)] md:min-w-0'
@@ -259,12 +275,19 @@ function StudioShowcaseCard({
       transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
     >
       <div className='relative aspect-[16/10] w-full overflow-hidden'>
-        <img
-          src={image}
-          alt={title}
-          className='h-full w-full object-cover transition duration-500 group-hover:scale-105'
-          loading='lazy'
-        />
+        <AnimatePresence mode='wait'>
+          <motion.img
+            key={images[imageIndex]}
+            src={images[imageIndex]}
+            alt={title}
+            className='absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105'
+            initial={reduceMotion ? { opacity: 1 } : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={reduceMotion ? { opacity: 1 } : { opacity: 0 }}
+            transition={reduceMotion ? { duration: 0 } : { duration: 0.6 }}
+            loading='lazy'
+          />
+        </AnimatePresence>
         <div className='absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/70 via-black/20 to-transparent' />
       </div>
       <div className='space-y-3 p-6'>
