@@ -3,6 +3,15 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --bg-deep: #07131d;
+    --glass: rgba(18, 24, 30, 0.55);
+    --stroke: rgba(255, 255, 255, 0.1);
+    --text: #f8f9fb;
+    --muted: rgba(255, 255, 255, 0.65);
+    --gold: #b7925a;
+  }
+
   html {
     scroll-behavior: smooth;
     background: #07131D;
@@ -85,16 +94,94 @@
     transform: translateZ(0);
     will-change: transform;
   }
+
+  .section-dark {
+    background: var(--bg-deep);
+    color: var(--text);
+  }
+
+  .section-pad {
+    padding-top: 7rem;
+    padding-bottom: 7rem;
+  }
+
+  .glass-panel {
+    background: var(--glass);
+    border: 1px solid var(--stroke);
+    border-radius: 22px;
+    box-shadow: 0 18px 45px rgba(5, 12, 18, 0.35);
+    backdrop-filter: blur(10px);
+  }
+
+  .glass-map {
+    background: rgba(10, 18, 24, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 24px;
+    box-shadow: 0 18px 45px rgba(5, 12, 18, 0.35);
+    backdrop-filter: blur(10px);
+  }
+
+  .split-grid {
+    display: grid;
+    align-items: center;
+    gap: 2.5rem;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  }
+
+  .section-title {
+    font-size: clamp(32px, 4vw, 44px);
+  }
+
+  .pin-pulse {
+    animation: pinPulse 1.8s ease-in-out 0.4s 3;
+  }
+}
+
+@keyframes pinPulse {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.12;
+  }
+  60% {
+    transform: scale(1.28);
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
   }
+
+  .pin-pulse {
+    animation: none;
+  }
 }
 
 @media (min-width: 768px) {
   body {
     font-size: 18px;
+  }
+}
+
+@media (max-width: 768px) {
+  .section-pad {
+    padding-top: 5.5rem;
+    padding-bottom: 5.5rem;
+  }
+
+  .glass-panel {
+    padding: 24px;
+  }
+
+  .split-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .section-title {
+    font-size: clamp(28px, 7vw, 40px);
   }
 }

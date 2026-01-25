@@ -10,11 +10,7 @@ import {
 import {
   Bath,
   BedDouble,
-  Building2,
   CarFront,
-  Compass,
-  KeyRound,
-  Landmark,
   MapPin,
   Ruler,
   X,
@@ -25,6 +21,16 @@ const whatsappNumber = '5571999999999';
 
 const heroPoster =
   'https://res.cloudinary.com/dwedcl97k/video/upload/so_0,f_jpg,w_1600/v1769199580/Design_sem_nome_-_2026-01-23T171932.339_fjulxo.mp4';
+const scenarioImage =
+  'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1800&q=80';
+const currencyFormatter = new Intl.NumberFormat('pt-BR', {
+  style: 'currency',
+  currency: 'BRL',
+  maximumFractionDigits: 0,
+});
+
+const formatCurrency = (value: number) =>
+  currencyFormatter.format(Math.round(value));
 const copy = {
   whatsappMessage:
     'Olá! Quero entender mais sobre o Bella Vista Beach Residence.',
@@ -40,11 +46,10 @@ const copy = {
     secondaryCta: 'Ver localização',
   },
   location: {
-    tag: 'Localização estratégica',
-    title:
-      'Entre a BR-367 e o azul do mar, nasce uma decisão bem posicionada.',
+    tag: 'LOCALIZAÇÃO ESTRATÉGICA',
+    title: 'Onde a rota encontra o mar.',
     body:
-      'Acesso direto, visibilidade e proximidade com os polos mais desejados do litoral sul. Um ponto de equilíbrio entre fluxo turístico e privacidade.',
+      'Entre a BR-367 e os polos turísticos do litoral sul, o Bella Vista conecta acesso rápido, demanda constante e privacidade na medida. Um ponto inteligente para morar ou gerar renda.',
     badge: 'BR-367',
     mapNote: 'BR-367 → polos turísticos → Bella Vista Beach Residence',
     pinLabel: 'Bella Vista',
@@ -55,42 +60,28 @@ const copy = {
       { label: 'Trancoso', top: '70%', left: '62%' },
     ],
   },
-  product: {
-    tag: 'Proposta do produto',
-    title:
-      'Pensado para quem entende que investir bem começa pela localização certa.',
-    cards: [
-      {
-        title: 'Stúdios funcionais',
-        description:
-          'Plantas inteligentes, metragem otimizada e facilidade de operação.',
-        icon: Building2,
-      },
-      {
-        title: 'Projeto contemporâneo',
-        description:
-          'Arquitetura limpa, acabamentos consistentes e presença premium.',
-        icon: Compass,
-      },
-      {
-        title: 'Região em crescimento',
-        description: 'Demanda turística crescente, valorização sustentada.',
-        icon: Landmark,
-      },
-      {
-        title: 'Ideal para morar ou investir',
-        description:
-          'Uso próprio com liquidez para temporada e renda passiva.',
-        icon: KeyRound,
-      },
+  simulator: {
+    tag: 'INVESTIMENTO',
+    title: 'Simule seu retorno com aluguel de temporada.',
+    subtitle:
+      'Ajuste os números e veja uma estimativa de faturamento, custos e retorno anual. (Valores ilustrativos.)',
+    bullets: [
+      'Demanda turística constante em alta temporada.',
+      'Modelo flexível para uso próprio ou renda.',
+      'Operação simples com potencial de recorrência.',
     ],
   },
-  audience: {
-    tag: 'Para quem é',
-    title: 'Este projeto é ideal para quem busca patrimônio, não impulso.',
+  scenario: {
+    tag: 'CENÁRIO',
+    title: 'Bahia em alta: turismo forte, demanda constante.',
     body:
-      'Perfil racional, sensível ao lugar certo. Uma escolha feita com calma e visão de longo prazo.',
-    items: ['Investidor patrimonial', 'Segunda residência', 'Renda com temporada'],
+      'O litoral sul vive um ciclo de valorização puxado por fluxo turístico, melhorias de acesso e procura por estadias curtas. Para quem investe com visão, o movimento já está em curso.',
+    bullets: [
+      'Alta ocupação em temporadas e feriados prolongados',
+      'Mobilidade e infraestrutura fortalecendo a região',
+      'Liquidez e potencial de renda recorrente',
+    ],
+    image: scenarioImage,
   },
   experience: {
     tag: 'Experiência',
@@ -418,9 +409,60 @@ function StudioShowcaseCard({
   );
 }
 
+function PremiumPin({ label }: { label: string }) {
+  const reduceMotion = useReducedMotion();
+  return (
+    <motion.div
+      className='flex items-center'
+      initial={reduceMotion ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.96 }}
+      whileInView={{ opacity: 1, scale: 1 }}
+      viewport={{ once: true, amount: 0.5 }}
+      transition={reduceMotion ? { duration: 0 } : { duration: 0.25 }}
+    >
+      <div className='relative flex h-9 w-9 items-center justify-center'>
+        <span className='absolute inset-0 rounded-full border border-[var(--gold)]/35 shadow-[0_0_10px_rgba(183,146,90,0.2)]' />
+        <span className='absolute inset-0 rounded-full bg-[var(--gold)]/10 pin-pulse' />
+        <svg
+          viewBox='0 0 24 32'
+          className='relative h-4 w-4 text-[var(--gold)] drop-shadow-[0_0_6px_rgba(183,146,90,0.35)]'
+          fill='currentColor'
+          aria-hidden='true'
+        >
+          <path d='M12 1.5C7.3 1.5 3.5 5.3 3.5 10c0 6.4 8.5 20.5 8.5 20.5S20.5 16.4 20.5 10c0-4.7-3.8-8.5-8.5-8.5zm0 12.1c-2 0-3.6-1.6-3.6-3.6S10 6.4 12 6.4s3.6 1.6 3.6 3.6S14 13.6 12 13.6z' />
+        </svg>
+      </div>
+      <span className='ml-3 rounded-full border border-white/15 bg-black/30 px-3 py-1 text-xs font-medium text-white/85'>
+        {label}
+      </span>
+    </motion.div>
+  );
+}
+
 export default function HomePage() {
   const reduceMotion = useReducedMotion();
   const [heroVideoReady, setHeroVideoReady] = useState(false);
+  const [propertyValue, setPropertyValue] = useState(250000);
+  const [dailyRate, setDailyRate] = useState(250);
+  const [occupancy, setOccupancy] = useState(55);
+  const [monthlyCosts, setMonthlyCosts] = useState(650);
+  const [platformFee, setPlatformFee] = useState(12);
+  const simulatorResults = useMemo(() => {
+    const nightsPerMonth = (30 * occupancy) / 100;
+    const grossMonthly = nightsPerMonth * dailyRate;
+    const platformFeeAmount = grossMonthly * (platformFee / 100);
+    const netMonthly = grossMonthly - platformFeeAmount - monthlyCosts;
+    const annualReturn =
+      propertyValue > 0 ? (netMonthly * 12 * 100) / propertyValue : 0;
+    const paybackYears =
+      netMonthly > 0 ? propertyValue / (netMonthly * 12) : null;
+    return {
+      nightsPerMonth,
+      grossMonthly,
+      netMonthly,
+      annualReturn,
+      paybackYears,
+    };
+  }, [propertyValue, dailyRate, occupancy, monthlyCosts, platformFee]);
   const mapLineVariants = useMemo(
     () => ({
       hidden: reduceMotion ? { pathLength: 1, opacity: 1 } : { pathLength: 0 },
@@ -428,6 +470,27 @@ export default function HomePage() {
         pathLength: 1,
         opacity: 1,
         transition: reduceMotion ? { duration: 0 } : { duration: 1.6 },
+      },
+    }),
+    [reduceMotion]
+  );
+  const scenarioListVariants = useMemo(
+    () => ({
+      hidden: { opacity: 1 },
+      visible: {
+        opacity: 1,
+        transition: reduceMotion ? { duration: 0 } : { staggerChildren: 0.1 },
+      },
+    }),
+    [reduceMotion]
+  );
+  const scenarioItemVariants = useMemo(
+    () => ({
+      hidden: reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 8 },
+      visible: {
+        opacity: 1,
+        y: 0,
+        transition: reduceMotion ? { duration: 0 } : { duration: 0.3 },
       },
     }),
     [reduceMotion]
@@ -547,7 +610,7 @@ export default function HomePage() {
 
           <section
             id='localizacao'
-            className='relative scroll-mt-24 bg-[#07131D] py-28'
+            className='relative scroll-mt-24 section-dark section-pad'
           >
             <div
               className='absolute inset-0 bg-[linear-gradient(180deg,rgba(8,12,16,0.82)_0%,rgba(8,12,16,0.62)_45%,rgba(8,12,16,0.86)_100%)]'
@@ -555,27 +618,33 @@ export default function HomePage() {
             />
             <div className='relative mx-auto max-w-6xl px-6'>
               <motion.div
-                className='rounded-[22px] border border-white/10 bg-[rgba(18,24,30,0.55)] p-6 shadow-[0_18px_45px_rgba(5,12,18,0.35)] backdrop-blur-[10px] md:p-8 lg:p-10'
+                className='glass-panel p-6 md:p-8 lg:p-10'
                 initial={reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 14 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.3 }}
                 transition={reduceMotion ? { duration: 0 } : { duration: 0.6 }}
               >
-                <div className='grid items-center gap-8 lg:grid-cols-[1fr_1.1fr] lg:gap-10'>
-                  <div className='space-y-5 text-center lg:text-left'>
-                    <p className='text-xs uppercase tracking-[0.32em] text-white/50'>
+                <div className='split-grid'>
+                  <motion.div
+                    className='space-y-5 text-center lg:text-left'
+                    initial={reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, amount: 0.4 }}
+                    transition={reduceMotion ? { duration: 0 } : { duration: 0.25 }}
+                  >
+                    <p className='text-xs uppercase tracking-[0.32em] text-[var(--muted)]'>
                       {copy.location.tag}
                     </p>
-                    <h2 className='text-[clamp(28px,7vw,40px)] font-semibold text-balance text-white md:text-4xl'>
+                    <h2 className='section-title font-semibold text-white'>
                       {copy.location.title}
                     </h2>
-                    <p className='text-base text-white/70 md:text-lg'>
+                    <p className='text-base text-[var(--muted)] md:text-lg'>
                       {copy.location.body}
                     </p>
-                  </div>
-                  <div className='relative rounded-[18px] border border-white/10 bg-white/5 p-5 md:p-6'>
-                    <div className='absolute inset-0 rounded-[18px] bg-gradient-to-br from-white/10 via-white/5 to-transparent' />
-                    <div className='relative h-[320px] rounded-[16px] bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.18),rgba(255,255,255,0.06)_55%,rgba(255,255,255,0.03)_100%)]'>
+                  </motion.div>
+                  <div className='glass-map relative p-5 md:p-6'>
+                    <div className='absolute inset-0 rounded-[24px] bg-gradient-to-br from-white/10 via-white/5 to-transparent' />
+                    <div className='relative h-[320px] rounded-[18px] bg-[linear-gradient(155deg,rgba(255,255,255,0.12),rgba(10,18,24,0.65))]'>
                       <motion.svg
                         className='absolute inset-0 h-full w-full'
                         viewBox='0 0 640 320'
@@ -585,7 +654,7 @@ export default function HomePage() {
                       >
                         <motion.path
                           d='M30 250 C140 180 210 200 280 140 C360 70 460 40 610 30'
-                          stroke='#D9BE86'
+                          stroke='var(--gold)'
                           strokeWidth='3'
                           strokeLinecap='round'
                           fill='none'
@@ -593,32 +662,26 @@ export default function HomePage() {
                         />
                       </motion.svg>
 
-                      <span className='absolute left-5 top-5 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-white/80'>
+                      <span className='absolute left-5 top-5 rounded-full border border-white/15 bg-black/30 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-white/80'>
                         {copy.location.badge}
                       </span>
 
-                      <div className='absolute right-[18%] top-[46%] flex items-center'>
-                        <span className='relative flex h-4 w-4 items-center justify-center'>
-                          <span className='absolute inline-flex h-full w-full rounded-full bg-gold/30 motion-safe:animate-ping' />
-                          <span className='relative inline-flex h-3 w-3 rounded-full bg-gold shadow-[0_0_12px_rgba(183,146,90,0.45)]' />
-                        </span>
-                        <span className='ml-3 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold text-white/80 shadow-sm'>
-                          {copy.location.pinLabel}
-                        </span>
+                      <div className='absolute right-[18%] top-[46%]'>
+                        <PremiumPin label={copy.location.pinLabel} />
                       </div>
 
                       {copy.location.chips.map((chip) => (
                         <span
                           key={chip.label}
-                          className='absolute rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs text-white/70 shadow-sm backdrop-blur'
+                          className='absolute rounded-full border border-white/15 bg-black/30 px-3 py-1 text-xs text-white/70 shadow-sm backdrop-blur'
                           style={{ top: chip.top, left: chip.left }}
                         >
                           {chip.label}
                         </span>
                       ))}
                     </div>
-                    <div className='mt-5 flex items-center justify-center gap-2 text-xs uppercase tracking-[0.3em] text-white/50 lg:justify-start'>
-                      <MapPin className='h-4 w-4 text-gold' />
+                    <div className='mt-5 flex items-center justify-center gap-2 text-xs uppercase tracking-[0.3em] text-[var(--muted)] lg:justify-start'>
+                      <MapPin className='h-4 w-4 text-[var(--gold)]' />
                       {copy.location.mapNote}
                     </div>
                   </div>
@@ -629,67 +692,221 @@ export default function HomePage() {
 
           <section
             id='proposta'
-            className='scroll-mt-24 bg-sand py-28'
+            className='relative scroll-mt-24 section-dark section-pad'
           >
-            <div className='mx-auto max-w-6xl px-6'>
-              <div className='mb-12 max-w-3xl space-y-4'>
-                <Reveal>
-                  <p className='text-xs uppercase tracking-[0.32em] text-muted'>
-                    {copy.product.tag}
+            <div
+              className='absolute inset-0 bg-[linear-gradient(180deg,rgba(8,12,16,0.82)_0%,rgba(8,12,16,0.68)_45%,rgba(8,12,16,0.9)_100%)]'
+              aria-hidden='true'
+            />
+            <div className='relative mx-auto max-w-6xl px-6'>
+              <div className='split-grid'>
+                <div className='space-y-5 text-center lg:text-left'>
+                  <p className='text-xs uppercase tracking-[0.32em] text-[var(--muted)]'>
+                    {copy.simulator.tag}
                   </p>
-                </Reveal>
-                <Reveal delay={0.1}>
-                  <h2 className='text-3xl font-semibold text-balance md:text-4xl'>
-                    {copy.product.title}
+                  <h2 className='section-title font-semibold text-white'>
+                    {copy.simulator.title}
                   </h2>
-                </Reveal>
-              </div>
-              <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-4'>
-                {copy.product.cards.map((card, index) => {
-                  const Icon = card.icon;
-                  return (
-                    <Reveal key={card.title} delay={0.1 + index * 0.08}>
-                      <div className='group h-full rounded-2xl border border-white/70 bg-white/80 px-5 py-6 shadow-soft backdrop-blur transition hover:-translate-y-1 hover:shadow-card'>
-                        <Icon className='h-6 w-6 text-ocean/80 transition group-hover:text-ocean' />
-                        <h3 className='mt-4 text-lg font-semibold text-ink'>
-                          {card.title}
-                        </h3>
-                        <p className='mt-3 text-sm text-muted'>
-                          {card.description}
+                  <p className='text-base text-[var(--muted)] md:text-lg'>
+                    {copy.simulator.subtitle}
+                  </p>
+                  <ul className='space-y-3 text-sm text-white/70'>
+                    {copy.simulator.bullets.map((item) => (
+                      <li
+                        key={item}
+                        className='flex items-center justify-center gap-3 text-left lg:justify-start'
+                      >
+                        <span className='h-1.5 w-1.5 rounded-full bg-[var(--gold)]' />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <motion.div
+                  className='glass-panel p-6 md:p-8 lg:p-10'
+                  initial={reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 14 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.3 }}
+                  transition={reduceMotion ? { duration: 0 } : { duration: 0.6 }}
+                >
+                  <div className='space-y-5 text-white'>
+                    <div className='grid gap-4 sm:grid-cols-2'>
+                      <label className='space-y-2 text-sm text-white/70'>
+                        <span>Valor do imóvel (R$)</span>
+                        <input
+                          type='number'
+                          value={propertyValue}
+                          onChange={(event) =>
+                            setPropertyValue(Number(event.target.value))
+                          }
+                          className='w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-[var(--gold)]/60'
+                        />
+                      </label>
+                      <label className='space-y-2 text-sm text-white/70'>
+                        <span>Diária média (R$)</span>
+                        <input
+                          type='number'
+                          value={dailyRate}
+                          onChange={(event) =>
+                            setDailyRate(Number(event.target.value))
+                          }
+                          className='w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-[var(--gold)]/60'
+                        />
+                      </label>
+                      <label className='space-y-2 text-sm text-white/70 sm:col-span-2'>
+                        <div className='flex items-center justify-between'>
+                          <span>Ocupação (%)</span>
+                          <span className='text-white/80'>{occupancy}%</span>
+                        </div>
+                        <input
+                          type='range'
+                          min={10}
+                          max={90}
+                          value={occupancy}
+                          onChange={(event) =>
+                            setOccupancy(Number(event.target.value))
+                          }
+                          className='h-2 w-full cursor-pointer appearance-none rounded-full bg-white/10 accent-[#B7925A]'
+                        />
+                      </label>
+                      <label className='space-y-2 text-sm text-white/70'>
+                        <span>Custos mensais (R$)</span>
+                        <input
+                          type='number'
+                          value={monthlyCosts}
+                          onChange={(event) =>
+                            setMonthlyCosts(Number(event.target.value))
+                          }
+                          className='w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-[var(--gold)]/60'
+                        />
+                      </label>
+                      <label className='space-y-2 text-sm text-white/70'>
+                        <span>Taxa de plataforma (%)</span>
+                        <input
+                          type='number'
+                          value={platformFee}
+                          onChange={(event) =>
+                            setPlatformFee(Number(event.target.value))
+                          }
+                          className='w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-[var(--gold)]/60'
+                        />
+                      </label>
+                    </div>
+                    <div className='grid gap-4 rounded-2xl border border-white/10 bg-white/5 p-4 sm:grid-cols-2'>
+                      <div>
+                        <p className='text-xs uppercase tracking-[0.2em] text-white/50'>
+                          Faturamento mensal
+                        </p>
+                        <p className='mt-2 text-lg font-semibold text-white'>
+                          {formatCurrency(simulatorResults.grossMonthly)}
                         </p>
                       </div>
-                    </Reveal>
-                  );
-                })}
+                      <div>
+                        <p className='text-xs uppercase tracking-[0.2em] text-white/50'>
+                          Lucro mensal
+                        </p>
+                        <p className='mt-2 text-lg font-semibold text-white'>
+                          {formatCurrency(simulatorResults.netMonthly)}
+                        </p>
+                      </div>
+                      <div>
+                        <p className='text-xs uppercase tracking-[0.2em] text-white/50'>
+                          Retorno anual
+                        </p>
+                        <p className='mt-2 text-lg font-semibold text-white'>
+                          {simulatorResults.annualReturn.toFixed(1)}%
+                        </p>
+                      </div>
+                      <div>
+                        <p className='text-xs uppercase tracking-[0.2em] text-white/50'>
+                          Payback
+                        </p>
+                        <p className='mt-2 text-lg font-semibold text-white'>
+                          {simulatorResults.paybackYears
+                            ? `${simulatorResults.paybackYears.toFixed(1)} anos`
+                            : '—'}
+                        </p>
+                      </div>
+                    </div>
+                    <a
+                      href={whatsappLink}
+                      target='_blank'
+                      rel='noreferrer'
+                      className='inline-flex items-center justify-center rounded-full border border-white/15 bg-white/5 px-6 py-3 text-sm font-semibold text-white transition hover:border-[var(--gold)]/40 hover:text-white'
+                    >
+                      Falar com um especialista
+                    </a>
+                    <p className='text-xs text-white/50'>
+                      Estimativa. Não substitui análise financeira.
+                    </p>
+                  </div>
+                </motion.div>
               </div>
             </div>
           </section>
 
-          <section id='perfil' className='scroll-mt-24 bg-white py-28'>
-            <div className='mx-auto max-w-6xl px-6'>
-              <Reveal>
-                <div className='rounded-2xl border border-white/70 bg-sand/90 px-6 py-12 text-center shadow-soft backdrop-blur md:px-12'>
-                  <p className='text-xs uppercase tracking-[0.32em] text-muted'>
-                    {copy.audience.tag}
+          <section
+            id='perfil'
+            className='relative scroll-mt-24 section-dark section-pad'
+          >
+            <div
+              className='absolute inset-0 bg-[linear-gradient(180deg,rgba(8,12,16,0.82)_0%,rgba(8,12,16,0.62)_45%,rgba(8,12,16,0.86)_100%)]'
+              aria-hidden='true'
+            />
+            <div className='relative mx-auto max-w-6xl px-6'>
+              <div className='split-grid'>
+                <motion.div
+                  className='space-y-5 text-center lg:text-left'
+                  initial={reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.3 }}
+                  transition={reduceMotion ? { duration: 0 } : { duration: 0.3 }}
+                >
+                  <p className='text-xs uppercase tracking-[0.32em] text-[var(--muted)]'>
+                    {copy.scenario.tag}
                   </p>
-                  <h2 className='mt-4 text-3xl font-semibold md:text-4xl'>
-                    {copy.audience.title}
+                  <h2 className='section-title font-semibold text-white'>
+                    {copy.scenario.title}
                   </h2>
-                  <p className='mx-auto mt-4 max-w-2xl text-base text-muted md:text-lg'>
-                    {copy.audience.body}
+                  <p className='text-base text-[var(--muted)] md:text-lg'>
+                    {copy.scenario.body}
                   </p>
-                  <div className='mt-10 grid gap-4 md:grid-cols-3'>
-                    {copy.audience.items.map((item) => (
-                      <div
+                  <motion.ul
+                    className='space-y-3 text-sm text-white/70'
+                    initial='hidden'
+                    whileInView='visible'
+                    viewport={{ once: true, amount: 0.3 }}
+                    variants={scenarioListVariants}
+                  >
+                    {copy.scenario.bullets.map((item) => (
+                      <motion.li
                         key={item}
-                        className='rounded-xl border border-white/70 bg-white/80 px-4 py-4 text-sm font-semibold text-ink shadow-sm backdrop-blur'
+                        variants={scenarioItemVariants}
+                        className='flex items-center justify-center gap-3 text-left lg:justify-start'
                       >
+                        <span className='h-1.5 w-1.5 rounded-full bg-[var(--gold)]' />
                         {item}
-                      </div>
+                      </motion.li>
                     ))}
-                  </div>
-                </div>
-              </Reveal>
+                  </motion.ul>
+                </motion.div>
+                {copy.scenario.image && (
+                  <motion.div
+                    className='rounded-2xl border border-white/10 bg-white/5 p-3 shadow-[0_18px_45px_rgba(5,12,18,0.35)] backdrop-blur'
+                    initial={reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, amount: 0.3 }}
+                    transition={reduceMotion ? { duration: 0 } : { duration: 0.4 }}
+                  >
+                    <img
+                      src={copy.scenario.image}
+                      alt='Vista do litoral sul da Bahia'
+                      className='h-full w-full rounded-xl object-cover'
+                      loading='lazy'
+                    />
+                  </motion.div>
+                )}
+              </div>
             </div>
           </section>
 
