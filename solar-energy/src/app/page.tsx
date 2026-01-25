@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   AnimatePresence,
   motion,
@@ -11,9 +11,17 @@ import {
   Bath,
   BedDouble,
   CarFront,
+  Clock,
+  Coins,
+  Mail,
   MapPin,
+  PhoneCall,
   Ruler,
+  TrendingUp,
+  Wallet,
+  Waves,
   X,
+  Zap,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -21,8 +29,6 @@ const whatsappNumber = '5571999999999';
 
 const heroPoster =
   'https://res.cloudinary.com/dwedcl97k/video/upload/so_0,f_jpg,w_1600/v1769199580/Design_sem_nome_-_2026-01-23T171932.339_fjulxo.mp4';
-const scenarioImage =
-  'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1800&q=80';
 const currencyFormatter = new Intl.NumberFormat('pt-BR', {
   style: 'currency',
   currency: 'BRL',
@@ -47,9 +53,9 @@ const copy = {
   },
   location: {
     tag: 'LOCALIZAÇÃO ESTRATÉGICA',
-    title: 'Onde a rota encontra o mar.',
+    title: 'Localização que transforma férias em demanda.',
     body:
-      'Entre a BR-367 e os polos turísticos do litoral sul, o Bella Vista conecta acesso rápido, demanda constante e privacidade na medida. Um ponto inteligente para morar ou gerar renda.',
+      'Entre a BR-367 e os polos turísticos do litoral sul, o Bella Vista combina acesso rápido, demanda constante e privacidade na medida.',
     badge: 'BR-367',
     mapNote: 'BR-367 → polos turísticos → Bella Vista Beach Residence',
     pinLabel: 'Bella Vista',
@@ -66,12 +72,12 @@ const copy = {
     subtitle:
       'Ajuste os números e veja uma estimativa de faturamento, custos e retorno anual. (Valores ilustrativos.)',
     bullets: [
-      'Demanda turística constante em alta temporada.',
+      'Demanda sazonal favorece ocupação consistente.',
       'Modelo flexível para uso próprio ou renda.',
-      'Operação simples com potencial de recorrência.',
+      'Operação enxuta com potencial recorrente.',
     ],
   },
-  scenario: {
+  bahia: {
     tag: 'CENÁRIO',
     title: 'Bahia em alta: turismo forte, demanda constante.',
     body:
@@ -81,7 +87,21 @@ const copy = {
       'Mobilidade e infraestrutura fortalecendo a região',
       'Liquidez e potencial de renda recorrente',
     ],
-    image: scenarioImage,
+    highlights: ['Alta temporada', 'Feriados', 'Praias e experiências'],
+  },
+  finalCta: {
+    title: 'Tudo pronto para sua próxima decisão patrimonial.',
+    body:
+      'Receba uma apresentação completa e tire dúvidas com um especialista.',
+    primary: 'Agendar conversa',
+    secondary: 'Ver projeto',
+  },
+  contact: {
+    tag: 'CONTATO',
+    title: 'Fale com nossa equipe',
+    body: 'Atendimento consultivo e rápido para você avançar com segurança.',
+    email: 'contato@bellavistabeach.com.br',
+    location: 'Costa do Descobrimento • Bahia',
   },
   experience: {
     tag: 'Experiência',
@@ -138,6 +158,57 @@ const showcaseDetails = [
   { icon: BedDouble, label: 'Quartos', value: '1' },
   { icon: Bath, label: 'Banheiros', value: '1' },
   { icon: CarFront, label: 'Vagas', value: '1' },
+];
+
+const simulatorPresets = [
+  {
+    label: 'Conservador',
+    values: {
+      propertyValue: 260000,
+      dailyRate: 220,
+      occupancy: 45,
+      monthlyCosts: 650,
+      platformFee: 12,
+    },
+  },
+  {
+    label: 'Realista',
+    values: {
+      propertyValue: 250000,
+      dailyRate: 250,
+      occupancy: 55,
+      monthlyCosts: 650,
+      platformFee: 12,
+    },
+  },
+  {
+    label: 'Alta Temporada',
+    values: {
+      propertyValue: 250000,
+      dailyRate: 320,
+      occupancy: 70,
+      monthlyCosts: 720,
+      platformFee: 12,
+    },
+  },
+];
+
+const bahiaIndicators = [
+  {
+    icon: Waves,
+    title: 'Fluxo turístico',
+    desc: 'Movimento forte em temporadas e feriados.',
+  },
+  {
+    icon: TrendingUp,
+    title: 'Ocupação média',
+    desc: 'Taxas consistentes sustentando a diária.',
+  },
+  {
+    icon: Zap,
+    title: 'Liquidez e demanda',
+    desc: 'Busca ativa por estadias curtas.',
+  },
 ];
 
 
@@ -268,12 +339,14 @@ function StudioShowcaseCard({
   desc,
   images,
   details,
+  index,
 }: {
   label: string;
   title: string;
   desc: string;
   images: string[];
   details?: Array<{ icon: LucideIcon; label: string; value: string }>;
+  index: number;
 }) {
   const reduceMotion = useReducedMotion();
   const [imageIndex, setImageIndex] = useState(0);
@@ -305,40 +378,46 @@ function StudioShowcaseCard({
         onClick={() => setIsOpen(true)}
         aria-haspopup='dialog'
         aria-expanded={isOpen}
-        className='group relative min-w-[85%] snap-center overflow-hidden rounded-3xl border border-white/10 bg-[rgba(7,27,36,0.45)] text-left shadow-[0_20px_40px_rgba(5,12,18,0.35)] backdrop-blur-[14px] transition-shadow duration-500 hover:shadow-[0_28px_55px_rgba(5,12,18,0.45),0_0_30px_rgba(183,146,90,0.22)] active:shadow-[0_28px_55px_rgba(5,12,18,0.45),0_0_30px_rgba(183,146,90,0.18)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B7925A]/60 md:min-w-0'
-      initial={{ opacity: 0, y: 16 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.2 }}
-      whileHover={{ y: -6, scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
-      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-    >
-      <div className='relative aspect-[16/10] w-full overflow-hidden'>
-        <AnimatePresence mode='wait'>
-          <motion.img
-            key={images[imageIndex]}
-            src={images[imageIndex]}
-            alt={title}
-            className='absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105'
-            initial={reduceMotion ? { opacity: 1 } : { opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={reduceMotion ? { opacity: 1 } : { opacity: 0 }}
-            transition={reduceMotion ? { duration: 0 } : { duration: 0.6 }}
-            loading='lazy'
-          />
-        </AnimatePresence>
-        <div className='absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/70 via-black/20 to-transparent' />
-      </div>
-      <div className='space-y-3 p-6'>
-        <span className='inline-flex rounded-full border border-[#B7925A]/40 bg-white/5 px-3 py-1 text-[0.6rem] uppercase tracking-[0.4em] text-[#D9BE86]'>
-          {label}
-        </span>
-        <div>
-          <h3 className='text-lg font-semibold text-white'>{title}</h3>
-          <p className='mt-1 text-sm text-white/70'>{desc}</p>
+        className='group relative min-w-[85%] snap-center overflow-hidden rounded-[24px] border border-white/10 bg-[var(--panel)] text-left shadow-[0_12px_30px_rgba(0,0,0,0.35)] transition duration-300 hover:shadow-[0_18px_50px_rgba(0,0,0,0.45)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold)]/60 md:min-w-0'
+        initial={{ opacity: 0, y: 16 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.2 }}
+        whileHover={reduceMotion ? undefined : { y: -6 }}
+        whileTap={reduceMotion ? undefined : { scale: 0.98 }}
+        transition={
+          reduceMotion
+            ? { duration: 0 }
+            : { duration: 0.35, delay: index * 0.08 }
+        }
+      >
+        <div className='relative aspect-[16/10] w-full overflow-hidden rounded-[18px] border border-white/10'>
+          <AnimatePresence mode='wait'>
+            <motion.img
+              key={images[imageIndex]}
+              src={images[imageIndex]}
+              alt={title}
+              className='absolute inset-0 h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]'
+              initial={reduceMotion ? { opacity: 1 } : { opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={reduceMotion ? { opacity: 1 } : { opacity: 0 }}
+              transition={reduceMotion ? { duration: 0 } : { duration: 0.5 }}
+              loading='lazy'
+            />
+          </AnimatePresence>
+          <div className='absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/70 via-black/20 to-transparent' />
         </div>
-        <div className='text-sm text-white/70'>Ver detalhes →</div>
-      </div>
+        <div className='space-y-3 p-6'>
+          <span className='inline-flex rounded-full border border-[var(--gold)]/35 bg-white/5 px-3 py-1 text-[0.6rem] uppercase tracking-[0.4em] text-[rgba(201,164,106,0.95)]'>
+            {label}
+          </span>
+          <div>
+            <h3 className='text-lg font-semibold text-[var(--text)]'>
+              {title}
+            </h3>
+            <p className='mt-1 text-sm text-[var(--muted)]'>{desc}</p>
+          </div>
+          <div className='text-sm text-[var(--muted)]'>Ver detalhes →</div>
+        </div>
       </motion.button>
 
       <AnimatePresence>
@@ -358,7 +437,7 @@ function StudioShowcaseCard({
               role='dialog'
               aria-modal='true'
               aria-label={`Detalhes do card ${title}`}
-              className='relative z-10 w-full max-w-md rounded-3xl border border-white/10 bg-[rgba(7,27,36,0.95)] p-6 text-white shadow-[0_24px_60px_rgba(5,12,18,0.55),0_0_40px_rgba(183,146,90,0.15)]'
+              className='relative z-10 w-full max-w-md rounded-[24px] border border-white/10 bg-[rgba(6,16,24,0.96)] p-6 text-white shadow-[0_24px_60px_rgba(5,12,18,0.55),0_0_40px_rgba(183,146,90,0.12)]'
               initial={{ y: 16, opacity: 0, scale: 0.98 }}
               animate={{ y: 0, opacity: 1, scale: 1 }}
               exit={{ y: 12, opacity: 0, scale: 0.98 }}
@@ -373,7 +452,7 @@ function StudioShowcaseCard({
               >
                 <X className='h-4 w-4' />
               </button>
-              <span className='inline-flex rounded-full border border-[#B7925A]/40 bg-white/5 px-3 py-1 text-[0.6rem] uppercase tracking-[0.4em] text-[#D9BE86]'>
+              <span className='inline-flex rounded-full border border-[var(--gold)]/40 bg-white/5 px-3 py-1 text-[0.6rem] uppercase tracking-[0.4em] text-[var(--gold)]'>
                 {label}
               </span>
               <h3 className='mt-4 text-xl font-semibold'>{title}</h3>
@@ -386,7 +465,7 @@ function StudioShowcaseCard({
                       key={detail.label}
                       className='flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3'
                     >
-                      <span className='inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-[#D9BE86]'>
+                      <span className='inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-[var(--gold)]'>
                         <Icon className='h-4 w-4' />
                       </span>
                       <div>
@@ -409,29 +488,44 @@ function StudioShowcaseCard({
   );
 }
 
-function PremiumPin({ label }: { label: string }) {
+function PremiumPin({
+  label,
+  onHoverChange,
+}: {
+  label: string;
+  onHoverChange?: (hover: boolean) => void;
+}) {
   const reduceMotion = useReducedMotion();
+  const [isVisible, setIsVisible] = useState(false);
   return (
     <motion.div
-      className='flex items-center'
+      className='group flex items-center'
       initial={reduceMotion ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.96 }}
       whileInView={{ opacity: 1, scale: 1 }}
       viewport={{ once: true, amount: 0.5 }}
       transition={reduceMotion ? { duration: 0 } : { duration: 0.25 }}
+      onViewportEnter={() => setIsVisible(true)}
+      onViewportLeave={() => setIsVisible(false)}
+      onMouseEnter={() => onHoverChange?.(true)}
+      onMouseLeave={() => onHoverChange?.(false)}
     >
       <div className='relative flex h-9 w-9 items-center justify-center'>
-        <span className='absolute inset-0 rounded-full border border-[var(--gold)]/35 shadow-[0_0_10px_rgba(183,146,90,0.2)]' />
-        <span className='absolute inset-0 rounded-full bg-[var(--gold)]/10 pin-pulse' />
+        <span className='absolute inset-0 rounded-full border border-[var(--gold)]/40 shadow-[0_0_10px_rgba(201,164,106,0.2)]' />
+        <span
+          className={`absolute inset-0 rounded-full bg-[var(--gold)]/10 ${
+            isVisible ? 'pin-pulse' : ''
+          }`}
+        />
         <svg
           viewBox='0 0 24 32'
-          className='relative h-4 w-4 text-[var(--gold)] drop-shadow-[0_0_6px_rgba(183,146,90,0.35)]'
+          className='relative h-4 w-4 text-[var(--gold)] drop-shadow-[0_0_6px_rgba(201,164,106,0.35)]'
           fill='currentColor'
           aria-hidden='true'
         >
           <path d='M12 1.5C7.3 1.5 3.5 5.3 3.5 10c0 6.4 8.5 20.5 8.5 20.5S20.5 16.4 20.5 10c0-4.7-3.8-8.5-8.5-8.5zm0 12.1c-2 0-3.6-1.6-3.6-3.6S10 6.4 12 6.4s3.6 1.6 3.6 3.6S14 13.6 12 13.6z' />
         </svg>
       </div>
-      <span className='ml-3 rounded-full border border-white/15 bg-black/30 px-3 py-1 text-xs font-medium text-white/85'>
+      <span className='ml-3 rounded-full border border-white/15 bg-black/30 px-3 py-1 text-xs font-medium text-white/85 transition group-hover:border-white/30 group-hover:bg-white/12'>
         {label}
       </span>
     </motion.div>
@@ -441,11 +535,14 @@ function PremiumPin({ label }: { label: string }) {
 export default function HomePage() {
   const reduceMotion = useReducedMotion();
   const [heroVideoReady, setHeroVideoReady] = useState(false);
+  const [isPinHover, setIsPinHover] = useState(false);
+  const [highlightIndex, setHighlightIndex] = useState(0);
   const [propertyValue, setPropertyValue] = useState(250000);
   const [dailyRate, setDailyRate] = useState(250);
   const [occupancy, setOccupancy] = useState(55);
   const [monthlyCosts, setMonthlyCosts] = useState(650);
   const [platformFee, setPlatformFee] = useState(12);
+  const [activePreset, setActivePreset] = useState('Realista');
   const simulatorResults = useMemo(() => {
     const nightsPerMonth = (30 * occupancy) / 100;
     const grossMonthly = nightsPerMonth * dailyRate;
@@ -463,13 +560,51 @@ export default function HomePage() {
       paybackYears,
     };
   }, [propertyValue, dailyRate, occupancy, monthlyCosts, platformFee]);
+  const previousResults = useRef(simulatorResults);
+  const [animatedResults, setAnimatedResults] = useState(simulatorResults);
+
+  useEffect(() => {
+    if (reduceMotion) {
+      setAnimatedResults(simulatorResults);
+      previousResults.current = simulatorResults;
+      return;
+    }
+    const from = previousResults.current;
+    const to = simulatorResults;
+    const start = performance.now();
+    const duration = 420;
+    let frame: number;
+
+    const animate = (now: number) => {
+      const progress = Math.min((now - start) / duration, 1);
+      const lerp = (a: number, b: number) => a + (b - a) * progress;
+      setAnimatedResults({
+        nightsPerMonth: lerp(from.nightsPerMonth, to.nightsPerMonth),
+        grossMonthly: lerp(from.grossMonthly, to.grossMonthly),
+        netMonthly: lerp(from.netMonthly, to.netMonthly),
+        annualReturn: lerp(from.annualReturn, to.annualReturn),
+        paybackYears:
+          to.paybackYears === null
+            ? null
+            : lerp(from.paybackYears ?? 0, to.paybackYears),
+      });
+      if (progress < 1) {
+        frame = window.requestAnimationFrame(animate);
+      } else {
+        previousResults.current = to;
+      }
+    };
+
+    frame = window.requestAnimationFrame(animate);
+    return () => window.cancelAnimationFrame(frame);
+  }, [reduceMotion, simulatorResults]);
   const mapLineVariants = useMemo(
     () => ({
       hidden: reduceMotion ? { pathLength: 1, opacity: 1 } : { pathLength: 0 },
       visible: {
         pathLength: 1,
         opacity: 1,
-        transition: reduceMotion ? { duration: 0 } : { duration: 1.6 },
+        transition: reduceMotion ? { duration: 0 } : { duration: 0.8 },
       },
     }),
     [reduceMotion]
@@ -498,7 +633,7 @@ export default function HomePage() {
 
   return (
     <MotionConfig reducedMotion='user'>
-      <div className='bg-sand text-ink'>
+      <div className='bg-[var(--bg-0)] text-[var(--text)]'>
         <HeroNav />
         <main>
           <section
@@ -589,20 +724,20 @@ export default function HomePage() {
 
           <section
             id='contexto'
-            className='scroll-mt-24 bg-[#07131D] py-28'
+            className='section-shell section-base section-glow scroll-mt-24'
           >
-            <div className='mx-auto max-w-6xl px-6'>
+            <div className='section-inner'>
               <div className='flex flex-col gap-3'>
-                <p className='text-xs uppercase tracking-[0.32em] text-white/50'>
+                <p className='text-xs uppercase tracking-[0.32em] text-[var(--muted)]'>
                   Vitrine do Studio
                 </p>
-                <h3 className='text-2xl font-semibold text-white'>
+                <h3 className='section-title font-semibold text-[var(--text)]'>
                   Explore o interior pensado para viver e investir bem.
                 </h3>
               </div>
               <div className='mt-6 flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory md:grid md:grid-cols-2 md:gap-6 md:overflow-visible md:snap-none lg:grid-cols-3'>
-                {showcaseItems.map((item) => (
-                  <StudioShowcaseCard key={item.label} {...item} />
+                {showcaseItems.map((item, index) => (
+                  <StudioShowcaseCard key={item.label} {...item} index={index} />
                 ))}
               </div>
             </div>
@@ -610,13 +745,9 @@ export default function HomePage() {
 
           <section
             id='localizacao'
-            className='relative scroll-mt-24 section-dark section-pad'
+            className='section-shell section-alt section-glow section-divider scroll-mt-24'
           >
-            <div
-              className='absolute inset-0 bg-[linear-gradient(180deg,rgba(8,12,16,0.82)_0%,rgba(8,12,16,0.62)_45%,rgba(8,12,16,0.86)_100%)]'
-              aria-hidden='true'
-            />
-            <div className='relative mx-auto max-w-6xl px-6'>
+            <div className='section-inner'>
               <motion.div
                 className='glass-panel p-6 md:p-8 lg:p-10'
                 initial={reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 14 }}
@@ -635,16 +766,25 @@ export default function HomePage() {
                     <p className='text-xs uppercase tracking-[0.32em] text-[var(--muted)]'>
                       {copy.location.tag}
                     </p>
-                    <h2 className='section-title font-semibold text-white'>
+                    <h2 className='section-title font-semibold text-[var(--text)]'>
                       {copy.location.title}
                     </h2>
-                    <p className='text-base text-[var(--muted)] md:text-lg'>
+                    <p className='text-base text-[var(--muted)] md:text-lg lg:max-w-[42ch]'>
                       {copy.location.body}
                     </p>
                   </motion.div>
-                  <div className='glass-map relative p-5 md:p-6'>
-                    <div className='absolute inset-0 rounded-[24px] bg-gradient-to-br from-white/10 via-white/5 to-transparent' />
-                    <div className='relative h-[320px] rounded-[18px] bg-[linear-gradient(155deg,rgba(255,255,255,0.12),rgba(10,18,24,0.65))]'>
+                  <motion.div
+                    className='glass-map relative p-5 md:p-6'
+                    initial={reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, amount: 0.3 }}
+                    transition={reduceMotion ? { duration: 0 } : { duration: 0.35 }}
+                  >
+                    <div className='absolute inset-0 rounded-[28px] bg-gradient-to-br from-white/10 via-white/5 to-transparent' />
+                    <motion.div
+                      className='relative h-[320px] rounded-[20px] bg-[rgba(255,255,255,0.03)]'
+                      whileHover={reduceMotion ? undefined : { scale: 1.005 }}
+                    >
                       <motion.svg
                         className='absolute inset-0 h-full w-full'
                         viewBox='0 0 640 320'
@@ -655,10 +795,11 @@ export default function HomePage() {
                         <motion.path
                           d='M30 250 C140 180 210 200 280 140 C360 70 460 40 610 30'
                           stroke='var(--gold)'
-                          strokeWidth='3'
+                          className='transition-[stroke-width] duration-200'
                           strokeLinecap='round'
                           fill='none'
                           variants={mapLineVariants}
+                          style={{ strokeWidth: isPinHover ? 4 : 3 }}
                         />
                       </motion.svg>
 
@@ -667,7 +808,10 @@ export default function HomePage() {
                       </span>
 
                       <div className='absolute right-[18%] top-[46%]'>
-                        <PremiumPin label={copy.location.pinLabel} />
+                        <PremiumPin
+                          label={copy.location.pinLabel}
+                          onHoverChange={setIsPinHover}
+                        />
                       </div>
 
                       {copy.location.chips.map((chip) => (
@@ -679,12 +823,12 @@ export default function HomePage() {
                           {chip.label}
                         </span>
                       ))}
-                    </div>
+                    </motion.div>
                     <div className='mt-5 flex items-center justify-center gap-2 text-xs uppercase tracking-[0.3em] text-[var(--muted)] lg:justify-start'>
                       <MapPin className='h-4 w-4 text-[var(--gold)]' />
                       {copy.location.mapNote}
                     </div>
-                  </div>
+                  </motion.div>
                 </div>
               </motion.div>
             </div>
@@ -692,22 +836,18 @@ export default function HomePage() {
 
           <section
             id='proposta'
-            className='relative scroll-mt-24 section-dark section-pad'
+            className='section-shell section-base section-glow section-divider scroll-mt-24'
           >
-            <div
-              className='absolute inset-0 bg-[linear-gradient(180deg,rgba(8,12,16,0.82)_0%,rgba(8,12,16,0.68)_45%,rgba(8,12,16,0.9)_100%)]'
-              aria-hidden='true'
-            />
-            <div className='relative mx-auto max-w-6xl px-6'>
-              <div className='split-grid'>
+            <div className='section-inner'>
+              <div className='grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-start'>
                 <div className='space-y-5 text-center lg:text-left'>
                   <p className='text-xs uppercase tracking-[0.32em] text-[var(--muted)]'>
                     {copy.simulator.tag}
                   </p>
-                  <h2 className='section-title font-semibold text-white'>
+                  <h2 className='section-title font-semibold text-[var(--text)]'>
                     {copy.simulator.title}
                   </h2>
-                  <p className='text-base text-[var(--muted)] md:text-lg'>
+                  <p className='text-base text-[var(--muted)] md:text-lg lg:max-w-[42ch]'>
                     {copy.simulator.subtitle}
                   </p>
                   <ul className='space-y-3 text-sm text-white/70'>
@@ -723,13 +863,36 @@ export default function HomePage() {
                   </ul>
                 </div>
                 <motion.div
-                  className='glass-panel p-6 md:p-8 lg:p-10'
+                  className='glass-panel p-6 md:p-8'
                   initial={reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 14 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, amount: 0.3 }}
                   transition={reduceMotion ? { duration: 0 } : { duration: 0.6 }}
                 >
                   <div className='space-y-5 text-white'>
+                    <div className='flex flex-wrap gap-2'>
+                      {simulatorPresets.map((preset) => (
+                        <button
+                          key={preset.label}
+                          type='button'
+                          onClick={() => {
+                            setPropertyValue(preset.values.propertyValue);
+                            setDailyRate(preset.values.dailyRate);
+                            setOccupancy(preset.values.occupancy);
+                            setMonthlyCosts(preset.values.monthlyCosts);
+                            setPlatformFee(preset.values.platformFee);
+                            setActivePreset(preset.label);
+                          }}
+                          className={`rounded-full border px-4 py-2 text-xs uppercase tracking-[0.2em] transition ${
+                            activePreset === preset.label
+                              ? 'border-[var(--gold)]/60 bg-[var(--panel-strong)] text-white'
+                              : 'border-white/15 bg-white/5 text-white/70 hover:border-[var(--gold)]/40'
+                          }`}
+                        >
+                          {preset.label}
+                        </button>
+                      ))}
+                    </div>
                     <div className='grid gap-4 sm:grid-cols-2'>
                       <label className='space-y-2 text-sm text-white/70'>
                         <span>Valor do imóvel (R$)</span>
@@ -739,7 +902,7 @@ export default function HomePage() {
                           onChange={(event) =>
                             setPropertyValue(Number(event.target.value))
                           }
-                          className='w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-[var(--gold)]/60'
+                          className='w-full rounded-xl border border-white/12 bg-[var(--panel)] px-4 py-3 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/40'
                         />
                       </label>
                       <label className='space-y-2 text-sm text-white/70'>
@@ -750,7 +913,7 @@ export default function HomePage() {
                           onChange={(event) =>
                             setDailyRate(Number(event.target.value))
                           }
-                          className='w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-[var(--gold)]/60'
+                          className='w-full rounded-xl border border-white/12 bg-[var(--panel)] px-4 py-3 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/40'
                         />
                       </label>
                       <label className='space-y-2 text-sm text-white/70 sm:col-span-2'>
@@ -766,7 +929,7 @@ export default function HomePage() {
                           onChange={(event) =>
                             setOccupancy(Number(event.target.value))
                           }
-                          className='h-2 w-full cursor-pointer appearance-none rounded-full bg-white/10 accent-[#B7925A]'
+                          className='h-2 w-full cursor-pointer appearance-none rounded-full bg-white/10 accent-[#C9A46A] transition'
                         />
                       </label>
                       <label className='space-y-2 text-sm text-white/70'>
@@ -777,7 +940,7 @@ export default function HomePage() {
                           onChange={(event) =>
                             setMonthlyCosts(Number(event.target.value))
                           }
-                          className='w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-[var(--gold)]/60'
+                          className='w-full rounded-xl border border-white/12 bg-[var(--panel)] px-4 py-3 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/40'
                         />
                       </label>
                       <label className='space-y-2 text-sm text-white/70'>
@@ -788,54 +951,82 @@ export default function HomePage() {
                           onChange={(event) =>
                             setPlatformFee(Number(event.target.value))
                           }
-                          className='w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-[var(--gold)]/60'
+                          className='w-full rounded-xl border border-white/12 bg-[var(--panel)] px-4 py-3 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/40'
                         />
                       </label>
                     </div>
-                    <div className='grid gap-4 rounded-2xl border border-white/10 bg-white/5 p-4 sm:grid-cols-2'>
-                      <div>
-                        <p className='text-xs uppercase tracking-[0.2em] text-white/50'>
-                          Faturamento mensal
-                        </p>
-                        <p className='mt-2 text-lg font-semibold text-white'>
-                          {formatCurrency(simulatorResults.grossMonthly)}
-                        </p>
+                    <div className='grid grid-cols-2 gap-3'>
+                      <div className='panel-strong flex items-center gap-3 px-4 py-3 text-white/80'>
+                        <span className='inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-[var(--gold)]'>
+                          <Coins className='h-4 w-4' />
+                        </span>
+                        <div>
+                          <p className='text-xs uppercase tracking-[0.2em] text-white/50'>
+                            Faturamento
+                          </p>
+                          <p className='mt-1 text-sm font-semibold text-white'>
+                            {formatCurrency(animatedResults.grossMonthly)}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className='text-xs uppercase tracking-[0.2em] text-white/50'>
-                          Lucro mensal
-                        </p>
-                        <p className='mt-2 text-lg font-semibold text-white'>
-                          {formatCurrency(simulatorResults.netMonthly)}
-                        </p>
+                      <div className='panel-strong flex items-center gap-3 px-4 py-3 text-white/80'>
+                        <span className='inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-[var(--gold)]'>
+                          <Wallet className='h-4 w-4' />
+                        </span>
+                        <div>
+                          <p className='text-xs uppercase tracking-[0.2em] text-white/50'>
+                            Lucro mensal
+                          </p>
+                          <p className='mt-1 text-sm font-semibold text-white'>
+                            {formatCurrency(animatedResults.netMonthly)}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className='text-xs uppercase tracking-[0.2em] text-white/50'>
-                          Retorno anual
-                        </p>
-                        <p className='mt-2 text-lg font-semibold text-white'>
-                          {simulatorResults.annualReturn.toFixed(1)}%
-                        </p>
+                      <div className='panel-strong flex items-center gap-3 px-4 py-3 text-white/80'>
+                        <span className='inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-[var(--gold)]'>
+                          <TrendingUp className='h-4 w-4' />
+                        </span>
+                        <div>
+                          <p className='text-xs uppercase tracking-[0.2em] text-white/50'>
+                            Retorno anual
+                          </p>
+                          <p className='mt-1 text-sm font-semibold text-white'>
+                            {animatedResults.annualReturn.toFixed(1)}%
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className='text-xs uppercase tracking-[0.2em] text-white/50'>
-                          Payback
-                        </p>
-                        <p className='mt-2 text-lg font-semibold text-white'>
-                          {simulatorResults.paybackYears
-                            ? `${simulatorResults.paybackYears.toFixed(1)} anos`
-                            : '—'}
-                        </p>
+                      <div className='panel-strong flex items-center gap-3 px-4 py-3 text-white/80'>
+                        <span className='inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-[var(--gold)]'>
+                          <Clock className='h-4 w-4' />
+                        </span>
+                        <div>
+                          <p className='text-xs uppercase tracking-[0.2em] text-white/50'>
+                            Payback
+                          </p>
+                          <p className='mt-1 text-sm font-semibold text-white'>
+                            {animatedResults.paybackYears
+                              ? `${animatedResults.paybackYears.toFixed(1)} anos`
+                              : '—'}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                    <a
-                      href={whatsappLink}
-                      target='_blank'
-                      rel='noreferrer'
-                      className='inline-flex items-center justify-center rounded-full border border-white/15 bg-white/5 px-6 py-3 text-sm font-semibold text-white transition hover:border-[var(--gold)]/40 hover:text-white'
-                    >
-                      Falar com um especialista
-                    </a>
+                    <div className='flex flex-col gap-3 sm:flex-row sm:items-center'>
+                      <a
+                        href={whatsappLink}
+                        target='_blank'
+                        rel='noreferrer'
+                        className='inline-flex flex-1 items-center justify-center rounded-full bg-[var(--gold)] px-6 py-3 text-sm font-semibold text-[#0c1116] shadow-[0_12px_30px_rgba(201,164,106,0.25)] transition hover:brightness-110'
+                      >
+                        Receber simulação no WhatsApp
+                      </a>
+                      <a
+                        href='/simulacao.pdf'
+                        className='text-center text-sm text-white/70 underline-offset-4 transition hover:text-white hover:underline'
+                      >
+                        Baixar PDF da simulação
+                      </a>
+                    </div>
                     <p className='text-xs text-white/50'>
                       Estimativa. Não substitui análise financeira.
                     </p>
@@ -847,14 +1038,10 @@ export default function HomePage() {
 
           <section
             id='perfil'
-            className='relative scroll-mt-24 section-dark section-pad'
+            className='section-shell section-alt section-glow section-divider scroll-mt-24'
           >
-            <div
-              className='absolute inset-0 bg-[linear-gradient(180deg,rgba(8,12,16,0.82)_0%,rgba(8,12,16,0.62)_45%,rgba(8,12,16,0.86)_100%)]'
-              aria-hidden='true'
-            />
-            <div className='relative mx-auto max-w-6xl px-6'>
-              <div className='split-grid'>
+            <div className='section-inner'>
+              <div className='grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-start'>
                 <motion.div
                   className='space-y-5 text-center lg:text-left'
                   initial={reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
@@ -863,13 +1050,13 @@ export default function HomePage() {
                   transition={reduceMotion ? { duration: 0 } : { duration: 0.3 }}
                 >
                   <p className='text-xs uppercase tracking-[0.32em] text-[var(--muted)]'>
-                    {copy.scenario.tag}
+                    {copy.bahia.tag}
                   </p>
-                  <h2 className='section-title font-semibold text-white'>
-                    {copy.scenario.title}
+                  <h2 className='section-title font-semibold text-[var(--text)]'>
+                    {copy.bahia.title}
                   </h2>
-                  <p className='text-base text-[var(--muted)] md:text-lg'>
-                    {copy.scenario.body}
+                  <p className='text-base text-[var(--muted)] md:text-lg lg:max-w-[42ch]'>
+                    {copy.bahia.body}
                   </p>
                   <motion.ul
                     className='space-y-3 text-sm text-white/70'
@@ -878,7 +1065,7 @@ export default function HomePage() {
                     viewport={{ once: true, amount: 0.3 }}
                     variants={scenarioListVariants}
                   >
-                    {copy.scenario.bullets.map((item) => (
+                    {copy.bahia.bullets.map((item) => (
                       <motion.li
                         key={item}
                         variants={scenarioItemVariants}
@@ -890,47 +1077,218 @@ export default function HomePage() {
                     ))}
                   </motion.ul>
                 </motion.div>
-                {copy.scenario.image && (
-                  <motion.div
-                    className='rounded-2xl border border-white/10 bg-white/5 p-3 shadow-[0_18px_45px_rgba(5,12,18,0.35)] backdrop-blur'
-                    initial={reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, amount: 0.3 }}
-                    transition={reduceMotion ? { duration: 0 } : { duration: 0.4 }}
-                  >
-                    <img
-                      src={copy.scenario.image}
-                      alt='Vista do litoral sul da Bahia'
-                      className='h-full w-full rounded-xl object-cover'
-                      loading='lazy'
-                    />
-                  </motion.div>
-                )}
+                <div className='space-y-6'>
+                  <div className='flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory md:grid md:grid-cols-1 md:gap-4 md:overflow-visible md:snap-none'>
+                    {bahiaIndicators.map((item) => {
+                      const Icon = item.icon;
+                      return (
+                        <motion.div
+                          key={item.title}
+                          className='min-w-[75%] snap-center rounded-[20px] border border-white/10 bg-[var(--panel)] p-5 text-white/80 transition hover:border-[var(--gold)]/50 md:min-w-0'
+                          whileHover={reduceMotion ? undefined : { y: -4 }}
+                        >
+                          <div className='flex items-start gap-3'>
+                            <span className='inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/5 text-[var(--gold)]'>
+                              <Icon className='h-5 w-5' />
+                            </span>
+                            <div>
+                              <p className='text-sm font-semibold text-white'>
+                                {item.title}
+                              </p>
+                              <p className='mt-1 text-sm text-white/60'>
+                                {item.desc}
+                              </p>
+                            </div>
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                  <div className='panel-strong rounded-[20px] px-5 py-4 text-center text-white/80'>
+                    <AnimatePresence mode='wait'>
+                      <motion.p
+                        key={copy.bahia.highlights[highlightIndex]}
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -6 }}
+                        transition={{ duration: reduceMotion ? 0 : 0.2 }}
+                        className='text-sm font-semibold text-white'
+                      >
+                        {copy.bahia.highlights[highlightIndex]}
+                      </motion.p>
+                    </AnimatePresence>
+                    <div className='mt-4 flex items-center justify-center gap-2'>
+                      {copy.bahia.highlights.map((_, index) => (
+                        <button
+                          key={index}
+                          type='button'
+                          onClick={() => setHighlightIndex(index)}
+                          className={`h-2 w-2 rounded-full transition ${
+                            index === highlightIndex
+                              ? 'bg-[var(--gold)]'
+                              : 'bg-white/20 hover:bg-white/40'
+                          }`}
+                          aria-label={`Slide ${index + 1}`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className='mt-10 flex flex-col items-center gap-3 text-center'>
+                <a
+                  href='#proposta'
+                  className='inline-flex items-center justify-center rounded-full bg-[var(--gold)] px-6 py-3 text-sm font-semibold text-[#0c1116] transition hover:brightness-110'
+                >
+                  Ver oportunidades de investimento
+                </a>
+                <a
+                  href={whatsappLink}
+                  target='_blank'
+                  rel='noreferrer'
+                  className='text-sm text-white/70 underline-offset-4 transition hover:text-white hover:underline'
+                >
+                  Falar com especialista
+                </a>
               </div>
             </div>
           </section>
 
           <section
             id='experiencia'
-            className='grain scroll-mt-24 bg-ocean py-28 text-white'
+            className='section-shell section-base section-glow section-divider scroll-mt-24'
           >
-            <div className='mx-auto flex max-w-6xl flex-col gap-8 px-6 lg:flex-row lg:items-center lg:justify-between'>
-              <div className='space-y-4'>
-                <Reveal>
-                  <p className='text-xs uppercase tracking-[0.32em] text-white/60'>
-                    {copy.experience.tag}
+            <div className='section-inner'>
+              <div className='flex flex-col items-center gap-6 text-center'>
+                <h2 className='section-title font-semibold text-[var(--text)]'>
+                  {copy.finalCta.title}
+                </h2>
+                <p className='max-w-xl text-base text-[var(--muted)] md:text-lg'>
+                  {copy.finalCta.body}
+                </p>
+                <div className='flex flex-col gap-3 sm:flex-row'>
+                  <a
+                    href={whatsappLink}
+                    target='_blank'
+                    rel='noreferrer'
+                    className='inline-flex items-center justify-center rounded-full bg-[var(--gold)] px-6 py-3 text-sm font-semibold text-[#0c1116] transition hover:brightness-110'
+                  >
+                    {copy.finalCta.primary}
+                  </a>
+                  <a
+                    href='#proposta'
+                    className='inline-flex items-center justify-center rounded-full border border-white/15 bg-white/5 px-6 py-3 text-sm font-semibold text-white/80 transition hover:border-[var(--gold)]/40 hover:text-white'
+                  >
+                    {copy.finalCta.secondary}
+                  </a>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section
+            id='contato'
+            className='section-shell section-alt section-glow section-divider scroll-mt-24'
+          >
+            <div className='section-inner'>
+              <div className='grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-start'>
+                <div className='space-y-5 text-center lg:text-left'>
+                  <p className='text-xs uppercase tracking-[0.32em] text-[var(--muted)]'>
+                    {copy.contact.tag}
                   </p>
-                </Reveal>
-                <Reveal delay={0.1}>
-                  <h2 className='text-3xl font-semibold text-balance md:text-4xl'>
-                    {copy.experience.title}
+                  <h2 className='section-title font-semibold text-[var(--text)]'>
+                    {copy.contact.title}
                   </h2>
-                </Reveal>
-                <Reveal delay={0.2}>
-                  <p className='max-w-xl text-base text-white/70 md:text-lg'>
-                    {copy.experience.body}
+                  <p className='text-base text-[var(--muted)] md:text-lg'>
+                    {copy.contact.body}
                   </p>
-                </Reveal>
+                  <form
+                    className='glass-panel mt-6 space-y-4 p-6 md:p-8'
+                    onSubmit={(event) => event.preventDefault()}
+                  >
+                    <div className='grid gap-4 sm:grid-cols-2'>
+                      <label className='space-y-2 text-sm text-white/70'>
+                        <span>Nome</span>
+                        <input
+                          type='text'
+                          placeholder='Seu nome'
+                          className='w-full rounded-xl border border-white/12 bg-[var(--panel)] px-4 py-3 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/40'
+                        />
+                      </label>
+                      <label className='space-y-2 text-sm text-white/70'>
+                        <span>Email</span>
+                        <input
+                          type='email'
+                          placeholder='voce@email.com'
+                          className='w-full rounded-xl border border-white/12 bg-[var(--panel)] px-4 py-3 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/40'
+                        />
+                      </label>
+                    </div>
+                    <label className='space-y-2 text-sm text-white/70'>
+                      <span>Mensagem</span>
+                      <textarea
+                        rows={4}
+                        placeholder='Como podemos ajudar?'
+                        className='w-full resize-none rounded-xl border border-white/12 bg-[var(--panel)] px-4 py-3 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/40'
+                      />
+                    </label>
+                    <button
+                      type='submit'
+                      className='inline-flex w-full items-center justify-center rounded-full bg-[var(--gold)] px-6 py-3 text-sm font-semibold text-[#0c1116] transition hover:brightness-110'
+                    >
+                      Enviar mensagem
+                    </button>
+                  </form>
+                </div>
+                <div className='space-y-4'>
+                  <div className='panel-strong flex items-start gap-3 px-5 py-4 text-white/80'>
+                    <span className='inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/5 text-[var(--gold)]'>
+                      <PhoneCall className='h-5 w-5' />
+                    </span>
+                    <div>
+                      <p className='text-xs uppercase tracking-[0.2em] text-white/50'>
+                        WhatsApp
+                      </p>
+                      <a
+                        href={whatsappLink}
+                        target='_blank'
+                        rel='noreferrer'
+                        className='mt-1 block text-sm font-semibold text-white'
+                      >
+                        Atendimento imediato
+                      </a>
+                    </div>
+                  </div>
+                  <div className='panel-strong flex items-start gap-3 px-5 py-4 text-white/80'>
+                    <span className='inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/5 text-[var(--gold)]'>
+                      <Mail className='h-5 w-5' />
+                    </span>
+                    <div>
+                      <p className='text-xs uppercase tracking-[0.2em] text-white/50'>
+                        Email
+                      </p>
+                      <a
+                        href={`mailto:${copy.contact.email}`}
+                        className='mt-1 block text-sm font-semibold text-white'
+                      >
+                        {copy.contact.email}
+                      </a>
+                    </div>
+                  </div>
+                  <div className='panel-strong flex items-start gap-3 px-5 py-4 text-white/80'>
+                    <span className='inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/5 text-[var(--gold)]'>
+                      <MapPin className='h-5 w-5' />
+                    </span>
+                    <div>
+                      <p className='text-xs uppercase tracking-[0.2em] text-white/50'>
+                        Localização
+                      </p>
+                      <p className='mt-1 text-sm font-semibold text-white'>
+                        {copy.contact.location}
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </section>
