@@ -175,62 +175,8 @@ const simulatorPresets = [
   },
 ];
 
-const mapPinSvgs = {
-  home:
-    '<svg viewBox="0 0 24 24" class="map-pin__icon" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 4l9 6.5"/><path d="M5 10.5V20h14v-9.5"/><path d="M9 20v-6h6v6"/></svg>',
-  beach:
-    '<svg viewBox="0 0 24 24" class="map-pin__icon" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 18 0H3z"/><path d="M12 12v7a2 2 0 0 0 4 0"/></svg>',
-  food:
-    '<svg viewBox="0 0 24 24" class="map-pin__icon" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v8"/><path d="M9 3v8"/><path d="M6 11h3"/><path d="M12 3v18"/></svg>',
-  hotel:
-    '<svg viewBox="0 0 24 24" class="map-pin__icon" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="6" width="16" height="14" rx="2"/><path d="M8 10h2M8 14h2M14 10h2M14 14h2"/><path d="M9 20v-4h6v4"/></svg>',
-  landmark:
-    '<svg viewBox="0 0 24 24" class="map-pin__icon" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4l8 6H4l8-6z"/><path d="M4 10h16"/><path d="M6 10v8M10 10v8M14 10v8M18 10v8"/><path d="M3 18h18"/></svg>',
-} as const;
-
-const mapPlaces = [
-  {
-    id: 'bella-vista',
-    label: 'Bella Vista',
-    lat: -16.392,
-    lng: -39.182,
-    note: 'Ponto central com fácil acesso aos polos turísticos.',
-    primary: true,
-    icon: 'home',
-  },
-  {
-    id: 'coroa',
-    label: 'Coroa Vermelha',
-    lat: -16.389,
-    lng: -39.175,
-    note: 'Praia com fluxo diário e serviços próximos.',
-    icon: 'beach',
-  },
-  {
-    id: 'porto',
-    label: 'Porto Seguro',
-    lat: -16.443,
-    lng: -39.064,
-    note: 'Hub turístico com demanda constante.',
-    icon: 'hotel',
-  },
-  {
-    id: 'arraial',
-    label: "Arraial d'Ajuda",
-    lat: -16.493,
-    lng: -39.061,
-    note: 'Gastronomia e experiências premium.',
-    icon: 'food',
-  },
-  {
-    id: 'trancoso',
-    label: 'Trancoso',
-    lat: -16.593,
-    lng: -39.096,
-    note: 'Destino sofisticado com alto ticket.',
-    icon: 'landmark',
-  },
-];
+const mapEmbedUrl =
+  'https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d30606.41813604043!2d-39.126!3d-16.445!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2sCoroa%20Vermelha%2C%20Porto%20Seguro%20-%20BA!5e0!3m2!1spt-BR!2sbr!4v1737700000000';
 
 
 
@@ -510,175 +456,16 @@ function StudioShowcaseCard({
   );
 }
 
-function InteractiveMap({
-  activePinId,
-  onSelect,
-}: {
-  activePinId: string;
-  onSelect: (id: string) => void;
-}) {
-  const mapContainerRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<any>(null);
-  const routeRef = useRef<any>(null);
-  const markersRef = useRef<Record<string, any>>({});
-  const [mapReady, setMapReady] = useState(false);
-
-  useEffect(() => {
-    if (!mapContainerRef.current) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]?.isIntersecting) {
-          setMapReady(true);
-          observer.disconnect();
-        }
-      },
-      { rootMargin: '200px' }
-    );
-    observer.observe(mapContainerRef.current);
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    if (!mapReady || mapInstanceRef.current || !mapContainerRef.current) return;
-    let cancelled = false;
-
-    const ensureLeaflet = () =>
-      new Promise<any>((resolve, reject) => {
-        if (typeof window === 'undefined') return resolve(null);
-        const existing = (window as any).L;
-        if (existing) return resolve(existing);
-
-        if (!document.getElementById('leaflet-css')) {
-          const link = document.createElement('link');
-          link.id = 'leaflet-css';
-          link.rel = 'stylesheet';
-          link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-          link.crossOrigin = '';
-          document.head.appendChild(link);
-        }
-
-        if (!document.getElementById('leaflet-js')) {
-          const script = document.createElement('script');
-          script.id = 'leaflet-js';
-          script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-          script.async = true;
-          script.onload = () => resolve((window as any).L);
-          script.onerror = reject;
-          document.body.appendChild(script);
-        } else {
-          const check = window.setInterval(() => {
-            if ((window as any).L) {
-              window.clearInterval(check);
-              resolve((window as any).L);
-            }
-          }, 50);
-        }
-      });
-
-    ensureLeaflet()
-      .then((L) => {
-        if (cancelled || !L || !mapContainerRef.current) return;
-        const map = L.map(mapContainerRef.current, {
-          zoomControl: false,
-          attributionControl: false,
-          scrollWheelZoom: false,
-          doubleClickZoom: false,
-          boxZoom: false,
-          keyboard: false,
-          dragging: true,
-          zoomSnap: 0.5,
-        });
-
-        map.setView([-16.46, -39.1], 11.4);
-
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          maxZoom: 14,
-          minZoom: 10,
-        }).addTo(map);
-
-        const routePoints = mapPlaces.map((place) => [place.lat, place.lng]);
-        routeRef.current = L.polyline(routePoints, {
-          className: 'map-route',
-          color: '#c9a46a',
-          weight: 3,
-        }).addTo(map);
-
-        mapPlaces.forEach((place) => {
-          const html = `
-            <span class="map-pin__core">${mapPinSvgs[place.icon]}</span>
-            <span class="map-pin__label">${place.label}</span>
-          `;
-          const icon = L.divIcon({
-            className: `map-pin ${place.primary ? 'map-pin--primary' : ''}`,
-            html,
-            iconSize: place.primary ? [200, 60] : [180, 52],
-            iconAnchor: place.primary ? [26, 42] : [22, 36],
-            tooltipAnchor: [0, -30],
-          });
-          const marker = L.marker([place.lat, place.lng], {
-            icon,
-            riseOnHover: true,
-          }).addTo(map);
-          marker.bindTooltip(place.label, {
-            direction: 'top',
-            className: 'map-tooltip',
-            opacity: 1,
-            sticky: true,
-          });
-          marker.on('mouseover', () => {
-            routeRef.current?.setStyle({ weight: 4 });
-            marker.openTooltip();
-          });
-          marker.on('mouseout', () => {
-            routeRef.current?.setStyle({ weight: 3 });
-            marker.closeTooltip();
-          });
-          marker.on('click', () => onSelect(place.id));
-          markersRef.current[place.id] = marker;
-        });
-
-        mapInstanceRef.current = map;
-        const initial = mapPlaces.find((place) => place.primary) ?? mapPlaces[0];
-        if (initial) {
-          onSelect(initial.id);
-          markersRef.current[initial.id]?.openTooltip();
-        }
-        window.setTimeout(() => map.invalidateSize(), 200);
-      })
-      .catch(() => undefined);
-
-    return () => {
-      cancelled = true;
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
-        mapInstanceRef.current = null;
-      }
-      markersRef.current = {};
-      routeRef.current = null;
-    };
-  }, [mapReady, onSelect]);
-
-  useEffect(() => {
-    Object.entries(markersRef.current).forEach(([id, marker]) => {
-      const el = marker.getElement();
-      if (!el) return;
-      el.classList.toggle('is-active', id === activePinId);
-      if (id === activePinId) {
-        marker.openTooltip();
-      } else {
-        marker.closeTooltip();
-      }
-    });
-  }, [activePinId]);
-
+function InteractiveMap() {
   return (
     <div className='relative h-[340px] w-full overflow-hidden rounded-[24px] border border-white/10 md:h-[360px]'>
-      <div ref={mapContainerRef} className='h-full w-full' />
-      {!mapReady && (
-        <div className='absolute inset-0 flex items-center justify-center text-xs uppercase tracking-[0.3em] text-white/40'>
-          Carregando mapa
-        </div>
-      )}
+      <iframe
+        title='Mapa da região'
+        src={mapEmbedUrl}
+        className='h-full w-full border-0'
+        loading='lazy'
+        referrerPolicy='no-referrer-when-downgrade'
+      />
     </div>
   );
 }
@@ -686,7 +473,6 @@ function InteractiveMap({
 export default function HomePage() {
   const reduceMotion = useReducedMotion();
   const [heroVideoReady, setHeroVideoReady] = useState(false);
-  const [activePinId, setActivePinId] = useState(mapPlaces[0]?.id ?? '');
   const [propertyValue, setPropertyValue] = useState(250000);
   const [dailyRate, setDailyRate] = useState(250);
   const [occupancy, setOccupancy] = useState(55);
@@ -749,10 +535,6 @@ export default function HomePage() {
     return () => window.cancelAnimationFrame(frame);
   }, [reduceMotion, simulatorResults]);
 
-  const activePin = useMemo(
-    () => mapPlaces.find((pin) => pin.id === activePinId) ?? mapPlaces[0],
-    [activePinId]
-  );
 
   return (
     <MotionConfig reducedMotion='user'>
@@ -896,22 +678,7 @@ export default function HomePage() {
                   viewport={{ once: true, amount: 0.3 }}
                   transition={reduceMotion ? { duration: 0 } : { duration: 0.35 }}
                 >
-                  <InteractiveMap
-                    activePinId={activePinId}
-                    onSelect={setActivePinId}
-                  />
-                  <AnimatePresence mode='wait'>
-                    <motion.p
-                      key={activePin?.id}
-                      initial={{ opacity: 0, y: 6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -6 }}
-                      transition={{ duration: reduceMotion ? 0 : 0.2 }}
-                      className='mt-3 text-sm text-[var(--muted)]'
-                    >
-                      {activePin?.note}
-                    </motion.p>
-                  </AnimatePresence>
+                  <InteractiveMap />
                 </motion.div>
                 <motion.div
                   className='order-3 flex flex-wrap justify-center gap-3 text-sm text-white/80 lg:col-start-1 lg:justify-start'
