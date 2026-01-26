@@ -1011,14 +1011,17 @@ export default function HomePage() {
                   </p>
                   <form
                     className='glass-panel mt-6 space-y-4 p-6 md:p-8'
-                    onSubmit={(event) => event.preventDefault()}
+                    action='https://formspree.io/f/maqojlbv'
+                    method='POST'
                   >
                     <div className='grid gap-4 sm:grid-cols-2'>
                       <label className='space-y-2 text-sm text-white/70'>
                         <span>Nome</span>
                         <input
                           type='text'
+                          name='name'
                           placeholder='Seu nome'
+                          required
                           className='w-full rounded-xl border border-white/12 bg-[var(--panel)] px-4 py-3 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/40'
                         />
                       </label>
@@ -1026,7 +1029,9 @@ export default function HomePage() {
                         <span>Email</span>
                         <input
                           type='email'
+                          name='email'
                           placeholder='voce@email.com'
+                          required
                           className='w-full rounded-xl border border-white/12 bg-[var(--panel)] px-4 py-3 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/40'
                         />
                       </label>
@@ -1035,7 +1040,9 @@ export default function HomePage() {
                       <span>Mensagem</span>
                       <textarea
                         rows={4}
+                        name='message'
                         placeholder='Como podemos ajudar?'
+                        required
                         className='w-full resize-none rounded-xl border border-white/12 bg-[var(--panel)] px-4 py-3 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/40'
                       />
                     </label>
