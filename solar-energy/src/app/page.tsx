@@ -23,8 +23,6 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
-const whatsappNumber = '5571999999999';
-
 const heroPoster =
   'https://res.cloudinary.com/dwedcl97k/video/upload/so_0,f_jpg,w_1600/v1769199580/Design_sem_nome_-_2026-01-23T171932.339_fjulxo.mp4';
 const currencyFormatter = new Intl.NumberFormat('pt-BR', {
@@ -35,9 +33,39 @@ const currencyFormatter = new Intl.NumberFormat('pt-BR', {
 
 const formatCurrency = (value: number) =>
   currencyFormatter.format(Math.round(value));
+const sanitizePdfText = (value: string) =>
+  value.replace(/[^\x20-\x7E]/g, ' ');
+const escapePdfText = (value: string) =>
+  sanitizePdfText(value).replace(/\\/g, '\\\\').replace(/\(/g, '\\(').replace(/\)/g, '\\)');
+const buildPdf = (lines: string[]) => {
+  const content = lines
+    .map((line, index) => {
+      const y = 760 - index * 18;
+      return `BT /F1 12 Tf 60 ${y} Td (${escapePdfText(line)}) Tj ET`;
+    })
+    .join('\n');
+  let pdf = '%PDF-1.3\n';
+  const offsets: number[] = [0];
+  const addObject = (obj: string) => {
+    offsets.push(pdf.length);
+    pdf += `${obj}\n`;
+  };
+  addObject('1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj');
+  addObject('2 0 obj << /Type /Pages /Kids [3 0 R] /Count 1 >> endobj');
+  addObject(
+    '3 0 obj << /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >> endobj'
+  );
+  addObject(`4 0 obj << /Length ${content.length} >> stream\n${content}\nendstream\nendobj`);
+  addObject('5 0 obj << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> endobj');
+  const xrefStart = pdf.length;
+  pdf += 'xref\n0 6\n0000000000 65535 f \n';
+  for (let i = 1; i <= 5; i += 1) {
+    pdf += `${offsets[i].toString().padStart(10, '0')} 00000 n \n`;
+  }
+  pdf += `trailer << /Size 6 /Root 1 0 R >>\nstartxref\n${xrefStart}\n%%EOF`;
+  return pdf;
+};
 const copy = {
-  whatsappMessage:
-    'Olá! Quero entender mais sobre o Bella Vista Beach Residence.',
   hero: {
     eyebrow: 'Costa do Descobrimento · Bahia',
     title: 'Viva perto do mar.\nInvista onde o futuro passa.',
@@ -96,9 +124,8 @@ const copy = {
   },
 };
 
-const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
-  copy.whatsappMessage
-)}`;
+const whatsappLink =
+  'https://wa.me/5573999545185?text=Ol%C3%A1%2C%20gostaria%20de%20mais%20informa%C3%A7%C3%B5es';
 
 const showcaseItems = [
   {
@@ -498,6 +525,35 @@ export default function HomePage() {
   }, [propertyValue, dailyRate, occupancy, monthlyCosts, platformFee]);
   const previousResults = useRef(simulatorResults);
   const [animatedResults, setAnimatedResults] = useState(simulatorResults);
+  const handleDownloadPdf = () => {
+    const lines = [
+      'Bella Vista Beach Residence',
+      'Simulacao de retorno (valores ilustrativos)',
+      '',
+      `Valor do imovel: ${formatCurrency(propertyValue)}`,
+      `Diaria media: ${formatCurrency(dailyRate)}`,
+      `Ocupacao: ${occupancy}%`,
+      `Custos mensais: ${formatCurrency(monthlyCosts)}`,
+      `Taxa plataforma: ${platformFee}%`,
+      '',
+      `Faturamento mensal: ${formatCurrency(simulatorResults.grossMonthly)}`,
+      `Lucro mensal: ${formatCurrency(simulatorResults.netMonthly)}`,
+      `Retorno anual: ${simulatorResults.annualReturn.toFixed(1)}%`,
+      `Payback: ${
+        simulatorResults.paybackYears
+          ? `${simulatorResults.paybackYears.toFixed(1)} anos`
+          : '-'
+      }`,
+    ];
+    const pdf = buildPdf(lines);
+    const blob = new Blob([pdf], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'simulacao-bella-vista.pdf';
+    link.click();
+    URL.revokeObjectURL(url);
+  };
 
   useEffect(() => {
     if (reduceMotion) {
@@ -888,12 +944,13 @@ export default function HomePage() {
                       >
                         Receber simulação no WhatsApp
                       </a>
-                      <a
-                        href='/simulacao.pdf'
+                      <button
+                        type='button'
+                        onClick={handleDownloadPdf}
                         className='text-center text-xs text-white/60 underline-offset-4 transition hover:text-white hover:underline'
                       >
                         Baixar PDF da simulação
-                      </a>
+                      </button>
                     </div>
                     <p className='text-[11px] text-white/50'>
                       Estimativa. Não substitui análise financeira.
