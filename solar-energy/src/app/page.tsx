@@ -591,13 +591,10 @@ function InteractiveMap({
 
         map.setView([-16.46, -39.1], 11.4);
 
-        L.tileLayer(
-          'https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png',
-          {
-            maxZoom: 14,
-            minZoom: 10,
-          }
-        ).addTo(map);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 14,
+          minZoom: 10,
+        }).addTo(map);
 
         const routePoints = mapPlaces.map((place) => [place.lat, place.lng]);
         routeRef.current = L.polyline(routePoints, {
@@ -677,8 +674,6 @@ function InteractiveMap({
   return (
     <div className='relative h-[340px] w-full overflow-hidden rounded-[24px] border border-white/10 md:h-[360px]'>
       <div ref={mapContainerRef} className='h-full w-full' />
-      <div className='pointer-events-none absolute inset-0 bg-[linear-gradient(160deg,rgba(6,16,26,0.25),rgba(6,16,26,0.7))]' />
-      <div className='pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_70%_25%,rgba(201,164,106,0.25),transparent_45%)]' />
       {!mapReady && (
         <div className='absolute inset-0 flex items-center justify-center text-xs uppercase tracking-[0.3em] text-white/40'>
           Carregando mapa
