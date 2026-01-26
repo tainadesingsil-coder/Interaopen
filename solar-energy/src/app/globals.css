@@ -68,6 +68,10 @@
     pointer-events: none;
   }
 
+  .grain-soft::after {
+    opacity: 0.06;
+  }
+
   .vignette::after {
     content: '';
     position: absolute;

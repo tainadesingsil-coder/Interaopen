@@ -599,7 +599,7 @@ export default function HomePage() {
         <main>
           <section
             id='inicio'
-            className='grain relative flex min-h-[100svh] items-start overflow-hidden bg-[#07131D] pt-24 md:min-h-screen md:items-center md:pt-20'
+            className='grain grain-soft relative flex min-h-[100svh] items-start overflow-hidden bg-[#07131D] pt-24 md:min-h-screen md:items-center md:pt-20'
           >
             <div className='absolute inset-0' aria-hidden='true'>
               <img
@@ -624,7 +624,7 @@ export default function HomePage() {
                 onCanPlay={() => setHeroVideoReady(true)}
               >
                 <source
-                  src='https://res.cloudinary.com/dwedcl97k/video/upload/f_auto,q_auto:good,w_960/v1769199580/Design_sem_nome_-_2026-01-23T171932.339_fjulxo.mp4'
+                  src='https://res.cloudinary.com/dwedcl97k/video/upload/f_auto,q_auto:best,w_1280/v1769199580/Design_sem_nome_-_2026-01-23T171932.339_fjulxo.mp4'
                   type='video/mp4'
                   media='(max-width: 768px)'
                 />
