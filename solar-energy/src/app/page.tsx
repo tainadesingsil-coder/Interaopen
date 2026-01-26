@@ -635,10 +635,10 @@ export default function HomePage() {
                 />
               </video>
             </div>
-            <div className='absolute inset-0 bg-gradient-to-b from-black/25 via-[#061825]/20 to-transparent lg:from-black/18 lg:via-[#061825]/14' />
-            <div className='absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(198,155,78,0.04),transparent_55%)] lg:opacity-32' />
-            <div className='absolute inset-0 bg-[linear-gradient(120deg,rgba(6,24,37,0.18),rgba(246,241,234,0.03)_45%,rgba(183,146,90,0.06)_100%)] lg:opacity-28' />
-            <div className='absolute inset-0 hidden lg:block lg:bg-[linear-gradient(90deg,rgba(5,14,22,0.25)_0%,rgba(5,14,22,0.08)_55%,rgba(5,14,22,0.02)_100%)]' />
+            <div className='absolute inset-0 bg-gradient-to-b from-black/18 via-[#061825]/16 to-transparent lg:from-black/12 lg:via-[#061825]/10' />
+            <div className='absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(198,155,78,0.035),transparent_55%)] lg:opacity-28' />
+            <div className='absolute inset-0 bg-[linear-gradient(120deg,rgba(6,24,37,0.14),rgba(246,241,234,0.03)_45%,rgba(183,146,90,0.05)_100%)] lg:opacity-24' />
+            <div className='absolute inset-0 hidden lg:block lg:bg-[linear-gradient(90deg,rgba(5,14,22,0.2)_0%,rgba(5,14,22,0.06)_55%,rgba(5,14,22,0.02)_100%)]' />
             <div className='absolute inset-0 vignette' />
             <div className='relative z-10 mx-auto w-full max-w-6xl px-6 pb-28 pt-24 text-white md:pb-36'>
               <div className='grid gap-12 lg:min-h-[70vh] lg:flex lg:items-center lg:justify-center'>
