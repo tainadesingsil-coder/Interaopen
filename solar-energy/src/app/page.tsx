@@ -176,7 +176,7 @@ const simulatorPresets = [
 ];
 
 const mapEmbedUrl =
-  'https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d30606.41813604043!2d-39.126!3d-16.445!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2sCoroa%20Vermelha%2C%20Porto%20Seguro%20-%20BA!5e0!3m2!1spt-BR!2sbr!4v1737700000000';
+  'https://www.google.com/maps?q=BR-367%2C%20Coroa%20Vermelha%2C%20Porto%20Seguro%20-%20BA&output=embed';
 
 
 
