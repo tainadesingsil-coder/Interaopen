@@ -13,16 +13,11 @@ import {
   CarFront,
   Clock,
   Coins,
-  Home,
-  Hotel,
-  Landmark,
   Mail,
   MapPin,
   PhoneCall,
   Ruler,
   TrendingUp,
-  Umbrella,
-  UtensilsCrossed,
   Wallet,
   X,
 } from 'lucide-react';
@@ -32,8 +27,6 @@ const whatsappNumber = '5571999999999';
 
 const heroPoster =
   'https://res.cloudinary.com/dwedcl97k/video/upload/so_0,f_jpg,w_1600/v1769199580/Design_sem_nome_-_2026-01-23T171932.339_fjulxo.mp4';
-const mapImage =
-  'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1600&q=80';
 const currencyFormatter = new Intl.NumberFormat('pt-BR', {
   style: 'currency',
   currency: 'BRL',
@@ -66,9 +59,6 @@ const copy = {
       'Fluxo turístico constante',
       'Equilíbrio: privacidade + movimento',
     ],
-    badge: 'BR-367',
-    mapNote: 'BR-367 → polos turísticos → Bella Vista Beach Residence',
-    pinLabel: 'Bella Vista',
   },
   simulator: {
     tag: 'INVESTIMENTO',
@@ -185,52 +175,60 @@ const simulatorPresets = [
   },
 ];
 
-const locationPins = [
+const mapPinSvgs = {
+  home:
+    '<svg viewBox="0 0 24 24" class="map-pin__icon" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 4l9 6.5"/><path d="M5 10.5V20h14v-9.5"/><path d="M9 20v-6h6v6"/></svg>',
+  beach:
+    '<svg viewBox="0 0 24 24" class="map-pin__icon" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 18 0H3z"/><path d="M12 12v7a2 2 0 0 0 4 0"/></svg>',
+  food:
+    '<svg viewBox="0 0 24 24" class="map-pin__icon" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v8"/><path d="M9 3v8"/><path d="M6 11h3"/><path d="M12 3v18"/></svg>',
+  hotel:
+    '<svg viewBox="0 0 24 24" class="map-pin__icon" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="6" width="16" height="14" rx="2"/><path d="M8 10h2M8 14h2M14 10h2M14 14h2"/><path d="M9 20v-4h6v4"/></svg>',
+  landmark:
+    '<svg viewBox="0 0 24 24" class="map-pin__icon" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4l8 6H4l8-6z"/><path d="M4 10h16"/><path d="M6 10v8M10 10v8M14 10v8M18 10v8"/><path d="M3 18h18"/></svg>',
+} as const;
+
+const mapPlaces = [
   {
     id: 'bella-vista',
     label: 'Bella Vista',
-    top: '54%',
-    left: '58%',
-    tooltip: '~10 min da BR-367',
-    note: 'Demanda turística forte nessa rota principal.',
+    lat: -16.392,
+    lng: -39.182,
+    note: 'Ponto central com fácil acesso aos polos turísticos.',
     primary: true,
-    icon: Home,
-  },
-  {
-    id: 'arraial',
-    label: "Arraial d'Ajuda",
-    top: '58%',
-    left: '28%',
-    tooltip: '~25 min',
-    note: 'Destino premium com alta procura por temporada.',
-    icon: UtensilsCrossed,
-  },
-  {
-    id: 'porto',
-    label: 'Porto Seguro',
-    top: '22%',
-    left: '18%',
-    tooltip: '~35 min',
-    note: 'Hub turístico que impulsiona fluxo contínuo.',
-    icon: Hotel,
-  },
-  {
-    id: 'trancoso',
-    label: 'Trancoso',
-    top: '72%',
-    left: '72%',
-    tooltip: '~40 min',
-    note: 'Experiência sofisticada com alto ticket.',
-    icon: Landmark,
+    icon: 'home',
   },
   {
     id: 'coroa',
     label: 'Coroa Vermelha',
-    top: '36%',
-    left: '52%',
-    tooltip: '~18 min',
-    note: 'Movimento diário de visitantes e serviços.',
-    icon: Umbrella,
+    lat: -16.389,
+    lng: -39.175,
+    note: 'Praia com fluxo diário e serviços próximos.',
+    icon: 'beach',
+  },
+  {
+    id: 'porto',
+    label: 'Porto Seguro',
+    lat: -16.443,
+    lng: -39.064,
+    note: 'Hub turístico com demanda constante.',
+    icon: 'hotel',
+  },
+  {
+    id: 'arraial',
+    label: "Arraial d'Ajuda",
+    lat: -16.493,
+    lng: -39.061,
+    note: 'Gastronomia e experiências premium.',
+    icon: 'food',
+  },
+  {
+    id: 'trancoso',
+    label: 'Trancoso',
+    lat: -16.593,
+    lng: -39.096,
+    note: 'Destino sofisticado com alto ticket.',
+    icon: 'landmark',
   },
 ];
 
@@ -512,115 +510,188 @@ function StudioShowcaseCard({
   );
 }
 
-function MapPin3D({
-  pin,
-  isActive,
+function InteractiveMap({
+  activePinId,
   onSelect,
-  onHover,
 }: {
-  pin: {
-    id: string;
-    label: string;
-    top: string;
-    left: string;
-    tooltip: string;
-    primary?: boolean;
-    icon: LucideIcon;
-  };
-  isActive: boolean;
+  activePinId: string;
   onSelect: (id: string) => void;
-  onHover: (id: string | null) => void;
 }) {
-  const reduceMotion = useReducedMotion();
-  const [isHovered, setIsHovered] = useState(false);
-  const Icon = pin.icon;
-  const showTooltip = isHovered || isActive;
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<any>(null);
+  const routeRef = useRef<any>(null);
+  const markersRef = useRef<Record<string, any>>({});
+  const [mapReady, setMapReady] = useState(false);
+
+  useEffect(() => {
+    if (!mapContainerRef.current) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setMapReady(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '200px' }
+    );
+    observer.observe(mapContainerRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!mapReady || mapInstanceRef.current || !mapContainerRef.current) return;
+    let cancelled = false;
+
+    const ensureLeaflet = () =>
+      new Promise<any>((resolve, reject) => {
+        if (typeof window === 'undefined') return resolve(null);
+        const existing = (window as any).L;
+        if (existing) return resolve(existing);
+
+        if (!document.getElementById('leaflet-css')) {
+          const link = document.createElement('link');
+          link.id = 'leaflet-css';
+          link.rel = 'stylesheet';
+          link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+          link.crossOrigin = '';
+          document.head.appendChild(link);
+        }
+
+        if (!document.getElementById('leaflet-js')) {
+          const script = document.createElement('script');
+          script.id = 'leaflet-js';
+          script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+          script.async = true;
+          script.onload = () => resolve((window as any).L);
+          script.onerror = reject;
+          document.body.appendChild(script);
+        } else {
+          const check = window.setInterval(() => {
+            if ((window as any).L) {
+              window.clearInterval(check);
+              resolve((window as any).L);
+            }
+          }, 50);
+        }
+      });
+
+    ensureLeaflet()
+      .then((L) => {
+        if (cancelled || !L || !mapContainerRef.current) return;
+        const map = L.map(mapContainerRef.current, {
+          zoomControl: false,
+          attributionControl: false,
+          scrollWheelZoom: false,
+          doubleClickZoom: false,
+          boxZoom: false,
+          keyboard: false,
+          dragging: true,
+          zoomSnap: 0.5,
+        });
+
+        map.setView([-16.46, -39.1], 11.4);
+
+        L.tileLayer(
+          'https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png',
+          {
+            maxZoom: 14,
+            minZoom: 10,
+          }
+        ).addTo(map);
+
+        const routePoints = mapPlaces.map((place) => [place.lat, place.lng]);
+        routeRef.current = L.polyline(routePoints, {
+          className: 'map-route',
+          color: '#c9a46a',
+          weight: 3,
+        }).addTo(map);
+
+        mapPlaces.forEach((place) => {
+          const html = `
+            <span class="map-pin__core">${mapPinSvgs[place.icon]}</span>
+            <span class="map-pin__label">${place.label}</span>
+          `;
+          const icon = L.divIcon({
+            className: `map-pin ${place.primary ? 'map-pin--primary' : ''}`,
+            html,
+            iconSize: place.primary ? [200, 60] : [180, 52],
+            iconAnchor: place.primary ? [26, 42] : [22, 36],
+            tooltipAnchor: [0, -30],
+          });
+          const marker = L.marker([place.lat, place.lng], {
+            icon,
+            riseOnHover: true,
+          }).addTo(map);
+          marker.bindTooltip(place.label, {
+            direction: 'top',
+            className: 'map-tooltip',
+            opacity: 1,
+            sticky: true,
+          });
+          marker.on('mouseover', () => {
+            routeRef.current?.setStyle({ weight: 4 });
+            marker.openTooltip();
+          });
+          marker.on('mouseout', () => {
+            routeRef.current?.setStyle({ weight: 3 });
+            marker.closeTooltip();
+          });
+          marker.on('click', () => onSelect(place.id));
+          markersRef.current[place.id] = marker;
+        });
+
+        mapInstanceRef.current = map;
+        const initial = mapPlaces.find((place) => place.primary) ?? mapPlaces[0];
+        if (initial) {
+          onSelect(initial.id);
+          markersRef.current[initial.id]?.openTooltip();
+        }
+        window.setTimeout(() => map.invalidateSize(), 200);
+      })
+      .catch(() => undefined);
+
+    return () => {
+      cancelled = true;
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+      markersRef.current = {};
+      routeRef.current = null;
+    };
+  }, [mapReady, onSelect]);
+
+  useEffect(() => {
+    Object.entries(markersRef.current).forEach(([id, marker]) => {
+      const el = marker.getElement();
+      if (!el) return;
+      el.classList.toggle('is-active', id === activePinId);
+      if (id === activePinId) {
+        marker.openTooltip();
+      } else {
+        marker.closeTooltip();
+      }
+    });
+  }, [activePinId]);
+
   return (
-    <motion.button
-      type='button'
-      onClick={() => onSelect(pin.id)}
-      onMouseEnter={() => {
-        onHover(pin.id);
-        setIsHovered(true);
-      }}
-      onMouseLeave={() => {
-        onHover(null);
-        setIsHovered(false);
-      }}
-      onFocus={() => {
-        onHover(pin.id);
-        setIsHovered(true);
-      }}
-      onBlur={() => {
-        onHover(null);
-        setIsHovered(false);
-      }}
-      className='group absolute flex -translate-x-1/2 -translate-y-1/2 items-center gap-2 text-left'
-      style={{ top: pin.top, left: pin.left }}
-      whileHover={reduceMotion ? undefined : { scale: 1.05 }}
-      whileTap={reduceMotion ? undefined : { scale: 0.98 }}
-      aria-pressed={isActive}
-      aria-label={`${pin.label} ${pin.tooltip}`}
-    >
-      <AnimatePresence>
-        {showTooltip && (
-          <motion.span
-            className='absolute -top-9 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border border-white/15 bg-black/70 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-white/85 shadow-[0_8px_20px_rgba(0,0,0,0.35)]'
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 6 }}
-            transition={{ duration: reduceMotion ? 0 : 0.2 }}
-          >
-            {pin.tooltip}
-          </motion.span>
-        )}
-      </AnimatePresence>
-      <span className='relative flex items-center justify-center scale-110 md:scale-100'>
-        <span
-          className={`absolute -inset-4 rounded-full bg-[var(--gold)]/10 ${
-            !reduceMotion ? 'pin-pulse' : ''
-          }`}
-        />
-        <span
-          className={`absolute inset-0 rounded-full ${
-            pin.primary
-              ? 'shadow-[0_12px_22px_rgba(0,0,0,0.35),0_0_20px_rgba(201,164,106,0.55)]'
-              : 'shadow-[0_10px_18px_rgba(0,0,0,0.35),0_0_14px_rgba(201,164,106,0.3)]'
-          }`}
-        />
-        <span
-          className={`relative flex items-center justify-center ${
-            pin.primary ? 'h-11 w-11' : 'h-9 w-9'
-          } rounded-[14px] bg-[linear-gradient(160deg,#f7e2b6,#c68b36)]`}
-        >
-          <Icon className='h-4 w-4 text-[#3b2a10]' />
-        </span>
-        <span
-          className={`absolute ${
-            pin.primary ? '-bottom-2 h-3 w-3' : '-bottom-1.5 h-2 w-2'
-          } rotate-45 rounded-[4px] bg-[linear-gradient(160deg,#f7e2b6,#c68b36)] shadow-[0_6px_14px_rgba(0,0,0,0.35)]`}
-        />
-      </span>
-      <span
-        className={`rounded-full border border-white/15 bg-black/40 px-3 py-1 text-xs font-medium text-white/85 transition ${
-          isActive
-            ? 'border-[var(--gold)]/40 bg-white/10'
-            : 'group-hover:border-white/30 group-hover:bg-white/10'
-        }`}
-      >
-        {pin.label}
-      </span>
-    </motion.button>
+    <div className='relative h-[340px] w-full overflow-hidden rounded-[24px] border border-white/10 md:h-[360px]'>
+      <div ref={mapContainerRef} className='h-full w-full' />
+      <div className='pointer-events-none absolute inset-0 bg-[linear-gradient(160deg,rgba(6,16,26,0.25),rgba(6,16,26,0.7))]' />
+      <div className='pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_70%_25%,rgba(201,164,106,0.25),transparent_45%)]' />
+      {!mapReady && (
+        <div className='absolute inset-0 flex items-center justify-center text-xs uppercase tracking-[0.3em] text-white/40'>
+          Carregando mapa
+        </div>
+      )}
+    </div>
   );
 }
 
 export default function HomePage() {
   const reduceMotion = useReducedMotion();
   const [heroVideoReady, setHeroVideoReady] = useState(false);
-  const [activePinId, setActivePinId] = useState(locationPins[0]?.id ?? '');
-  const [hoverPinId, setHoverPinId] = useState<string | null>(null);
-  const [mapOffset, setMapOffset] = useState({ x: 0, y: 0 });
-  const [isMapHover, setIsMapHover] = useState(false);
+  const [activePinId, setActivePinId] = useState(mapPlaces[0]?.id ?? '');
   const [propertyValue, setPropertyValue] = useState(250000);
   const [dailyRate, setDailyRate] = useState(250);
   const [occupancy, setOccupancy] = useState(55);
@@ -684,19 +755,8 @@ export default function HomePage() {
   }, [reduceMotion, simulatorResults]);
 
   const activePin = useMemo(
-    () => locationPins.find((pin) => pin.id === activePinId) ?? locationPins[0],
+    () => mapPlaces.find((pin) => pin.id === activePinId) ?? mapPlaces[0],
     [activePinId]
-  );
-  const mapLineVariants = useMemo(
-    () => ({
-      hidden: reduceMotion ? { pathLength: 1, opacity: 1 } : { pathLength: 0 },
-      visible: {
-        pathLength: 1,
-        opacity: 1,
-        transition: reduceMotion ? { duration: 0 } : { duration: 0.8 },
-      },
-    }),
-    [reduceMotion]
   );
 
   return (
@@ -840,73 +900,11 @@ export default function HomePage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, amount: 0.3 }}
                   transition={reduceMotion ? { duration: 0 } : { duration: 0.35 }}
-                  onMouseEnter={() => {
-                    if (reduceMotion) return;
-                    if (window.innerWidth < 1024) return;
-                    setIsMapHover(true);
-                  }}
-                  onMouseMove={(event) => {
-                    if (reduceMotion) return;
-                    if (window.innerWidth < 1024) return;
-                    const rect = event.currentTarget.getBoundingClientRect();
-                    const x =
-                      ((event.clientX - rect.left) / rect.width - 0.5) * 8;
-                    const y =
-                      ((event.clientY - rect.top) / rect.height - 0.5) * 8;
-                    setMapOffset({ x, y });
-                  }}
-                  onMouseLeave={() => {
-                    setIsMapHover(false);
-                    setMapOffset({ x: 0, y: 0 });
-                  }}
                 >
-                  <div className='absolute inset-0 rounded-[28px] bg-[linear-gradient(135deg,rgba(6,16,26,0.92),rgba(6,12,18,0.98))]' />
-                  <div className='absolute inset-0 rounded-[28px] bg-[radial-gradient(circle_at_20%_20%,rgba(201,164,106,0.2),transparent_40%)] opacity-60' />
-                  <motion.div
-                    className='relative h-[340px] overflow-hidden rounded-[22px] transition-transform duration-300'
-                    style={{
-                      transform: `translate3d(${mapOffset.x}px, ${mapOffset.y}px, 0) scale(${
-                        isMapHover && !reduceMotion ? 1.03 : 1
-                      })`,
-                    }}
-                  >
-                    <img
-                      src={mapImage}
-                      alt='Mapa aéreo estilizado'
-                      className='absolute inset-0 h-full w-full object-cover opacity-70'
-                      loading='lazy'
-                    />
-                    <div className='absolute inset-0 bg-[linear-gradient(160deg,rgba(6,16,26,0.35),rgba(6,16,26,0.85))]' />
-                    <div className='absolute inset-0 bg-[radial-gradient(circle_at_70%_20%,rgba(201,164,106,0.25),transparent_45%)] opacity-80' />
-                    <motion.svg
-                      className='absolute inset-0 h-full w-full'
-                      viewBox='0 0 640 320'
-                      initial='hidden'
-                      whileInView='visible'
-                      viewport={{ once: true, amount: 0.6 }}
-                    >
-                      <motion.path
-                        d='M50 250 C140 190 220 210 300 150 C380 90 470 70 590 50'
-                        stroke='var(--gold)'
-                        strokeLinecap='round'
-                        fill='none'
-                        variants={mapLineVariants}
-                        style={{
-                          strokeWidth: hoverPinId ? 4 : 3,
-                          filter: 'drop-shadow(0 0 6px rgba(201,164,106,0.4))',
-                        }}
-                      />
-                    </motion.svg>
-                    {locationPins.map((pin) => (
-                      <MapPin3D
-                        key={pin.id}
-                        pin={pin}
-                        isActive={pin.id === activePinId}
-                        onSelect={setActivePinId}
-                        onHover={setHoverPinId}
-                      />
-                    ))}
-                  </motion.div>
+                  <InteractiveMap
+                    activePinId={activePinId}
+                    onSelect={setActivePinId}
+                  />
                   <AnimatePresence mode='wait'>
                     <motion.p
                       key={activePin?.id}
