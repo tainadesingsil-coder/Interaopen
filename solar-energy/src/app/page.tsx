@@ -13,11 +13,16 @@ import {
   CarFront,
   Clock,
   Coins,
+  Home,
+  Hotel,
+  Landmark,
   Mail,
   MapPin,
   PhoneCall,
   Ruler,
   TrendingUp,
+  Umbrella,
+  UtensilsCrossed,
   Wallet,
   X,
 } from 'lucide-react';
@@ -27,6 +32,8 @@ const whatsappNumber = '5571999999999';
 
 const heroPoster =
   'https://res.cloudinary.com/dwedcl97k/video/upload/so_0,f_jpg,w_1600/v1769199580/Design_sem_nome_-_2026-01-23T171932.339_fjulxo.mp4';
+const mapImage =
+  'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1600&q=80';
 const currencyFormatter = new Intl.NumberFormat('pt-BR', {
   style: 'currency',
   currency: 'BRL',
@@ -187,6 +194,7 @@ const locationPins = [
     tooltip: '~10 min da BR-367',
     note: 'Demanda turística forte nessa rota principal.',
     primary: true,
+    icon: Home,
   },
   {
     id: 'arraial',
@@ -195,6 +203,7 @@ const locationPins = [
     left: '28%',
     tooltip: '~25 min',
     note: 'Destino premium com alta procura por temporada.',
+    icon: UtensilsCrossed,
   },
   {
     id: 'porto',
@@ -203,6 +212,7 @@ const locationPins = [
     left: '18%',
     tooltip: '~35 min',
     note: 'Hub turístico que impulsiona fluxo contínuo.',
+    icon: Hotel,
   },
   {
     id: 'trancoso',
@@ -211,6 +221,7 @@ const locationPins = [
     left: '72%',
     tooltip: '~40 min',
     note: 'Experiência sofisticada com alto ticket.',
+    icon: Landmark,
   },
   {
     id: 'coroa',
@@ -219,6 +230,7 @@ const locationPins = [
     left: '52%',
     tooltip: '~18 min',
     note: 'Movimento diário de visitantes e serviços.',
+    icon: Umbrella,
   },
 ];
 
@@ -513,20 +525,36 @@ function MapPin3D({
     left: string;
     tooltip: string;
     primary?: boolean;
+    icon: LucideIcon;
   };
   isActive: boolean;
   onSelect: (id: string) => void;
   onHover: (id: string | null) => void;
 }) {
   const reduceMotion = useReducedMotion();
+  const [isHovered, setIsHovered] = useState(false);
+  const Icon = pin.icon;
+  const showTooltip = isHovered || isActive;
   return (
     <motion.button
       type='button'
       onClick={() => onSelect(pin.id)}
-      onMouseEnter={() => onHover(pin.id)}
-      onMouseLeave={() => onHover(null)}
-      onFocus={() => onHover(pin.id)}
-      onBlur={() => onHover(null)}
+      onMouseEnter={() => {
+        onHover(pin.id);
+        setIsHovered(true);
+      }}
+      onMouseLeave={() => {
+        onHover(null);
+        setIsHovered(false);
+      }}
+      onFocus={() => {
+        onHover(pin.id);
+        setIsHovered(true);
+      }}
+      onBlur={() => {
+        onHover(null);
+        setIsHovered(false);
+      }}
       className='group absolute flex -translate-x-1/2 -translate-y-1/2 items-center gap-2 text-left'
       style={{ top: pin.top, left: pin.left }}
       whileHover={reduceMotion ? undefined : { scale: 1.05 }}
@@ -534,35 +562,43 @@ function MapPin3D({
       aria-pressed={isActive}
       aria-label={`${pin.label} ${pin.tooltip}`}
     >
-      <span
-        className={`absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border border-white/15 bg-black/60 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-white/80 opacity-0 transition ${
-          isActive ? 'opacity-100' : 'group-hover:opacity-100'
-        }`}
-      >
-        {pin.tooltip}
-      </span>
-      <span className='relative flex items-center justify-center'>
+      <AnimatePresence>
+        {showTooltip && (
+          <motion.span
+            className='absolute -top-9 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border border-white/15 bg-black/70 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-white/85 shadow-[0_8px_20px_rgba(0,0,0,0.35)]'
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 6 }}
+            transition={{ duration: reduceMotion ? 0 : 0.2 }}
+          >
+            {pin.tooltip}
+          </motion.span>
+        )}
+      </AnimatePresence>
+      <span className='relative flex items-center justify-center scale-110 md:scale-100'>
         <span
-          className={`absolute -inset-3 rounded-full bg-[var(--gold)]/15 ${
-            isActive && !reduceMotion ? 'pin-pulse' : ''
+          className={`absolute -inset-4 rounded-full bg-[var(--gold)]/10 ${
+            !reduceMotion ? 'pin-pulse' : ''
           }`}
         />
         <span
           className={`absolute inset-0 rounded-full ${
             pin.primary
-              ? 'shadow-[0_10px_22px_rgba(0,0,0,0.35),0_0_16px_rgba(201,164,106,0.45)]'
-              : 'shadow-[0_8px_18px_rgba(0,0,0,0.35),0_0_12px_rgba(201,164,106,0.25)]'
+              ? 'shadow-[0_12px_22px_rgba(0,0,0,0.35),0_0_20px_rgba(201,164,106,0.55)]'
+              : 'shadow-[0_10px_18px_rgba(0,0,0,0.35),0_0_14px_rgba(201,164,106,0.3)]'
           }`}
         />
         <span
-          className={`relative block ${
-            pin.primary ? 'h-5 w-5' : 'h-4 w-4'
-          } rotate-45 rounded-[6px] bg-[linear-gradient(145deg,#f5dfb0,#c6903a)]`}
-        />
+          className={`relative flex items-center justify-center ${
+            pin.primary ? 'h-11 w-11' : 'h-9 w-9'
+          } rounded-[14px] bg-[linear-gradient(160deg,#f7e2b6,#c68b36)]`}
+        >
+          <Icon className='h-4 w-4 text-[#3b2a10]' />
+        </span>
         <span
           className={`absolute ${
-            pin.primary ? '-bottom-2 h-2 w-2' : '-bottom-1.5 h-1.5 w-1.5'
-          } rotate-45 rounded-[4px] bg-[linear-gradient(145deg,#f5dfb0,#c6903a)] shadow-[0_6px_14px_rgba(0,0,0,0.35)]`}
+            pin.primary ? '-bottom-2 h-3 w-3' : '-bottom-1.5 h-2 w-2'
+          } rotate-45 rounded-[4px] bg-[linear-gradient(160deg,#f7e2b6,#c68b36)] shadow-[0_6px_14px_rgba(0,0,0,0.35)]`}
         />
       </span>
       <span
@@ -584,6 +620,7 @@ export default function HomePage() {
   const [activePinId, setActivePinId] = useState(locationPins[0]?.id ?? '');
   const [hoverPinId, setHoverPinId] = useState<string | null>(null);
   const [mapOffset, setMapOffset] = useState({ x: 0, y: 0 });
+  const [isMapHover, setIsMapHover] = useState(false);
   const [propertyValue, setPropertyValue] = useState(250000);
   const [dailyRate, setDailyRate] = useState(250);
   const [occupancy, setOccupancy] = useState(55);
@@ -803,6 +840,11 @@ export default function HomePage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, amount: 0.3 }}
                   transition={reduceMotion ? { duration: 0 } : { duration: 0.35 }}
+                  onMouseEnter={() => {
+                    if (reduceMotion) return;
+                    if (window.innerWidth < 1024) return;
+                    setIsMapHover(true);
+                  }}
                   onMouseMove={(event) => {
                     if (reduceMotion) return;
                     if (window.innerWidth < 1024) return;
@@ -813,16 +855,29 @@ export default function HomePage() {
                       ((event.clientY - rect.top) / rect.height - 0.5) * 8;
                     setMapOffset({ x, y });
                   }}
-                  onMouseLeave={() => setMapOffset({ x: 0, y: 0 })}
+                  onMouseLeave={() => {
+                    setIsMapHover(false);
+                    setMapOffset({ x: 0, y: 0 });
+                  }}
                 >
-                  <div className='absolute inset-0 rounded-[28px] bg-[linear-gradient(135deg,rgba(201,164,106,0.15),rgba(6,16,26,0.92))]' />
-                  <div className='absolute inset-0 rounded-[28px] bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.15),transparent_40%)] opacity-60' />
+                  <div className='absolute inset-0 rounded-[28px] bg-[linear-gradient(135deg,rgba(6,16,26,0.92),rgba(6,12,18,0.98))]' />
+                  <div className='absolute inset-0 rounded-[28px] bg-[radial-gradient(circle_at_20%_20%,rgba(201,164,106,0.2),transparent_40%)] opacity-60' />
                   <motion.div
-                    className='relative h-[320px] rounded-[22px] transition-transform duration-300'
+                    className='relative h-[340px] overflow-hidden rounded-[22px] transition-transform duration-300'
                     style={{
-                      transform: `translate3d(${mapOffset.x}px, ${mapOffset.y}px, 0)`,
+                      transform: `translate3d(${mapOffset.x}px, ${mapOffset.y}px, 0) scale(${
+                        isMapHover && !reduceMotion ? 1.03 : 1
+                      })`,
                     }}
                   >
+                    <img
+                      src={mapImage}
+                      alt='Mapa aéreo estilizado'
+                      className='absolute inset-0 h-full w-full object-cover opacity-70'
+                      loading='lazy'
+                    />
+                    <div className='absolute inset-0 bg-[linear-gradient(160deg,rgba(6,16,26,0.35),rgba(6,16,26,0.85))]' />
+                    <div className='absolute inset-0 bg-[radial-gradient(circle_at_70%_20%,rgba(201,164,106,0.25),transparent_45%)] opacity-80' />
                     <motion.svg
                       className='absolute inset-0 h-full w-full'
                       viewBox='0 0 640 320'
@@ -836,7 +891,10 @@ export default function HomePage() {
                         strokeLinecap='round'
                         fill='none'
                         variants={mapLineVariants}
-                        style={{ strokeWidth: hoverPinId ? 4 : 3 }}
+                        style={{
+                          strokeWidth: hoverPinId ? 4 : 3,
+                          filter: 'drop-shadow(0 0 6px rgba(201,164,106,0.4))',
+                        }}
                       />
                     </motion.svg>
                     {locationPins.map((pin) => (
@@ -849,6 +907,18 @@ export default function HomePage() {
                       />
                     ))}
                   </motion.div>
+                  <AnimatePresence mode='wait'>
+                    <motion.p
+                      key={activePin?.id}
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -6 }}
+                      transition={{ duration: reduceMotion ? 0 : 0.2 }}
+                      className='mt-3 text-sm text-[var(--muted)]'
+                    >
+                      {activePin?.note}
+                    </motion.p>
+                  </AnimatePresence>
                 </motion.div>
                 <motion.div
                   className='order-3 flex flex-wrap justify-center gap-3 text-sm text-white/80 lg:col-start-1 lg:justify-start'
