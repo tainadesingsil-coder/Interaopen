@@ -137,8 +137,12 @@ const whatsappLink =
 const showcaseItems = [
   {
     label: 'BELLA VISTA',
-    title: 'Studio 27,89 m²',
-    desc: 'R$ 256.006,49',
+    title: 'Studio',
+    desc: '27,89 m²',
+    details: [
+      { icon: Ruler, label: 'Área', value: '27,89 m²' },
+      { icon: BedDouble, label: 'Ambiente', value: 'Studio' },
+    ],
     images: [
       'https://i.postimg.cc/mksDjFhJ/Whats-App-Image-2026-01-22-at-12-04-21.jpg',
       'https://i.postimg.cc/GpTm1jyg/Whats-App-Image-2026-01-22-at-12-04-21-(2).jpg',
@@ -147,8 +151,12 @@ const showcaseItems = [
   },
   {
     label: '2 QUARTOS',
-    title: '56,6 m²',
-    desc: 'R$ 448.667,86',
+    title: 'Residência 2 quartos',
+    desc: '56,6 m²',
+    details: [
+      { icon: Ruler, label: 'Área', value: '56,6 m²' },
+      { icon: BedDouble, label: 'Quartos', value: '2' },
+    ],
     images: [
       'https://i.postimg.cc/pV5VhCch/Whats-App-Image-2026-01-22-at-12-04-20.jpg',
       'https://i.postimg.cc/vZYdztXF/Whats-App-Image-2026-01-22-at-12-04-20-(1).jpg',
@@ -158,13 +166,29 @@ const showcaseItems = [
   },
   {
     label: '3 QUARTOS',
-    title: '82,48 m²',
-    desc: 'R$ 7785.669,20',
+    title: 'Residência 3 quartos',
+    desc: '82,48 m²',
+    details: [
+      { icon: Ruler, label: 'Área', value: '82,48 m²' },
+      { icon: BedDouble, label: 'Quartos', value: '3' },
+    ],
     images: [
       'https://i.postimg.cc/kX7Z3XSm/Design-sem-nome-2026-01-24T013513-644.png',
       'https://i.postimg.cc/6QBTCZ4p/Design-sem-nome-2026-01-24T013506-098.png',
       'https://i.postimg.cc/gJTJ9BM5/Design-sem-nome-2026-01-24T013459-346.png',
       'https://i.postimg.cc/qq67pXS1/Design-sem-nome-2026-01-24T013356-074.png',
+    ],
+  },
+  {
+    label: 'AMBIENTE TOTAL',
+    title: 'Ambiente completo',
+    desc: 'Cozinha + quarto',
+    details: [
+      { icon: Ruler, label: 'Integração', value: 'Total' },
+      { icon: BedDouble, label: 'Ambientes', value: 'Cozinha + quarto' },
+    ],
+    images: [
+      'https://images.unsplash.com/photo-1507089947368-19c1da9775ae?auto=format&fit=crop&w=1600&q=80',
     ],
   },
 ];
