@@ -99,6 +99,13 @@ const copy = {
       'Operação enxuta com potencial recorrente.',
     ],
   },
+  progress: {
+    tag: 'ANDAMENTO DA OBRA',
+    title: 'Já estamos em obra.',
+    body:
+      'Evolução contínua com etapas monitoradas. Atualizações visuais registradas para acompanhar cada avanço.',
+    highlights: ['Estrutura em andamento', 'Equipe local mobilizada', 'Cronograma ativo'],
+  },
   finalCta: {
     title: 'Tudo pronto para sua próxima decisão patrimonial.',
     body:
@@ -167,6 +174,12 @@ const showcaseDetails = [
   { icon: BedDouble, label: 'Quartos', value: '1' },
   { icon: Bath, label: 'Banheiros', value: '1' },
   { icon: CarFront, label: 'Vagas', value: '1' },
+];
+
+const progressImages = [
+  'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1600&q=80',
+  'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=1600&q=80',
+  'https://images.unsplash.com/photo-1505842465776-3d90f616310d?auto=format&fit=crop&w=1600&q=80',
 ];
 
 const simulatorPresets = [
@@ -506,6 +519,7 @@ export default function HomePage() {
   const [monthlyCosts, setMonthlyCosts] = useState(650);
   const [platformFee, setPlatformFee] = useState(12);
   const [activePreset, setActivePreset] = useState('Realista');
+  const [progressIndex, setProgressIndex] = useState(0);
   const simulatorResults = useMemo(() => {
     const nightsPerMonth = (30 * occupancy) / 100;
     const grossMonthly = nightsPerMonth * dailyRate;
@@ -590,6 +604,14 @@ export default function HomePage() {
     frame = window.requestAnimationFrame(animate);
     return () => window.cancelAnimationFrame(frame);
   }, [reduceMotion, simulatorResults]);
+
+  useEffect(() => {
+    if (reduceMotion || progressImages.length < 2) return;
+    const interval = window.setInterval(() => {
+      setProgressIndex((prev) => (prev + 1) % progressImages.length);
+    }, 4200);
+    return () => window.clearInterval(interval);
+  }, [reduceMotion]);
 
 
   return (
@@ -955,6 +977,81 @@ export default function HomePage() {
                     <p className='text-[11px] text-white/50'>
                       Estimativa. Não substitui análise financeira.
                     </p>
+                  </div>
+                </motion.div>
+              </div>
+            </div>
+          </section>
+
+          <section
+            id='obra'
+            className='section-shell section-alt section-glow section-divider scroll-mt-24'
+          >
+            <div className='section-inner'>
+              <div className='grid gap-10 lg:grid-cols-[1fr_1.1fr] lg:items-center'>
+                <motion.div
+                  className='space-y-5 text-center lg:text-left'
+                  initial={reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.3 }}
+                  transition={reduceMotion ? { duration: 0 } : { duration: 0.35 }}
+                >
+                  <p className='text-xs uppercase tracking-[0.32em] text-[var(--muted)]'>
+                    {copy.progress.tag}
+                  </p>
+                  <h2 className='section-title font-semibold text-[var(--text)]'>
+                    {copy.progress.title}
+                  </h2>
+                  <p className='text-base text-[var(--muted)] md:text-lg lg:max-w-[42ch]'>
+                    {copy.progress.body}
+                  </p>
+                  <div className='flex flex-wrap justify-center gap-3 text-xs text-white/70 lg:justify-start'>
+                    {copy.progress.highlights.map((item) => (
+                      <span
+                        key={item}
+                        className='rounded-full border border-white/10 bg-[var(--panel)] px-4 py-2'
+                      >
+                        {item}
+                      </span>
+                    ))}
+                  </div>
+                </motion.div>
+                <motion.div
+                  className='glass-panel p-4 md:p-5'
+                  initial={reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.3 }}
+                  transition={reduceMotion ? { duration: 0 } : { duration: 0.4 }}
+                >
+                  <div className='relative aspect-[16/10] overflow-hidden rounded-2xl'>
+                    <AnimatePresence mode='wait'>
+                      <motion.img
+                        key={progressImages[progressIndex]}
+                        src={progressImages[progressIndex]}
+                        alt='Andamento da obra'
+                        className='absolute inset-0 h-full w-full object-cover'
+                        initial={reduceMotion ? { opacity: 1 } : { opacity: 0, scale: 1.02 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={reduceMotion ? { opacity: 1 } : { opacity: 0 }}
+                        transition={reduceMotion ? { duration: 0 } : { duration: 0.6 }}
+                        loading='lazy'
+                      />
+                    </AnimatePresence>
+                  </div>
+                  <div className='mt-4 flex items-center justify-center gap-2'>
+                    {progressImages.map((_, index) => (
+                      <button
+                        key={index}
+                        type='button'
+                        onClick={() => setProgressIndex(index)}
+                        className={`h-2 w-2 rounded-full transition ${
+                          index === progressIndex
+                            ? 'bg-[var(--gold)]'
+                            : 'bg-white/20 hover:bg-white/40'
+                        }`}
+                        aria-label={`Imagem ${index + 1}`}
+                      />
+                    ))}
                   </div>
                 </motion.div>
               </div>
