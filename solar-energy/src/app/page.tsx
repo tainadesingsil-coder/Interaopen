@@ -136,9 +136,9 @@ const whatsappLink =
 
 const showcaseItems = [
   {
-    label: 'STUDIO',
-    title: 'Ambiente completo',
-    desc: 'Integração e conforto real.',
+    label: 'BELLA VISTA',
+    title: 'Studio 27,89 m²',
+    desc: 'R$ 256.006,49',
     images: [
       'https://i.postimg.cc/mksDjFhJ/Whats-App-Image-2026-01-22-at-12-04-21.jpg',
       'https://i.postimg.cc/GpTm1jyg/Whats-App-Image-2026-01-22-at-12-04-21-(2).jpg',
@@ -146,9 +146,9 @@ const showcaseItems = [
     ],
   },
   {
-    label: 'PLANTA',
-    title: 'Planta inteligente',
-    desc: 'Metragem otimizada e funcional.',
+    label: '2 QUARTOS',
+    title: '56,6 m²',
+    desc: 'R$ 448.667,86',
     images: [
       'https://i.postimg.cc/pV5VhCch/Whats-App-Image-2026-01-22-at-12-04-20.jpg',
       'https://i.postimg.cc/vZYdztXF/Whats-App-Image-2026-01-22-at-12-04-20-(1).jpg',
@@ -157,9 +157,9 @@ const showcaseItems = [
     ],
   },
   {
-    label: 'ÁREA COMPLETA',
-    title: 'Tudo no lugar',
-    desc: 'Cozinha, descanso e rotina fluida.',
+    label: '3 QUARTOS',
+    title: '82,48 m²',
+    desc: 'R$ 7785.669,20',
     images: [
       'https://i.postimg.cc/kX7Z3XSm/Design-sem-nome-2026-01-24T013513-644.png',
       'https://i.postimg.cc/6QBTCZ4p/Design-sem-nome-2026-01-24T013506-098.png',
