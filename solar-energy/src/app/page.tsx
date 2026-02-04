@@ -24,6 +24,7 @@ import {
   TrendingUp,
   Waves,
   Wallet,
+  X,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -415,11 +416,21 @@ function StudioShowcaseCard({
     return () => window.clearInterval(interval);
   }, [hasCarousel, images.length]);
 
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsOpen(false);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen]);
+
   return (
     <>
       <motion.button
         type='button'
-        onClick={() => setIsOpen((open) => !open)}
+        onClick={() => setIsOpen(true)}
+        aria-haspopup='dialog'
         aria-expanded={isOpen}
         className='group relative min-w-[85%] snap-center overflow-hidden rounded-[24px] border border-white/10 bg-[var(--panel)] text-left shadow-[0_12px_30px_rgba(0,0,0,0.35)] transition duration-300 hover:shadow-[0_18px_50px_rgba(0,0,0,0.45)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold)]/60 md:min-w-0'
         initial={{ opacity: 0, y: 16 }}
@@ -459,18 +470,48 @@ function StudioShowcaseCard({
             </h3>
             <p className='mt-1 text-sm text-[var(--muted)]'>{desc}</p>
           </div>
-          <div className='text-sm text-[var(--muted)]'>
-            {isOpen ? 'Fechar detalhes' : 'Ver detalhes'} →
-          </div>
-          <AnimatePresence initial={false}>
-            {isOpen && (
-              <motion.div
-                className='mt-4 grid gap-3 border-t border-white/10 pt-4 sm:grid-cols-2'
-                initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 6 }}
-                transition={reduceMotion ? { duration: 0 } : { duration: 0.2 }}
+          <div className='text-sm text-[var(--muted)]'>Ver detalhes →</div>
+        </div>
+      </motion.button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            className='fixed inset-0 z-[60] flex items-center justify-center p-6'
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <div
+              className='absolute inset-0 bg-black/60 backdrop-blur-sm'
+              onClick={() => setIsOpen(false)}
+              aria-hidden='true'
+            />
+            <motion.div
+              role='dialog'
+              aria-modal='true'
+              aria-label={`Detalhes do card ${title}`}
+              className='relative z-10 w-full max-w-md rounded-[24px] border border-white/10 bg-[rgba(6,16,24,0.96)] p-6 text-white shadow-[0_24px_60px_rgba(5,12,18,0.55),0_0_40px_rgba(183,146,90,0.12)]'
+              initial={{ y: 16, opacity: 0, scale: 0.98 }}
+              animate={{ y: 0, opacity: 1, scale: 1 }}
+              exit={{ y: 12, opacity: 0, scale: 0.98 }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              onClick={(event) => event.stopPropagation()}
+            >
+              <button
+                type='button'
+                onClick={() => setIsOpen(false)}
+                className='absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/70 transition hover:text-white'
+                aria-label='Fechar'
               >
+                <X className='h-4 w-4' />
+              </button>
+              <span className='inline-flex rounded-full border border-[var(--gold)]/40 bg-white/5 px-3 py-1 text-[0.6rem] uppercase tracking-[0.4em] text-[var(--gold)]'>
+                {label}
+              </span>
+              <h3 className='mt-4 text-xl font-semibold'>{title}</h3>
+              <p className='mt-2 text-sm text-white/70'>{desc}</p>
+              <div className='mt-5 grid grid-cols-2 gap-3'>
                 {resolvedDetails.map((detail) => {
                   const Icon = detail.icon;
                   return (
@@ -492,11 +533,11 @@ function StudioShowcaseCard({
                     </div>
                   );
                 })}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
     </>
   );
