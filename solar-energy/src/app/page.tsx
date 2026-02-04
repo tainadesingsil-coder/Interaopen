@@ -138,10 +138,12 @@ const showcaseItems = [
   {
     label: 'BELLA VISTA',
     title: 'Studio',
-    desc: '27,89 m²',
+    desc: 'Studio e 2/4 no Bella Vista Beach Residence em Coroa Vermelha',
     details: [
-      { icon: Ruler, label: 'Área', value: '27,89 m²' },
-      { icon: BedDouble, label: 'Ambiente', value: 'Studio' },
+      { icon: BedDouble, label: 'Quartos', value: '1' },
+      { icon: CarFront, label: 'Vagas', value: '1' },
+      { icon: Ruler, label: 'Área', value: '27 m²' },
+      { icon: Bath, label: 'Banheiro', value: '1' },
     ],
     images: [
       'https://i.postimg.cc/mksDjFhJ/Whats-App-Image-2026-01-22-at-12-04-21.jpg',
@@ -151,7 +153,7 @@ const showcaseItems = [
   },
   {
     label: '2 QUARTOS',
-    title: 'Residência 2 quartos',
+    title: 'Apartamento 2 quartos',
     desc: '56,6 m²',
     details: [
       { icon: Ruler, label: 'Área', value: '56,6 m²' },
@@ -166,7 +168,7 @@ const showcaseItems = [
   },
   {
     label: '3 QUARTOS',
-    title: 'Residência 3 quartos',
+    title: 'Apartamento 3 quartos',
     desc: '82,48 m²',
     details: [
       { icon: Ruler, label: 'Área', value: '82,48 m²' },
