@@ -111,7 +111,7 @@ const copy = {
     body:
       'Receba uma apresentação completa e tire dúvidas com um especialista.',
     primary: 'Agendar conversa',
-    secondary: 'Ver projeto',
+    secondary: 'Ver obras',
   },
   contact: {
     tag: 'CONTATO',
@@ -1104,7 +1104,7 @@ export default function HomePage() {
                     {copy.finalCta.primary}
                   </a>
                   <a
-                    href='#proposta'
+                    href='#obra'
                     className='inline-flex items-center justify-center rounded-full border border-white/15 bg-white/5 px-6 py-3 text-sm font-semibold text-white/80 transition hover:border-[var(--gold)]/40 hover:text-white'
                   >
                     {copy.finalCta.secondary}
