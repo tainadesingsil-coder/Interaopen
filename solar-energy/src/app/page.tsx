@@ -17,6 +17,7 @@ import {
   MapPin,
   PhoneCall,
   Ruler,
+  Shield,
   TrendingUp,
   Wallet,
   X,
@@ -154,10 +155,11 @@ const showcaseItems = [
   {
     label: '2 QUARTOS',
     title: 'Apartamento 2 quartos',
-    desc: '56,6 m²',
+    desc: '45 m²',
     details: [
-      { icon: Ruler, label: 'Área', value: '56,6 m²' },
-      { icon: BedDouble, label: 'Quartos', value: '2' },
+      { icon: Ruler, label: 'Área', value: '45 m²' },
+      { icon: BedDouble, label: 'Suítes', value: '2' },
+      { icon: CarFront, label: 'Vaga', value: '1' },
     ],
     images: [
       'https://i.postimg.cc/pV5VhCch/Whats-App-Image-2026-01-22-at-12-04-20.jpg',
@@ -173,6 +175,8 @@ const showcaseItems = [
     details: [
       { icon: Ruler, label: 'Área', value: '82,48 m²' },
       { icon: BedDouble, label: 'Quartos', value: '3' },
+      { icon: Bath, label: 'Suítes', value: '2' },
+      { icon: CarFront, label: 'Vaga', value: '1' },
     ],
     images: [
       'https://i.postimg.cc/kX7Z3XSm/Design-sem-nome-2026-01-24T013513-644.png',
@@ -184,10 +188,21 @@ const showcaseItems = [
   {
     label: 'AMBIENTE TOTAL',
     title: 'Ambiente completo',
-    desc: 'Cozinha + quarto',
+    desc: 'Infraestrutura e lazer de resort',
     details: [
-      { icon: Ruler, label: 'Integração', value: 'Total' },
-      { icon: BedDouble, label: 'Ambientes', value: 'Cozinha + quarto' },
+      {
+        icon: Ruler,
+        label: 'Piscina',
+        value: 'Borda infinita com vista para o mar',
+      },
+      { icon: BedDouble, label: 'Beach Club', value: 'Exclusivo' },
+      { icon: Bath, label: 'Bem-estar', value: 'SPA, academia e ofurôs' },
+      {
+        icon: CarFront,
+        label: 'Lazer',
+        value: 'Lounge bar, áreas verdes e trilhas',
+      },
+      { icon: Shield, label: 'Segurança', value: '24 horas' },
     ],
     images: [
       'https://images.unsplash.com/photo-1507089947368-19c1da9775ae?auto=format&fit=crop&w=1600&q=80',
