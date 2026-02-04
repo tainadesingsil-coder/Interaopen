@@ -519,7 +519,7 @@ function StudioShowcaseCard({
                       key={detail.label}
                       className='flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3'
                     >
-                      <span className='inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-[var(--gold)]'>
+                      <span className='inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/5 text-[var(--gold)]'>
                         <Icon className='h-4 w-4' />
                       </span>
                       <div>
