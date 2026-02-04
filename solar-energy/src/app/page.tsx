@@ -141,9 +141,9 @@ const whatsappLink =
 
 const showcaseItems = [
   {
-    label: 'BELLA VISTA',
-    title: 'Studio',
-    desc: 'Studio e 2/4',
+    label: 'STUDIO',
+    title: 'Apartamento studio',
+    desc: '27 m²',
     details: [
       { icon: BedDouble, label: 'Quartos', value: '1' },
       { icon: CarFront, label: 'Vagas', value: '1' },
@@ -161,9 +161,10 @@ const showcaseItems = [
     title: 'Apartamento 2 quartos',
     desc: '45 m²',
     details: [
-      { icon: Ruler, label: 'Área', value: '45 m²' },
-      { icon: BedDouble, label: 'Suítes', value: '2' },
+      { icon: BedDouble, label: 'Quartos', value: '2' },
+      { icon: Bath, label: 'Suítes', value: '2' },
       { icon: CarFront, label: 'Vaga', value: '1' },
+      { icon: Ruler, label: 'Área', value: '45 m²' },
     ],
     images: [
       'https://i.postimg.cc/pV5VhCch/Whats-App-Image-2026-01-22-at-12-04-20.jpg',
@@ -177,10 +178,10 @@ const showcaseItems = [
     title: 'Apartamento 3 quartos',
     desc: '82,48 m²',
     details: [
-      { icon: Ruler, label: 'Área', value: '82,48 m²' },
       { icon: BedDouble, label: 'Quartos', value: '3' },
       { icon: Bath, label: 'Suítes', value: '2' },
       { icon: CarFront, label: 'Vaga', value: '1' },
+      { icon: Ruler, label: 'Área', value: '82,48 m²' },
     ],
     images: [
       'https://i.postimg.cc/kX7Z3XSm/Design-sem-nome-2026-01-24T013513-644.png',
