@@ -138,7 +138,7 @@ const showcaseItems = [
   {
     label: 'BELLA VISTA',
     title: 'Studio',
-    desc: 'Studio e 2/4 no Bella Vista Beach Residence em Coroa Vermelha',
+    desc: 'Studio e 2/4',
     details: [
       { icon: BedDouble, label: 'Quartos', value: '1' },
       { icon: CarFront, label: 'Vagas', value: '1' },
