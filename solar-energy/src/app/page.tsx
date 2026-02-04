@@ -202,6 +202,7 @@ const showcaseDetails = [
 
 const progressImages = [
   'https://i.postimg.cc/bwQR1PBD/20251204-082816-(1).jpg',
+  'https://i.postimg.cc/tT7mRvNb/20251204-082550-(1).jpg',
 ];
 
 const simulatorPresets = [
