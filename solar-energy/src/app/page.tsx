@@ -18,7 +18,11 @@ import {
   PhoneCall,
   Ruler,
   Shield,
+  Sparkles,
+  Trees,
   TrendingUp,
+  Umbrella,
+  Waves,
   Wallet,
   X,
 } from 'lucide-react';
@@ -191,14 +195,14 @@ const showcaseItems = [
     desc: 'Infraestrutura e lazer de resort',
     details: [
       {
-        icon: Ruler,
+        icon: Waves,
         label: 'Piscina',
         value: 'Borda infinita com vista para o mar',
       },
-      { icon: BedDouble, label: 'Beach Club', value: 'Exclusivo' },
-      { icon: Bath, label: 'Bem-estar', value: 'SPA, academia e ofurôs' },
+      { icon: Umbrella, label: 'Beach Club', value: 'Exclusivo' },
+      { icon: Sparkles, label: 'Bem-estar', value: 'SPA, academia e ofurôs' },
       {
-        icon: CarFront,
+        icon: Trees,
         label: 'Lazer',
         value: 'Lounge bar, áreas verdes e trilhas',
       },
