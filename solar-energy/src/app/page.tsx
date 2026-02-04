@@ -291,10 +291,10 @@ function HeroNav() {
             Localização
           </a>
           <a
-            href='#proposta'
+            href='#obra'
             className='transition hover:text-[#B7925A] hover:drop-shadow-[0_0_10px_rgba(183,146,90,0.55)]'
           >
-            Projeto
+            Obras
           </a>
           <a
             href='#perfil'
@@ -336,11 +336,11 @@ function HeroNav() {
               Localização
             </a>
             <a
-              href='#proposta'
+              href='#obra'
               className='transition hover:text-[#B7925A] hover:drop-shadow-[0_0_10px_rgba(183,146,90,0.55)]'
               onClick={() => setMenuOpen(false)}
             >
-              Projeto
+              Obras
             </a>
             <a
               href='#perfil'
