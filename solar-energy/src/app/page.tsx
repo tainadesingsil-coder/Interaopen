@@ -240,7 +240,7 @@ const simulatorPresets = [
 ];
 
 const mapEmbedUrl =
-  'https://www.google.com/maps?q=BR-367%2C%20Coroa%20Vermelha%2C%20Porto%20Seguro%20-%20BA&output=embed';
+  'https://www.google.com/maps?q=Comunidade%20Nossa%20Senhora%20da%20Esperan%C3%A7a%20Par%C3%B3quia%20Sagrada%20Fam%C3%ADlia%20Santa%20Cruz%20Cabr%C3%A1lia%20BA&output=embed';
 
 
 
