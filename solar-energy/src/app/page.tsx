@@ -201,9 +201,7 @@ const showcaseDetails = [
 ];
 
 const progressImages = [
-  'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1600&q=80',
-  'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=1600&q=80',
-  'https://images.unsplash.com/photo-1505842465776-3d90f616310d?auto=format&fit=crop&w=1600&q=80',
+  'https://i.postimg.cc/bwQR1PBD/20251204-082816-(1).jpg',
 ];
 
 const simulatorPresets = [
