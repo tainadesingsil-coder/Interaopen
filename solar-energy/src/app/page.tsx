@@ -210,7 +210,10 @@ const showcaseItems = [
       { icon: Shield, label: 'Segurança', value: '24 horas' },
     ],
     images: [
-      'https://images.unsplash.com/photo-1507089947368-19c1da9775ae?auto=format&fit=crop&w=1600&q=80',
+      'https://i.postimg.cc/kX7Z3XSm/Design-sem-nome-2026-01-24T013513-644.png',
+      'https://i.postimg.cc/6QBTCZ4p/Design-sem-nome-2026-01-24T013506-098.png',
+      'https://i.postimg.cc/gJTJ9BM5/Design-sem-nome-2026-01-24T013459-346.png',
+      'https://i.postimg.cc/qq67pXS1/Design-sem-nome-2026-01-24T013356-074.png',
     ],
   },
 ];
