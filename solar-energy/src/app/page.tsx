@@ -198,7 +198,7 @@ const showcaseItems = [
       {
         icon: Waves,
         label: 'Piscina',
-        value: 'Borda infinita com vista para o mar',
+        value: 'Borda infinita, vista para o mar',
       },
       { icon: Sun, label: 'Beach Club', value: 'Exclusivo' },
       { icon: Sparkles, label: 'Bem-estar', value: 'SPA, academia e ofurôs' },
