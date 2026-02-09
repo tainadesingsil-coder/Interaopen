@@ -136,8 +136,7 @@ const copy = {
   },
 };
 
-const whatsappLink =
-  'https://wa.me/5573999545185?text=Ol%C3%A1%2C%20gostaria%20de%20mais%20informa%C3%A7%C3%B5es';
+const whatsappLink = 'https://wa.me/557399833471';
 
 const showcaseItems = [
   {
