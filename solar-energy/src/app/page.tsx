@@ -122,7 +122,7 @@ const copy = {
     tag: 'CONTATO',
     title: 'Fale com nossa equipe',
     body: 'Atendimento consultivo e rápido para você avançar com segurança.',
-    email: 'contato@bellavistabeach.com.br',
+    email: 'gestaocliente@bellaimperial.com.br',
     location: 'Costa do Descobrimento • Bahia',
   },
   experience: {
@@ -265,6 +265,8 @@ const simulatorPresets = [
 
 const mapEmbedUrl =
   'https://www.google.com/maps?q=Bella%20Vista%20Beach%20Residence%2C%20BA-001%2C%20Km%20367%2C%20Praia%20do%20Mutari%2C%20Santa%20Cruz%20Cabr%C3%A1lia%20-%20BA&output=embed';
+const mapLocationUrl =
+  'https://www.google.com/maps?q=Bella%20Vista%20Beach%20Residence%2C%20BA-001%2C%20Km%20367%2C%20Praia%20do%20Mutari%2C%20Santa%20Cruz%20Cabr%C3%A1lia%20-%20BA';
 
 
 
@@ -1243,9 +1245,14 @@ export default function HomePage() {
                       <p className='text-xs uppercase tracking-[0.2em] text-white/50'>
                         Localização
                       </p>
-                      <p className='mt-1 text-sm font-semibold text-white'>
+                      <a
+                        href={mapLocationUrl}
+                        target='_blank'
+                        rel='noreferrer'
+                        className='mt-1 inline-flex text-sm font-semibold text-white transition hover:text-[var(--gold)]'
+                      >
                         {copy.contact.location}
-                      </p>
+                      </a>
                     </div>
                   </div>
                 </div>
