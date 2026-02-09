@@ -873,11 +873,13 @@ function LanguageSwitcher({
   onLocaleChange,
   ariaLabel,
   className,
+  buttonClassName,
 }: {
   locale: Locale;
   onLocaleChange: (value: Locale) => void;
   ariaLabel: string;
   className?: string;
+  buttonClassName?: string;
 }) {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -902,13 +904,13 @@ function LanguageSwitcher({
         aria-haspopup='menu'
         aria-expanded={open}
         aria-label={ariaLabel}
-        className='inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white/80 transition hover:text-white'
+        className={`inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/25 bg-white/10 text-white/90 shadow-[0_8px_18px_rgba(5,12,18,0.35)] transition hover:border-[var(--gold)]/50 hover:text-white ${buttonClassName ?? ''}`}
       >
         <Globe className='h-4 w-4' />
       </button>
       {open && (
         <div
-          className='absolute right-0 mt-2 flex items-center gap-1 rounded-full border border-white/15 bg-[rgba(8,16,24,0.9)] p-1 text-white/85 shadow-[0_12px_30px_rgba(0,0,0,0.35)] backdrop-blur'
+          className='absolute right-0 z-50 mt-2 flex items-center gap-1 rounded-full border border-white/15 bg-[rgba(8,16,24,0.92)] p-1 text-white/85 shadow-[0_12px_30px_rgba(0,0,0,0.35)] backdrop-blur'
           role='menu'
         >
           {languageOptions.map((option) => {
@@ -1006,16 +1008,24 @@ function HeroNav({
             ariaLabel={labels.languageLabel}
           />
         </div>
-        <button
-          type='button'
-          aria-label={menuAria}
-          aria-expanded={menuOpen}
-          aria-controls='hero-menu'
-          onClick={() => setMenuOpen((open) => !open)}
-          className='inline-flex items-center justify-center rounded-full border border-white/20 bg-white/10 px-3 py-2 text-xs uppercase tracking-[0.3em] text-white/80 transition hover:text-white md:hidden'
-        >
-          {menuLabel}
-        </button>
+        <div className='flex items-center gap-3 md:hidden'>
+          <LanguageSwitcher
+            locale={locale}
+            onLocaleChange={onLocaleChange}
+            ariaLabel={labels.languageLabel}
+            buttonClassName='h-10 w-10'
+          />
+          <button
+            type='button'
+            aria-label={menuAria}
+            aria-expanded={menuOpen}
+            aria-controls='hero-menu'
+            onClick={() => setMenuOpen((open) => !open)}
+            className='inline-flex items-center justify-center rounded-full border border-white/20 bg-white/10 px-3 py-2 text-xs uppercase tracking-[0.3em] text-white/85 transition hover:text-white'
+          >
+            {menuLabel}
+          </button>
+        </div>
       </nav>
       {menuOpen && (
         <div
