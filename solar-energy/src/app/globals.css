@@ -28,6 +28,11 @@
     text-rendering: optimizeLegibility;
   }
 
+  *:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+  }
+
   h1,
   h2,
   h3,
@@ -66,6 +71,7 @@
     opacity: 0.12;
     mix-blend-mode: soft-light;
     pointer-events: none;
+    will-change: opacity;
   }
 
   .grain-soft::after {
@@ -99,6 +105,7 @@
     backface-visibility: hidden;
     transform: translateZ(0);
     will-change: transform;
+    contain: layout style paint;
   }
 
   .section-shell {
@@ -158,6 +165,25 @@
     font-size: clamp(30px, 4vw, 44px);
   }
 
+  .skip-link {
+    position: absolute;
+    left: 16px;
+    top: 16px;
+    z-index: 100;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: var(--gold);
+    color: #0c1116;
+    font-size: 12px;
+    font-weight: 600;
+    transform: translateY(-120%);
+    transition: transform 0.2s ease;
+  }
+
+  .skip-link:focus {
+    transform: translateY(0);
+  }
+
   .glass-panel {
     background: var(--panel);
     border: 1px solid var(--stroke);
@@ -207,6 +233,26 @@
   100% {
     opacity: 0;
   }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.skeleton {
+  animation: shimmer 2s infinite;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.05) 25%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.05) 75%
+  );
+  background-size: 1000px 100%;
 }
 
 @media (prefers-reduced-motion: reduce) {
