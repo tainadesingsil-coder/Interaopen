@@ -1,15 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
 import { blurDataUrl, heroPoster, heroVideoSources } from '@/app/lib/constants';
+import { OptimizedImage } from '@/app/components/shared/OptimizedImage';
 
 export const HeroVideo = () => {
   const [heroVideoReady, setHeroVideoReady] = useState(false);
 
   return (
     <div className='absolute inset-0' aria-hidden='true'>
-      <Image
+      <OptimizedImage
         src={heroPoster}
         alt=''
         fill

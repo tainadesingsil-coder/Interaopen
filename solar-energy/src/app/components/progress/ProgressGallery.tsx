@@ -1,9 +1,9 @@
 'use client';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import Image from 'next/image';
 import { blurDataUrl } from '@/app/lib/constants';
 import { useGallery } from '@/app/hooks/useGallery';
+import { OptimizedImage } from '@/app/components/shared/OptimizedImage';
 
 type Props = {
   images: string[];
@@ -30,7 +30,7 @@ export const ProgressGallery = ({ images, alt, reduceMotion }: Props) => {
             exit={reduceMotion ? { opacity: 1 } : { opacity: 0 }}
             transition={reduceMotion ? { duration: 0 } : { duration: 0.6 }}
           >
-            <Image
+            <OptimizedImage
               src={images[index]}
               alt={alt}
               fill

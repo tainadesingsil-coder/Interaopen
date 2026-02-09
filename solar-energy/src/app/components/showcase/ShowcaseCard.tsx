@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import Image from 'next/image';
 import type { ShowcaseDetail } from '@/app/types';
 import { blurDataUrl } from '@/app/lib/constants';
 import { useGallery } from '@/app/hooks/useGallery';
 import { ShowcaseModal } from '@/app/components/showcase/ShowcaseModal';
+import { OptimizedImage } from '@/app/components/shared/OptimizedImage';
 
 type Props = {
   label: string;
@@ -76,7 +76,7 @@ export const ShowcaseCard = ({
               exit={reduceMotion ? { opacity: 1 } : { opacity: 0 }}
               transition={reduceMotion ? { duration: 0 } : { duration: 0.5 }}
             >
-              <Image
+              <OptimizedImage
                 src={images[imageIndex]}
                 alt={title}
                 fill

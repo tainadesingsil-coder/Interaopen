@@ -61,4 +61,7 @@ download "https://i.postimg.cc/9fwJvwmZ/20251204-082247-(1).jpg" \
 download "https://i.postimg.cc/90rCyBPd/20251113-080300.jpg" \
   "$ASSETS_DIR/progress/progress-4.jpg"
 
+echo "Running WebP optimization..."
+node "$ROOT_DIR/scripts/optimize-images.mjs"
+
 echo "✅ Assets downloaded to $ASSETS_DIR"

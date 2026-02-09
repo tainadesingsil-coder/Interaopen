@@ -31,16 +31,22 @@ NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=dwedcl97k
 
 ## ✅ Imagens locais
 
-As imagens foram migradas para `/public/images`. Para baixar os arquivos do CDN:
+As imagens foram migradas para `/public/images`. Para baixar os arquivos do CDN e gerar WebP/redimensionamentos:
 
 ```bash
 npm run assets:download
 ```
 
-O script salva em:
+Isso gera:
 - `public/images/hero`
 - `public/images/showcase`
 - `public/images/progress`
+
+Para rodar somente a conversão WebP (sem baixar novamente):
+
+```bash
+npm run assets:optimize
+```
 
 ## ✅ Estrutura de pastas
 
