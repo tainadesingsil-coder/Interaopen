@@ -13,6 +13,7 @@ import {
   CarFront,
   Clock,
   Coins,
+  Globe,
   Mail,
   MapPin,
   PhoneCall,
@@ -778,12 +779,11 @@ const translations: Record<
   },
 };
 
-const languageOptions: { value: Locale; label: string; flag: string; name: string }[] =
-  [
-    { value: 'pt', label: 'PT', flag: '🇧🇷', name: 'Português' },
-    { value: 'en', label: 'EN', flag: '🇺🇸', name: 'English' },
-    { value: 'it', label: 'IT', flag: '🇮🇹', name: 'Italiano' },
-  ];
+const languageOptions: { value: Locale; label: string; name: string }[] = [
+  { value: 'pt', label: 'PT', name: 'Português' },
+  { value: 'en', label: 'EN', name: 'English' },
+  { value: 'it', label: 'IT', name: 'Italiano' },
+];
 
 const showcaseDetails = [
   { icon: Ruler, label: 'Área', value: '48 m²' },
@@ -879,9 +879,12 @@ function LanguageSwitcher({
 }) {
   return (
     <div
-      className={`flex items-center gap-1 rounded-full border border-white/15 bg-white/10 p-1 text-white/80 normal-case ${className ?? ''}`}
+      className={`flex items-center gap-2 rounded-full border border-white/15 bg-white/10 p-1.5 text-white/85 ${className ?? ''}`}
       aria-label={ariaLabel}
     >
+      <span className='inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/70'>
+        <Globe className='h-4 w-4' />
+      </span>
       {languageOptions.map((option) => {
         const isActive = locale === option.value;
         return (
@@ -892,13 +895,12 @@ function LanguageSwitcher({
             aria-pressed={isActive}
             aria-label={`${ariaLabel}: ${option.name}`}
             title={option.name}
-            className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[0.55rem] font-semibold tracking-[0.2em] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold)]/50 ${
+            className={`inline-flex items-center rounded-full px-2.5 py-1 text-[0.55rem] font-semibold tracking-[0.28em] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold)]/50 ${
               isActive
                 ? 'bg-[var(--gold)]/25 text-white shadow-[0_0_14px_rgba(201,164,106,0.35)]'
-                : 'text-white/70 hover:bg-white/10 hover:text-white'
+                : 'text-white/80 hover:bg-white/10 hover:text-white'
             }`}
           >
-            <span className='text-base leading-none'>{option.flag}</span>
             <span>{option.label}</span>
           </button>
         );
