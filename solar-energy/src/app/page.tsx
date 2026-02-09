@@ -136,8 +136,9 @@ const copy = {
   },
 };
 
+const whatsappMessage = 'Olá! Quero saber mais sobre o Bella Vista Beach Residence.';
 const whatsappLink =
-  'https://wa.me/557399833471?text=Ol%C3%A1!%20Quero%20saber%20mais%20sobre%20o%20Bella%20Vista%20Beach%20Residence.';
+  'https://wa.me/557399833471?text=' + encodeURIComponent(whatsappMessage);
 
 const showcaseItems = [
   {
