@@ -31,8 +31,8 @@ export const Navigation = ({
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <header className='fixed inset-x-0 top-0 z-50 bg-[#07131D]/85 backdrop-blur-lg shadow-[0_8px_24px_rgba(5,12,18,0.35)] md:bg-[rgba(8,18,28,0.65)]'>
-      <nav className='mx-auto flex max-w-6xl items-center justify-between px-6 py-4 text-white lg:py-6'>
+    <header className='fixed inset-x-0 top-0 z-50 overflow-visible border-b border-white/5 bg-[#07131D]/85 backdrop-blur-lg shadow-[0_8px_24px_rgba(5,12,18,0.35)] md:bg-[rgba(8,18,28,0.65)]'>
+      <nav className='relative mx-auto flex max-w-6xl items-center justify-between px-5 py-3 text-white md:px-6 md:py-4 lg:py-6'>
         <Image
           src='/logo.png'
           alt='Bella Vista'

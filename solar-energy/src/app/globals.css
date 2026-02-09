@@ -278,11 +278,22 @@
   }
 
   .section-inner {
-    padding: 64px 24px;
+    padding: 48px 20px;
   }
 
   .section-title {
     font-size: clamp(28px, 7vw, 40px);
+    margin-bottom: 16px;
+    padding: 0 4px;
+  }
+
+  .glass-panel {
+    padding: 20px;
+  }
+
+  button,
+  a.inline-flex {
+    min-height: 44px;
   }
 
 }

@@ -36,20 +36,20 @@ export const LanguageSwitcher = ({
   }, [open]);
 
   return (
-    <div ref={containerRef} className={`relative ${className ?? ''}`}>
+    <div ref={containerRef} className={`relative z-50 ${className ?? ''}`}>
       <button
         type='button'
         onClick={() => setOpen((prev) => !prev)}
         aria-haspopup='menu'
         aria-expanded={open}
         aria-label={ariaLabel}
-        className={`inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/25 bg-white/10 text-white/90 shadow-[0_8px_18px_rgba(5,12,18,0.35)] transition hover:border-[var(--gold)]/50 hover:text-white ${buttonClassName ?? ''}`}
+        className={`inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/25 bg-white/10 text-white/90 shadow-[0_8px_18px_rgba(5,12,18,0.35)] transition hover:border-[var(--gold)]/50 hover:text-white md:h-10 md:w-10 ${buttonClassName ?? ''}`}
       >
         <Globe className='h-4 w-4' />
       </button>
       {open && (
         <div
-          className='absolute right-0 z-50 mt-2 flex items-center gap-1 rounded-full border border-white/15 bg-[rgba(8,16,24,0.92)] p-1 text-white/85 shadow-[0_12px_30px_rgba(0,0,0,0.35)] backdrop-blur'
+          className='absolute right-0 top-full z-[60] mt-2 flex min-w-[120px] items-center gap-1 rounded-full border border-white/15 bg-[rgba(8,16,24,0.92)] p-1 text-white/85 shadow-[0_12px_30px_rgba(0,0,0,0.35)] backdrop-blur'
           role='menu'
         >
           {languageOptions.map((option) => {

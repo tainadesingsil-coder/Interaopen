@@ -58,26 +58,27 @@ export const ShowcaseModal = ({
           </span>
           <h3 className='mt-4 text-xl font-semibold'>{title}</h3>
           <p className='mt-2 text-sm text-white/70'>{desc}</p>
-          <div className='mt-5 grid grid-cols-2 gap-3'>
-            {details.map((detail) => {
-              const Icon = detail.icon;
-              return (
-                <div
-                  key={detail.label}
-                  className='flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3'
-                >
-                  <span className='inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/5 text-[var(--gold)]'>
-                    <Icon className='h-4 w-4' />
-                  </span>
-                  <div>
-                    <p className='text-[10px] uppercase tracking-[0.2em] text-white/50'>
-                      {detail.label}
-                    </p>
-                    <p className='text-sm font-semibold text-white'>{detail.value}</p>
+          <div className='mt-6 rounded-2xl border border-white/10 bg-white/5 p-5 md:p-6'>
+            <div className='grid grid-cols-2 gap-4 md:gap-6'>
+              {details.map((detail) => {
+                const Icon = detail.icon;
+                return (
+                  <div key={detail.label} className='flex items-center gap-3 md:gap-4'>
+                    <span className='inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white/5 text-[var(--gold)]'>
+                      <Icon className='h-7 w-7' />
+                    </span>
+                    <div className='min-w-0 flex-1'>
+                      <p className='text-xs uppercase tracking-[0.18em] text-white/50'>
+                        {detail.label}
+                      </p>
+                      <p className='text-base font-semibold text-white md:text-lg'>
+                        {detail.value}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         </motion.div>
       </motion.div>
