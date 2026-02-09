@@ -185,6 +185,7 @@ const showcaseItems = [
     ],
     images: [
       'https://i.postimg.cc/LsrVzVfh/CASA-TIPO-E-5.png',
+      'https://i.postimg.cc/xTtysQMH/CASA-TIPO-E-6.png',
     ],
   },
   {
