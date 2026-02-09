@@ -24,14 +24,12 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: solar-energy/package-lock.json
+          cache-dependency-path: package-lock.json
 
       - name: Install dependencies
-        working-directory: solar-energy
         run: npm ci --prefer-offline --no-audit --no-fund
 
       - name: Build
-        working-directory: solar-energy
         run: npm run build
 
       - name: Publish to Cloudflare Pages
@@ -40,7 +38,7 @@ jobs:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
           projectName: solarenergy-5h5
-          directory: solar-energy/dist
+          directory: dist
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ github.ref == 'refs/heads/cursor/landing-page-bella-vista-7d69' && 'cursor-landing-page-bella-vi' || github.ref == 'refs/heads/main' && 'main' || github.ref_name }}
           wranglerVersion: '3'
