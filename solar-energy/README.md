@@ -51,6 +51,7 @@ npm run assets:optimize
 ## ✅ Estrutura de pastas
 
 ```
+app/ (reexporta para src/app)
 src/app/
   components/
     hero/
