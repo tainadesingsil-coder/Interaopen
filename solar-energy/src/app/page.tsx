@@ -13,6 +13,7 @@ import {
   CarFront,
   Clock,
   Coins,
+  Globe,
   Mail,
   MapPin,
   PhoneCall,
@@ -30,14 +31,6 @@ import type { LucideIcon } from 'lucide-react';
 
 const heroPoster =
   'https://res.cloudinary.com/dwedcl97k/video/upload/so_0,f_jpg,w_1600/v1769199580/Design_sem_nome_-_2026-01-23T171932.339_fjulxo.mp4';
-const currencyFormatter = new Intl.NumberFormat('pt-BR', {
-  style: 'currency',
-  currency: 'BRL',
-  maximumFractionDigits: 0,
-});
-
-const formatCurrency = (value: number) =>
-  currencyFormatter.format(Math.round(value));
 const sanitizePdfText = (value: string) =>
   value.replace(/[^\x20-\x7E]/g, ' ');
 const escapePdfText = (value: string) =>
@@ -70,152 +63,721 @@ const buildPdf = (lines: string[]) => {
   pdf += `trailer << /Size 6 /Root 1 0 R >>\nstartxref\n${xrefStart}\n%%EOF`;
   return pdf;
 };
-const copy = {
-  hero: {
-    eyebrow: 'Costa do Descobrimento · Bahia',
-    title: 'Viva perto do mar.\nInvista onde o futuro passa.',
-    subtitle:
-      'Studios e apartamentos em uma das regiões mais desejadas da Bahia, com alto potencial de valorização.',
-    subtitleDesktop:
-      'Studios e apartamentos na Costa do Descobrimento, com localização estratégica e potencial de valorização.',
-    primaryCta: 'Solicitar apresentação exclusiva',
-    primaryCtaDesktop: 'Solicitar apresentação exclusiva',
-    secondaryCta: 'Ver localização',
-  },
-  location: {
-    tag: 'LOCALIZAÇÃO ESTRATÉGICA',
-    title: 'Localização que vira demanda.',
-    body:
-      'Entre BR-367 e os polos turísticos, acesso rápido e liquidez para uso próprio ou renda.',
-    benefits: [
-      'Acesso pela BR-367',
-      'Fluxo turístico constante',
-      'Equilíbrio: privacidade + movimento',
-    ],
-  },
-  simulator: {
-    tag: 'INVESTIMENTO',
-    title: 'Simule seu retorno com aluguel de temporada.',
-    subtitle:
-      'Ajuste os números e veja uma estimativa de faturamento, custos e retorno anual. Valores ilustrativos.',
-    bullets: [
-      'Demanda sazonal favorece ocupação consistente.',
-      'Modelo flexível para uso próprio ou renda.',
-      'Operação enxuta com potencial recorrente.',
-    ],
-  },
-  progress: {
-    tag: 'ANDAMENTO DA OBRA',
-    title: 'Já estamos em obra.',
-    body:
-      'Evolução contínua com etapas monitoradas. Atualizações visuais registradas para acompanhar cada avanço.',
-    highlights: ['Estrutura em andamento', 'Equipe local mobilizada', 'Cronograma ativo'],
-  },
-  finalCta: {
-    title: 'Tudo pronto para sua próxima decisão patrimonial.',
-    body:
-      'Receba uma apresentação completa e tire dúvidas com um especialista.',
-    primary: 'Agendar conversa',
-    secondary: 'Ver obras',
-  },
-  contact: {
-    tag: 'CONTATO',
-    title: 'Fale com nossa equipe',
-    body: 'Atendimento consultivo e rápido para você avançar com segurança.',
-    email: 'gestaocliente@bellaimperial.com.br',
-    location: 'Costa do Descobrimento • Bahia',
-  },
-  experience: {
-    tag: 'Experiência',
-    title: 'Alguns lugares você entende. Outros você sente.',
-    body:
-      'O Bella Vista equilibra desejo e previsibilidade. Um convite para viver o litoral com segurança patrimonial.',
-  },
-  floating: {
-    ariaLabel: 'Abrir conversa no WhatsApp',
-  },
+type Locale = 'pt' | 'en' | 'it';
+type PresetKey = 'conservative' | 'realistic' | 'high';
+type SimulatorValues = {
+  propertyValue: number;
+  dailyRate: number;
+  occupancy: number;
+  monthlyCosts: number;
+  platformFee: number;
 };
 
-const whatsappMessage = 'Olá! Quero saber mais sobre o Bella Vista Beach Residence.';
-const whatsappLink =
-  'https://wa.me/557399833471?text=' + encodeURIComponent(whatsappMessage);
+const baseWhatsAppUrl = 'https://wa.me/557399833471';
 
-const showcaseItems = [
+const showcaseImages = {
+  studio: [
+    'https://i.postimg.cc/mksDjFhJ/Whats-App-Image-2026-01-22-at-12-04-21.jpg',
+    'https://i.postimg.cc/GpTm1jyg/Whats-App-Image-2026-01-22-at-12-04-21-(2).jpg',
+    'https://i.postimg.cc/mDNRbp2p/Whats-App-Image-2026-01-22-at-12-04-21-(1).jpg',
+  ],
+  apt2: [
+    'https://i.postimg.cc/pV5VhCch/Whats-App-Image-2026-01-22-at-12-04-20.jpg',
+    'https://i.postimg.cc/vZYdztXF/Whats-App-Image-2026-01-22-at-12-04-20-(1).jpg',
+    'https://i.postimg.cc/1zbTLGGj/Whats-App-Image-2026-01-22-at-12-04-20-(2).jpg',
+    'https://i.postimg.cc/m2Tqf29C/Design-sem-nome-2026-01-24T013521-711.png',
+  ],
+  apt3: [
+    'https://i.postimg.cc/LsrVzVfh/CASA-TIPO-E-5.png',
+    'https://i.postimg.cc/xTtysQMH/CASA-TIPO-E-6.png',
+  ],
+  amenities: [
+    'https://i.postimg.cc/kX7Z3XSm/Design-sem-nome-2026-01-24T013513-644.png',
+    'https://i.postimg.cc/6QBTCZ4p/Design-sem-nome-2026-01-24T013506-098.png',
+    'https://i.postimg.cc/gJTJ9BM5/Design-sem-nome-2026-01-24T013459-346.png',
+    'https://i.postimg.cc/qq67pXS1/Design-sem-nome-2026-01-24T013356-074.png',
+  ],
+};
+
+const translations: Record<
+  Locale,
   {
-    label: 'STUDIO',
-    title: 'Apartamento studio',
-    desc: '27 m²',
-    details: [
-      { icon: BedDouble, label: 'Quartos', value: '1' },
-      { icon: CarFront, label: 'Vagas', value: '1' },
-      { icon: Ruler, label: 'Área', value: '27 m²' },
-      { icon: Bath, label: 'Banheiro', value: '1' },
-    ],
-    images: [
-      'https://i.postimg.cc/mksDjFhJ/Whats-App-Image-2026-01-22-at-12-04-21.jpg',
-      'https://i.postimg.cc/GpTm1jyg/Whats-App-Image-2026-01-22-at-12-04-21-(2).jpg',
-      'https://i.postimg.cc/mDNRbp2p/Whats-App-Image-2026-01-22-at-12-04-21-(1).jpg',
-    ],
-  },
-  {
-    label: '2 QUARTOS',
-    title: 'Apartamento 2 quartos',
-    desc: '45 m²',
-    details: [
-      { icon: BedDouble, label: 'Quartos', value: '2' },
-      { icon: Bath, label: 'Suítes', value: '2' },
-      { icon: CarFront, label: 'Vaga', value: '1' },
-      { icon: Ruler, label: 'Área', value: '45 m²' },
-    ],
-    images: [
-      'https://i.postimg.cc/pV5VhCch/Whats-App-Image-2026-01-22-at-12-04-20.jpg',
-      'https://i.postimg.cc/vZYdztXF/Whats-App-Image-2026-01-22-at-12-04-20-(1).jpg',
-      'https://i.postimg.cc/1zbTLGGj/Whats-App-Image-2026-01-22-at-12-04-20-(2).jpg',
-      'https://i.postimg.cc/m2Tqf29C/Design-sem-nome-2026-01-24T013521-711.png',
-    ],
-  },
-  {
-    label: '3 QUARTOS',
-    title: 'Apartamento 3 quartos',
-    desc: '82,48 m²',
-    details: [
-      { icon: BedDouble, label: 'Quartos', value: '3' },
-      { icon: Bath, label: 'Suítes', value: '2' },
-      { icon: CarFront, label: 'Vaga', value: '1' },
-      { icon: Ruler, label: 'Área', value: '82,48 m²' },
-    ],
-    images: [
-      'https://i.postimg.cc/LsrVzVfh/CASA-TIPO-E-5.png',
-      'https://i.postimg.cc/xTtysQMH/CASA-TIPO-E-6.png',
-    ],
-  },
-  {
-    label: 'AMBIENTE TOTAL',
-    title: 'Ambiente completo',
-    desc: 'Infraestrutura e lazer de resort',
-    details: [
-      {
-        icon: Waves,
-        label: 'Piscina',
-        value: 'Borda infinita, vista para o mar',
+    nav: {
+      location: string;
+      works: string;
+      investment: string;
+      contact: string;
+      menu: string;
+      menuAria: string;
+      languageLabel: string;
+    };
+    hero: {
+      eyebrow: string;
+      title: string;
+      subtitle: string;
+      subtitleDesktop: string;
+      primaryCta: string;
+      primaryCtaDesktop: string;
+      secondaryCta: string;
+    };
+    showcase: {
+      title: string;
+      subtitle: string;
+      detailsOpen: string;
+      detailsClose: string;
+      dialogLabel: string;
+      cards: {
+        label: string;
+        title: string;
+        desc: string;
+        details: { icon: LucideIcon; label: string; value: string }[];
+        images: string[];
+      }[];
+    };
+    location: {
+      tag: string;
+      title: string;
+      body: string;
+      benefits: string[];
+    };
+    simulator: {
+      tag: string;
+      title: string;
+      subtitle: string;
+      bullets: string[];
+      presets: {
+        conservative: string;
+        realistic: string;
+        high: string;
+      };
+      fields: {
+        propertyValue: string;
+        dailyRate: string;
+        occupancy: string;
+        monthlyCosts: string;
+        platformFee: string;
+      };
+      results: {
+        revenue: string;
+        profit: string;
+        annualReturn: string;
+        payback: string;
+      };
+      paybackUnit: string;
+      ctaPrimary: string;
+      ctaSecondary: string;
+      disclaimer: string;
+    };
+    progress: {
+      tag: string;
+      title: string;
+      body: string;
+      highlights: string[];
+    };
+    finalCta: {
+      title: string;
+      body: string;
+      primary: string;
+      secondary: string;
+    };
+    contact: {
+      tag: string;
+      title: string;
+      body: string;
+      email: string;
+      location: string;
+      whatsappValue: string;
+      form: {
+        nameLabel: string;
+        emailLabel: string;
+        messageLabel: string;
+        namePlaceholder: string;
+        emailPlaceholder: string;
+        messagePlaceholder: string;
+        submit: string;
+      };
+      cards: {
+        whatsapp: string;
+        email: string;
+        location: string;
+      };
+    };
+    map: {
+      title: string;
+    };
+    pdf: {
+      title: string;
+      subtitle: string;
+      propertyValue: string;
+      dailyRate: string;
+      occupancy: string;
+      monthlyCosts: string;
+      platformFee: string;
+      grossMonthly: string;
+      netMonthly: string;
+      annualReturn: string;
+      payback: string;
+      paybackUnit: string;
+    };
+    whatsappMessage: string;
+  }
+> = {
+  pt: {
+    nav: {
+      location: 'Localização',
+      works: 'Obras',
+      investment: 'Investimento',
+      contact: 'Contato',
+      menu: 'Menu',
+      menuAria: 'Abrir menu',
+      languageLabel: 'Selecionar idioma',
+    },
+    hero: {
+      eyebrow: 'Costa do Descobrimento · Bahia',
+      title: 'Viva perto do mar.\nInvista onde o futuro passa.',
+      subtitle:
+        'Studios e apartamentos em uma das regiões mais desejadas da Bahia, com alto potencial de valorização.',
+      subtitleDesktop:
+        'Studios e apartamentos na Costa do Descobrimento, com localização estratégica e potencial de valorização.',
+      primaryCta: 'Solicitar apresentação exclusiva',
+      primaryCtaDesktop: 'Solicitar apresentação exclusiva',
+      secondaryCta: 'Ver localização',
+    },
+    showcase: {
+      title: 'Vitrine do Bella Vista Beach Residence',
+      subtitle: 'Explore os ambientes pensados para viver e investir bem.',
+      detailsOpen: 'Ver detalhes',
+      detailsClose: 'Fechar detalhes',
+      dialogLabel: 'Detalhes do card',
+      cards: [
+        {
+          label: 'STUDIO',
+          title: 'Apartamento studio',
+          desc: '27 m²',
+          details: [
+            { icon: BedDouble, label: 'Quartos', value: '1' },
+            { icon: CarFront, label: 'Vagas', value: '1' },
+            { icon: Ruler, label: 'Área', value: '27 m²' },
+            { icon: Bath, label: 'Banheiro', value: '1' },
+          ],
+          images: showcaseImages.studio,
+        },
+        {
+          label: '2 QUARTOS',
+          title: 'Apartamento 2 quartos',
+          desc: '45 m²',
+          details: [
+            { icon: BedDouble, label: 'Quartos', value: '2' },
+            { icon: Bath, label: 'Suítes', value: '2' },
+            { icon: CarFront, label: 'Vaga', value: '1' },
+            { icon: Ruler, label: 'Área', value: '45 m²' },
+          ],
+          images: showcaseImages.apt2,
+        },
+        {
+          label: '3 QUARTOS',
+          title: 'Apartamento 3 quartos',
+          desc: '82,48 m²',
+          details: [
+            { icon: BedDouble, label: 'Quartos', value: '3' },
+            { icon: Bath, label: 'Suítes', value: '2' },
+            { icon: CarFront, label: 'Vaga', value: '1' },
+            { icon: Ruler, label: 'Área', value: '82,48 m²' },
+          ],
+          images: showcaseImages.apt3,
+        },
+        {
+          label: 'AMBIENTE TOTAL',
+          title: 'Ambiente completo',
+          desc: 'Infraestrutura e lazer de resort',
+          details: [
+            {
+              icon: Waves,
+              label: 'Piscina',
+              value: 'Borda infinita, vista para o mar',
+            },
+            { icon: Sun, label: 'Beach Club', value: 'Exclusivo' },
+            { icon: Sparkles, label: 'Bem-estar', value: 'SPA, academia e ofurôs' },
+            {
+              icon: Trees,
+              label: 'Lazer',
+              value: 'Lounge bar, áreas verdes e trilhas',
+            },
+            { icon: Shield, label: 'Segurança', value: '24 horas' },
+          ],
+          images: showcaseImages.amenities,
+        },
+      ],
+    },
+    location: {
+      tag: 'LOCALIZAÇÃO ESTRATÉGICA',
+      title: 'Localização que vira demanda.',
+      body:
+        'Entre BR-367 e os polos turísticos, acesso rápido e liquidez para uso próprio ou renda.',
+      benefits: [
+        'Acesso pela BR-367',
+        'Fluxo turístico constante',
+        'Equilíbrio: privacidade + movimento',
+      ],
+    },
+    simulator: {
+      tag: 'INVESTIMENTO',
+      title: 'Simule seu retorno com aluguel de temporada.',
+      subtitle:
+        'Ajuste os números e veja uma estimativa de faturamento, custos e retorno anual. Valores ilustrativos.',
+      bullets: [
+        'Demanda sazonal favorece ocupação consistente.',
+        'Modelo flexível para uso próprio ou renda.',
+        'Operação enxuta com potencial recorrente.',
+      ],
+      presets: {
+        conservative: 'Conservador',
+        realistic: 'Realista',
+        high: 'Alta Temporada',
       },
-      { icon: Sun, label: 'Beach Club', value: 'Exclusivo' },
-      { icon: Sparkles, label: 'Bem-estar', value: 'SPA, academia e ofurôs' },
-      {
-        icon: Trees,
-        label: 'Lazer',
-        value: 'Lounge bar, áreas verdes e trilhas',
+      fields: {
+        propertyValue: 'Valor do imóvel (R$)',
+        dailyRate: 'Diária média (R$)',
+        occupancy: 'Ocupação (%)',
+        monthlyCosts: 'Custos mensais (R$)',
+        platformFee: 'Taxa de plataforma (%)',
       },
-      { icon: Shield, label: 'Segurança', value: '24 horas' },
-    ],
-    images: [
-      'https://i.postimg.cc/kX7Z3XSm/Design-sem-nome-2026-01-24T013513-644.png',
-      'https://i.postimg.cc/6QBTCZ4p/Design-sem-nome-2026-01-24T013506-098.png',
-      'https://i.postimg.cc/gJTJ9BM5/Design-sem-nome-2026-01-24T013459-346.png',
-      'https://i.postimg.cc/qq67pXS1/Design-sem-nome-2026-01-24T013356-074.png',
-    ],
+      results: {
+        revenue: 'Faturamento mensal',
+        profit: 'Lucro mensal',
+        annualReturn: 'Retorno anual',
+        payback: 'Payback estimado',
+      },
+      paybackUnit: 'anos',
+      ctaPrimary: 'Receber simulação no WhatsApp',
+      ctaSecondary: 'Baixar PDF da simulação',
+      disclaimer: 'Estimativa. Não substitui análise financeira.',
+    },
+    progress: {
+      tag: 'ANDAMENTO DA OBRA',
+      title: 'Já estamos em obra.',
+      body:
+        'Evolução contínua com etapas monitoradas. Atualizações visuais registradas para acompanhar cada avanço.',
+      highlights: ['Estrutura em andamento', 'Equipe local mobilizada', 'Cronograma ativo'],
+    },
+    finalCta: {
+      title: 'Tudo pronto para sua próxima decisão patrimonial.',
+      body: 'Receba uma apresentação completa e tire dúvidas com um especialista.',
+      primary: 'Agendar conversa',
+      secondary: 'Ver obras',
+    },
+    contact: {
+      tag: 'CONTATO',
+      title: 'Fale com nossa equipe',
+      body: 'Atendimento consultivo e rápido para você avançar com segurança.',
+      email: 'gestaocliente@bellaimperial.com.br',
+      location: 'Costa do Descobrimento • Bahia',
+      whatsappValue: 'Atendimento imediato',
+      form: {
+        nameLabel: 'Nome',
+        emailLabel: 'Email',
+        messageLabel: 'Mensagem',
+        namePlaceholder: 'Seu nome',
+        emailPlaceholder: 'voce@email.com',
+        messagePlaceholder: 'Como podemos ajudar?',
+        submit: 'Enviar mensagem',
+      },
+      cards: {
+        whatsapp: 'WhatsApp',
+        email: 'Email',
+        location: 'Localização',
+      },
+    },
+    map: {
+      title: 'Mapa da região',
+    },
+    pdf: {
+      title: 'Bella Vista Beach Residence',
+      subtitle: 'Simulacao de retorno (valores ilustrativos)',
+      propertyValue: 'Valor do imovel',
+      dailyRate: 'Diaria media',
+      occupancy: 'Ocupacao',
+      monthlyCosts: 'Custos mensais',
+      platformFee: 'Taxa plataforma',
+      grossMonthly: 'Faturamento mensal',
+      netMonthly: 'Lucro mensal',
+      annualReturn: 'Retorno anual',
+      payback: 'Payback',
+      paybackUnit: 'anos',
+    },
+    whatsappMessage: 'Olá! Quero saber mais sobre o Bella Vista Beach Residence.',
   },
-];
+  en: {
+    nav: {
+      location: 'Location',
+      works: 'Works',
+      investment: 'Investment',
+      contact: 'Contact',
+      menu: 'Menu',
+      menuAria: 'Open menu',
+      languageLabel: 'Select language',
+    },
+    hero: {
+      eyebrow: 'Discovery Coast · Bahia',
+      title: 'Live near the sea.\nInvest where the future moves.',
+      subtitle:
+        "Studios and apartments in one of Bahia's most desired regions, with strong appreciation potential.",
+      subtitleDesktop:
+        'Studios and apartments on the Discovery Coast, with a strategic location and appreciation potential.',
+      primaryCta: 'Request an exclusive presentation',
+      primaryCtaDesktop: 'Request an exclusive presentation',
+      secondaryCta: 'See location',
+    },
+    showcase: {
+      title: 'Bella Vista Beach Residence Showcase',
+      subtitle: 'Explore the spaces designed to live and invest well.',
+      detailsOpen: 'View details',
+      detailsClose: 'Close details',
+      dialogLabel: 'Card details',
+      cards: [
+        {
+          label: 'STUDIO',
+          title: 'Studio apartment',
+          desc: '27 m²',
+          details: [
+            { icon: BedDouble, label: 'Bedrooms', value: '1' },
+            { icon: CarFront, label: 'Parking', value: '1' },
+            { icon: Ruler, label: 'Area', value: '27 m²' },
+            { icon: Bath, label: 'Bathroom', value: '1' },
+          ],
+          images: showcaseImages.studio,
+        },
+        {
+          label: '2 BEDROOMS',
+          title: '2-bedroom apartment',
+          desc: '45 m²',
+          details: [
+            { icon: BedDouble, label: 'Bedrooms', value: '2' },
+            { icon: Bath, label: 'Suites', value: '2' },
+            { icon: CarFront, label: 'Parking', value: '1' },
+            { icon: Ruler, label: 'Area', value: '45 m²' },
+          ],
+          images: showcaseImages.apt2,
+        },
+        {
+          label: '3 BEDROOMS',
+          title: '3-bedroom apartment',
+          desc: '82.48 m²',
+          details: [
+            { icon: BedDouble, label: 'Bedrooms', value: '3' },
+            { icon: Bath, label: 'Suites', value: '2' },
+            { icon: CarFront, label: 'Parking', value: '1' },
+            { icon: Ruler, label: 'Area', value: '82.48 m²' },
+          ],
+          images: showcaseImages.apt3,
+        },
+        {
+          label: 'AMENITIES',
+          title: 'Full amenities',
+          desc: 'Resort infrastructure and leisure',
+          details: [
+            {
+              icon: Waves,
+              label: 'Pool',
+              value: 'Infinity pool, sea view',
+            },
+            { icon: Sun, label: 'Beach Club', value: 'Exclusive' },
+            { icon: Sparkles, label: 'Wellness', value: 'Spa, gym and hot tubs' },
+            {
+              icon: Trees,
+              label: 'Leisure',
+              value: 'Lounge bar, green areas and trails',
+            },
+            { icon: Shield, label: 'Security', value: '24-hour' },
+          ],
+          images: showcaseImages.amenities,
+        },
+      ],
+    },
+    location: {
+      tag: 'STRATEGIC LOCATION',
+      title: 'Location that turns into demand.',
+      body:
+        'Between BR-367 and the tourist hubs, fast access and liquidity for personal use or income.',
+      benefits: [
+        'Access via BR-367',
+        'Consistent tourist flow',
+        'Balance: privacy + movement',
+      ],
+    },
+    simulator: {
+      tag: 'INVESTMENT',
+      title: 'Simulate your return with vacation rentals.',
+      subtitle:
+        'Adjust the numbers and see an estimate of revenue, costs and annual return. Illustrative values.',
+      bullets: [
+        'Seasonal demand supports consistent occupancy.',
+        'Flexible model for personal use or income.',
+        'Lean operation with recurring potential.',
+      ],
+      presets: {
+        conservative: 'Conservative',
+        realistic: 'Realistic',
+        high: 'High Season',
+      },
+      fields: {
+        propertyValue: 'Property value (R$)',
+        dailyRate: 'Average daily rate (R$)',
+        occupancy: 'Occupancy (%)',
+        monthlyCosts: 'Monthly costs (R$)',
+        platformFee: 'Platform fee (%)',
+      },
+      results: {
+        revenue: 'Monthly revenue',
+        profit: 'Monthly profit',
+        annualReturn: 'Annual return',
+        payback: 'Estimated payback',
+      },
+      paybackUnit: 'years',
+      ctaPrimary: 'Receive simulation on WhatsApp',
+      ctaSecondary: 'Download simulation PDF',
+      disclaimer: 'Estimate. Does not replace financial analysis.',
+    },
+    progress: {
+      tag: 'CONSTRUCTION PROGRESS',
+      title: 'We are already building.',
+      body:
+        'Continuous progress with monitored stages. Visual updates recorded to track each milestone.',
+      highlights: ['Structure in progress', 'Local team mobilized', 'Active schedule'],
+    },
+    finalCta: {
+      title: 'Everything ready for your next investment decision.',
+      body: 'Get a full presentation and speak with a specialist.',
+      primary: 'Schedule a call',
+      secondary: 'See construction',
+    },
+    contact: {
+      tag: 'CONTACT',
+      title: 'Talk to our team',
+      body: 'Consultative, fast service so you can move forward with confidence.',
+      email: 'gestaocliente@bellaimperial.com.br',
+      location: 'Discovery Coast • Bahia',
+      whatsappValue: 'Instant assistance',
+      form: {
+        nameLabel: 'Name',
+        emailLabel: 'Email',
+        messageLabel: 'Message',
+        namePlaceholder: 'Your name',
+        emailPlaceholder: 'you@email.com',
+        messagePlaceholder: 'How can we help?',
+        submit: 'Send message',
+      },
+      cards: {
+        whatsapp: 'WhatsApp',
+        email: 'Email',
+        location: 'Location',
+      },
+    },
+    map: {
+      title: 'Region map',
+    },
+    pdf: {
+      title: 'Bella Vista Beach Residence',
+      subtitle: 'Return simulation (illustrative values)',
+      propertyValue: 'Property value',
+      dailyRate: 'Average daily rate',
+      occupancy: 'Occupancy',
+      monthlyCosts: 'Monthly costs',
+      platformFee: 'Platform fee',
+      grossMonthly: 'Monthly revenue',
+      netMonthly: 'Monthly profit',
+      annualReturn: 'Annual return',
+      payback: 'Payback',
+      paybackUnit: 'years',
+    },
+    whatsappMessage: 'Hello! I want to know more about Bella Vista Beach Residence.',
+  },
+  it: {
+    nav: {
+      location: 'Posizione',
+      works: 'Opere',
+      investment: 'Investimento',
+      contact: 'Contatto',
+      menu: 'Menu',
+      menuAria: 'Apri menu',
+      languageLabel: 'Seleziona lingua',
+    },
+    hero: {
+      eyebrow: 'Costa della Scoperta · Bahia',
+      title: 'Vivi vicino al mare.\nInvesti dove passa il futuro.',
+      subtitle:
+        'Monolocali e appartamenti in una delle zone più desiderate della Bahia, con alto potenziale di valorizzazione.',
+      subtitleDesktop:
+        'Monolocali e appartamenti sulla Costa della Scoperta, con posizione strategica e potenziale di valorizzazione.',
+      primaryCta: 'Richiedi una presentazione esclusiva',
+      primaryCtaDesktop: 'Richiedi una presentazione esclusiva',
+      secondaryCta: 'Vedi posizione',
+    },
+    showcase: {
+      title: 'Vetrina Bella Vista Beach Residence',
+      subtitle: 'Esplora gli spazi pensati per vivere e investire bene.',
+      detailsOpen: 'Vedi dettagli',
+      detailsClose: 'Chiudi dettagli',
+      dialogLabel: 'Dettagli della scheda',
+      cards: [
+        {
+          label: 'STUDIO',
+          title: 'Monolocale',
+          desc: '27 m²',
+          details: [
+            { icon: BedDouble, label: 'Camere', value: '1' },
+            { icon: CarFront, label: 'Posto auto', value: '1' },
+            { icon: Ruler, label: 'Superficie', value: '27 m²' },
+            { icon: Bath, label: 'Bagno', value: '1' },
+          ],
+          images: showcaseImages.studio,
+        },
+        {
+          label: '2 CAMERE',
+          title: 'Appartamento 2 camere',
+          desc: '45 m²',
+          details: [
+            { icon: BedDouble, label: 'Camere', value: '2' },
+            { icon: Bath, label: 'Suite', value: '2' },
+            { icon: CarFront, label: 'Posto auto', value: '1' },
+            { icon: Ruler, label: 'Superficie', value: '45 m²' },
+          ],
+          images: showcaseImages.apt2,
+        },
+        {
+          label: '3 CAMERE',
+          title: 'Appartamento 3 camere',
+          desc: '82,48 m²',
+          details: [
+            { icon: BedDouble, label: 'Camere', value: '3' },
+            { icon: Bath, label: 'Suite', value: '2' },
+            { icon: CarFront, label: 'Posto auto', value: '1' },
+            { icon: Ruler, label: 'Superficie', value: '82,48 m²' },
+          ],
+          images: showcaseImages.apt3,
+        },
+        {
+          label: 'AMENITA',
+          title: 'Servizi completi',
+          desc: 'Infrastruttura e leisure da resort',
+          details: [
+            {
+              icon: Waves,
+              label: 'Piscina',
+              value: 'Infinity pool con vista mare',
+            },
+            { icon: Sun, label: 'Beach Club', value: 'Esclusivo' },
+            { icon: Sparkles, label: 'Benessere', value: 'Spa, palestra e ofuro' },
+            {
+              icon: Trees,
+              label: 'Leisure',
+              value: 'Lounge bar, aree verdi e sentieri',
+            },
+            { icon: Shield, label: 'Sicurezza', value: '24 ore' },
+          ],
+          images: showcaseImages.amenities,
+        },
+      ],
+    },
+    location: {
+      tag: 'POSIZIONE STRATEGICA',
+      title: 'Una posizione che diventa domanda.',
+      body:
+        'Tra la BR-367 e i poli turistici, accesso rapido e liquidita per uso personale o rendita.',
+      benefits: [
+        'Accesso dalla BR-367',
+        'Flusso turistico costante',
+        'Equilibrio: privacy + movimento',
+      ],
+    },
+    simulator: {
+      tag: 'INVESTIMENTO',
+      title: 'Simula il tuo ritorno con gli affitti brevi.',
+      subtitle:
+        'Regola i numeri e vedi una stima di fatturato, costi e ritorno annuo. Valori indicativi.',
+      bullets: [
+        "La domanda stagionale sostiene un'occupazione costante.",
+        'Modello flessibile per uso personale o rendita.',
+        'Gestione snella con potenziale ricorrente.',
+      ],
+      presets: {
+        conservative: 'Conservativo',
+        realistic: 'Realistico',
+        high: 'Alta stagione',
+      },
+      fields: {
+        propertyValue: 'Valore immobile (R$)',
+        dailyRate: 'Tariffa media (R$)',
+        occupancy: 'Occupazione (%)',
+        monthlyCosts: 'Costi mensili (R$)',
+        platformFee: 'Commissione piattaforma (%)',
+      },
+      results: {
+        revenue: 'Fatturato mensile',
+        profit: 'Utile mensile',
+        annualReturn: 'Ritorno annuo',
+        payback: 'Payback stimato',
+      },
+      paybackUnit: 'anni',
+      ctaPrimary: 'Ricevi simulazione su WhatsApp',
+      ctaSecondary: 'Scarica PDF simulazione',
+      disclaimer: 'Stima. Non sostituisce analisi finanziaria.',
+    },
+    progress: {
+      tag: 'AVANZAMENTO LAVORI',
+      title: 'Siamo gia in cantiere.',
+      body:
+        'Evoluzione continua con fasi monitorate. Aggiornamenti visivi per seguire ogni avanzamento.',
+      highlights: ['Struttura in corso', 'Team locale attivo', 'Cronoprogramma attivo'],
+    },
+    finalCta: {
+      title: 'Tutto pronto per la tua prossima decisione patrimoniale.',
+      body: 'Ricevi una presentazione completa e parla con un esperto.',
+      primary: 'Prenota una call',
+      secondary: 'Vedi cantiere',
+    },
+    contact: {
+      tag: 'CONTATTO',
+      title: 'Parla con il nostro team',
+      body: 'Assistenza consultiva e rapida per avanzare con sicurezza.',
+      email: 'gestaocliente@bellaimperial.com.br',
+      location: 'Costa della Scoperta • Bahia',
+      whatsappValue: 'Assistenza immediata',
+      form: {
+        nameLabel: 'Nome',
+        emailLabel: 'Email',
+        messageLabel: 'Messaggio',
+        namePlaceholder: 'Il tuo nome',
+        emailPlaceholder: 'tu@email.com',
+        messagePlaceholder: 'Come possiamo aiutarti?',
+        submit: 'Invia messaggio',
+      },
+      cards: {
+        whatsapp: 'WhatsApp',
+        email: 'Email',
+        location: 'Posizione',
+      },
+    },
+    map: {
+      title: 'Mappa della regione',
+    },
+    pdf: {
+      title: 'Bella Vista Beach Residence',
+      subtitle: 'Simulazione di ritorno (valori indicativi)',
+      propertyValue: 'Valore immobile',
+      dailyRate: 'Tariffa media',
+      occupancy: 'Occupazione',
+      monthlyCosts: 'Costi mensili',
+      platformFee: 'Commissione piattaforma',
+      grossMonthly: 'Fatturato mensile',
+      netMonthly: 'Utile mensile',
+      annualReturn: 'Ritorno annuo',
+      payback: 'Payback',
+      paybackUnit: 'anni',
+    },
+    whatsappMessage: 'Ciao! Vorrei sapere di piu sul Bella Vista Beach Residence.',
+  },
+};
 
 const showcaseDetails = [
   { icon: Ruler, label: 'Área', value: '48 m²' },
@@ -231,9 +793,9 @@ const progressImages = [
   'https://i.postimg.cc/90rCyBPd/20251113-080300.jpg',
 ];
 
-const simulatorPresets = [
+const simulatorPresets: { key: PresetKey; values: SimulatorValues }[] = [
   {
-    label: 'Conservador',
+    key: 'conservative',
     values: {
       propertyValue: 260000,
       dailyRate: 220,
@@ -243,7 +805,7 @@ const simulatorPresets = [
     },
   },
   {
-    label: 'Realista',
+    key: 'realistic',
     values: {
       propertyValue: 250000,
       dailyRate: 250,
@@ -253,7 +815,7 @@ const simulatorPresets = [
     },
   },
   {
-    label: 'Alta Temporada',
+    key: 'high',
     values: {
       propertyValue: 250000,
       dailyRate: 320,
@@ -298,7 +860,27 @@ function Reveal({
   );
 }
 
-function HeroNav() {
+function HeroNav({
+  labels,
+  whatsappLink,
+  menuLabel,
+  menuAria,
+  locale,
+  onLocaleChange,
+}: {
+  labels: {
+    location: string;
+    works: string;
+    investment: string;
+    contact: string;
+    languageLabel: string;
+  };
+  whatsappLink: string;
+  menuLabel: string;
+  menuAria: string;
+  locale: Locale;
+  onLocaleChange: (value: Locale) => void;
+}) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -315,19 +897,19 @@ function HeroNav() {
             href='#localizacao'
             className='transition hover:text-[#B7925A] hover:drop-shadow-[0_0_10px_rgba(183,146,90,0.55)]'
           >
-            Localização
+            {labels.location}
           </a>
           <a
             href='#obra'
             className='transition hover:text-[#B7925A] hover:drop-shadow-[0_0_10px_rgba(183,146,90,0.55)]'
           >
-            Obras
+            {labels.works}
           </a>
           <a
             href='#perfil'
             className='transition hover:text-[#B7925A] hover:drop-shadow-[0_0_10px_rgba(183,146,90,0.55)]'
           >
-            Investimento
+            {labels.investment}
           </a>
           <a
             href={whatsappLink}
@@ -335,18 +917,31 @@ function HeroNav() {
             rel='noreferrer'
             className='transition hover:text-[#B7925A] hover:drop-shadow-[0_0_10px_rgba(183,146,90,0.55)]'
           >
-            Contato
+            {labels.contact}
           </a>
+          <div className='flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-2 text-[0.55rem] uppercase tracking-[0.25em] text-white/75'>
+            <Globe className='h-3.5 w-3.5 text-white/70' />
+            <select
+              value={locale}
+              onChange={(event) => onLocaleChange(event.target.value as Locale)}
+              className='bg-transparent text-white/80 focus:outline-none'
+              aria-label={labels.languageLabel}
+            >
+              <option value='pt'>PT</option>
+              <option value='en'>EN</option>
+              <option value='it'>IT</option>
+            </select>
+          </div>
         </div>
         <button
           type='button'
-          aria-label='Abrir menu'
+          aria-label={menuAria}
           aria-expanded={menuOpen}
           aria-controls='hero-menu'
           onClick={() => setMenuOpen((open) => !open)}
           className='inline-flex items-center justify-center rounded-full border border-white/20 bg-white/10 px-3 py-2 text-xs uppercase tracking-[0.3em] text-white/80 transition hover:text-white md:hidden'
         >
-          Menu
+          {menuLabel}
         </button>
       </nav>
       {menuOpen && (
@@ -360,21 +955,21 @@ function HeroNav() {
               className='transition hover:text-[#B7925A] hover:drop-shadow-[0_0_10px_rgba(183,146,90,0.55)]'
               onClick={() => setMenuOpen(false)}
             >
-              Localização
+              {labels.location}
             </a>
             <a
               href='#obra'
               className='transition hover:text-[#B7925A] hover:drop-shadow-[0_0_10px_rgba(183,146,90,0.55)]'
               onClick={() => setMenuOpen(false)}
             >
-              Obras
+              {labels.works}
             </a>
             <a
               href='#perfil'
               className='transition hover:text-[#B7925A] hover:drop-shadow-[0_0_10px_rgba(183,146,90,0.55)]'
               onClick={() => setMenuOpen(false)}
             >
-              Investimento
+              {labels.investment}
             </a>
             <a
               href={whatsappLink}
@@ -383,8 +978,21 @@ function HeroNav() {
               className='transition hover:text-[#B7925A] hover:drop-shadow-[0_0_10px_rgba(183,146,90,0.55)]'
               onClick={() => setMenuOpen(false)}
             >
-              Contato
+              {labels.contact}
             </a>
+            <div className='mt-2 flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-2 text-[0.6rem] uppercase tracking-[0.25em] text-white/75'>
+              <Globe className='h-3.5 w-3.5 text-white/70' />
+              <select
+                value={locale}
+                onChange={(event) => onLocaleChange(event.target.value as Locale)}
+                className='bg-transparent text-white/80 focus:outline-none'
+                aria-label={labels.languageLabel}
+              >
+                <option value='pt'>PT</option>
+                <option value='en'>EN</option>
+                <option value='it'>IT</option>
+              </select>
+            </div>
           </div>
         </div>
       )}
@@ -399,6 +1007,9 @@ function StudioShowcaseCard({
   images,
   details,
   index,
+  detailsOpenLabel,
+  detailsCloseLabel,
+  dialogLabel,
 }: {
   label: string;
   title: string;
@@ -406,6 +1017,9 @@ function StudioShowcaseCard({
   images: string[];
   details?: Array<{ icon: LucideIcon; label: string; value: string }>;
   index: number;
+  detailsOpenLabel: string;
+  detailsCloseLabel: string;
+  dialogLabel: string;
 }) {
   const reduceMotion = useReducedMotion();
   const [imageIndex, setImageIndex] = useState(0);
@@ -437,6 +1051,7 @@ function StudioShowcaseCard({
         onClick={() => setIsOpen(true)}
         aria-haspopup='dialog'
         aria-expanded={isOpen}
+        aria-label={`${detailsOpenLabel}: ${title}`}
         className='group relative min-w-[85%] snap-center overflow-hidden rounded-[24px] border border-white/10 bg-[var(--panel)] text-left shadow-[0_12px_30px_rgba(0,0,0,0.35)] transition duration-300 hover:shadow-[0_18px_50px_rgba(0,0,0,0.45)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold)]/60 md:min-w-0'
         initial={{ opacity: 0, y: 16 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -475,7 +1090,7 @@ function StudioShowcaseCard({
             </h3>
             <p className='mt-1 text-sm text-[var(--muted)]'>{desc}</p>
           </div>
-          <div className='text-sm text-[var(--muted)]'>Ver detalhes →</div>
+          <div className='text-sm text-[var(--muted)]'>{detailsOpenLabel} →</div>
         </div>
       </motion.button>
 
@@ -495,7 +1110,7 @@ function StudioShowcaseCard({
             <motion.div
               role='dialog'
               aria-modal='true'
-              aria-label={`Detalhes do card ${title}`}
+              aria-label={`${dialogLabel} ${title}`}
               className='relative z-10 w-full max-w-md rounded-[24px] border border-white/10 bg-[rgba(6,16,24,0.96)] p-6 text-white shadow-[0_24px_60px_rgba(5,12,18,0.55),0_0_40px_rgba(183,146,90,0.12)]'
               initial={{ y: 16, opacity: 0, scale: 0.98 }}
               animate={{ y: 0, opacity: 1, scale: 1 }}
@@ -507,7 +1122,7 @@ function StudioShowcaseCard({
                 type='button'
                 onClick={() => setIsOpen(false)}
                 className='absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/70 transition hover:text-white'
-                aria-label='Fechar'
+                aria-label={detailsCloseLabel}
               >
                 <X className='h-4 w-4' />
               </button>
@@ -548,11 +1163,11 @@ function StudioShowcaseCard({
   );
 }
 
-function InteractiveMap() {
+function InteractiveMap({ title }: { title: string }) {
   return (
     <div className='relative h-[340px] w-full overflow-hidden rounded-[24px] border border-white/10 md:h-[360px]'>
       <iframe
-        title='Mapa da região'
+        title={title}
         src={mapEmbedUrl}
         className='h-full w-full border-0'
         loading='lazy'
@@ -564,14 +1179,40 @@ function InteractiveMap() {
 
 export default function HomePage() {
   const reduceMotion = useReducedMotion();
+  const [locale, setLocale] = useState<Locale>('pt');
   const [heroVideoReady, setHeroVideoReady] = useState(false);
   const [propertyValue, setPropertyValue] = useState(250000);
   const [dailyRate, setDailyRate] = useState(250);
   const [occupancy, setOccupancy] = useState(55);
   const [monthlyCosts, setMonthlyCosts] = useState(650);
   const [platformFee, setPlatformFee] = useState(12);
-  const [activePreset, setActivePreset] = useState('Realista');
+  const [activePreset, setActivePreset] = useState<PresetKey>('realistic');
   const [progressIndex, setProgressIndex] = useState(0);
+  const copy = translations[locale];
+  const showcaseItems = copy.showcase.cards;
+  const whatsappLink =
+    baseWhatsAppUrl + '?text=' + encodeURIComponent(copy.whatsappMessage);
+  const currencyFormatter = useMemo(
+    () =>
+      new Intl.NumberFormat(
+        locale === 'en' ? 'en-US' : locale === 'it' ? 'it-IT' : 'pt-BR',
+        { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }
+      ),
+    [locale]
+  );
+  const formatCurrency = (value: number) =>
+    currencyFormatter.format(Math.round(value));
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem('bella-vista-locale');
+    if (saved === 'pt' || saved === 'en' || saved === 'it') {
+      setLocale(saved);
+    }
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem('bella-vista-locale', locale);
+  }, [locale]);
   const simulatorResults = useMemo(() => {
     const nightsPerMonth = (30 * occupancy) / 100;
     const grossMonthly = nightsPerMonth * dailyRate;
@@ -592,24 +1233,23 @@ export default function HomePage() {
   const previousResults = useRef(simulatorResults);
   const [animatedResults, setAnimatedResults] = useState(simulatorResults);
   const handleDownloadPdf = () => {
+    const paybackLabel = simulatorResults.paybackYears
+      ? `${simulatorResults.paybackYears.toFixed(1)} ${copy.pdf.paybackUnit}`
+      : '-';
     const lines = [
-      'Bella Vista Beach Residence',
-      'Simulacao de retorno (valores ilustrativos)',
+      copy.pdf.title,
+      copy.pdf.subtitle,
       '',
-      `Valor do imovel: ${formatCurrency(propertyValue)}`,
-      `Diaria media: ${formatCurrency(dailyRate)}`,
-      `Ocupacao: ${occupancy}%`,
-      `Custos mensais: ${formatCurrency(monthlyCosts)}`,
-      `Taxa plataforma: ${platformFee}%`,
+      `${copy.pdf.propertyValue}: ${formatCurrency(propertyValue)}`,
+      `${copy.pdf.dailyRate}: ${formatCurrency(dailyRate)}`,
+      `${copy.pdf.occupancy}: ${occupancy}%`,
+      `${copy.pdf.monthlyCosts}: ${formatCurrency(monthlyCosts)}`,
+      `${copy.pdf.platformFee}: ${platformFee}%`,
       '',
-      `Faturamento mensal: ${formatCurrency(simulatorResults.grossMonthly)}`,
-      `Lucro mensal: ${formatCurrency(simulatorResults.netMonthly)}`,
-      `Retorno anual: ${simulatorResults.annualReturn.toFixed(1)}%`,
-      `Payback: ${
-        simulatorResults.paybackYears
-          ? `${simulatorResults.paybackYears.toFixed(1)} anos`
-          : '-'
-      }`,
+      `${copy.pdf.grossMonthly}: ${formatCurrency(simulatorResults.grossMonthly)}`,
+      `${copy.pdf.netMonthly}: ${formatCurrency(simulatorResults.netMonthly)}`,
+      `${copy.pdf.annualReturn}: ${simulatorResults.annualReturn.toFixed(1)}%`,
+      `${copy.pdf.payback}: ${paybackLabel}`,
     ];
     const pdf = buildPdf(lines);
     const blob = new Blob([pdf], { type: 'application/pdf' });
@@ -669,7 +1309,14 @@ export default function HomePage() {
   return (
     <MotionConfig reducedMotion='user'>
       <div className='bg-[var(--bg-0)] text-[var(--text)]'>
-        <HeroNav />
+        <HeroNav
+          labels={copy.nav}
+          whatsappLink={whatsappLink}
+          menuLabel={copy.nav.menu}
+          menuAria={copy.nav.menuAria}
+          locale={locale}
+          onLocaleChange={setLocale}
+        />
         <main>
           <section
             id='inicio'
@@ -764,15 +1411,22 @@ export default function HomePage() {
             <div className='section-inner'>
               <div className='flex flex-col gap-3'>
                 <p className='text-xs uppercase tracking-[0.32em] text-[var(--muted)]'>
-                  Vitrine do Bella Vista Beach Residence
+                  {copy.showcase.title}
                 </p>
                 <h3 className='section-title font-semibold text-[var(--text)]'>
-                  Explore o interior pensado para viver e investir bem.
+                  {copy.showcase.subtitle}
                 </h3>
               </div>
               <div className='mt-6 flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory md:grid md:grid-cols-2 md:gap-6 md:overflow-visible md:snap-none lg:grid-cols-3'>
                 {showcaseItems.map((item, index) => (
-                  <StudioShowcaseCard key={item.label} {...item} index={index} />
+                  <StudioShowcaseCard
+                    key={item.label}
+                    {...item}
+                    index={index}
+                    detailsOpenLabel={copy.showcase.detailsOpen}
+                    detailsCloseLabel={copy.showcase.detailsClose}
+                    dialogLabel={copy.showcase.dialogLabel}
+                  />
                 ))}
               </div>
             </div>
@@ -808,7 +1462,7 @@ export default function HomePage() {
                   viewport={{ once: true, amount: 0.3 }}
                   transition={reduceMotion ? { duration: 0 } : { duration: 0.35 }}
                 >
-                  <InteractiveMap />
+                  <InteractiveMap title={copy.map.title} />
                 </motion.div>
                 <motion.div
                   className='order-3 flex flex-wrap justify-center gap-3 text-sm text-white/80 lg:col-start-1 lg:justify-start'
@@ -858,27 +1512,30 @@ export default function HomePage() {
                     ))}
                   </ul>
                   <div className='flex gap-2 overflow-x-auto pb-1 lg:flex-wrap lg:justify-start lg:overflow-visible'>
-                    {simulatorPresets.map((preset) => (
-                      <button
-                        key={preset.label}
-                        type='button'
-                        onClick={() => {
-                          setPropertyValue(preset.values.propertyValue);
-                          setDailyRate(preset.values.dailyRate);
-                          setOccupancy(preset.values.occupancy);
-                          setMonthlyCosts(preset.values.monthlyCosts);
-                          setPlatformFee(preset.values.platformFee);
-                          setActivePreset(preset.label);
-                        }}
-                        className={`flex-shrink-0 rounded-full border px-3 py-2 text-[10px] uppercase tracking-[0.2em] transition ${
-                          activePreset === preset.label
-                            ? 'border-[var(--gold)]/60 bg-[var(--panel-strong)] text-white'
-                            : 'border-white/15 bg-white/5 text-white/70 hover:border-[var(--gold)]/40'
-                        }`}
-                      >
-                        {preset.label}
-                      </button>
-                    ))}
+                    {simulatorPresets.map((preset) => {
+                      const presetLabel = copy.simulator.presets[preset.key];
+                      return (
+                        <button
+                          key={preset.key}
+                          type='button'
+                          onClick={() => {
+                            setPropertyValue(preset.values.propertyValue);
+                            setDailyRate(preset.values.dailyRate);
+                            setOccupancy(preset.values.occupancy);
+                            setMonthlyCosts(preset.values.monthlyCosts);
+                            setPlatformFee(preset.values.platformFee);
+                            setActivePreset(preset.key);
+                          }}
+                          className={`flex-shrink-0 rounded-full border px-3 py-2 text-[10px] uppercase tracking-[0.2em] transition ${
+                            activePreset === preset.key
+                              ? 'border-[var(--gold)]/60 bg-[var(--panel-strong)] text-white'
+                              : 'border-white/15 bg-white/5 text-white/70 hover:border-[var(--gold)]/40'
+                          }`}
+                        >
+                          {presetLabel}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
                 <motion.div
@@ -891,7 +1548,7 @@ export default function HomePage() {
                   <div className='space-y-5 text-white'>
                     <div className='grid gap-4 sm:grid-cols-2'>
                       <label className='space-y-2 text-[11px] text-white/60'>
-                        <span>Valor do imóvel (R$)</span>
+                        <span>{copy.simulator.fields.propertyValue}</span>
                         <input
                           type='number'
                           value={propertyValue}
@@ -902,7 +1559,7 @@ export default function HomePage() {
                         />
                       </label>
                       <label className='space-y-2 text-[11px] text-white/60'>
-                        <span>Diária média (R$)</span>
+                        <span>{copy.simulator.fields.dailyRate}</span>
                         <input
                           type='number'
                           value={dailyRate}
@@ -914,7 +1571,7 @@ export default function HomePage() {
                       </label>
                       <label className='space-y-2 text-[11px] text-white/60 sm:col-span-2'>
                         <div className='flex items-end justify-between'>
-                          <span>Ocupação (%)</span>
+                          <span>{copy.simulator.fields.occupancy}</span>
                           <span className='text-base font-semibold text-white'>
                             {occupancy}%
                           </span>
@@ -931,7 +1588,7 @@ export default function HomePage() {
                         />
                       </label>
                       <label className='space-y-2 text-[11px] text-white/60'>
-                        <span>Custos mensais (R$)</span>
+                        <span>{copy.simulator.fields.monthlyCosts}</span>
                         <input
                           type='number'
                           value={monthlyCosts}
@@ -942,7 +1599,7 @@ export default function HomePage() {
                         />
                       </label>
                       <label className='space-y-2 text-[11px] text-white/60'>
-                        <span>Taxa de plataforma (%)</span>
+                        <span>{copy.simulator.fields.platformFee}</span>
                         <input
                           type='number'
                           value={platformFee}
@@ -960,7 +1617,7 @@ export default function HomePage() {
                         </span>
                         <div>
                           <p className='text-[9px] uppercase tracking-[0.2em] text-white/50'>
-                            Faturamento
+                            {copy.simulator.results.revenue}
                           </p>
                           <p className='mt-1 text-base font-semibold text-white'>
                             {formatCurrency(animatedResults.grossMonthly)}
@@ -973,7 +1630,7 @@ export default function HomePage() {
                         </span>
                         <div>
                           <p className='text-[9px] uppercase tracking-[0.2em] text-white/50'>
-                            Lucro mensal
+                            {copy.simulator.results.profit}
                           </p>
                           <p className='mt-1 text-base font-semibold text-white'>
                             {formatCurrency(animatedResults.netMonthly)}
@@ -986,7 +1643,7 @@ export default function HomePage() {
                         </span>
                         <div>
                           <p className='text-[9px] uppercase tracking-[0.2em] text-white/50'>
-                            Retorno anual
+                            {copy.simulator.results.annualReturn}
                           </p>
                           <p className='mt-1 text-base font-semibold text-white'>
                             {animatedResults.annualReturn.toFixed(1)}%
@@ -999,11 +1656,13 @@ export default function HomePage() {
                         </span>
                         <div>
                           <p className='text-[9px] uppercase tracking-[0.2em] text-white/50'>
-                            Payback
+                            {copy.simulator.results.payback}
                           </p>
                           <p className='mt-1 text-base font-semibold text-white'>
                             {animatedResults.paybackYears
-                              ? `${animatedResults.paybackYears.toFixed(1)} anos`
+                              ? `${animatedResults.paybackYears.toFixed(1)} ${
+                                  copy.simulator.paybackUnit
+                                }`
                               : '—'}
                           </p>
                         </div>
@@ -1016,18 +1675,18 @@ export default function HomePage() {
                         rel='noreferrer'
                         className='inline-flex flex-1 items-center justify-center rounded-full bg-[var(--gold)] px-6 py-3 text-xs font-semibold text-[#0c1116] shadow-[0_12px_30px_rgba(201,164,106,0.25)] transition hover:brightness-110'
                       >
-                        Receber simulação no WhatsApp
+                        {copy.simulator.ctaPrimary}
                       </a>
                       <button
                         type='button'
                         onClick={handleDownloadPdf}
                         className='text-center text-xs text-white/60 underline-offset-4 transition hover:text-white hover:underline'
                       >
-                        Baixar PDF da simulação
+                        {copy.simulator.ctaSecondary}
                       </button>
                     </div>
                     <p className='text-[11px] text-white/50'>
-                      Estimativa. Não substitui análise financeira.
+                      {copy.simulator.disclaimer}
                     </p>
                   </div>
                 </motion.div>
@@ -1165,32 +1824,32 @@ export default function HomePage() {
                   >
                     <div className='grid gap-4 sm:grid-cols-2'>
                       <label className='space-y-2 text-sm text-white/70'>
-                        <span>Nome</span>
+                        <span>{copy.contact.form.nameLabel}</span>
                         <input
                           type='text'
                           name='name'
-                          placeholder='Seu nome'
+                          placeholder={copy.contact.form.namePlaceholder}
                           required
                           className='w-full rounded-xl border border-white/12 bg-[var(--panel)] px-4 py-3 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/40'
                         />
                       </label>
                       <label className='space-y-2 text-sm text-white/70'>
-                        <span>Email</span>
+                        <span>{copy.contact.form.emailLabel}</span>
                         <input
                           type='email'
                           name='email'
-                          placeholder='voce@email.com'
+                          placeholder={copy.contact.form.emailPlaceholder}
                           required
                           className='w-full rounded-xl border border-white/12 bg-[var(--panel)] px-4 py-3 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/40'
                         />
                       </label>
                     </div>
                     <label className='space-y-2 text-sm text-white/70'>
-                      <span>Mensagem</span>
+                      <span>{copy.contact.form.messageLabel}</span>
                       <textarea
                         rows={4}
                         name='message'
-                        placeholder='Como podemos ajudar?'
+                        placeholder={copy.contact.form.messagePlaceholder}
                         required
                         className='w-full resize-none rounded-xl border border-white/12 bg-[var(--panel)] px-4 py-3 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/40'
                       />
@@ -1199,7 +1858,7 @@ export default function HomePage() {
                       type='submit'
                       className='inline-flex w-full items-center justify-center rounded-full bg-[var(--gold)] px-6 py-3 text-sm font-semibold text-[#0c1116] transition hover:brightness-110'
                     >
-                      Enviar mensagem
+                      {copy.contact.form.submit}
                     </button>
                   </form>
                 </div>
@@ -1210,7 +1869,7 @@ export default function HomePage() {
                     </span>
                     <div>
                       <p className='text-xs uppercase tracking-[0.2em] text-white/50'>
-                        WhatsApp
+                        {copy.contact.cards.whatsapp}
                       </p>
                       <a
                         href={whatsappLink}
@@ -1218,7 +1877,7 @@ export default function HomePage() {
                         rel='noreferrer'
                         className='mt-1 block text-sm font-semibold text-white'
                       >
-                        Atendimento imediato
+                        {copy.contact.whatsappValue}
                       </a>
                     </div>
                   </div>
@@ -1228,7 +1887,7 @@ export default function HomePage() {
                     </span>
                     <div>
                       <p className='text-xs uppercase tracking-[0.2em] text-white/50'>
-                        Email
+                        {copy.contact.cards.email}
                       </p>
                       <a
                         href={`mailto:${copy.contact.email}`}
@@ -1244,7 +1903,7 @@ export default function HomePage() {
                     </span>
                     <div>
                       <p className='text-xs uppercase tracking-[0.2em] text-white/50'>
-                        Localização
+                        {copy.contact.cards.location}
                       </p>
                       <a
                         href={mapLocationUrl}
