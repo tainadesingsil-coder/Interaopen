@@ -698,7 +698,7 @@ export default function HomePage() {
                 onCanPlay={() => setHeroVideoReady(true)}
               >
                 <source
-                  src='https://res.cloudinary.com/dwedcl97k/video/upload/f_auto,q_auto:best,w_1280/v1769199580/Design_sem_nome_-_2026-01-23T171932.339_fjulxo.mp4'
+                  src='https://res.cloudinary.com/dwedcl97k/video/upload/f_auto,q_auto:good,w_960/v1769199580/Design_sem_nome_-_2026-01-23T171932.339_fjulxo.mp4'
                   type='video/mp4'
                   media='(max-width: 768px)'
                 />
