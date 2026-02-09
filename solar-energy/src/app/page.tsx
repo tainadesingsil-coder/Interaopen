@@ -13,7 +13,6 @@ import {
   CarFront,
   Clock,
   Coins,
-  Globe,
   Mail,
   MapPin,
   PhoneCall,
@@ -779,6 +778,13 @@ const translations: Record<
   },
 };
 
+const languageOptions: { value: Locale; label: string; flag: string; name: string }[] =
+  [
+    { value: 'pt', label: 'PT', flag: '🇧🇷', name: 'Português' },
+    { value: 'en', label: 'EN', flag: '🇺🇸', name: 'English' },
+    { value: 'it', label: 'IT', flag: '🇮🇹', name: 'Italiano' },
+  ];
+
 const showcaseDetails = [
   { icon: Ruler, label: 'Área', value: '48 m²' },
   { icon: BedDouble, label: 'Quartos', value: '1' },
@@ -860,6 +866,47 @@ function Reveal({
   );
 }
 
+function LanguageSwitcher({
+  locale,
+  onLocaleChange,
+  ariaLabel,
+  className,
+}: {
+  locale: Locale;
+  onLocaleChange: (value: Locale) => void;
+  ariaLabel: string;
+  className?: string;
+}) {
+  return (
+    <div
+      className={`flex items-center gap-1 rounded-full border border-white/15 bg-white/10 p-1 text-white/80 normal-case ${className ?? ''}`}
+      aria-label={ariaLabel}
+    >
+      {languageOptions.map((option) => {
+        const isActive = locale === option.value;
+        return (
+          <button
+            key={option.value}
+            type='button'
+            onClick={() => onLocaleChange(option.value)}
+            aria-pressed={isActive}
+            aria-label={`${ariaLabel}: ${option.name}`}
+            title={option.name}
+            className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[0.55rem] font-semibold tracking-[0.2em] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold)]/50 ${
+              isActive
+                ? 'bg-[var(--gold)]/25 text-white shadow-[0_0_14px_rgba(201,164,106,0.35)]'
+                : 'text-white/70 hover:bg-white/10 hover:text-white'
+            }`}
+          >
+            <span className='text-base leading-none'>{option.flag}</span>
+            <span>{option.label}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 function HeroNav({
   labels,
   whatsappLink,
@@ -919,19 +966,11 @@ function HeroNav({
           >
             {labels.contact}
           </a>
-          <div className='flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-2 text-[0.55rem] uppercase tracking-[0.25em] text-white/75'>
-            <Globe className='h-3.5 w-3.5 text-white/70' />
-            <select
-              value={locale}
-              onChange={(event) => onLocaleChange(event.target.value as Locale)}
-              className='bg-transparent text-white/80 focus:outline-none'
-              aria-label={labels.languageLabel}
-            >
-              <option value='pt'>PT</option>
-              <option value='en'>EN</option>
-              <option value='it'>IT</option>
-            </select>
-          </div>
+          <LanguageSwitcher
+            locale={locale}
+            onLocaleChange={onLocaleChange}
+            ariaLabel={labels.languageLabel}
+          />
         </div>
         <button
           type='button'
@@ -980,19 +1019,12 @@ function HeroNav({
             >
               {labels.contact}
             </a>
-            <div className='mt-2 flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-2 text-[0.6rem] uppercase tracking-[0.25em] text-white/75'>
-              <Globe className='h-3.5 w-3.5 text-white/70' />
-              <select
-                value={locale}
-                onChange={(event) => onLocaleChange(event.target.value as Locale)}
-                className='bg-transparent text-white/80 focus:outline-none'
-                aria-label={labels.languageLabel}
-              >
-                <option value='pt'>PT</option>
-                <option value='en'>EN</option>
-                <option value='it'>IT</option>
-              </select>
-            </div>
+            <LanguageSwitcher
+              locale={locale}
+              onLocaleChange={onLocaleChange}
+              ariaLabel={labels.languageLabel}
+              className='mt-2 w-fit'
+            />
           </div>
         </div>
       )}
