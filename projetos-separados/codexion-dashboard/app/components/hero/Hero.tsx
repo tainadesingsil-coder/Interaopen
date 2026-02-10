@@ -1,8 +1,9 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { HeroVideo } from '@/app/components/hero/HeroVideo';
+import { usePrefersReducedMotion } from '@/app/hooks/usePrefersReducedMotion';
 import type { Translation } from '@/app/lib/translations';
 
 type Props = {
@@ -19,7 +20,7 @@ const Reveal = ({
   delay?: number;
   className?: string;
 }) => {
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = usePrefersReducedMotion();
   return (
     <motion.div
       className={className}
