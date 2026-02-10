@@ -33,9 +33,9 @@ services:
       # Reserved / future:
       DATABASE_URL: ${DATABASE_URL:-}
     volumes:
-      - edge_data:/app/data
-      - edge_node_modules:/app/node_modules
       - ./apps/edge-gateway:/app
+      - edge_node_modules:/app/node_modules
+      - edge_data:/app/data
     depends_on:
       postgres:
         condition: service_healthy
@@ -53,11 +53,11 @@ services:
       NEXT_PUBLIC_EDGE_API_URL: ${NEXT_PUBLIC_EDGE_API_URL:-http://localhost:8787}
       NEXT_PUBLIC_EDGE_WS_URL: ${NEXT_PUBLIC_EDGE_WS_URL:-ws://localhost:8787/ws}
     volumes:
-      - dashboard_node_modules:/app/node_modules
       - ./apps/dashboard:/app
+      - dashboard_node_modules:/app/node_modules
     depends_on:
       - edge-gateway
-    command: sh -c "npm ci --prefer-offline --no-audit --no-fund && npm run dev -- -p 3000"
+    command: sh -c "npm ci --prefer-offline --no-audit --no-fund && npm run dev"
 
   middleware:
     build:
@@ -72,8 +72,8 @@ services:
       EDGE_AES256_KEY_B64: ${EDGE_AES256_KEY_B64:-}
       OUTBOX_DB_PATH: /app/runtime/edge_outbox.db
     volumes:
-      - middleware_runtime:/app/runtime
       - ./apps/middleware:/app
+      - middleware_runtime:/app/runtime
     depends_on:
       - edge-gateway
     # BLE in containers may require extra privileges on some hosts.
