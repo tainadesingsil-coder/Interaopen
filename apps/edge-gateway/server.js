@@ -11,6 +11,7 @@ const { runMigrations } = require('./src/migrations');
 const { createLockProviderFromEnv } = require('./src/adapters/locks');
 const { BeaconScanner } = require('./src/adapters/ble/beaconScanner');
 const { PatrolService } = require('./src/core/patrolService');
+const { DuressService } = require('./src/core/duressService');
 const {
   MAX_RETRIES_DEFAULT,
   RETRY_BASE_MS_DEFAULT,
@@ -38,6 +39,11 @@ const BLE_SCANNER_ENABLED =
   String(process.env.BLE_SCANNER_ENABLED || 'false') === 'true';
 const BLE_ALLOW_DUPLICATES =
   String(process.env.BLE_ALLOW_DUPLICATES || 'true') !== 'false';
+const DURESS_HR_THRESHOLD = Number(process.env.DURESS_HR_THRESHOLD || 130);
+const DURESS_SUSTAIN_SECONDS = Number(process.env.DURESS_SUSTAIN_SECONDS || 20);
+const DURESS_WINDOW_SECONDS = Number(process.env.DURESS_WINDOW_SECONDS || 60);
+const DURESS_MAX_STEPS_DELTA = Number(process.env.DURESS_MAX_STEPS_DELTA || 0);
+const DURESS_COOLDOWN_SECONDS = Number(process.env.DURESS_COOLDOWN_SECONDS || 180);
 
 const COMMAND_STATUSES = ['pending', 'dispatched', 'success', 'failed'];
 
@@ -431,6 +437,15 @@ const patrolService = new PatrolService({
   logger: console,
 });
 
+const duressService = new DuressService({
+  db,
+  defaultHrThreshold: DURESS_HR_THRESHOLD,
+  defaultSustainSeconds: DURESS_SUSTAIN_SECONDS,
+  defaultWindowSeconds: DURESS_WINDOW_SECONDS,
+  defaultMaxStepsDelta: DURESS_MAX_STEPS_DELTA,
+  defaultCooldownSeconds: DURESS_COOLDOWN_SECONDS,
+});
+
 const beaconScanner = new BeaconScanner({
   logger: console,
   allowDuplicates: BLE_ALLOW_DUPLICATES,
@@ -721,6 +736,7 @@ app.get('/health', (_request, response) => {
   } catch (_error) {
     dbOk = false;
   }
+  const activeDuressRule = duressService.getActiveRule();
   response.json({
     ok: dbOk,
     service: 'edge-gateway',
@@ -730,6 +746,7 @@ app.get('/health', (_request, response) => {
     lock_provider: lockProvider.constructor?.name || 'unknown',
     ble_scanner_enabled: BLE_SCANNER_ENABLED,
     ble_scanner_running: beaconScanner.isRunning(),
+    duress_rule_active: activeDuressRule,
     time: nowIso(),
   });
 });
@@ -784,6 +801,90 @@ app.post('/commands/replay', (request, response) => {
     commands: replayed,
     event: replayEvent,
   });
+});
+
+app.get('/duress/rules', (_request, response) => {
+  const items = duressService.listRules();
+  response.json({
+    items,
+    active_rule: items.find((item) => item.active) || null,
+    count: items.length,
+  });
+});
+
+app.post('/duress/rules', (request, response) => {
+  try {
+    const rule = duressService.upsertRule(request.body || {});
+    const event = createEvent('duress.rule.updated', {
+      rule,
+    });
+    notifyEvent(event);
+    response.status(201).json({
+      ok: true,
+      rule,
+      event,
+    });
+  } catch (error) {
+    response.status(422).json({
+      error: String(error?.message || 'invalid duress rule payload'),
+    });
+  }
+});
+
+app.post('/telemetry/watch', (request, response) => {
+  try {
+    const result = duressService.ingestTelemetry(request.body || {});
+    let duressEvent = null;
+    let command = null;
+    let commandEvent = null;
+
+    if (result.suspected) {
+      duressEvent = createEvent('duress.suspected', {
+        device_id: result.sample.device_id,
+        rule_id: result.rule.id,
+        summary: result.summary,
+        sample: {
+          hr: result.sample.hr,
+          steps: result.sample.steps,
+          spo2: result.sample.spo2,
+          recorded_at: result.sample.recorded_at,
+        },
+        level: 'operational_alert',
+      });
+      notifyEvent(duressEvent);
+
+      command = createCommand('notify.security', {
+        device_id: result.sample.device_id,
+        duress_event_id: duressEvent.id,
+        silent: true,
+        summary: result.summary,
+      });
+      notifyCommand(command);
+      commandEvent = emitCommandEvent(command, 'requested', {
+        source: 'duress_detector',
+        silent: true,
+      });
+      wakeQueue();
+    }
+
+    response.status(201).json({
+      ok: true,
+      telemetry: result.sample,
+      duress: {
+        suspected: result.suspected,
+        reason: result.reason,
+        summary: result.summary || null,
+        rule: result.rule || null,
+        event: duressEvent,
+        command,
+        command_event: commandEvent,
+      },
+    });
+  } catch (error) {
+    response.status(422).json({
+      error: String(error?.message || 'invalid telemetry payload'),
+    });
+  }
 });
 
 app.post('/patrol/routes', (request, response) => {

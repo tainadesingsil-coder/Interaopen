@@ -27,6 +27,7 @@ apps/edge-gateway/
     migrations.js
     command-queue.js
     core/
+      duressService.js
       patrolService.js
   db/
     migrations/
@@ -38,6 +39,7 @@ apps/edge-gateway/
   tests/
     beacon-scanner.test.js
     command-queue.test.js
+    duress-service.test.js
     lock-provider.test.js
     patrol-service.test.js
   data/
@@ -83,6 +85,11 @@ MOCK_LOCK_DELAY_MS=400
 MOCK_LOCK_SUCCESS_RATE=0.9
 BLE_SCANNER_ENABLED=false
 BLE_ALLOW_DUPLICATES=true
+DURESS_HR_THRESHOLD=130
+DURESS_SUSTAIN_SECONDS=20
+DURESS_WINDOW_SECONDS=60
+DURESS_MAX_STEPS_DELTA=0
+DURESS_COOLDOWN_SECONDS=180
 COMMAND_MAX_RETRIES=5
 RETRY_BASE_MS=1000
 RETRY_MAX_MS=30000
@@ -209,6 +216,48 @@ Body:
 
 Regra de debounce tambem se aplica ao checkin manual.
 
+### `GET /duress/rules`
+Lista regras de coacao e qual esta ativa.
+
+### `POST /duress/rules`
+Cria/atualiza regra operacional de coacao.
+
+Body exemplo:
+
+```json
+{
+  "name": "Padrao Portaria",
+  "hr_threshold": 130,
+  "sustain_seconds": 20,
+  "window_seconds": 60,
+  "max_steps_delta": 0,
+  "cooldown_seconds": 180,
+  "active": true
+}
+```
+
+### `POST /telemetry/watch`
+Recebe telemetria de relogio:
+
+```json
+{
+  "device_id": "watch-01",
+  "hr": 135,
+  "steps": 2200,
+  "spo2": 97.5,
+  "timestamp": "2026-02-10T12:00:00Z"
+}
+```
+
+Regra aplicada:
+- janela deslizante de 60s (configuravel),
+- HR acima do limiar por tempo sustentado,
+- sem aumento de passos.
+
+Quando detectar:
+- gera evento `duress.suspected`,
+- cria comando silencioso `notify.security`.
+
 ## WebSocket
 
 Conectar em:
@@ -227,6 +276,10 @@ Canais emitidos:
 Eventos de ronda emitidos em tempo real:
 - `patrol.route.configured`
 - `patrol.checkin`
+
+Eventos de coacao emitidos em tempo real:
+- `duress.suspected`
+- `duress.rule.updated`
 
 ## Migrations e Seed manual
 
@@ -247,7 +300,8 @@ Testes cobrem:
 - transicoes de status da fila,
 - comportamento local-only para comandos criticos em modo offline,
 - adapter de fechadura mock/relay,
-- logica de ronda com 3 leituras + debounce de 3 minutos.
+- logica de ronda com 3 leituras + debounce de 3 minutos,
+- detector de coacao com janela deslizante e cooldown.
 
 ## Banco (SQLite)
 
@@ -264,3 +318,5 @@ Tabelas:
 - `patrol_routes(...)`
 - `patrol_route_devices(route_id, device_id)`
 - `patrol_checkins(...)`
+- `watch_telemetry(...)`
+- `duress_rules(...)`

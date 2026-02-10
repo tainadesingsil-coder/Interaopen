@@ -6,6 +6,7 @@ const CRITICAL_COMMAND_TYPES = new Set([
   'access.approve',
   'access.deny',
   'emergency.lockdown',
+  'notify.security',
 ]);
 
 function calculateBackoffDelayMs(
