@@ -1,0 +1,22 @@
+{
+  "name": "edge-gateway",
+  "version": "1.0.0",
+  "description": "Edge gateway REST + WebSocket for condo concierge dashboard",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js",
+    "migrate": "node scripts/migrate.js",
+    "seed": "node scripts/seed.js",
+    "start:seed": "node scripts/seed.js && node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "better-sqlite3": "^12.6.2",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "ws": "^8.19.0"
+  }
+}
