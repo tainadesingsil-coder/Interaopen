@@ -8,6 +8,7 @@ const { WebSocketServer } = require('ws');
 const { randomUUID } = require('crypto');
 
 const { runMigrations } = require('./src/migrations');
+const { createLockProviderFromEnv } = require('./src/adapters/locks');
 const {
   MAX_RETRIES_DEFAULT,
   RETRY_BASE_MS_DEFAULT,
@@ -120,6 +121,7 @@ function parseCommandStatuses(rawValue) {
 
 const db = openDatabase();
 runMigrations(db, MIGRATION_DIR);
+const lockProvider = createLockProviderFromEnv(process.env);
 
 const insertEventStmt = db.prepare(
   `
@@ -459,7 +461,82 @@ function simulateRemoteDispatch() {
   };
 }
 
-function executeCommandLocalFirst(command) {
+async function executeAccessApprove(command) {
+  const target = String(command.payload?.target || '').trim();
+  if (!['service_gate', 'main_gate'].includes(target)) {
+    return {
+      ok: false,
+      error: 'invalid_gate_target',
+      stage: 'local_gate',
+      command,
+    };
+  }
+
+  let gateResult;
+  try {
+    gateResult = await lockProvider.openGate(target);
+  } catch (error) {
+    gateResult = {
+      ok: false,
+      provider: lockProvider.constructor?.name || 'unknown',
+      target,
+      error: String(error?.message || 'gate_provider_error'),
+    };
+  }
+
+  if (!gateResult.ok) {
+    const failedPayload = {
+      ...command.payload,
+      gate_last_error: gateResult.error || 'gate_open_failed',
+      gate_last_attempt_at: nowIso(),
+    };
+    command = updateCommandPayload(command.id, failedPayload);
+
+    const gateFailedEvent = createEvent('gate.failed', {
+      command_id: command.id,
+      target,
+      provider: gateResult.provider || 'unknown',
+      error: gateResult.error || 'gate_open_failed',
+      details: gateResult.details || null,
+    });
+    notifyEvent(gateFailedEvent);
+
+    return {
+      ok: false,
+      error: gateResult.error || 'gate_open_failed',
+      stage: 'local_gate',
+      command,
+    };
+  }
+
+  const successPayload = {
+    ...command.payload,
+    gate_opened_at: nowIso(),
+    gate_provider: gateResult.provider || 'unknown',
+    gate_open_details: gateResult.details || null,
+  };
+  command = updateCommandPayload(command.id, successPayload);
+
+  const gateOpenedEvent = createEvent('gate.opened', {
+    command_id: command.id,
+    target,
+    provider: gateResult.provider || 'unknown',
+    details: gateResult.details || null,
+  });
+  notifyEvent(gateOpenedEvent);
+
+  return {
+    ok: true,
+    command,
+    stage: 'gate_opened',
+  };
+}
+
+async function executeCommandLocalFirst(command) {
+  if (command.type === 'access.approve') {
+    return executeAccessApprove(command);
+  }
+
   const payload = { ...command.payload };
   const localOnly = shouldExecuteLocallyOnly(command.type, OFFLINE_MODE);
 
@@ -504,7 +581,7 @@ function executeCommandLocalFirst(command) {
 
 let queueBusy = false;
 
-function processCommandQueue() {
+async function processCommandQueue() {
   if (queueBusy) {
     return;
   }
@@ -521,7 +598,7 @@ function processCommandQueue() {
         offline_mode: OFFLINE_MODE,
       });
 
-      const result = executeCommandLocalFirst(dispatched);
+      const result = await executeCommandLocalFirst(dispatched);
       if (result.ok) {
         const success = setCommandSuccess(dispatched.id);
         notifyCommand(success);
@@ -554,20 +631,16 @@ function processCommandQueue() {
 
 function wakeQueue() {
   setImmediate(() => {
-    try {
-      processCommandQueue();
-    } catch (error) {
+    processCommandQueue().catch((error) => {
       console.error('Erro ao processar fila de comandos:', error);
-    }
+    });
   });
 }
 
 setInterval(() => {
-  try {
-    processCommandQueue();
-  } catch (error) {
+  processCommandQueue().catch((error) => {
     console.error('Erro no loop da fila:', error);
-  }
+  });
 }, QUEUE_POLL_MS);
 
 server.on('upgrade', (request, socket, head) => {
@@ -623,6 +696,7 @@ app.get('/health', (_request, response) => {
     offline_mode: OFFLINE_MODE,
     db_ok: dbOk,
     ws_clients_count: wsClients.size,
+    lock_provider: lockProvider.constructor?.name || 'unknown',
     time: nowIso(),
   });
 });
@@ -789,6 +863,7 @@ server.listen(PORT, () => {
   console.log(`WebSocket em ws://localhost:${PORT}/ws`);
   console.log(`SQLite DB: ${DB_PATH}`);
   console.log(`OFFLINE_MODE: ${OFFLINE_MODE}`);
+  console.log(`Lock provider: ${lockProvider.constructor?.name || 'unknown'}`);
   console.log(
     `Fila local-first pronta. Status atuais: ${JSON.stringify(counts)}`
   );

@@ -16,6 +16,12 @@ apps/edge-gateway/
   package-lock.json
   .gitignore
   src/
+    adapters/
+      locks/
+        ILockProvider.js
+        MockLockProvider.js
+        RelayLockProvider.js
+        index.js
     migrations.js
     command-queue.js
   db/
@@ -27,6 +33,7 @@ apps/edge-gateway/
     seed.js
   tests/
     command-queue.test.js
+    lock-provider.test.js
   data/
     .gitkeep
 ```
@@ -65,6 +72,9 @@ Variaveis de ambiente uteis:
 PORT=8787
 DB_PATH=./data/edge-gateway.sqlite
 OFFLINE_MODE=false
+LOCK_PROVIDER=mock
+MOCK_LOCK_DELAY_MS=400
+MOCK_LOCK_SUCCESS_RATE=0.9
 COMMAND_MAX_RETRIES=5
 RETRY_BASE_MS=1000
 RETRY_MAX_MS=30000
@@ -95,6 +105,12 @@ Body:
 ```
 
 `target` permitido: `main_gate` ou `service_gate`.
+
+Fluxo local-first do approve:
+- cria comando `pending`,
+- fila processa e chama `openGate(target)` no provider de fechadura,
+- atualiza comando para `success` ou `failed`,
+- gera eventos `gate.opened` ou `gate.failed`.
 
 ### `POST /actions/access/deny`
 Body:
@@ -174,7 +190,8 @@ npm test
 Testes cobrem:
 - backoff exponencial,
 - transicoes de status da fila,
-- comportamento local-only para comandos criticos em modo offline.
+- comportamento local-only para comandos criticos em modo offline,
+- adapter de fechadura mock/relay.
 
 ## Banco (SQLite)
 
