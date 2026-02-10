@@ -1,0 +1,1396 @@
+const cors = require('cors');
+const express = require('express');
+const Database = require('better-sqlite3');
+const fs = require('fs');
+const http = require('http');
+const path = require('path');
+const { WebSocketServer } = require('ws');
+const { randomUUID } = require('crypto');
+
+const { runMigrations } = require('./src/migrations');
+const { createLockProviderFromEnv } = require('./src/adapters/locks');
+const { BeaconScanner } = require('./src/adapters/ble/beaconScanner');
+const { PatrolService } = require('./src/core/patrolService');
+const { DuressService } = require('./src/core/duressService');
+const {
+  MAX_RETRIES_DEFAULT,
+  RETRY_BASE_MS_DEFAULT,
+  RETRY_MAX_MS_DEFAULT,
+  computeFailureTransition,
+  shouldExecuteLocallyOnly,
+} = require('./src/command-queue');
+
+const PORT = Number(process.env.PORT || 8787);
+const DB_PATH =
+  process.env.DB_PATH || path.join(__dirname, 'data', 'edge-gateway.sqlite');
+const MIGRATION_DIR = path.join(__dirname, 'db', 'migrations');
+const AUTO_SEED_ON_BOOT = process.env.AUTO_SEED_ON_BOOT !== 'false';
+const OFFLINE_MODE = String(process.env.OFFLINE_MODE || 'false') === 'true';
+
+const COMMAND_MAX_RETRIES = Number(
+  process.env.COMMAND_MAX_RETRIES || MAX_RETRIES_DEFAULT
+);
+const RETRY_BASE_MS = Number(process.env.RETRY_BASE_MS || RETRY_BASE_MS_DEFAULT);
+const RETRY_MAX_MS = Number(process.env.RETRY_MAX_MS || RETRY_MAX_MS_DEFAULT);
+const QUEUE_POLL_MS = Number(process.env.QUEUE_POLL_MS || 1000);
+const LOCAL_FAILURE_RATE = Number(process.env.LOCAL_FAILURE_RATE || 0.08);
+const REMOTE_FAILURE_RATE = Number(process.env.REMOTE_FAILURE_RATE || 0.2);
+const BLE_SCANNER_ENABLED =
+  String(process.env.BLE_SCANNER_ENABLED || 'false') === 'true';
+const BLE_ALLOW_DUPLICATES =
+  String(process.env.BLE_ALLOW_DUPLICATES || 'true') !== 'false';
+const DURESS_HR_THRESHOLD = Number(process.env.DURESS_HR_THRESHOLD || 130);
+const DURESS_SUSTAIN_SECONDS = Number(process.env.DURESS_SUSTAIN_SECONDS || 20);
+const DURESS_WINDOW_SECONDS = Number(process.env.DURESS_WINDOW_SECONDS || 60);
+const DURESS_MAX_STEPS_DELTA = Number(process.env.DURESS_MAX_STEPS_DELTA || 0);
+const DURESS_COOLDOWN_SECONDS = Number(process.env.DURESS_COOLDOWN_SECONDS || 180);
+
+const COMMAND_STATUSES = ['pending', 'dispatched', 'success', 'failed'];
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+function ensureDatabaseDirectory() {
+  fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
+}
+
+function openDatabase() {
+  ensureDatabaseDirectory();
+  const db = new Database(DB_PATH);
+  db.pragma('journal_mode = WAL');
+  db.pragma('foreign_keys = ON');
+  return db;
+}
+
+function parsePayload(payloadJson) {
+  try {
+    return JSON.parse(payloadJson);
+  } catch (_error) {
+    return {};
+  }
+}
+
+function mapEvent(row) {
+  return {
+    id: row.id,
+    type: row.type,
+    payload: parsePayload(row.payload_json),
+    created_at: row.created_at,
+  };
+}
+
+function mapCommand(row) {
+  return {
+    id: row.id,
+    type: row.type,
+    payload: parsePayload(row.payload_json),
+    status: row.status,
+    retry_count: row.retry_count,
+    max_retries: row.max_retries,
+    next_attempt_at: row.next_attempt_at,
+    last_error: row.last_error,
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+  };
+}
+
+function mapWatchSession(row) {
+  if (!row) {
+    return null;
+  }
+  return {
+    device_id: row.device_id,
+    device_name: row.device_name,
+    connected: Boolean(row.connected),
+    battery_level: row.battery_level,
+    last_hr: row.last_hr,
+    last_steps: row.last_steps,
+    last_spo2: row.last_spo2,
+    connected_at: row.connected_at,
+    disconnected_at: row.disconnected_at,
+    last_seen_at: row.last_seen_at,
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+  };
+}
+
+function nowIso() {
+  return new Date().toISOString();
+}
+
+function normalizeText(value) {
+  if (typeof value !== 'string') {
+    return '';
+  }
+  return value.trim();
+}
+
+function parseLimit(rawLimit, defaultValue = 50) {
+  const numeric = Number.parseInt(String(rawLimit ?? defaultValue), 10);
+  if (!Number.isFinite(numeric)) {
+    return defaultValue;
+  }
+  return Math.max(1, Math.min(200, numeric));
+}
+
+function parseCommandStatuses(rawValue) {
+  if (!rawValue) {
+    return ['pending', 'failed'];
+  }
+  if (rawValue === 'all') {
+    return [...COMMAND_STATUSES];
+  }
+  const statuses = String(rawValue)
+    .split(',')
+    .map((item) => item.trim())
+    .filter((item) => COMMAND_STATUSES.includes(item));
+  if (statuses.length === 0) {
+    return ['pending', 'failed'];
+  }
+  return [...new Set(statuses)];
+}
+
+const db = openDatabase();
+runMigrations(db, MIGRATION_DIR);
+const lockProvider = createLockProviderFromEnv(process.env);
+
+const insertEventStmt = db.prepare(
+  `
+  INSERT INTO events (id, type, payload_json, created_at)
+  VALUES (@id, @type, @payload_json, @created_at)
+`
+);
+const getEventStmt = db.prepare(
+  `
+  SELECT id, type, payload_json, created_at
+  FROM events
+  WHERE id = ?
+`
+);
+const listFeedStmt = db.prepare(
+  `
+  SELECT id, type, payload_json, created_at
+  FROM events
+  ORDER BY created_at DESC
+  LIMIT ?
+`
+);
+const countEventsStmt = db.prepare(`SELECT COUNT(*) AS count FROM events`);
+
+const insertCommandStmt = db.prepare(
+  `
+  INSERT INTO commands (
+    id, type, payload_json, status, retry_count, max_retries,
+    next_attempt_at, last_error, created_at, updated_at
+  )
+  VALUES (
+    @id, @type, @payload_json, @status, @retry_count, @max_retries,
+    @next_attempt_at, @last_error, @created_at, @updated_at
+  )
+`
+);
+const getCommandStmt = db.prepare(
+  `
+  SELECT
+    id, type, payload_json, status, retry_count, max_retries,
+    next_attempt_at, last_error, created_at, updated_at
+  FROM commands
+  WHERE id = ?
+`
+);
+const setCommandPayloadStmt = db.prepare(
+  `
+  UPDATE commands
+  SET payload_json = @payload_json, updated_at = @updated_at
+  WHERE id = @id
+`
+);
+const setCommandDispatchedStmt = db.prepare(
+  `
+  UPDATE commands
+  SET status = 'dispatched', updated_at = @updated_at
+  WHERE id = @id
+`
+);
+const setCommandSuccessStmt = db.prepare(
+  `
+  UPDATE commands
+  SET
+    status = 'success',
+    next_attempt_at = NULL,
+    last_error = NULL,
+    updated_at = @updated_at
+  WHERE id = @id
+`
+);
+const setCommandFailedStmt = db.prepare(
+  `
+  UPDATE commands
+  SET
+    status = 'failed',
+    retry_count = @retry_count,
+    next_attempt_at = @next_attempt_at,
+    last_error = @last_error,
+    updated_at = @updated_at
+  WHERE id = @id
+`
+);
+const listReadyCommandsStmt = db.prepare(
+  `
+  SELECT
+    id, type, payload_json, status, retry_count, max_retries,
+    next_attempt_at, last_error, created_at, updated_at
+  FROM commands
+  WHERE
+    status IN ('pending', 'failed')
+    AND retry_count < max_retries
+    AND (next_attempt_at IS NULL OR next_attempt_at <= ?)
+  ORDER BY created_at ASC
+  LIMIT ?
+`
+);
+const countCommandsByStatusStmt = db.prepare(
+  `
+  SELECT status, COUNT(*) AS count
+  FROM commands
+  GROUP BY status
+`
+);
+const resetFailedCommandStmt = db.prepare(
+  `
+  UPDATE commands
+  SET
+    status = 'pending',
+    retry_count = 0,
+    next_attempt_at = @next_attempt_at,
+    last_error = NULL,
+    updated_at = @updated_at
+  WHERE id = @id AND status = 'failed'
+`
+);
+const upsertWatchSessionStmt = db.prepare(
+  `
+  INSERT INTO watch_sessions (
+    device_id, device_name, connected, battery_level, last_hr, last_steps, last_spo2,
+    connected_at, disconnected_at, last_seen_at, created_at, updated_at
+  )
+  VALUES (
+    @device_id, @device_name, @connected, @battery_level, @last_hr, @last_steps, @last_spo2,
+    @connected_at, @disconnected_at, @last_seen_at, @created_at, @updated_at
+  )
+  ON CONFLICT(device_id) DO UPDATE SET
+    device_name = excluded.device_name,
+    connected = excluded.connected,
+    battery_level = excluded.battery_level,
+    last_hr = excluded.last_hr,
+    last_steps = excluded.last_steps,
+    last_spo2 = excluded.last_spo2,
+    connected_at = excluded.connected_at,
+    disconnected_at = excluded.disconnected_at,
+    last_seen_at = excluded.last_seen_at,
+    updated_at = excluded.updated_at
+`
+);
+const getWatchSessionStmt = db.prepare(
+  `
+  SELECT
+    device_id, device_name, connected, battery_level, last_hr, last_steps, last_spo2,
+    connected_at, disconnected_at, last_seen_at, created_at, updated_at
+  FROM watch_sessions
+  WHERE device_id = ?
+`
+);
+const listWatchSessionsStmt = db.prepare(
+  `
+  SELECT
+    device_id, device_name, connected, battery_level, last_hr, last_steps, last_spo2,
+    connected_at, disconnected_at, last_seen_at, created_at, updated_at
+  FROM watch_sessions
+  ORDER BY updated_at DESC
+`
+);
+const countConnectedWatchSessionsStmt = db.prepare(
+  `
+  SELECT COUNT(*) AS count
+  FROM watch_sessions
+  WHERE connected = 1
+`
+);
+const insertWatchHeartbeatStmt = db.prepare(
+  `
+  INSERT INTO watch_heartbeats (
+    id, device_id, battery_level, hr, steps, spo2, recorded_at, created_at
+  )
+  VALUES (
+    @id, @device_id, @battery_level, @hr, @steps, @spo2, @recorded_at, @created_at
+  )
+`
+);
+const latestTelemetryByDeviceStmt = db.prepare(
+  `
+  SELECT id, device_id, hr, steps, spo2, recorded_at, ingested_at
+  FROM watch_telemetry
+  WHERE device_id = ?
+  ORDER BY recorded_at DESC
+  LIMIT 1
+`
+);
+const latestTelemetryAllDevicesStmt = db.prepare(
+  `
+  SELECT wt.id, wt.device_id, wt.hr, wt.steps, wt.spo2, wt.recorded_at, wt.ingested_at
+  FROM watch_telemetry wt
+  INNER JOIN (
+    SELECT device_id, MAX(recorded_at) AS max_recorded_at
+    FROM watch_telemetry
+    GROUP BY device_id
+  ) latest
+  ON latest.device_id = wt.device_id AND latest.max_recorded_at = wt.recorded_at
+  ORDER BY wt.recorded_at DESC
+`
+);
+
+function createEvent(type, payload) {
+  const id = randomUUID();
+  const created_at = nowIso();
+  insertEventStmt.run({
+    id,
+    type,
+    payload_json: JSON.stringify(payload ?? {}),
+    created_at,
+  });
+  return mapEvent(getEventStmt.get(id));
+}
+
+function createCommand(type, payload) {
+  const id = randomUUID();
+  const timestamp = nowIso();
+  insertCommandStmt.run({
+    id,
+    type,
+    payload_json: JSON.stringify(payload ?? {}),
+    status: 'pending',
+    retry_count: 0,
+    max_retries: COMMAND_MAX_RETRIES,
+    next_attempt_at: timestamp,
+    last_error: null,
+    created_at: timestamp,
+    updated_at: timestamp,
+  });
+  return mapCommand(getCommandStmt.get(id));
+}
+
+function updateCommandPayload(commandId, payload) {
+  setCommandPayloadStmt.run({
+    id: commandId,
+    payload_json: JSON.stringify(payload ?? {}),
+    updated_at: nowIso(),
+  });
+  return mapCommand(getCommandStmt.get(commandId));
+}
+
+function setCommandDispatched(commandId) {
+  setCommandDispatchedStmt.run({
+    id: commandId,
+    updated_at: nowIso(),
+  });
+  return mapCommand(getCommandStmt.get(commandId));
+}
+
+function setCommandSuccess(commandId) {
+  setCommandSuccessStmt.run({
+    id: commandId,
+    updated_at: nowIso(),
+  });
+  return mapCommand(getCommandStmt.get(commandId));
+}
+
+function setCommandFailed(commandId, transition, errorMessage) {
+  setCommandFailedStmt.run({
+    id: commandId,
+    retry_count: transition.retry_count,
+    next_attempt_at: transition.next_attempt_at,
+    last_error: String(errorMessage || 'unknown_error').slice(0, 500),
+    updated_at: nowIso(),
+  });
+  return mapCommand(getCommandStmt.get(commandId));
+}
+
+function listFeed(limit) {
+  return listFeedStmt.all(limit).map(mapEvent);
+}
+
+function listCommands(statuses, limit) {
+  const placeholders = statuses.map(() => '?').join(', ');
+  const statement = db.prepare(
+    `
+    SELECT
+      id, type, payload_json, status, retry_count, max_retries,
+      next_attempt_at, last_error, created_at, updated_at
+    FROM commands
+    WHERE status IN (${placeholders})
+    ORDER BY created_at DESC
+    LIMIT ?
+  `
+  );
+  return statement.all(...statuses, limit).map(mapCommand);
+}
+
+function resetFailedCommands(commandId = null) {
+  const now = nowIso();
+  if (commandId) {
+    const changed = resetFailedCommandStmt.run({
+      id: commandId,
+      next_attempt_at: now,
+      updated_at: now,
+    }).changes;
+    if (changed === 0) {
+      return [];
+    }
+    return [mapCommand(getCommandStmt.get(commandId))];
+  }
+
+  const failed = listCommands(['failed'], 500);
+  const tx = db.transaction((items) => {
+    for (const item of items) {
+      resetFailedCommandStmt.run({
+        id: item.id,
+        next_attempt_at: now,
+        updated_at: now,
+      });
+    }
+  });
+  tx(failed);
+  return failed.map((item) => mapCommand(getCommandStmt.get(item.id)));
+}
+
+function sanitizeOptionalNumber(value, { min = -Infinity, max = Infinity } = {}) {
+  if (value === null || value === undefined || value === '') {
+    return null;
+  }
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) {
+    return null;
+  }
+  return Math.min(max, Math.max(min, parsed));
+}
+
+function upsertWatchSession(data) {
+  const timestamp = nowIso();
+  const existing = getWatchSessionStmt.get(data.device_id);
+  upsertWatchSessionStmt.run({
+    device_id: data.device_id,
+    device_name: data.device_name || existing?.device_name || null,
+    connected: data.connected,
+    battery_level:
+      data.battery_level ?? existing?.battery_level ?? null,
+    last_hr: data.last_hr ?? existing?.last_hr ?? null,
+    last_steps: data.last_steps ?? existing?.last_steps ?? null,
+    last_spo2: data.last_spo2 ?? existing?.last_spo2 ?? null,
+    connected_at:
+      data.connected === 1
+        ? data.connected_at || existing?.connected_at || timestamp
+        : existing?.connected_at || null,
+    disconnected_at:
+      data.connected === 0
+        ? data.disconnected_at || timestamp
+        : existing?.disconnected_at || null,
+    last_seen_at: data.last_seen_at || timestamp,
+    created_at: existing?.created_at || timestamp,
+    updated_at: timestamp,
+  });
+  return mapWatchSession(getWatchSessionStmt.get(data.device_id));
+}
+
+function recordWatchHeartbeat({
+  device_id,
+  battery_level = null,
+  hr = null,
+  steps = null,
+  spo2 = null,
+  recorded_at = null,
+}) {
+  const timestamp = recorded_at || nowIso();
+  const createdAt = nowIso();
+  insertWatchHeartbeatStmt.run({
+    id: randomUUID(),
+    device_id,
+    battery_level,
+    hr,
+    steps,
+    spo2,
+    recorded_at: timestamp,
+    created_at: createdAt,
+  });
+
+  return upsertWatchSession({
+    device_id,
+    connected: 1,
+    battery_level,
+    last_hr: hr,
+    last_steps: steps,
+    last_spo2: spo2,
+    last_seen_at: timestamp,
+  });
+}
+
+function listWatchSessions() {
+  return listWatchSessionsStmt.all().map(mapWatchSession);
+}
+
+function getWatchTelemetryLatest(deviceId = null) {
+  if (deviceId) {
+    const row = latestTelemetryByDeviceStmt.get(deviceId);
+    return row ? [row] : [];
+  }
+  return latestTelemetryAllDevicesStmt.all();
+}
+
+function seedFakeEvents(amount = 10) {
+  const templates = [
+    {
+      type: 'intercom.called',
+      payload: { tower: 'A', unit: '1203', visitor_name: 'Camila Ferreira' },
+    },
+    {
+      type: 'access.approve.success',
+      payload: { intercom_event_id: 'seed', target: 'main_gate' },
+    },
+    {
+      type: 'access.deny.success',
+      payload: { intercom_event_id: 'seed', target: 'service_gate' },
+    },
+    {
+      type: 'patrol.checkin',
+      payload: { checkpoint: 'C3', guard: 'Joao Pereira' },
+    },
+    {
+      type: 'safety.alert',
+      payload: { level: 'warning', zone: 'Garagem' },
+    },
+  ];
+
+  for (let index = 0; index < amount; index += 1) {
+    const template = templates[index % templates.length];
+    createEvent(template.type, {
+      ...template.payload,
+      seed_index: index + 1,
+    });
+  }
+}
+
+if (AUTO_SEED_ON_BOOT) {
+  const current = countEventsStmt.get().count;
+  if (current === 0) {
+    seedFakeEvents(10);
+    console.log('Seed inicial aplicado com 10 eventos.');
+  }
+}
+
+const server = http.createServer(app);
+const wss = new WebSocketServer({ noServer: true });
+const wsClients = new Set();
+
+function broadcast(channel, data) {
+  const payload = JSON.stringify({
+    channel,
+    data,
+    sent_at: nowIso(),
+  });
+  for (const client of wsClients) {
+    if (client.readyState === client.OPEN) {
+      client.send(payload);
+    }
+  }
+}
+
+function notifyEvent(event) {
+  broadcast('feed.event', event);
+}
+
+function notifyCommand(command) {
+  broadcast('command.status', command);
+}
+
+const patrolService = new PatrolService({
+  db,
+  createEvent,
+  notifyEvent,
+  logger: console,
+});
+
+const duressService = new DuressService({
+  db,
+  defaultHrThreshold: DURESS_HR_THRESHOLD,
+  defaultSustainSeconds: DURESS_SUSTAIN_SECONDS,
+  defaultWindowSeconds: DURESS_WINDOW_SECONDS,
+  defaultMaxStepsDelta: DURESS_MAX_STEPS_DELTA,
+  defaultCooldownSeconds: DURESS_COOLDOWN_SECONDS,
+});
+
+const beaconScanner = new BeaconScanner({
+  logger: console,
+  allowDuplicates: BLE_ALLOW_DUPLICATES,
+});
+
+beaconScanner.on('beacon', (reading) => {
+  try {
+    const result = patrolService.processBeaconReading(reading);
+    if (result.checkins?.length > 0) {
+      console.log(
+        `[BLE] checkins gerados: ${result.checkins.filter((item) => item.created).length}`
+      );
+    }
+  } catch (error) {
+    console.error('Erro processando leitura BLE:', error);
+  }
+});
+
+function emitCommandEvent(command, stage, extras = {}) {
+  const event = createEvent(`${command.type}.${stage}`, {
+    command_id: command.id,
+    status: command.status,
+    retry_count: command.retry_count,
+    max_retries: command.max_retries,
+    payload: command.payload,
+    ...extras,
+  });
+  notifyEvent(event);
+  return event;
+}
+
+function simulateLocalExecution() {
+  if (Math.random() < LOCAL_FAILURE_RATE) {
+    return {
+      ok: false,
+      error: 'local_controller_unreachable',
+    };
+  }
+  return {
+    ok: true,
+  };
+}
+
+function simulateRemoteDispatch() {
+  if (OFFLINE_MODE) {
+    return {
+      ok: false,
+      error: 'offline_mode_enabled',
+    };
+  }
+  if (Math.random() < REMOTE_FAILURE_RATE) {
+    return {
+      ok: false,
+      error: 'remote_ack_timeout',
+    };
+  }
+  return {
+    ok: true,
+  };
+}
+
+async function executeAccessApprove(command) {
+  const target = String(command.payload?.target || '').trim();
+  if (!['service_gate', 'main_gate'].includes(target)) {
+    return {
+      ok: false,
+      error: 'invalid_gate_target',
+      stage: 'local_gate',
+      command,
+    };
+  }
+
+  let gateResult;
+  try {
+    gateResult = await lockProvider.openGate(target);
+  } catch (error) {
+    gateResult = {
+      ok: false,
+      provider: lockProvider.constructor?.name || 'unknown',
+      target,
+      error: String(error?.message || 'gate_provider_error'),
+    };
+  }
+
+  if (!gateResult.ok) {
+    const failedPayload = {
+      ...command.payload,
+      gate_last_error: gateResult.error || 'gate_open_failed',
+      gate_last_attempt_at: nowIso(),
+    };
+    command = updateCommandPayload(command.id, failedPayload);
+
+    const gateFailedEvent = createEvent('gate.failed', {
+      command_id: command.id,
+      target,
+      provider: gateResult.provider || 'unknown',
+      error: gateResult.error || 'gate_open_failed',
+      details: gateResult.details || null,
+    });
+    notifyEvent(gateFailedEvent);
+
+    return {
+      ok: false,
+      error: gateResult.error || 'gate_open_failed',
+      stage: 'local_gate',
+      command,
+    };
+  }
+
+  const successPayload = {
+    ...command.payload,
+    gate_opened_at: nowIso(),
+    gate_provider: gateResult.provider || 'unknown',
+    gate_open_details: gateResult.details || null,
+  };
+  command = updateCommandPayload(command.id, successPayload);
+
+  const gateOpenedEvent = createEvent('gate.opened', {
+    command_id: command.id,
+    target,
+    provider: gateResult.provider || 'unknown',
+    details: gateResult.details || null,
+  });
+  notifyEvent(gateOpenedEvent);
+
+  return {
+    ok: true,
+    command,
+    stage: 'gate_opened',
+  };
+}
+
+async function executeCommandLocalFirst(command) {
+  if (command.type === 'access.approve') {
+    return executeAccessApprove(command);
+  }
+
+  const payload = { ...command.payload };
+  const localOnly = shouldExecuteLocallyOnly(command.type, OFFLINE_MODE);
+
+  if (!payload.local_executed_at) {
+    const localResult = simulateLocalExecution(command);
+    if (!localResult.ok) {
+      return {
+        ok: false,
+        error: localResult.error,
+        stage: 'local',
+        command,
+      };
+    }
+    payload.local_executed_at = nowIso();
+    payload.local_execution_mode = localOnly ? 'offline_local' : 'local_first';
+    command = updateCommandPayload(command.id, payload);
+  }
+
+  if (localOnly) {
+    return {
+      ok: true,
+      command,
+      stage: 'local_offline',
+    };
+  }
+
+  const remoteResult = simulateRemoteDispatch(command);
+  if (!remoteResult.ok) {
+    return {
+      ok: false,
+      error: remoteResult.error,
+      stage: 'remote',
+      command,
+    };
+  }
+  return {
+    ok: true,
+    command,
+    stage: 'local_and_remote',
+  };
+}
+
+let queueBusy = false;
+
+async function processCommandQueue() {
+  if (queueBusy) {
+    return;
+  }
+  queueBusy = true;
+
+  try {
+    const now = nowIso();
+    const queueItems = listReadyCommandsStmt.all(now, 20).map(mapCommand);
+
+    for (const item of queueItems) {
+      const dispatched = setCommandDispatched(item.id);
+      notifyCommand(dispatched);
+      emitCommandEvent(dispatched, 'dispatched', {
+        offline_mode: OFFLINE_MODE,
+      });
+
+      const result = await executeCommandLocalFirst(dispatched);
+      if (result.ok) {
+        const success = setCommandSuccess(dispatched.id);
+        notifyCommand(success);
+        emitCommandEvent(success, 'success', {
+          execution_stage: result.stage,
+          offline_mode: OFFLINE_MODE,
+        });
+        continue;
+      }
+
+      const transition = computeFailureTransition({
+        retryCount: dispatched.retry_count,
+        maxRetries: dispatched.max_retries,
+        baseDelayMs: RETRY_BASE_MS,
+        maxDelayMs: RETRY_MAX_MS,
+      });
+      const failed = setCommandFailed(dispatched.id, transition, result.error);
+      notifyCommand(failed);
+      emitCommandEvent(failed, 'failed', {
+        execution_stage: result.stage,
+        error: result.error,
+        will_retry: transition.will_retry,
+        next_attempt_at: transition.next_attempt_at,
+      });
+    }
+  } finally {
+    queueBusy = false;
+  }
+}
+
+function wakeQueue() {
+  setImmediate(() => {
+    processCommandQueue().catch((error) => {
+      console.error('Erro ao processar fila de comandos:', error);
+    });
+  });
+}
+
+setInterval(() => {
+  processCommandQueue().catch((error) => {
+    console.error('Erro no loop da fila:', error);
+  });
+}, QUEUE_POLL_MS);
+
+server.on('upgrade', (request, socket, head) => {
+  if (request.url !== '/ws') {
+    socket.destroy();
+    return;
+  }
+  wss.handleUpgrade(request, socket, head, (ws) => {
+    wss.emit('connection', ws);
+  });
+});
+
+wss.on('connection', (ws) => {
+  wsClients.add(ws);
+  ws.send(
+    JSON.stringify({
+      channel: 'gateway.ready',
+      data: {
+        message: 'Conexao WebSocket estabelecida.',
+        server_time: nowIso(),
+        offline_mode: OFFLINE_MODE,
+      },
+    })
+  );
+  ws.send(
+    JSON.stringify({
+      channel: 'feed.snapshot',
+      data: listFeed(20),
+    })
+  );
+  ws.send(
+    JSON.stringify({
+      channel: 'commands.snapshot',
+      data: listCommands(['pending', 'failed', 'dispatched'], 50),
+    })
+  );
+  ws.send(
+    JSON.stringify({
+      channel: 'watch.snapshot',
+      data: listWatchSessions(),
+    })
+  );
+
+  ws.on('close', () => {
+    wsClients.delete(ws);
+  });
+});
+
+app.get('/health', (_request, response) => {
+  let dbOk = true;
+  try {
+    db.prepare('SELECT 1 AS ok').get();
+  } catch (_error) {
+    dbOk = false;
+  }
+  const activeDuressRule = duressService.getActiveRule();
+  const connectedWatchCount = countConnectedWatchSessionsStmt.get().count;
+  response.json({
+    ok: dbOk,
+    service: 'edge-gateway',
+    offline_mode: OFFLINE_MODE,
+    db_ok: dbOk,
+    ws_clients_count: wsClients.size,
+    lock_provider: lockProvider.constructor?.name || 'unknown',
+    ble_scanner_enabled: BLE_SCANNER_ENABLED,
+    ble_scanner_running: beaconScanner.isRunning(),
+    duress_rule_active: activeDuressRule,
+    connected_watch_count: connectedWatchCount,
+    time: nowIso(),
+  });
+});
+
+app.get('/feed', (request, response) => {
+  const limit = parseLimit(request.query.limit);
+  const items = listFeed(limit);
+  response.json({
+    items,
+    count: items.length,
+    limit,
+  });
+});
+
+app.get('/commands', (request, response) => {
+  const statuses = parseCommandStatuses(request.query.status);
+  const limit = parseLimit(request.query.limit);
+  const items = listCommands(statuses, limit);
+  response.json({
+    items,
+    count: items.length,
+    statuses,
+    limit,
+  });
+});
+
+app.post('/commands/replay', (request, response) => {
+  const commandId = normalizeText(request.body?.command_id);
+  const replayed = resetFailedCommands(commandId || null);
+
+  if (commandId && replayed.length === 0) {
+    response.status(404).json({
+      error: 'failed command not found for replay',
+    });
+    return;
+  }
+
+  for (const command of replayed) {
+    notifyCommand(command);
+  }
+
+  const replayEvent = createEvent('commands.replay.requested', {
+    command_id: commandId || null,
+    replayed_count: replayed.length,
+  });
+  notifyEvent(replayEvent);
+  wakeQueue();
+
+  response.json({
+    ok: true,
+    replayed_count: replayed.length,
+    commands: replayed,
+    event: replayEvent,
+  });
+});
+
+app.get('/watch/session', (_request, response) => {
+  const items = listWatchSessions();
+  response.json({
+    items,
+    count: items.length,
+    connected_count: items.filter((item) => item.connected).length,
+  });
+});
+
+app.post('/watch/session/connect', (request, response) => {
+  const device_id = normalizeText(request.body?.device_id);
+  const device_name = normalizeText(request.body?.device_name) || null;
+  if (!device_id) {
+    response.status(422).json({
+      error: 'device_id is required',
+    });
+    return;
+  }
+
+  const session = upsertWatchSession({
+    device_id,
+    device_name,
+    connected: 1,
+    last_seen_at: nowIso(),
+  });
+  const event = createEvent('watch.connected', {
+    device_id: session.device_id,
+    device_name: session.device_name,
+    connected_at: session.connected_at,
+  });
+  notifyEvent(event);
+  broadcast('watch.session', session);
+
+  response.status(201).json({
+    ok: true,
+    session,
+    event,
+  });
+});
+
+app.post('/watch/session/disconnect', (request, response) => {
+  const device_id = normalizeText(request.body?.device_id);
+  if (!device_id) {
+    response.status(422).json({
+      error: 'device_id is required',
+    });
+    return;
+  }
+
+  const session = upsertWatchSession({
+    device_id,
+    connected: 0,
+    disconnected_at: nowIso(),
+    last_seen_at: nowIso(),
+  });
+  const event = createEvent('watch.disconnected', {
+    device_id: session.device_id,
+    disconnected_at: session.disconnected_at,
+  });
+  notifyEvent(event);
+  broadcast('watch.session', session);
+
+  response.json({
+    ok: true,
+    session,
+    event,
+  });
+});
+
+app.post('/watch/heartbeat', (request, response) => {
+  const device_id = normalizeText(request.body?.device_id);
+  if (!device_id) {
+    response.status(422).json({
+      error: 'device_id is required',
+    });
+    return;
+  }
+
+  const heartbeat = {
+    device_id,
+    battery_level: sanitizeOptionalNumber(request.body?.battery_level, {
+      min: 0,
+      max: 100,
+    }),
+    hr: sanitizeOptionalNumber(request.body?.hr, {
+      min: 0,
+      max: 260,
+    }),
+    steps: sanitizeOptionalNumber(request.body?.steps, {
+      min: 0,
+      max: 10000000,
+    }),
+    spo2: sanitizeOptionalNumber(request.body?.spo2, {
+      min: 50,
+      max: 100,
+    }),
+    recorded_at: request.body?.timestamp
+      ? String(request.body.timestamp)
+      : nowIso(),
+  };
+
+  const session = recordWatchHeartbeat(heartbeat);
+  broadcast('watch.session', session);
+  broadcast('watch.heartbeat', session);
+
+  response.status(201).json({
+    ok: true,
+    session,
+  });
+});
+
+app.get('/telemetry/watch/latest', (request, response) => {
+  const deviceId = normalizeText(request.query.device_id);
+  const items = getWatchTelemetryLatest(deviceId || null);
+  response.json({
+    items,
+    count: items.length,
+    device_id: deviceId || null,
+  });
+});
+
+app.get('/duress/rules', (_request, response) => {
+  const items = duressService.listRules();
+  response.json({
+    items,
+    active_rule: items.find((item) => item.active) || null,
+    count: items.length,
+  });
+});
+
+app.post('/duress/rules', (request, response) => {
+  try {
+    const rule = duressService.upsertRule(request.body || {});
+    const event = createEvent('duress.rule.updated', {
+      rule,
+    });
+    notifyEvent(event);
+    response.status(201).json({
+      ok: true,
+      rule,
+      event,
+    });
+  } catch (error) {
+    response.status(422).json({
+      error: String(error?.message || 'invalid duress rule payload'),
+    });
+  }
+});
+
+app.post('/telemetry/watch', (request, response) => {
+  try {
+    const result = duressService.ingestTelemetry(request.body || {});
+    const watchSession = recordWatchHeartbeat({
+      device_id: result.sample.device_id,
+      hr: result.sample.hr,
+      steps: result.sample.steps,
+      spo2: result.sample.spo2,
+      recorded_at: result.sample.recorded_at,
+      battery_level: sanitizeOptionalNumber(request.body?.battery_level, {
+        min: 0,
+        max: 100,
+      }),
+    });
+    broadcast('watch.session', watchSession);
+    broadcast('watch.heartbeat', watchSession);
+
+    let duressEvent = null;
+    let command = null;
+    let commandEvent = null;
+
+    if (result.suspected) {
+      duressEvent = createEvent('duress.suspected', {
+        device_id: result.sample.device_id,
+        rule_id: result.rule.id,
+        summary: result.summary,
+        sample: {
+          hr: result.sample.hr,
+          steps: result.sample.steps,
+          spo2: result.sample.spo2,
+          recorded_at: result.sample.recorded_at,
+        },
+        level: 'operational_alert',
+      });
+      notifyEvent(duressEvent);
+
+      command = createCommand('notify.security', {
+        device_id: result.sample.device_id,
+        duress_event_id: duressEvent.id,
+        silent: true,
+        summary: result.summary,
+      });
+      notifyCommand(command);
+      commandEvent = emitCommandEvent(command, 'requested', {
+        source: 'duress_detector',
+        silent: true,
+      });
+      wakeQueue();
+    }
+
+    response.status(201).json({
+      ok: true,
+      telemetry: result.sample,
+      watch_session: watchSession,
+      duress: {
+        suspected: result.suspected,
+        reason: result.reason,
+        summary: result.summary || null,
+        rule: result.rule || null,
+        event: duressEvent,
+        command,
+        command_event: commandEvent,
+      },
+    });
+  } catch (error) {
+    response.status(422).json({
+      error: String(error?.message || 'invalid telemetry payload'),
+    });
+  }
+});
+
+app.post('/patrol/routes', (request, response) => {
+  try {
+    const configured = patrolService.upsertRoute(request.body || {});
+    const event = createEvent('patrol.route.configured', {
+      route: configured.route,
+      beacons: configured.beacons,
+    });
+    notifyEvent(event);
+
+    response.status(201).json({
+      ok: true,
+      ...configured,
+      event,
+    });
+  } catch (error) {
+    response.status(422).json({
+      error: String(error?.message || 'invalid patrol route payload'),
+    });
+  }
+});
+
+app.post('/patrol/checkin/manual', (request, response) => {
+  try {
+    const body = request.body || {};
+    const beacon = body.beacon && typeof body.beacon === 'object' ? body.beacon : {};
+    const result = patrolService.manualCheckin({
+      route_id: body.route_id,
+      user_id: body.user_id,
+      uuid: body.uuid ?? beacon.uuid,
+      major: body.major ?? beacon.major,
+      minor: body.minor ?? beacon.minor,
+      rssi: body.rssi,
+    });
+
+    response.status(result.created ? 201 : 200).json({
+      ok: true,
+      ...result,
+    });
+  } catch (error) {
+    response.status(422).json({
+      error: String(error?.message || 'invalid manual checkin payload'),
+    });
+  }
+});
+
+app.post('/webhooks/intercom', (request, response) => {
+  const tower = normalizeText(request.body?.tower);
+  const unit = normalizeText(request.body?.unit);
+  const visitor_name = normalizeText(request.body?.visitor_name) || null;
+
+  if (!tower || !unit) {
+    response.status(422).json({
+      error: 'tower and unit are required',
+    });
+    return;
+  }
+
+  const event = createEvent('intercom.called', {
+    tower,
+    unit,
+    visitor_name,
+    source: 'intercom-webhook',
+  });
+  notifyEvent(event);
+
+  response.status(201).json({
+    ok: true,
+    intercom_event_id: event.id,
+    event,
+  });
+});
+
+app.post('/actions/access/approve', (request, response) => {
+  const intercom_event_id = normalizeText(request.body?.intercom_event_id);
+  const target = normalizeText(request.body?.target);
+
+  if (!intercom_event_id || !['service_gate', 'main_gate'].includes(target)) {
+    response.status(422).json({
+      error: 'intercom_event_id and valid target are required',
+    });
+    return;
+  }
+
+  const command = createCommand('access.approve', {
+    intercom_event_id,
+    target,
+  });
+  notifyCommand(command);
+  const requestedEvent = emitCommandEvent(command, 'requested', {
+    intercom_event_id,
+    target,
+  });
+  wakeQueue();
+
+  response.status(202).json({
+    ok: true,
+    command,
+    event: requestedEvent,
+  });
+});
+
+app.post('/actions/access/deny', (request, response) => {
+  const intercom_event_id = normalizeText(request.body?.intercom_event_id);
+
+  if (!intercom_event_id) {
+    response.status(422).json({
+      error: 'intercom_event_id is required',
+    });
+    return;
+  }
+
+  const command = createCommand('access.deny', {
+    intercom_event_id,
+  });
+  notifyCommand(command);
+  const requestedEvent = emitCommandEvent(command, 'requested', {
+    intercom_event_id,
+  });
+  wakeQueue();
+
+  response.status(202).json({
+    ok: true,
+    command,
+    event: requestedEvent,
+  });
+});
+
+app.post('/actions/emergency/lockdown', (request, response) => {
+  const reason = normalizeText(request.body?.reason) || 'manual_lockdown';
+  const scope = normalizeText(request.body?.scope) || 'all_gates';
+
+  const command = createCommand('emergency.lockdown', {
+    reason,
+    scope,
+  });
+  notifyCommand(command);
+  const requestedEvent = emitCommandEvent(command, 'requested', {
+    reason,
+    scope,
+  });
+  wakeQueue();
+
+  response.status(202).json({
+    ok: true,
+    command,
+    event: requestedEvent,
+  });
+});
+
+server.listen(PORT, () => {
+  const counts = countCommandsByStatusStmt.all();
+  console.log(`Edge Gateway executando em http://localhost:${PORT}`);
+  console.log(`WebSocket em ws://localhost:${PORT}/ws`);
+  console.log(`SQLite DB: ${DB_PATH}`);
+  console.log(`OFFLINE_MODE: ${OFFLINE_MODE}`);
+  console.log(`Lock provider: ${lockProvider.constructor?.name || 'unknown'}`);
+  console.log(`BLE scanner enabled: ${BLE_SCANNER_ENABLED}`);
+  console.log(
+    `Fila local-first pronta. Status atuais: ${JSON.stringify(counts)}`
+  );
+
+  if (BLE_SCANNER_ENABLED) {
+    beaconScanner.start().catch((error) => {
+      console.error('Falha ao iniciar BLE scanner:', error);
+    });
+  }
+});
+
+async function shutdown() {
+  try {
+    await beaconScanner.stop();
+  } catch (_error) {
+    // Ignore scanner shutdown failures.
+  }
+  server.close(() => {
+    process.exit(0);
+  });
+}
+
+process.on('SIGINT', shutdown);
+process.on('SIGTERM', shutdown);
