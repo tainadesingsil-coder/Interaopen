@@ -20,6 +20,9 @@ interface CommandBarProps {
   bluetoothConnected: boolean;
   bluetoothConnecting: boolean;
   bluetoothDeviceName: string | null;
+  bluetoothHeartbeatAt: string | null;
+  bluetoothHr: number | null;
+  bluetoothBattery: number | null;
   onBluetoothToggle: () => void;
   onEmergencyRequest: () => void;
 }
@@ -39,6 +42,9 @@ export function CommandBar({
   bluetoothConnected,
   bluetoothConnecting,
   bluetoothDeviceName,
+  bluetoothHeartbeatAt,
+  bluetoothHr,
+  bluetoothBattery,
   onBluetoothToggle,
   onEmergencyRequest,
 }: CommandBarProps) {
@@ -104,6 +110,12 @@ export function CommandBar({
           </p>
           {bluetoothConnected && bluetoothDeviceName ? (
             <p className='truncate text-[11px] text-zinc-400'>{bluetoothDeviceName}</p>
+          ) : null}
+          {bluetoothConnected ? (
+            <p className='truncate text-[11px] text-zinc-500'>
+              HB {bluetoothHeartbeatAt || '--'} • HR {bluetoothHr ?? '--'} • BAT{' '}
+              {bluetoothBattery ?? '--'}%
+            </p>
           ) : null}
         </button>
 

@@ -95,6 +95,26 @@ function mapCommand(row) {
   };
 }
 
+function mapWatchSession(row) {
+  if (!row) {
+    return null;
+  }
+  return {
+    device_id: row.device_id,
+    device_name: row.device_name,
+    connected: Boolean(row.connected),
+    battery_level: row.battery_level,
+    last_hr: row.last_hr,
+    last_steps: row.last_steps,
+    last_spo2: row.last_spo2,
+    connected_at: row.connected_at,
+    disconnected_at: row.disconnected_at,
+    last_seen_at: row.last_seen_at,
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+  };
+}
+
 function nowIso() {
   return new Date().toISOString();
 }
@@ -249,6 +269,86 @@ const resetFailedCommandStmt = db.prepare(
   WHERE id = @id AND status = 'failed'
 `
 );
+const upsertWatchSessionStmt = db.prepare(
+  `
+  INSERT INTO watch_sessions (
+    device_id, device_name, connected, battery_level, last_hr, last_steps, last_spo2,
+    connected_at, disconnected_at, last_seen_at, created_at, updated_at
+  )
+  VALUES (
+    @device_id, @device_name, @connected, @battery_level, @last_hr, @last_steps, @last_spo2,
+    @connected_at, @disconnected_at, @last_seen_at, @created_at, @updated_at
+  )
+  ON CONFLICT(device_id) DO UPDATE SET
+    device_name = excluded.device_name,
+    connected = excluded.connected,
+    battery_level = excluded.battery_level,
+    last_hr = excluded.last_hr,
+    last_steps = excluded.last_steps,
+    last_spo2 = excluded.last_spo2,
+    connected_at = excluded.connected_at,
+    disconnected_at = excluded.disconnected_at,
+    last_seen_at = excluded.last_seen_at,
+    updated_at = excluded.updated_at
+`
+);
+const getWatchSessionStmt = db.prepare(
+  `
+  SELECT
+    device_id, device_name, connected, battery_level, last_hr, last_steps, last_spo2,
+    connected_at, disconnected_at, last_seen_at, created_at, updated_at
+  FROM watch_sessions
+  WHERE device_id = ?
+`
+);
+const listWatchSessionsStmt = db.prepare(
+  `
+  SELECT
+    device_id, device_name, connected, battery_level, last_hr, last_steps, last_spo2,
+    connected_at, disconnected_at, last_seen_at, created_at, updated_at
+  FROM watch_sessions
+  ORDER BY updated_at DESC
+`
+);
+const countConnectedWatchSessionsStmt = db.prepare(
+  `
+  SELECT COUNT(*) AS count
+  FROM watch_sessions
+  WHERE connected = 1
+`
+);
+const insertWatchHeartbeatStmt = db.prepare(
+  `
+  INSERT INTO watch_heartbeats (
+    id, device_id, battery_level, hr, steps, spo2, recorded_at, created_at
+  )
+  VALUES (
+    @id, @device_id, @battery_level, @hr, @steps, @spo2, @recorded_at, @created_at
+  )
+`
+);
+const latestTelemetryByDeviceStmt = db.prepare(
+  `
+  SELECT id, device_id, hr, steps, spo2, recorded_at, ingested_at
+  FROM watch_telemetry
+  WHERE device_id = ?
+  ORDER BY recorded_at DESC
+  LIMIT 1
+`
+);
+const latestTelemetryAllDevicesStmt = db.prepare(
+  `
+  SELECT wt.id, wt.device_id, wt.hr, wt.steps, wt.spo2, wt.recorded_at, wt.ingested_at
+  FROM watch_telemetry wt
+  INNER JOIN (
+    SELECT device_id, MAX(recorded_at) AS max_recorded_at
+    FROM watch_telemetry
+    GROUP BY device_id
+  ) latest
+  ON latest.device_id = wt.device_id AND latest.max_recorded_at = wt.recorded_at
+  ORDER BY wt.recorded_at DESC
+`
+);
 
 function createEvent(type, payload) {
   const id = randomUUID();
@@ -362,6 +462,88 @@ function resetFailedCommands(commandId = null) {
   });
   tx(failed);
   return failed.map((item) => mapCommand(getCommandStmt.get(item.id)));
+}
+
+function sanitizeOptionalNumber(value, { min = -Infinity, max = Infinity } = {}) {
+  if (value === null || value === undefined || value === '') {
+    return null;
+  }
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) {
+    return null;
+  }
+  return Math.min(max, Math.max(min, parsed));
+}
+
+function upsertWatchSession(data) {
+  const timestamp = nowIso();
+  const existing = getWatchSessionStmt.get(data.device_id);
+  upsertWatchSessionStmt.run({
+    device_id: data.device_id,
+    device_name: data.device_name || existing?.device_name || null,
+    connected: data.connected,
+    battery_level:
+      data.battery_level ?? existing?.battery_level ?? null,
+    last_hr: data.last_hr ?? existing?.last_hr ?? null,
+    last_steps: data.last_steps ?? existing?.last_steps ?? null,
+    last_spo2: data.last_spo2 ?? existing?.last_spo2 ?? null,
+    connected_at:
+      data.connected === 1
+        ? data.connected_at || existing?.connected_at || timestamp
+        : existing?.connected_at || null,
+    disconnected_at:
+      data.connected === 0
+        ? data.disconnected_at || timestamp
+        : existing?.disconnected_at || null,
+    last_seen_at: data.last_seen_at || timestamp,
+    created_at: existing?.created_at || timestamp,
+    updated_at: timestamp,
+  });
+  return mapWatchSession(getWatchSessionStmt.get(data.device_id));
+}
+
+function recordWatchHeartbeat({
+  device_id,
+  battery_level = null,
+  hr = null,
+  steps = null,
+  spo2 = null,
+  recorded_at = null,
+}) {
+  const timestamp = recorded_at || nowIso();
+  const createdAt = nowIso();
+  insertWatchHeartbeatStmt.run({
+    id: randomUUID(),
+    device_id,
+    battery_level,
+    hr,
+    steps,
+    spo2,
+    recorded_at: timestamp,
+    created_at: createdAt,
+  });
+
+  return upsertWatchSession({
+    device_id,
+    connected: 1,
+    battery_level,
+    last_hr: hr,
+    last_steps: steps,
+    last_spo2: spo2,
+    last_seen_at: timestamp,
+  });
+}
+
+function listWatchSessions() {
+  return listWatchSessionsStmt.all().map(mapWatchSession);
+}
+
+function getWatchTelemetryLatest(deviceId = null) {
+  if (deviceId) {
+    const row = latestTelemetryByDeviceStmt.get(deviceId);
+    return row ? [row] : [];
+  }
+  return latestTelemetryAllDevicesStmt.all();
 }
 
 function seedFakeEvents(amount = 10) {
@@ -723,6 +905,12 @@ wss.on('connection', (ws) => {
       data: listCommands(['pending', 'failed', 'dispatched'], 50),
     })
   );
+  ws.send(
+    JSON.stringify({
+      channel: 'watch.snapshot',
+      data: listWatchSessions(),
+    })
+  );
 
   ws.on('close', () => {
     wsClients.delete(ws);
@@ -737,6 +925,7 @@ app.get('/health', (_request, response) => {
     dbOk = false;
   }
   const activeDuressRule = duressService.getActiveRule();
+  const connectedWatchCount = countConnectedWatchSessionsStmt.get().count;
   response.json({
     ok: dbOk,
     service: 'edge-gateway',
@@ -747,6 +936,7 @@ app.get('/health', (_request, response) => {
     ble_scanner_enabled: BLE_SCANNER_ENABLED,
     ble_scanner_running: beaconScanner.isRunning(),
     duress_rule_active: activeDuressRule,
+    connected_watch_count: connectedWatchCount,
     time: nowIso(),
   });
 });
@@ -803,6 +993,127 @@ app.post('/commands/replay', (request, response) => {
   });
 });
 
+app.get('/watch/session', (_request, response) => {
+  const items = listWatchSessions();
+  response.json({
+    items,
+    count: items.length,
+    connected_count: items.filter((item) => item.connected).length,
+  });
+});
+
+app.post('/watch/session/connect', (request, response) => {
+  const device_id = normalizeText(request.body?.device_id);
+  const device_name = normalizeText(request.body?.device_name) || null;
+  if (!device_id) {
+    response.status(422).json({
+      error: 'device_id is required',
+    });
+    return;
+  }
+
+  const session = upsertWatchSession({
+    device_id,
+    device_name,
+    connected: 1,
+    last_seen_at: nowIso(),
+  });
+  const event = createEvent('watch.connected', {
+    device_id: session.device_id,
+    device_name: session.device_name,
+    connected_at: session.connected_at,
+  });
+  notifyEvent(event);
+  broadcast('watch.session', session);
+
+  response.status(201).json({
+    ok: true,
+    session,
+    event,
+  });
+});
+
+app.post('/watch/session/disconnect', (request, response) => {
+  const device_id = normalizeText(request.body?.device_id);
+  if (!device_id) {
+    response.status(422).json({
+      error: 'device_id is required',
+    });
+    return;
+  }
+
+  const session = upsertWatchSession({
+    device_id,
+    connected: 0,
+    disconnected_at: nowIso(),
+    last_seen_at: nowIso(),
+  });
+  const event = createEvent('watch.disconnected', {
+    device_id: session.device_id,
+    disconnected_at: session.disconnected_at,
+  });
+  notifyEvent(event);
+  broadcast('watch.session', session);
+
+  response.json({
+    ok: true,
+    session,
+    event,
+  });
+});
+
+app.post('/watch/heartbeat', (request, response) => {
+  const device_id = normalizeText(request.body?.device_id);
+  if (!device_id) {
+    response.status(422).json({
+      error: 'device_id is required',
+    });
+    return;
+  }
+
+  const heartbeat = {
+    device_id,
+    battery_level: sanitizeOptionalNumber(request.body?.battery_level, {
+      min: 0,
+      max: 100,
+    }),
+    hr: sanitizeOptionalNumber(request.body?.hr, {
+      min: 0,
+      max: 260,
+    }),
+    steps: sanitizeOptionalNumber(request.body?.steps, {
+      min: 0,
+      max: 10000000,
+    }),
+    spo2: sanitizeOptionalNumber(request.body?.spo2, {
+      min: 50,
+      max: 100,
+    }),
+    recorded_at: request.body?.timestamp
+      ? String(request.body.timestamp)
+      : nowIso(),
+  };
+
+  const session = recordWatchHeartbeat(heartbeat);
+  broadcast('watch.session', session);
+  broadcast('watch.heartbeat', session);
+
+  response.status(201).json({
+    ok: true,
+    session,
+  });
+});
+
+app.get('/telemetry/watch/latest', (request, response) => {
+  const deviceId = normalizeText(request.query.device_id);
+  const items = getWatchTelemetryLatest(deviceId || null);
+  response.json({
+    items,
+    count: items.length,
+    device_id: deviceId || null,
+  });
+});
+
 app.get('/duress/rules', (_request, response) => {
   const items = duressService.listRules();
   response.json({
@@ -834,6 +1145,20 @@ app.post('/duress/rules', (request, response) => {
 app.post('/telemetry/watch', (request, response) => {
   try {
     const result = duressService.ingestTelemetry(request.body || {});
+    const watchSession = recordWatchHeartbeat({
+      device_id: result.sample.device_id,
+      hr: result.sample.hr,
+      steps: result.sample.steps,
+      spo2: result.sample.spo2,
+      recorded_at: result.sample.recorded_at,
+      battery_level: sanitizeOptionalNumber(request.body?.battery_level, {
+        min: 0,
+        max: 100,
+      }),
+    });
+    broadcast('watch.session', watchSession);
+    broadcast('watch.heartbeat', watchSession);
+
     let duressEvent = null;
     let command = null;
     let commandEvent = null;
@@ -870,6 +1195,7 @@ app.post('/telemetry/watch', (request, response) => {
     response.status(201).json({
       ok: true,
       telemetry: result.sample,
+      watch_session: watchSession,
       duress: {
         suspected: result.suspected,
         reason: result.reason,

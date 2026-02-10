@@ -13,6 +13,7 @@ import { ContextPanel } from '@/app/components/console/ContextPanel';
 import { Timeline } from '@/app/components/console/Timeline';
 import { Toaster } from '@/app/components/ui/sonner';
 import { useBluetoothWatch } from '@/app/hooks/useBluetoothWatch';
+import { useEdgeWatchSession } from '@/app/hooks/useEdgeWatchSession';
 import { useRealtimeFeed } from '@/app/hooks/useRealtimeFeed';
 import { mockCommands } from '@/src/mock/commands';
 import { mockCondominiums } from '@/src/mock/condominiums';
@@ -68,6 +69,21 @@ function isDangerIntent(intent: ConfirmationIntent) {
 
 function getCurrentTimeLabel() {
   return new Date().toLocaleTimeString('pt-BR', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  });
+}
+
+function formatHeartbeatLabel(value: string | null) {
+  if (!value) {
+    return null;
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+  return date.toLocaleTimeString('pt-BR', {
     hour: '2-digit',
     minute: '2-digit',
     second: '2-digit',
@@ -207,7 +223,42 @@ export default function Page() {
   const [edgePingMs, setEdgePingMs] = useState(31);
   const [confirmIntent, setConfirmIntent] = useState<ConfirmationIntent>(null);
 
-  const bluetooth = useBluetoothWatch();
+  const edgeWatch = useEdgeWatchSession();
+
+  const bluetooth = useBluetoothWatch({
+    onConnected: async ({ device_id, device_name }) => {
+      try {
+        await edgeWatch.connectSession({ device_id, device_name });
+      } catch (unknownError) {
+        const message =
+          unknownError instanceof Error
+            ? unknownError.message
+            : 'Falha ao registrar conexao do relogio no EDGE.';
+        toast.error(message);
+      }
+    },
+    onDisconnected: async ({ device_id }) => {
+      try {
+        await edgeWatch.disconnectSession({ device_id });
+      } catch (_error) {
+        // Session may already be closed on backend.
+      }
+    },
+    onHeartbeat: async (sample) => {
+      try {
+        await edgeWatch.sendHeartbeat(sample);
+      } catch (_error) {
+        // Ignore transient EDGE heartbeat errors.
+      }
+    },
+    onTelemetry: async (sample) => {
+      try {
+        await edgeWatch.sendTelemetry(sample);
+      } catch (_error) {
+        // Ignore telemetry submission failures while staying connected locally.
+      }
+    },
+  });
 
   const {
     events,
@@ -246,40 +297,55 @@ export default function Page() {
     }, 500);
   };
 
-  if (!authenticated) {
-    return (
-      <>
-        <AdminLogin
-          username={adminUser}
-          password={adminPass}
-          loading={authLoading}
-          error={authError}
-          onUsernameChange={setAdminUser}
-          onPasswordChange={setAdminPass}
-          onSubmit={handleLogin}
-        />
-        <Toaster />
-      </>
-    );
-  }
-
   const selectedCondominium = condominiumById.get(selectedCondominiumId) || mockCondominiums[0];
-  const edgeOnline = connectionState === 'online' || connectionState === 'mock';
+  const edgeApiUrl = process.env.NEXT_PUBLIC_EDGE_API_URL || '';
+  const edgeOnline = connectionState === 'online';
   const bleScanning = edgeOnline && !offlineMode;
 
   useEffect(() => {
-    const interval = window.setInterval(() => {
-      if (!edgeOnline) {
-        setEdgePingMs(0);
-        return;
+    if (!edgeApiUrl) {
+      const interval = window.setInterval(() => {
+        if (!edgeOnline) {
+          setEdgePingMs(0);
+          return;
+        }
+        setEdgePingMs((previous) => {
+          const jitter = Math.floor(Math.random() * 12) - 5;
+          return Math.max(9, previous + jitter);
+        });
+      }, 2500);
+      return () => window.clearInterval(interval);
+    }
+
+    let cancelled = false;
+
+    const probe = async () => {
+      const startedAt = performance.now();
+      try {
+        const response = await fetch(`${edgeApiUrl}/health`);
+        if (!response.ok) {
+          throw new Error(`health ${response.status}`);
+        }
+        if (!cancelled) {
+          setEdgePingMs(Math.max(1, Math.round(performance.now() - startedAt)));
+        }
+      } catch (_error) {
+        if (!cancelled) {
+          setEdgePingMs(0);
+        }
       }
-      setEdgePingMs((previous) => {
-        const jitter = Math.floor(Math.random() * 12) - 5;
-        return Math.max(9, previous + jitter);
-      });
-    }, 2500);
-    return () => window.clearInterval(interval);
-  }, [edgeOnline]);
+    };
+
+    probe();
+    const interval = window.setInterval(() => {
+      probe();
+    }, 5000);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
+  }, [edgeApiUrl, edgeOnline]);
 
   const filteredEvents = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -363,6 +429,20 @@ export default function Page() {
     () => filteredEvents.filter((event) => event.severity !== 'info').length,
     [filteredEvents]
   );
+
+  const watchConnected = bluetooth.connected || Boolean(edgeWatch.activeSession?.connected);
+  const watchName = bluetooth.deviceName || edgeWatch.activeSession?.device_name || null;
+  const watchHeartbeatLabel = formatHeartbeatLabel(
+    bluetooth.lastHeartbeatAt || edgeWatch.lastSeenAt
+  );
+  const watchHr =
+    bluetooth.latestHr !== null && bluetooth.latestHr !== undefined
+      ? bluetooth.latestHr
+      : edgeWatch.latestHr;
+  const watchBattery =
+    bluetooth.batteryLevel !== null && bluetooth.batteryLevel !== undefined
+      ? bluetooth.batteryLevel
+      : edgeWatch.activeSession?.battery_level || null;
 
   const enqueueCommandExecution = (
     commandTemplate: Pick<
@@ -592,6 +672,23 @@ export default function Page() {
     toast.message('Sessao ADM encerrada');
   };
 
+  if (!authenticated) {
+    return (
+      <>
+        <AdminLogin
+          username={adminUser}
+          password={adminPass}
+          loading={authLoading}
+          error={authError}
+          onUsernameChange={setAdminUser}
+          onPasswordChange={setAdminPass}
+          onSubmit={handleLogin}
+        />
+        <Toaster />
+      </>
+    );
+  }
+
   return (
     <MotionConfig reducedMotion='user'>
       <div className='min-h-screen bg-[#070a0d] text-zinc-100'>
@@ -614,9 +711,12 @@ export default function Page() {
           searchQuery={searchQuery}
           onSearchQueryChange={setSearchQuery}
           bluetoothSupported={bluetooth.supported}
-          bluetoothConnected={bluetooth.connected}
+          bluetoothConnected={watchConnected}
           bluetoothConnecting={bluetooth.connecting}
-          bluetoothDeviceName={bluetooth.deviceName}
+          bluetoothDeviceName={watchName}
+          bluetoothHeartbeatAt={watchHeartbeatLabel}
+          bluetoothHr={watchHr}
+          bluetoothBattery={watchBattery}
           onBluetoothToggle={handleBluetoothToggle}
           onEmergencyRequest={() => setConfirmIntent({ kind: 'emergency' })}
         />
@@ -627,7 +727,18 @@ export default function Page() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.24 }}
           >
-            <CondominiumOverview condominium={selectedCondominium} />
+            <CondominiumOverview
+              condominium={selectedCondominium}
+              watchTelemetry={{
+                connected: watchConnected,
+                deviceName: watchName,
+                hr: watchHr,
+                spo2: edgeWatch.latestSpo2,
+                steps: bluetooth.connected ? bluetooth.latestSteps : edgeWatch.latestSteps,
+                battery: watchBattery,
+                lastSeenAt: watchHeartbeatLabel,
+              }}
+            />
           </motion.div>
 
           <motion.div

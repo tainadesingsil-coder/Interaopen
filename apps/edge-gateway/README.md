@@ -33,6 +33,9 @@ apps/edge-gateway/
     migrations/
       001_init.sql
       002_commands_local_first.sql
+      003_patrol_ble.sql
+      004_duress_detection.sql
+      005_watch_bridge.sql
   scripts/
     migrate.js
     seed.js
@@ -154,6 +157,7 @@ Retorna estado da aplicacao:
 - `offline_mode`
 - `db_ok`
 - `ws_clients_count`
+- `connected_watch_count`
 
 ### `GET /commands?status=pending,failed&limit=50`
 Lista comandos da fila.
@@ -258,6 +262,45 @@ Quando detectar:
 - gera evento `duress.suspected`,
 - cria comando silencioso `notify.security`.
 
+### `GET /telemetry/watch/latest?device_id=watch-01`
+Retorna o ultimo registro de telemetria por dispositivo (ou de todos quando sem filtro).
+
+### `GET /watch/session`
+Lista sessoes de relogios e estado de conexao atual.
+
+### `POST /watch/session/connect`
+Registra conexao de relogio (bridge navegador -> edge):
+
+```json
+{
+  "device_id": "watch-01",
+  "device_name": "Vvfit M6"
+}
+```
+
+### `POST /watch/session/disconnect`
+Marca sessao como desconectada:
+
+```json
+{
+  "device_id": "watch-01"
+}
+```
+
+### `POST /watch/heartbeat`
+Atualiza heartbeat operacional e status de bateria/HR:
+
+```json
+{
+  "device_id": "watch-01",
+  "battery_level": 83,
+  "hr": 88,
+  "steps": 2440,
+  "spo2": 97,
+  "timestamp": "2026-02-10T12:00:00Z"
+}
+```
+
 ## WebSocket
 
 Conectar em:
@@ -271,6 +314,9 @@ Canais emitidos:
 - `command.status` (status `pending/dispatched/success/failed`),
 - `feed.snapshot` (snapshot inicial ao conectar),
 - `commands.snapshot` (snapshot inicial dos comandos),
+- `watch.snapshot` (snapshot de sessoes de relogio),
+- `watch.session` (mudanca de sessao),
+- `watch.heartbeat` (heartbeat operacional),
 - `gateway.ready` (handshake inicial).
 
 Eventos de ronda emitidos em tempo real:
@@ -320,3 +366,5 @@ Tabelas:
 - `patrol_checkins(...)`
 - `watch_telemetry(...)`
 - `duress_rules(...)`
+- `watch_sessions(...)`
+- `watch_heartbeats(...)`
