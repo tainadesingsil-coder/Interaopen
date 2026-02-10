@@ -1,8 +1,10 @@
 import { enrichLeadByEmail } from "@/lib/hookflow/enrichment";
 import { generateApproachStrategy } from "@/lib/hookflow/openai";
-import { getSupabaseAdminClient, HOOKFLOW_LEADS_TABLE } from "@/lib/hookflow/supabase";
+import { getSupabaseAdminClient } from "@/lib/hookflow/supabase";
 import type { HookflowLeadRow, NormalizedLeadInput } from "@/lib/hookflow/types";
 import { buildPersonalizedWhatsAppMessage, buildWhatsAppUrl } from "@/lib/hookflow/whatsapp";
+
+const LEADS_TABLE = "hookflow_leads";
 
 const fallbackStrategy =
   "Inicie reconhecendo o contexto do lead e conecte sua solução ao objetivo imediato dele. Feche com uma pergunta direta para avançar para uma reunião ou demonstração.";
@@ -37,7 +39,7 @@ const insertLead = async (lead: NormalizedLeadInput) => {
 
   if (lead.facebookLeadId) {
     const { data, error } = await supabase
-      .from(HOOKFLOW_LEADS_TABLE)
+      .from(LEADS_TABLE)
       .upsert(payload, {
         onConflict: "facebook_lead_id",
       })
@@ -51,7 +53,7 @@ const insertLead = async (lead: NormalizedLeadInput) => {
     return data;
   }
 
-  const { data, error } = await supabase.from(HOOKFLOW_LEADS_TABLE).insert(payload).select("*").single();
+  const { data, error } = await supabase.from(LEADS_TABLE).insert(payload).select("*").single();
   if (error || !data) {
     throw new Error(error?.message ?? "Falha ao salvar lead no Supabase.");
   }
@@ -93,7 +95,7 @@ export const processIncomingLead = async (lead: NormalizedLeadInput) => {
   const status = processingError ? "processed_with_warnings" : "processed";
 
   const { data: updatedLead, error } = await supabase
-    .from(HOOKFLOW_LEADS_TABLE)
+    .from(LEADS_TABLE)
     .update({
       enrichment_source: enrichment.source,
       enrichment_data: enrichment.data,
@@ -123,7 +125,7 @@ export const listRecentLeads = async (limit = 100): Promise<HookflowLeadRow[]> =
   }
 
   const { data, error } = await supabase
-    .from(HOOKFLOW_LEADS_TABLE)
+    .from(LEADS_TABLE)
     .select("*")
     .order("created_at", { ascending: false })
     .limit(limit);
