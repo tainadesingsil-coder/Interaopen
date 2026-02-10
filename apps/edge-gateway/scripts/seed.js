@@ -2,6 +2,7 @@ const Database = require('better-sqlite3');
 const fs = require('fs');
 const path = require('path');
 const { randomUUID } = require('crypto');
+const { runMigrations } = require('../src/migrations');
 
 const DB_PATH =
   process.env.DB_PATH ||
@@ -14,23 +15,12 @@ function nowIsoOffset(minutesAgo) {
   return value.toISOString();
 }
 
-function runMigrations(db) {
-  const files = fs
-    .readdirSync(MIGRATION_DIR)
-    .filter((file) => file.endsWith('.sql'))
-    .sort();
-  for (const file of files) {
-    const sql = fs.readFileSync(path.join(MIGRATION_DIR, file), 'utf8');
-    db.exec(sql);
-  }
-}
-
 function seed() {
   fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
   const db = new Database(DB_PATH);
   db.pragma('journal_mode = WAL');
   db.pragma('foreign_keys = ON');
-  runMigrations(db);
+  runMigrations(db, MIGRATION_DIR);
 
   const insertEventStmt = db.prepare(
     `

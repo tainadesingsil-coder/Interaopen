@@ -7,11 +7,32 @@ const path = require('path');
 const { WebSocketServer } = require('ws');
 const { randomUUID } = require('crypto');
 
+const { runMigrations } = require('./src/migrations');
+const {
+  MAX_RETRIES_DEFAULT,
+  RETRY_BASE_MS_DEFAULT,
+  RETRY_MAX_MS_DEFAULT,
+  computeFailureTransition,
+  shouldExecuteLocallyOnly,
+} = require('./src/command-queue');
+
 const PORT = Number(process.env.PORT || 8787);
 const DB_PATH =
   process.env.DB_PATH || path.join(__dirname, 'data', 'edge-gateway.sqlite');
+const MIGRATION_DIR = path.join(__dirname, 'db', 'migrations');
 const AUTO_SEED_ON_BOOT = process.env.AUTO_SEED_ON_BOOT !== 'false';
-const COMMAND_DELAY_MS = Number(process.env.COMMAND_DELAY_MS || 900);
+const OFFLINE_MODE = String(process.env.OFFLINE_MODE || 'false') === 'true';
+
+const COMMAND_MAX_RETRIES = Number(
+  process.env.COMMAND_MAX_RETRIES || MAX_RETRIES_DEFAULT
+);
+const RETRY_BASE_MS = Number(process.env.RETRY_BASE_MS || RETRY_BASE_MS_DEFAULT);
+const RETRY_MAX_MS = Number(process.env.RETRY_MAX_MS || RETRY_MAX_MS_DEFAULT);
+const QUEUE_POLL_MS = Number(process.env.QUEUE_POLL_MS || 1000);
+const LOCAL_FAILURE_RATE = Number(process.env.LOCAL_FAILURE_RATE || 0.08);
+const REMOTE_FAILURE_RATE = Number(process.env.REMOTE_FAILURE_RATE || 0.2);
+
+const COMMAND_STATUSES = ['pending', 'dispatched', 'success', 'failed'];
 
 const app = express();
 app.use(cors());
@@ -27,22 +48,6 @@ function openDatabase() {
   db.pragma('journal_mode = WAL');
   db.pragma('foreign_keys = ON');
   return db;
-}
-
-function runMigrations(db) {
-  const migrationDir = path.join(__dirname, 'db', 'migrations');
-  if (!fs.existsSync(migrationDir)) {
-    return;
-  }
-  const files = fs
-    .readdirSync(migrationDir)
-    .filter((file) => file.endsWith('.sql'))
-    .sort();
-
-  for (const file of files) {
-    const sql = fs.readFileSync(path.join(migrationDir, file), 'utf8');
-    db.exec(sql);
-  }
 }
 
 function parsePayload(payloadJson) {
@@ -68,6 +73,10 @@ function mapCommand(row) {
     type: row.type,
     payload: parsePayload(row.payload_json),
     status: row.status,
+    retry_count: row.retry_count,
+    max_retries: row.max_retries,
+    next_attempt_at: row.next_attempt_at,
+    last_error: row.last_error,
     created_at: row.created_at,
     updated_at: row.updated_at,
   };
@@ -84,16 +93,33 @@ function normalizeText(value) {
   return value.trim();
 }
 
-function parseLimit(rawLimit) {
-  const numeric = Number.parseInt(String(rawLimit ?? 50), 10);
+function parseLimit(rawLimit, defaultValue = 50) {
+  const numeric = Number.parseInt(String(rawLimit ?? defaultValue), 10);
   if (!Number.isFinite(numeric)) {
-    return 50;
+    return defaultValue;
   }
   return Math.max(1, Math.min(200, numeric));
 }
 
+function parseCommandStatuses(rawValue) {
+  if (!rawValue) {
+    return ['pending', 'failed'];
+  }
+  if (rawValue === 'all') {
+    return [...COMMAND_STATUSES];
+  }
+  const statuses = String(rawValue)
+    .split(',')
+    .map((item) => item.trim())
+    .filter((item) => COMMAND_STATUSES.includes(item));
+  if (statuses.length === 0) {
+    return ['pending', 'failed'];
+  }
+  return [...new Set(statuses)];
+}
+
 const db = openDatabase();
-runMigrations(db);
+runMigrations(db, MIGRATION_DIR);
 
 const insertEventStmt = db.prepare(
   `
@@ -120,22 +146,93 @@ const countEventsStmt = db.prepare(`SELECT COUNT(*) AS count FROM events`);
 
 const insertCommandStmt = db.prepare(
   `
-  INSERT INTO commands (id, type, payload_json, status, created_at, updated_at)
-  VALUES (@id, @type, @payload_json, @status, @created_at, @updated_at)
+  INSERT INTO commands (
+    id, type, payload_json, status, retry_count, max_retries,
+    next_attempt_at, last_error, created_at, updated_at
+  )
+  VALUES (
+    @id, @type, @payload_json, @status, @retry_count, @max_retries,
+    @next_attempt_at, @last_error, @created_at, @updated_at
+  )
 `
 );
 const getCommandStmt = db.prepare(
   `
-  SELECT id, type, payload_json, status, created_at, updated_at
+  SELECT
+    id, type, payload_json, status, retry_count, max_retries,
+    next_attempt_at, last_error, created_at, updated_at
   FROM commands
   WHERE id = ?
 `
 );
-const updateCommandStatusStmt = db.prepare(
+const setCommandPayloadStmt = db.prepare(
   `
   UPDATE commands
-  SET status = @status, updated_at = @updated_at
+  SET payload_json = @payload_json, updated_at = @updated_at
   WHERE id = @id
+`
+);
+const setCommandDispatchedStmt = db.prepare(
+  `
+  UPDATE commands
+  SET status = 'dispatched', updated_at = @updated_at
+  WHERE id = @id
+`
+);
+const setCommandSuccessStmt = db.prepare(
+  `
+  UPDATE commands
+  SET
+    status = 'success',
+    next_attempt_at = NULL,
+    last_error = NULL,
+    updated_at = @updated_at
+  WHERE id = @id
+`
+);
+const setCommandFailedStmt = db.prepare(
+  `
+  UPDATE commands
+  SET
+    status = 'failed',
+    retry_count = @retry_count,
+    next_attempt_at = @next_attempt_at,
+    last_error = @last_error,
+    updated_at = @updated_at
+  WHERE id = @id
+`
+);
+const listReadyCommandsStmt = db.prepare(
+  `
+  SELECT
+    id, type, payload_json, status, retry_count, max_retries,
+    next_attempt_at, last_error, created_at, updated_at
+  FROM commands
+  WHERE
+    status IN ('pending', 'failed')
+    AND retry_count < max_retries
+    AND (next_attempt_at IS NULL OR next_attempt_at <= ?)
+  ORDER BY created_at ASC
+  LIMIT ?
+`
+);
+const countCommandsByStatusStmt = db.prepare(
+  `
+  SELECT status, COUNT(*) AS count
+  FROM commands
+  GROUP BY status
+`
+);
+const resetFailedCommandStmt = db.prepare(
+  `
+  UPDATE commands
+  SET
+    status = 'pending',
+    retry_count = 0,
+    next_attempt_at = @next_attempt_at,
+    last_error = NULL,
+    updated_at = @updated_at
+  WHERE id = @id AND status = 'failed'
 `
 );
 
@@ -151,32 +248,106 @@ function createEvent(type, payload) {
   return mapEvent(getEventStmt.get(id));
 }
 
-function createCommand(type, payload, status = 'pending') {
+function createCommand(type, payload) {
   const id = randomUUID();
   const timestamp = nowIso();
   insertCommandStmt.run({
     id,
     type,
     payload_json: JSON.stringify(payload ?? {}),
-    status,
+    status: 'pending',
+    retry_count: 0,
+    max_retries: COMMAND_MAX_RETRIES,
+    next_attempt_at: timestamp,
+    last_error: null,
     created_at: timestamp,
     updated_at: timestamp,
   });
   return mapCommand(getCommandStmt.get(id));
 }
 
-function setCommandStatus(commandId, status) {
-  const updated_at = nowIso();
-  updateCommandStatusStmt.run({
+function updateCommandPayload(commandId, payload) {
+  setCommandPayloadStmt.run({
     id: commandId,
-    status,
-    updated_at,
+    payload_json: JSON.stringify(payload ?? {}),
+    updated_at: nowIso(),
+  });
+  return mapCommand(getCommandStmt.get(commandId));
+}
+
+function setCommandDispatched(commandId) {
+  setCommandDispatchedStmt.run({
+    id: commandId,
+    updated_at: nowIso(),
+  });
+  return mapCommand(getCommandStmt.get(commandId));
+}
+
+function setCommandSuccess(commandId) {
+  setCommandSuccessStmt.run({
+    id: commandId,
+    updated_at: nowIso(),
+  });
+  return mapCommand(getCommandStmt.get(commandId));
+}
+
+function setCommandFailed(commandId, transition, errorMessage) {
+  setCommandFailedStmt.run({
+    id: commandId,
+    retry_count: transition.retry_count,
+    next_attempt_at: transition.next_attempt_at,
+    last_error: String(errorMessage || 'unknown_error').slice(0, 500),
+    updated_at: nowIso(),
   });
   return mapCommand(getCommandStmt.get(commandId));
 }
 
 function listFeed(limit) {
   return listFeedStmt.all(limit).map(mapEvent);
+}
+
+function listCommands(statuses, limit) {
+  const placeholders = statuses.map(() => '?').join(', ');
+  const statement = db.prepare(
+    `
+    SELECT
+      id, type, payload_json, status, retry_count, max_retries,
+      next_attempt_at, last_error, created_at, updated_at
+    FROM commands
+    WHERE status IN (${placeholders})
+    ORDER BY created_at DESC
+    LIMIT ?
+  `
+  );
+  return statement.all(...statuses, limit).map(mapCommand);
+}
+
+function resetFailedCommands(commandId = null) {
+  const now = nowIso();
+  if (commandId) {
+    const changed = resetFailedCommandStmt.run({
+      id: commandId,
+      next_attempt_at: now,
+      updated_at: now,
+    }).changes;
+    if (changed === 0) {
+      return [];
+    }
+    return [mapCommand(getCommandStmt.get(commandId))];
+  }
+
+  const failed = listCommands(['failed'], 500);
+  const tx = db.transaction((items) => {
+    for (const item of items) {
+      resetFailedCommandStmt.run({
+        id: item.id,
+        next_attempt_at: now,
+        updated_at: now,
+      });
+    }
+  });
+  tx(failed);
+  return failed.map((item) => mapCommand(getCommandStmt.get(item.id)));
 }
 
 function seedFakeEvents(amount = 10) {
@@ -216,7 +387,6 @@ if (AUTO_SEED_ON_BOOT) {
   const current = countEventsStmt.get().count;
   if (current === 0) {
     seedFakeEvents(10);
-    // One-time bootstrap to make feed test-ready after first run.
     console.log('Seed inicial aplicado com 10 eventos.');
   }
 }
@@ -246,23 +416,159 @@ function notifyCommand(command) {
   broadcast('command.status', command);
 }
 
-function resolveCommandAsync(command, successEventType, failEventType) {
-  setTimeout(() => {
-    const hasFailed = Math.random() < 0.12;
-    const status = hasFailed ? 'fail' : 'success';
-    const updatedCommand = setCommandStatus(command.id, status);
-    notifyCommand(updatedCommand);
-
-    const eventType = hasFailed ? failEventType : successEventType;
-    const event = createEvent(eventType, {
-      command_id: command.id,
-      command_type: command.type,
-      status: updatedCommand.status,
-      payload: updatedCommand.payload,
-    });
-    notifyEvent(event);
-  }, COMMAND_DELAY_MS);
+function emitCommandEvent(command, stage, extras = {}) {
+  const event = createEvent(`${command.type}.${stage}`, {
+    command_id: command.id,
+    status: command.status,
+    retry_count: command.retry_count,
+    max_retries: command.max_retries,
+    payload: command.payload,
+    ...extras,
+  });
+  notifyEvent(event);
+  return event;
 }
+
+function simulateLocalExecution() {
+  if (Math.random() < LOCAL_FAILURE_RATE) {
+    return {
+      ok: false,
+      error: 'local_controller_unreachable',
+    };
+  }
+  return {
+    ok: true,
+  };
+}
+
+function simulateRemoteDispatch() {
+  if (OFFLINE_MODE) {
+    return {
+      ok: false,
+      error: 'offline_mode_enabled',
+    };
+  }
+  if (Math.random() < REMOTE_FAILURE_RATE) {
+    return {
+      ok: false,
+      error: 'remote_ack_timeout',
+    };
+  }
+  return {
+    ok: true,
+  };
+}
+
+function executeCommandLocalFirst(command) {
+  const payload = { ...command.payload };
+  const localOnly = shouldExecuteLocallyOnly(command.type, OFFLINE_MODE);
+
+  if (!payload.local_executed_at) {
+    const localResult = simulateLocalExecution(command);
+    if (!localResult.ok) {
+      return {
+        ok: false,
+        error: localResult.error,
+        stage: 'local',
+        command,
+      };
+    }
+    payload.local_executed_at = nowIso();
+    payload.local_execution_mode = localOnly ? 'offline_local' : 'local_first';
+    command = updateCommandPayload(command.id, payload);
+  }
+
+  if (localOnly) {
+    return {
+      ok: true,
+      command,
+      stage: 'local_offline',
+    };
+  }
+
+  const remoteResult = simulateRemoteDispatch(command);
+  if (!remoteResult.ok) {
+    return {
+      ok: false,
+      error: remoteResult.error,
+      stage: 'remote',
+      command,
+    };
+  }
+  return {
+    ok: true,
+    command,
+    stage: 'local_and_remote',
+  };
+}
+
+let queueBusy = false;
+
+function processCommandQueue() {
+  if (queueBusy) {
+    return;
+  }
+  queueBusy = true;
+
+  try {
+    const now = nowIso();
+    const queueItems = listReadyCommandsStmt.all(now, 20).map(mapCommand);
+
+    for (const item of queueItems) {
+      const dispatched = setCommandDispatched(item.id);
+      notifyCommand(dispatched);
+      emitCommandEvent(dispatched, 'dispatched', {
+        offline_mode: OFFLINE_MODE,
+      });
+
+      const result = executeCommandLocalFirst(dispatched);
+      if (result.ok) {
+        const success = setCommandSuccess(dispatched.id);
+        notifyCommand(success);
+        emitCommandEvent(success, 'success', {
+          execution_stage: result.stage,
+          offline_mode: OFFLINE_MODE,
+        });
+        continue;
+      }
+
+      const transition = computeFailureTransition({
+        retryCount: dispatched.retry_count,
+        maxRetries: dispatched.max_retries,
+        baseDelayMs: RETRY_BASE_MS,
+        maxDelayMs: RETRY_MAX_MS,
+      });
+      const failed = setCommandFailed(dispatched.id, transition, result.error);
+      notifyCommand(failed);
+      emitCommandEvent(failed, 'failed', {
+        execution_stage: result.stage,
+        error: result.error,
+        will_retry: transition.will_retry,
+        next_attempt_at: transition.next_attempt_at,
+      });
+    }
+  } finally {
+    queueBusy = false;
+  }
+}
+
+function wakeQueue() {
+  setImmediate(() => {
+    try {
+      processCommandQueue();
+    } catch (error) {
+      console.error('Erro ao processar fila de comandos:', error);
+    }
+  });
+}
+
+setInterval(() => {
+  try {
+    processCommandQueue();
+  } catch (error) {
+    console.error('Erro no loop da fila:', error);
+  }
+}, QUEUE_POLL_MS);
 
 server.on('upgrade', (request, socket, head) => {
   if (request.url !== '/ws') {
@@ -282,6 +588,7 @@ wss.on('connection', (ws) => {
       data: {
         message: 'Conexao WebSocket estabelecida.',
         server_time: nowIso(),
+        offline_mode: OFFLINE_MODE,
       },
     })
   );
@@ -291,6 +598,12 @@ wss.on('connection', (ws) => {
       data: listFeed(20),
     })
   );
+  ws.send(
+    JSON.stringify({
+      channel: 'commands.snapshot',
+      data: listCommands(['pending', 'failed', 'dispatched'], 50),
+    })
+  );
 
   ws.on('close', () => {
     wsClients.delete(ws);
@@ -298,10 +611,18 @@ wss.on('connection', (ws) => {
 });
 
 app.get('/health', (_request, response) => {
+  let dbOk = true;
+  try {
+    db.prepare('SELECT 1 AS ok').get();
+  } catch (_error) {
+    dbOk = false;
+  }
   response.json({
-    ok: true,
+    ok: dbOk,
     service: 'edge-gateway',
-    ws_clients: wsClients.size,
+    offline_mode: OFFLINE_MODE,
+    db_ok: dbOk,
+    ws_clients_count: wsClients.size,
     time: nowIso(),
   });
 });
@@ -313,6 +634,48 @@ app.get('/feed', (request, response) => {
     items,
     count: items.length,
     limit,
+  });
+});
+
+app.get('/commands', (request, response) => {
+  const statuses = parseCommandStatuses(request.query.status);
+  const limit = parseLimit(request.query.limit);
+  const items = listCommands(statuses, limit);
+  response.json({
+    items,
+    count: items.length,
+    statuses,
+    limit,
+  });
+});
+
+app.post('/commands/replay', (request, response) => {
+  const commandId = normalizeText(request.body?.command_id);
+  const replayed = resetFailedCommands(commandId || null);
+
+  if (commandId && replayed.length === 0) {
+    response.status(404).json({
+      error: 'failed command not found for replay',
+    });
+    return;
+  }
+
+  for (const command of replayed) {
+    notifyCommand(command);
+  }
+
+  const replayEvent = createEvent('commands.replay.requested', {
+    command_id: commandId || null,
+    replayed_count: replayed.length,
+  });
+  notifyEvent(replayEvent);
+  wakeQueue();
+
+  response.json({
+    ok: true,
+    replayed_count: replayed.length,
+    commands: replayed,
+    event: replayEvent,
   });
 });
 
@@ -359,19 +722,11 @@ app.post('/actions/access/approve', (request, response) => {
     target,
   });
   notifyCommand(command);
-
-  const requestedEvent = createEvent('access.approve.requested', {
-    command_id: command.id,
+  const requestedEvent = emitCommandEvent(command, 'requested', {
     intercom_event_id,
     target,
   });
-  notifyEvent(requestedEvent);
-
-  resolveCommandAsync(
-    command,
-    'access.approve.success',
-    'access.approve.fail'
-  );
+  wakeQueue();
 
   response.status(202).json({
     ok: true,
@@ -394,14 +749,10 @@ app.post('/actions/access/deny', (request, response) => {
     intercom_event_id,
   });
   notifyCommand(command);
-
-  const requestedEvent = createEvent('access.deny.requested', {
-    command_id: command.id,
+  const requestedEvent = emitCommandEvent(command, 'requested', {
     intercom_event_id,
   });
-  notifyEvent(requestedEvent);
-
-  resolveCommandAsync(command, 'access.deny.success', 'access.deny.fail');
+  wakeQueue();
 
   response.status(202).json({
     ok: true,
@@ -419,19 +770,11 @@ app.post('/actions/emergency/lockdown', (request, response) => {
     scope,
   });
   notifyCommand(command);
-
-  const requestedEvent = createEvent('emergency.lockdown.requested', {
-    command_id: command.id,
+  const requestedEvent = emitCommandEvent(command, 'requested', {
     reason,
     scope,
   });
-  notifyEvent(requestedEvent);
-
-  resolveCommandAsync(
-    command,
-    'emergency.lockdown.success',
-    'emergency.lockdown.fail'
-  );
+  wakeQueue();
 
   response.status(202).json({
     ok: true,
@@ -441,7 +784,12 @@ app.post('/actions/emergency/lockdown', (request, response) => {
 });
 
 server.listen(PORT, () => {
+  const counts = countCommandsByStatusStmt.all();
   console.log(`Edge Gateway executando em http://localhost:${PORT}`);
   console.log(`WebSocket em ws://localhost:${PORT}/ws`);
   console.log(`SQLite DB: ${DB_PATH}`);
+  console.log(`OFFLINE_MODE: ${OFFLINE_MODE}`);
+  console.log(
+    `Fila local-first pronta. Status atuais: ${JSON.stringify(counts)}`
+  );
 });
