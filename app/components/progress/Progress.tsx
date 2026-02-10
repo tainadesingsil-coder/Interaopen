@@ -53,7 +53,7 @@ export const Progress = ({ copy }: Props) => {
             <ProgressGallery
               images={progressImages}
               alt={copy.title}
-              reduceMotion={reduceMotion}
+              reduceMotion={!!reduceMotion}
             />
           </motion.div>
         </div>
