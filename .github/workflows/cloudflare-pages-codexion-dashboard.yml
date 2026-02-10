@@ -1,16 +1,22 @@
-name: Cloudflare Pages
+name: Cloudflare Pages (Codexion Dashboard)
 
 on:
   pull_request:
     branches: [ main ]
+    paths:
+      - 'projetos-separados/codexion-dashboard/**'
+      - '.github/workflows/cloudflare-pages-codexion-dashboard.yml'
   push:
     branches:
       - main
       - '**'
+    paths:
+      - 'projetos-separados/codexion-dashboard/**'
+      - '.github/workflows/cloudflare-pages-codexion-dashboard.yml'
 
 jobs:
   deploy:
-    name: Deploy to Cloudflare Pages
+    name: Deploy Codexion Dashboard to Cloudflare Pages
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -24,13 +30,15 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: package-lock.json
+          cache-dependency-path: projetos-separados/codexion-dashboard/package-lock.json
 
       - name: Install dependencies
         run: npm ci --prefer-offline --no-audit --no-fund
+        working-directory: projetos-separados/codexion-dashboard
 
       - name: Build
         run: npm run build
+        working-directory: projetos-separados/codexion-dashboard
 
       - name: Publish to Cloudflare Pages
         if: ${{ (secrets.CF_API_TOKEN || secrets.CLOUDFLARE_API_TOKEN) && (secrets.CF_ACCOUNT_ID || secrets.CLOUDFLARE_ACCOUNT_ID) }}
@@ -38,10 +46,10 @@ jobs:
         with:
           apiToken: ${{ secrets.CF_API_TOKEN || secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CF_ACCOUNT_ID || secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: solarenergy-5h5
-          directory: dist
+          projectName: codexion-dashboard
+          directory: projetos-separados/codexion-dashboard/dist
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref == 'refs/heads/cursor/landing-page-bella-vista-7d69' && 'cursor-landing-page-bella-vi' || github.ref == 'refs/heads/main' && 'main' || github.ref_name }}
+          branch: ${{ github.ref == 'refs/heads/main' && 'main' || 'dev' }}
           wranglerVersion: '3'
 
       - name: Skip Cloudflare publish (missing secrets)

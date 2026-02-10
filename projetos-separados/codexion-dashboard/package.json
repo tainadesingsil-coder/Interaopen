@@ -11,8 +11,8 @@
     "lint": "next lint",
     "assets:download": "node scripts/download-images.js",
     "assets:optimize": "node scripts/optimize-images.mjs",
-    "deploy:cf": "wrangler pages deploy dist --project-name=solarenergy-5h5 --branch=production",
-    "deploy:cf:preview": "wrangler pages deploy dist --project-name=solarenergy-5h5 --branch=preview"
+    "deploy:cf": "wrangler pages deploy dist --project-name=codexion-dashboard --branch=main",
+    "deploy:cf:preview": "wrangler pages deploy dist --project-name=codexion-dashboard --branch=dev"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",
