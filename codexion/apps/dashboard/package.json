@@ -1,16 +1,14 @@
 {
-  "name": "solar-energy",
+  "name": "codexion-dashboard",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 3000",
     "build": "next build",
     "postbuild": "rm -rf dist && cp -R out dist",
-    "start": "next start",
+    "start": "npx serve@latest -s dist -l 3000",
     "lint": "next lint",
-    "assets:download": "node scripts/download-images.js",
-    "assets:optimize": "node scripts/optimize-images.mjs",
     "deploy:cf": "wrangler pages deploy dist --project-name=codexion-dashboard --branch=main",
     "deploy:cf:preview": "wrangler pages deploy dist --project-name=codexion-dashboard --branch=dev"
   },
@@ -26,6 +24,7 @@
     "react-dom": "^19.1.1",
     "recharts": "^3.7.0",
     "sonner": "^2.0.7",
+    "swr": "^2.4.0",
     "tailwind-merge": "^3.4.0"
   },
   "devDependencies": {

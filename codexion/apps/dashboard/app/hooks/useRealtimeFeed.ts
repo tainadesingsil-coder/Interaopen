@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import useSWR from 'swr';
 
 import { mockEvents } from '@/src/mock/events';
 import type { EventAction, EventType, FeedEvent } from '@/src/mock/types';
@@ -186,11 +187,30 @@ function parseIncomingEvent(payload: unknown): FeedEvent | null {
 
 export function useRealtimeFeed(): UseRealtimeFeedResult {
   const wsRef = useRef<WebSocket | null>(null);
-  const [events, setEvents] = useState<FeedEvent[]>(mockEvents);
-  const [connectionState, setConnectionState] = useState<ConnectionState>('mock');
-  const [loading, setLoading] = useState(true);
+  const [events, setEvents] = useState<FeedEvent[]>(() => {
+    if (process.env.NEXT_PUBLIC_EDGE_WS_URL || process.env.NEXT_PUBLIC_EDGE_API_URL) {
+      return [];
+    }
+    return mockEvents;
+  });
+  const [connectionState, setConnectionState] = useState<ConnectionState>(() => {
+    if (process.env.NEXT_PUBLIC_EDGE_WS_URL || process.env.NEXT_PUBLIC_EDGE_API_URL) {
+      return 'connecting';
+    }
+    return 'mock';
+  });
+  const [loading, setLoading] = useState(() =>
+    Boolean(process.env.NEXT_PUBLIC_EDGE_WS_URL || process.env.NEXT_PUBLIC_EDGE_API_URL)
+  );
   const [error, setError] = useState<string | null>(null);
   const [offlineMode, setOfflineMode] = useState(false);
+
+  const apiBase = useMemo(() => {
+    if (typeof window === 'undefined') {
+      return '';
+    }
+    return process.env.NEXT_PUBLIC_EDGE_API_URL || '';
+  }, []);
 
   const wsUrl = useMemo(() => {
     if (typeof window === 'undefined') {
@@ -202,10 +222,72 @@ export function useRealtimeFeed(): UseRealtimeFeedResult {
     return null;
   }, []);
 
+  const feedKey = apiBase ? `${apiBase}/feed?limit=50` : null;
+  const {
+    data: feedData,
+    error: feedError,
+    isLoading: feedLoading,
+  } = useSWR(
+    feedKey,
+    async (url: string) => {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`EDGE feed respondeu ${response.status}`);
+      }
+      return response.json() as Promise<{ items?: unknown[] }>;
+    },
+    {
+      refreshInterval: 2000,
+      revalidateOnFocus: false,
+    }
+  );
+
+  useEffect(() => {
+    if (!feedData || !Array.isArray(feedData.items)) {
+      return;
+    }
+    const incoming = feedData.items
+      .map((item) => parseIncomingEvent(item))
+      .filter((item): item is FeedEvent => Boolean(item));
+
+    if (incoming.length === 0) {
+      return;
+    }
+
+    setEvents((previous) => {
+      const byId = new Map<string, FeedEvent>();
+      for (const item of [...incoming, ...previous]) {
+        byId.set(item.id, item);
+      }
+      return Array.from(byId.values()).slice(0, 300);
+    });
+
+    if (!wsUrl) {
+      setConnectionState('online');
+      setError(null);
+      setLoading(false);
+    }
+  }, [feedData, wsUrl]);
+
+  useEffect(() => {
+    if (!feedError || wsUrl) {
+      return;
+    }
+    setConnectionState('error');
+    setError('Falha ao carregar feed do EDGE. Exibindo feed local.');
+    setLoading(false);
+    setEvents((previous) => (previous.length > 0 ? previous : mockEvents));
+  }, [feedError, wsUrl]);
+
   useEffect(() => {
     if (!wsUrl) {
-      setConnectionState('mock');
-      setLoading(false);
+      if (apiBase) {
+        setConnectionState('connecting');
+        setLoading(true);
+      } else {
+        setConnectionState('mock');
+        setLoading(false);
+      }
       return;
     }
 
@@ -271,7 +353,14 @@ export function useRealtimeFeed(): UseRealtimeFeedResult {
       ws.close();
       wsRef.current = null;
     };
-  }, [wsUrl]);
+  }, [apiBase, wsUrl]);
+
+  useEffect(() => {
+    if (wsUrl || !apiBase) {
+      return;
+    }
+    setLoading(feedLoading);
+  }, [apiBase, feedLoading, wsUrl]);
 
   const pushLocalEvent = (event: FeedEvent) => {
     setEvents((previous) => [event, ...previous].slice(0, 300));

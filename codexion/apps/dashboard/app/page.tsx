@@ -13,9 +13,9 @@ import { ContextPanel } from '@/app/components/console/ContextPanel';
 import { Timeline } from '@/app/components/console/Timeline';
 import { Toaster } from '@/app/components/ui/sonner';
 import { useBluetoothWatch } from '@/app/hooks/useBluetoothWatch';
+import { useCommandQueue } from '@/app/hooks/useCommandQueue';
 import { useEdgeWatchSession } from '@/app/hooks/useEdgeWatchSession';
 import { useRealtimeFeed } from '@/app/hooks/useRealtimeFeed';
-import { mockCommands } from '@/src/mock/commands';
 import { mockCondominiums } from '@/src/mock/condominiums';
 import type {
   CommandItem,
@@ -219,11 +219,12 @@ export default function Page() {
     'emergency',
   ]);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
-  const [commands, setCommands] = useState<CommandItem[]>(mockCommands);
   const [edgePingMs, setEdgePingMs] = useState(31);
   const [confirmIntent, setConfirmIntent] = useState<ConfirmationIntent>(null);
 
   const edgeWatch = useEdgeWatchSession();
+  const commandQueue = useCommandQueue();
+  const commands = commandQueue.commands;
 
   const bluetooth = useBluetoothWatch({
     onConnected: async ({ device_id, device_name }) => {
@@ -266,7 +267,6 @@ export default function Page() {
     loading,
     error,
     offlineMode,
-    pushLocalEvent,
     clearFeed,
   } = useRealtimeFeed();
 
@@ -444,82 +444,93 @@ export default function Page() {
       ? bluetooth.batteryLevel
       : edgeWatch.activeSession?.battery_level || null;
 
-  const enqueueCommandExecution = (
-    commandTemplate: Pick<
-      CommandItem,
-      'condominiumId' | 'type' | 'target' | 'actor' | 'notes'
-    >,
-    eventContext?: {
-      sourceEvent: FeedEvent;
-      action: EventAction;
+  const edgeApiEnabled = edgeApiUrl.length > 0;
+
+  const edgePostJson = async (path: string, body: unknown) => {
+    if (!edgeApiEnabled) {
+      throw new Error('EDGE API nao configurada (NEXT_PUBLIC_EDGE_API_URL).');
     }
-  ) => {
-    const commandId = randomId('cmd');
-    const timestamp = getCurrentTimeLabel();
-    const base: CommandItem = {
-      id: commandId,
-      condominiumId: commandTemplate.condominiumId,
-      type: commandTemplate.type,
-      target: commandTemplate.target,
-      timestamp,
-      status: 'pending',
-      actor: commandTemplate.actor,
-      notes: commandTemplate.notes,
-    };
-
-    setCommands((previous) => [base, ...previous].slice(0, 80));
-    toast.message(`Comando enfileirado: ${base.type}`);
-
-    window.setTimeout(() => {
-      setCommands((previous) =>
-        previous.map((item) =>
-          item.id === commandId ? { ...item, status: 'running' } : item
-        )
-      );
-    }, 350);
-
-    window.setTimeout(() => {
-      const success = Math.random() > 0.16;
-      const finalStatus: CommandItem['status'] = success ? 'success' : 'fail';
-      setCommands((previous) =>
-        previous.map((item) =>
-          item.id === commandId ? { ...item, status: finalStatus } : item
-        )
-      );
-
-      if (eventContext) {
-        pushLocalEvent(
-          eventFromAction(
-            eventContext.sourceEvent,
-            eventContext.action,
-            success ? 'success' : 'fail'
-          )
-        );
-      }
-      if (success) {
-        toast.success(`Comando ${base.type} concluido`);
-      } else {
-        toast.error(`Comando ${base.type} falhou`);
-      }
-    }, 1250);
+    const response = await fetch(`${edgeApiUrl}${path}`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    });
+    if (!response.ok) {
+      const text = await response.text().catch(() => '');
+      throw new Error(`EDGE ${path} respondeu ${response.status}${text ? `: ${text}` : ''}`);
+    }
+    try {
+      return await response.json();
+    } catch {
+      return null;
+    }
   };
 
-  const executeEventAction = (
+  const handleApprove = async (eventId: string, target: 'main_gate' | 'service_gate') => {
+    await edgePostJson('/actions/access/approve', {
+      intercom_event_id: eventId,
+      target,
+    });
+  };
+
+  const handleDeny = async (eventId: string) => {
+    await edgePostJson('/actions/access/deny', {
+      intercom_event_id: eventId,
+    });
+  };
+
+  const handleEmergency = async (reason: string) => {
+    await edgePostJson('/actions/emergency/lockdown', {
+      reason: reason || 'manual_lockdown',
+      scope: 'all_gates',
+    });
+  };
+
+  const handleReplay = async (commandId: string) => {
+    await edgePostJson('/commands/replay', {
+      command_id: commandId,
+    });
+  };
+
+  const executeEventAction = async (
     event: FeedEvent,
     action: EventAction,
     reason: string,
     source: 'timeline' | 'context'
   ) => {
-    const template = commandTemplateFromAction(
-      event,
-      action,
-      reason,
-      selectedCondominiumId
-    );
-    enqueueCommandExecution(template, {
-      sourceEvent: event,
-      action,
-    });
+    try {
+      if (action.type === 'approve') {
+        await handleApprove(event.id, 'main_gate');
+        toast.success('Aprovacao enviada ao EDGE');
+      } else if (action.type === 'open_gate') {
+        await handleApprove(event.id, 'service_gate');
+        toast.success('Abertura enviada ao EDGE');
+      } else if (action.type === 'deny') {
+        await handleDeny(event.id);
+        toast.message('Recusa enviada ao EDGE');
+      } else if (action.type === 'create_incident') {
+        await handleEmergency(reason || 'incident');
+        toast.warning('Emergencia enviada ao EDGE');
+      } else if (action.type === 'acknowledge') {
+        toast.message('Evento reconhecido');
+        return;
+      } else if (action.type === 'view_camera') {
+        toast.message('Camera: integracao pendente');
+        return;
+      } else {
+        toast.message('Acao nao integrada');
+        return;
+      }
+
+      await commandQueue.mutate();
+    } catch (unknownError) {
+      const message =
+        unknownError instanceof Error ? unknownError.message : 'Falha ao acionar EDGE.';
+      toast.error(message);
+    }
+
     if (source === 'timeline') {
       setSelectedEventId(event.id);
     }
@@ -530,7 +541,7 @@ export default function Page() {
     if (!action) {
       return;
     }
-    const requireReason = Boolean(action.critical && event.severity === 'critical');
+    const requireReason = Boolean(action.critical || event.severity === 'critical');
     if (requireReason) {
       setConfirmIntent({
         kind: 'event_action',
@@ -541,7 +552,7 @@ export default function Page() {
       });
       return;
     }
-    executeEventAction(event, action, '', 'timeline');
+    void executeEventAction(event, action, '', 'timeline');
   };
 
   const handleContextAction = (
@@ -559,22 +570,17 @@ export default function Page() {
   };
 
   const handleRetryFailed = (command: CommandItem) => {
-    setCommands((previous) =>
-      previous.map((item) =>
-        item.id === command.id ? { ...item, status: 'running' } : item
-      )
-    );
-    toast.message(`Retry enviado para ${command.type}`);
-    window.setTimeout(() => {
-      const success = Math.random() > 0.22;
-      setCommands((previous) =>
-        previous.map((item) =>
-          item.id === command.id
-            ? { ...item, status: success ? 'success' : 'fail' }
-            : item
-        )
-      );
-    }, 900);
+    void (async () => {
+      try {
+        await handleReplay(command.id);
+        toast.message(`Replay enviado: ${command.type}`);
+        await commandQueue.mutate();
+      } catch (unknownError) {
+        const message =
+          unknownError instanceof Error ? unknownError.message : 'Falha ao reenfileirar comando.';
+        toast.error(message);
+      }
+    })();
   };
 
   const toggleFilter = (type: EventType) => {
@@ -614,35 +620,24 @@ export default function Page() {
       return;
     }
     if (confirmIntent.kind === 'emergency') {
-      const emergencyEvent: FeedEvent = {
-        id: randomId('evt-emg'),
-        condominiumId: selectedCondominiumId,
-        type: 'emergency',
-        severity: 'critical',
-        title: 'Modo emergencia solicitado',
-        description: 'Protocolo de contingencia iniciado pela portaria.',
-        tower: 'Condominio',
-        unit: 'GLOBAL',
-        timestamp: getCurrentTimeLabel(),
-        payload: {
-          reason: reason || 'sem motivo informado',
-        },
-        actions: [{ type: 'acknowledge', label: 'Reconhecer' }],
-      };
-      pushLocalEvent(emergencyEvent);
-      enqueueCommandExecution({
-        condominiumId: selectedCondominiumId,
-        type: 'emergency.lockdown',
-        target: 'all_gates',
-        actor: 'Operador Portaria',
-        notes: reason || 'Ativacao manual',
-      });
-      toast.warning('Modo emergencia acionado');
+      void (async () => {
+        try {
+          await handleEmergency(reason);
+          toast.warning('Modo emergencia acionado no EDGE');
+          await commandQueue.mutate();
+        } catch (unknownError) {
+          const message =
+            unknownError instanceof Error
+              ? unknownError.message
+              : 'Falha ao acionar modo emergencia.';
+          toast.error(message);
+        }
+      })();
       setConfirmIntent(null);
       return;
     }
 
-    executeEventAction(
+    void executeEventAction(
       confirmIntent.event,
       confirmIntent.action,
       reason,
