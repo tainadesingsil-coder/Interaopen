@@ -30,6 +30,6 @@ export type ShowcaseItem = {
   label: string;
   title: string;
   desc: string;
-  details: ShowcaseDetail[];
-  images: string[];
+  details: ReadonlyArray<ShowcaseDetail>;
+  images: ReadonlyArray<string>;
 };

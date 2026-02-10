@@ -12,8 +12,8 @@ type Props = {
   label: string;
   title: string;
   desc: string;
-  images: string[];
-  details: ShowcaseDetail[];
+  images: ReadonlyArray<string>;
+  details: ReadonlyArray<ShowcaseDetail>;
   index: number;
   detailsOpenLabel: string;
   detailsCloseLabel: string;

@@ -10,7 +10,7 @@ type Props = {
   label: string;
   title: string;
   desc: string;
-  details: ShowcaseDetail[];
+  details: ReadonlyArray<ShowcaseDetail>;
   detailsCloseLabel: string;
   dialogLabel: string;
 };
