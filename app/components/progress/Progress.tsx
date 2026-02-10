@@ -1,6 +1,7 @@
 'use client';
 
-import { motion, useReducedMotion } from 'framer-motion';
+import { motion } from 'framer-motion';
+import { usePrefersReducedMotion } from '@/app/hooks/usePrefersReducedMotion';
 import type { Translation } from '@/app/lib/translations';
 import { progressImages } from '@/app/lib/constants';
 import { ProgressGallery } from '@/app/components/progress/ProgressGallery';
@@ -10,7 +11,7 @@ type Props = {
 };
 
 export const Progress = ({ copy }: Props) => {
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = usePrefersReducedMotion();
 
   return (
     <section id='obra' className='section-shell section-alt section-glow section-divider scroll-mt-24'>

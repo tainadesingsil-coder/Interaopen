@@ -1,6 +1,7 @@
 'use client';
 
-import { motion, useReducedMotion } from 'framer-motion';
+import { motion } from 'framer-motion';
+import { usePrefersReducedMotion } from '@/app/hooks/usePrefersReducedMotion';
 import type { Translation } from '@/app/lib/translations';
 import { LocationMap } from '@/app/components/location/LocationMap';
 
@@ -10,7 +11,7 @@ type Props = {
 };
 
 export const Location = ({ copy, mapTitle }: Props) => {
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = usePrefersReducedMotion();
 
   return (
     <section

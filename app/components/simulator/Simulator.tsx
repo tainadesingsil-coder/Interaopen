@@ -1,9 +1,10 @@
 'use client';
 
-import { motion, useReducedMotion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import type { Locale } from '@/app/types';
 import type { Translation } from '@/app/lib/translations';
 import { simulatorPresets } from '@/app/lib/constants';
+import { usePrefersReducedMotion } from '@/app/hooks/usePrefersReducedMotion';
 import { useSimulator } from '@/app/hooks/useSimulator';
 import { SimulatorPresets } from '@/app/components/simulator/SimulatorPresets';
 import { SimulatorResults } from '@/app/components/simulator/SimulatorResults';
@@ -17,7 +18,7 @@ type Props = {
 };
 
 export const Simulator = ({ locale, copy, pdfCopy, whatsappLink }: Props) => {
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = usePrefersReducedMotion();
   const shouldReduceMotion = !!reduceMotion;
   const {
     values,

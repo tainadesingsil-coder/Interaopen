@@ -1,10 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import type { ShowcaseDetail } from '@/app/types';
 import { blurDataUrl } from '@/app/lib/constants';
 import { useGallery } from '@/app/hooks/useGallery';
+import { usePrefersReducedMotion } from '@/app/hooks/usePrefersReducedMotion';
 import { ShowcaseModal } from '@/app/components/showcase/ShowcaseModal';
 import { OptimizedImage } from '@/app/components/shared/OptimizedImage';
 
@@ -31,7 +32,7 @@ export const ShowcaseCard = ({
   detailsCloseLabel,
   dialogLabel,
 }: Props) => {
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = usePrefersReducedMotion();
   const shouldReduceMotion = !!reduceMotion;
   const [isOpen, setIsOpen] = useState(false);
   const { index: imageIndex } = useGallery({
