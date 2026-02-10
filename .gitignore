@@ -32,13 +32,11 @@ node_modules/
 out/
 dist/
 *.local
+.env*.local
 
 # Do not ignore app lib folder
 !app/lib/
 !app/lib/**
-
-# Allow committed env for this repo
-!.env.local
 
 # PyInstaller
 #  Usually these files are written by a python script from a template

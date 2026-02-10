@@ -19,14 +19,10 @@ O build gera `out/` e copia para `dist/` via script `postbuild`.
 
 ## ✅ Variáveis de ambiente
 
-Crie o arquivo `.env.local` com:
+Crie o arquivo `.env.local` com base no `.env.example`:
 
 ```
-NEXT_PUBLIC_FORMSPREE_ID=mgolwpwv
-NEXT_PUBLIC_WHATSAPP_NUMBER=557399833471
-NEXT_PUBLIC_SITE_URL=https://bellavistaresidence.com.br
-NEXT_PUBLIC_MAP_LOCATION_URL=https://maps.app.goo.gl/K6etpoksT7F9u2an8
-NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=dwedcl97k
+cp .env.example .env.local
 ```
 
 ## ✅ Imagens locais

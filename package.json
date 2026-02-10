@@ -9,7 +9,7 @@
     "postbuild": "rm -rf dist && cp -R out dist",
     "start": "next start",
     "lint": "next lint",
-    "assets:download": "bash scripts/download-assets.sh",
+    "assets:download": "node scripts/download-images.js",
     "assets:optimize": "node scripts/optimize-images.mjs",
     "deploy:cf": "wrangler pages deploy dist --project-name=solarenergy-5h5 --branch=production",
     "deploy:cf:preview": "wrangler pages deploy dist --project-name=solarenergy-5h5 --branch=preview"
