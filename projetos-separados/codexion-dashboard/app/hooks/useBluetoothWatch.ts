@@ -4,6 +4,17 @@ import { useEffect, useMemo, useState } from 'react';
 
 type BluetoothState = 'idle' | 'connecting' | 'connected' | 'disconnected' | 'error';
 
+type DeviceLike = {
+  name?: string | null;
+  gatt?: {
+    connected?: boolean;
+    connect: () => Promise<unknown>;
+    disconnect: () => void;
+  } | null;
+  addEventListener?: (event: string, handler: () => void) => void;
+  removeEventListener?: (event: string, handler: () => void) => void;
+};
+
 const VVFIT_SERVICE_UUID_CANDIDATES = [
   '0000fee0-0000-1000-8000-00805f9b34fb',
   '0000180d-0000-1000-8000-00805f9b34fb',
@@ -19,7 +30,7 @@ export function useBluetoothWatch() {
   const [state, setState] = useState<BluetoothState>('idle');
   const [deviceName, setDeviceName] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [device, setDevice] = useState<BluetoothDevice | null>(null);
+  const [device, setDevice] = useState<DeviceLike | null>(null);
 
   const supported = useMemo(
     () => typeof navigator !== 'undefined' && Boolean((navigator as any).bluetooth),
@@ -35,9 +46,9 @@ export function useBluetoothWatch() {
       setState('disconnected');
     };
 
-    device.addEventListener('gattserverdisconnected', onDisconnected);
+    device.addEventListener?.('gattserverdisconnected', onDisconnected);
     return () => {
-      device.removeEventListener('gattserverdisconnected', onDisconnected);
+      device.removeEventListener?.('gattserverdisconnected', onDisconnected);
     };
   }, [device]);
 
@@ -52,12 +63,12 @@ export function useBluetoothWatch() {
       setState('connecting');
       setError(null);
 
-      const requestOptions: RequestDeviceOptions = {
+      const requestOptions = {
         acceptAllDevices: true,
         optionalServices: VVFIT_SERVICE_UUID_CANDIDATES,
       };
 
-      const selected = await navigator.bluetooth.requestDevice(requestOptions);
+      const selected = await (navigator as any).bluetooth.requestDevice(requestOptions);
       const selectedName = selected.name || 'Dispositivo sem nome';
       const normalized = normalizeName(selected.name);
 
