@@ -17,6 +17,8 @@ apps/edge-gateway/
   .gitignore
   src/
     adapters/
+      ble/
+        beaconScanner.js
       locks/
         ILockProvider.js
         MockLockProvider.js
@@ -24,6 +26,8 @@ apps/edge-gateway/
         index.js
     migrations.js
     command-queue.js
+    core/
+      patrolService.js
   db/
     migrations/
       001_init.sql
@@ -32,8 +36,10 @@ apps/edge-gateway/
     migrate.js
     seed.js
   tests/
+    beacon-scanner.test.js
     command-queue.test.js
     lock-provider.test.js
+    patrol-service.test.js
   data/
     .gitkeep
 ```
@@ -75,6 +81,8 @@ OFFLINE_MODE=false
 LOCK_PROVIDER=mock
 MOCK_LOCK_DELAY_MS=400
 MOCK_LOCK_SUCCESS_RATE=0.9
+BLE_SCANNER_ENABLED=false
+BLE_ALLOW_DUPLICATES=true
 COMMAND_MAX_RETRIES=5
 RETRY_BASE_MS=1000
 RETRY_MAX_MS=30000
@@ -159,6 +167,48 @@ Body para replay de um comando:
 
 Sem body (ou sem `command_id`) faz replay em lote de todos `failed`.
 
+### `POST /patrol/routes`
+Configura rota de ronda com beacons BLE.
+
+Body:
+
+```json
+{
+  "route_id": "rota-a-noite",
+  "name": "Ronda Noturna Torre A",
+  "user_id": "guard-01",
+  "rssi_threshold": -68,
+  "confirm_readings": 3,
+  "debounce_seconds": 180,
+  "beacons": [
+    {
+      "uuid": "fda50693-a4e2-4fb1-afcf-c6eb07647825",
+      "major": 100,
+      "minor": 7,
+      "name": "Portao Norte"
+    }
+  ]
+}
+```
+
+### `POST /patrol/checkin/manual`
+Fallback para registrar checkin manual quando BLE nao estiver disponivel.
+
+Body:
+
+```json
+{
+  "route_id": "rota-a-noite",
+  "user_id": "guard-01",
+  "uuid": "fda50693-a4e2-4fb1-afcf-c6eb07647825",
+  "major": 100,
+  "minor": 7,
+  "rssi": -61
+}
+```
+
+Regra de debounce tambem se aplica ao checkin manual.
+
 ## WebSocket
 
 Conectar em:
@@ -174,6 +224,10 @@ Canais emitidos:
 - `commands.snapshot` (snapshot inicial dos comandos),
 - `gateway.ready` (handshake inicial).
 
+Eventos de ronda emitidos em tempo real:
+- `patrol.route.configured`
+- `patrol.checkin`
+
 ## Migrations e Seed manual
 
 ```bash
@@ -188,10 +242,12 @@ npm test
 ```
 
 Testes cobrem:
+- parse de iBeacon via manufacturer data,
 - backoff exponencial,
 - transicoes de status da fila,
 - comportamento local-only para comandos criticos em modo offline,
-- adapter de fechadura mock/relay.
+- adapter de fechadura mock/relay,
+- logica de ronda com 3 leituras + debounce de 3 minutos.
 
 ## Banco (SQLite)
 
@@ -204,3 +260,7 @@ apps/edge-gateway/data/edge-gateway.sqlite
 Tabelas:
 - `events(id, type, payload_json, created_at)`
 - `commands(id, type, payload_json, status, retry_count, max_retries, next_attempt_at, last_error, created_at, updated_at)`
+- `devices(id, type, uuid, major, minor, ...)`
+- `patrol_routes(...)`
+- `patrol_route_devices(route_id, device_id)`
+- `patrol_checkins(...)`

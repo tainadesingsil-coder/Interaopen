@@ -9,6 +9,8 @@ const { randomUUID } = require('crypto');
 
 const { runMigrations } = require('./src/migrations');
 const { createLockProviderFromEnv } = require('./src/adapters/locks');
+const { BeaconScanner } = require('./src/adapters/ble/beaconScanner');
+const { PatrolService } = require('./src/core/patrolService');
 const {
   MAX_RETRIES_DEFAULT,
   RETRY_BASE_MS_DEFAULT,
@@ -32,6 +34,10 @@ const RETRY_MAX_MS = Number(process.env.RETRY_MAX_MS || RETRY_MAX_MS_DEFAULT);
 const QUEUE_POLL_MS = Number(process.env.QUEUE_POLL_MS || 1000);
 const LOCAL_FAILURE_RATE = Number(process.env.LOCAL_FAILURE_RATE || 0.08);
 const REMOTE_FAILURE_RATE = Number(process.env.REMOTE_FAILURE_RATE || 0.2);
+const BLE_SCANNER_ENABLED =
+  String(process.env.BLE_SCANNER_ENABLED || 'false') === 'true';
+const BLE_ALLOW_DUPLICATES =
+  String(process.env.BLE_ALLOW_DUPLICATES || 'true') !== 'false';
 
 const COMMAND_STATUSES = ['pending', 'dispatched', 'success', 'failed'];
 
@@ -418,6 +424,31 @@ function notifyCommand(command) {
   broadcast('command.status', command);
 }
 
+const patrolService = new PatrolService({
+  db,
+  createEvent,
+  notifyEvent,
+  logger: console,
+});
+
+const beaconScanner = new BeaconScanner({
+  logger: console,
+  allowDuplicates: BLE_ALLOW_DUPLICATES,
+});
+
+beaconScanner.on('beacon', (reading) => {
+  try {
+    const result = patrolService.processBeaconReading(reading);
+    if (result.checkins?.length > 0) {
+      console.log(
+        `[BLE] checkins gerados: ${result.checkins.filter((item) => item.created).length}`
+      );
+    }
+  } catch (error) {
+    console.error('Erro processando leitura BLE:', error);
+  }
+});
+
 function emitCommandEvent(command, stage, extras = {}) {
   const event = createEvent(`${command.type}.${stage}`, {
     command_id: command.id,
@@ -697,6 +728,8 @@ app.get('/health', (_request, response) => {
     db_ok: dbOk,
     ws_clients_count: wsClients.size,
     lock_provider: lockProvider.constructor?.name || 'unknown',
+    ble_scanner_enabled: BLE_SCANNER_ENABLED,
+    ble_scanner_running: beaconScanner.isRunning(),
     time: nowIso(),
   });
 });
@@ -751,6 +784,51 @@ app.post('/commands/replay', (request, response) => {
     commands: replayed,
     event: replayEvent,
   });
+});
+
+app.post('/patrol/routes', (request, response) => {
+  try {
+    const configured = patrolService.upsertRoute(request.body || {});
+    const event = createEvent('patrol.route.configured', {
+      route: configured.route,
+      beacons: configured.beacons,
+    });
+    notifyEvent(event);
+
+    response.status(201).json({
+      ok: true,
+      ...configured,
+      event,
+    });
+  } catch (error) {
+    response.status(422).json({
+      error: String(error?.message || 'invalid patrol route payload'),
+    });
+  }
+});
+
+app.post('/patrol/checkin/manual', (request, response) => {
+  try {
+    const body = request.body || {};
+    const beacon = body.beacon && typeof body.beacon === 'object' ? body.beacon : {};
+    const result = patrolService.manualCheckin({
+      route_id: body.route_id,
+      user_id: body.user_id,
+      uuid: body.uuid ?? beacon.uuid,
+      major: body.major ?? beacon.major,
+      minor: body.minor ?? beacon.minor,
+      rssi: body.rssi,
+    });
+
+    response.status(result.created ? 201 : 200).json({
+      ok: true,
+      ...result,
+    });
+  } catch (error) {
+    response.status(422).json({
+      error: String(error?.message || 'invalid manual checkin payload'),
+    });
+  }
 });
 
 app.post('/webhooks/intercom', (request, response) => {
@@ -864,7 +942,28 @@ server.listen(PORT, () => {
   console.log(`SQLite DB: ${DB_PATH}`);
   console.log(`OFFLINE_MODE: ${OFFLINE_MODE}`);
   console.log(`Lock provider: ${lockProvider.constructor?.name || 'unknown'}`);
+  console.log(`BLE scanner enabled: ${BLE_SCANNER_ENABLED}`);
   console.log(
     `Fila local-first pronta. Status atuais: ${JSON.stringify(counts)}`
   );
+
+  if (BLE_SCANNER_ENABLED) {
+    beaconScanner.start().catch((error) => {
+      console.error('Falha ao iniciar BLE scanner:', error);
+    });
+  }
 });
+
+async function shutdown() {
+  try {
+    await beaconScanner.stop();
+  } catch (_error) {
+    // Ignore scanner shutdown failures.
+  }
+  server.close(() => {
+    process.exit(0);
+  });
+}
+
+process.on('SIGINT', shutdown);
+process.on('SIGTERM', shutdown);
