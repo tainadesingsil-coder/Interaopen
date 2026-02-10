@@ -40,18 +40,14 @@ function runMigrations(db, migrationDir) {
     VALUES (?, ?)
 `
   );
-  const applyMigration = db.transaction((file, sql) => {
-    db.exec(sql);
-    insertAppliedStmt.run(file, nowIso());
-  });
-
   const appliedNow = [];
   for (const file of files) {
     if (applied.has(file)) {
       continue;
     }
     const sql = fs.readFileSync(path.join(migrationDir, file), 'utf8');
-    applyMigration(file, sql);
+    db.exec(sql);
+    insertAppliedStmt.run(file, nowIso());
     appliedNow.push(file);
   }
   return appliedNow;
