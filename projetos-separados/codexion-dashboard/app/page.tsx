@@ -672,9 +672,9 @@ export default function Page() {
     toast.message('Sessao ADM encerrada');
   };
 
-  if (!authenticated) {
-    return (
-      <>
+  return (
+    <>
+      {!authenticated ? (
         <AdminLogin
           username={adminUser}
           password={adminPass}
@@ -684,120 +684,117 @@ export default function Page() {
           onPasswordChange={setAdminPass}
           onSubmit={handleLogin}
         />
-        <Toaster />
-      </>
-    );
-  }
-
-  return (
-    <MotionConfig reducedMotion='user'>
-      <div className='min-h-screen bg-[#070a0d] text-zinc-100'>
-        <CommandBar
-          adminName={adminUser || 'ADM'}
-          condominiums={mockCondominiums.map((item) => item.name)}
-          selectedCondominium={selectedCondominium.name}
-          onSelectCondominium={(value) => {
-            const match = mockCondominiums.find((item) => item.name === value);
-            if (!match) {
-              return;
-            }
-            setSelectedCondominiumId(match.id);
-            setSelectedEventId(null);
-          }}
-          edgeOnline={edgeOnline}
-          edgePingMs={edgePingMs}
-          bleScanning={bleScanning}
-          activeAlerts={activeAlerts}
-          searchQuery={searchQuery}
-          onSearchQueryChange={setSearchQuery}
-          bluetoothSupported={bluetooth.supported}
-          bluetoothConnected={watchConnected}
-          bluetoothConnecting={bluetooth.connecting}
-          bluetoothDeviceName={watchName}
-          bluetoothHeartbeatAt={watchHeartbeatLabel}
-          bluetoothHr={watchHr}
-          bluetoothBattery={watchBattery}
-          onBluetoothToggle={handleBluetoothToggle}
-          onEmergencyRequest={() => setConfirmIntent({ kind: 'emergency' })}
-        />
-
-        <main id='main-content' className='mx-auto max-w-[1800px] px-3 pb-[140px] pt-[104px]'>
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.24 }}
-          >
-            <CondominiumOverview
-              condominium={selectedCondominium}
-              watchTelemetry={{
-                connected: watchConnected,
-                deviceName: watchName,
-                hr: watchHr,
-                spo2: edgeWatch.latestSpo2,
-                steps: bluetooth.connected ? bluetooth.latestSteps : edgeWatch.latestSteps,
-                battery: watchBattery,
-                lastSeenAt: watchHeartbeatLabel,
+      ) : (
+        <MotionConfig reducedMotion='user'>
+          <div className='min-h-screen bg-[#070a0d] text-zinc-100'>
+            <CommandBar
+              adminName={adminUser || 'ADM'}
+              condominiums={mockCondominiums.map((item) => item.name)}
+              selectedCondominium={selectedCondominium.name}
+              onSelectCondominium={(value) => {
+                const match = mockCondominiums.find((item) => item.name === value);
+                if (!match) {
+                  return;
+                }
+                setSelectedCondominiumId(match.id);
+                setSelectedEventId(null);
               }}
-            />
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.24 }}
-            className='grid gap-2 lg:grid-cols-[1.5fr_1fr]'
-          >
-            <Timeline
-              events={filteredEvents}
-              selectedEventId={selectedEventId}
-              activeFilters={activeFilters}
-              loading={loading}
-              error={error}
-              offlineMode={offlineMode}
-              onToggleFilter={toggleFilter}
-              onSelectEvent={(event) => setSelectedEventId(event.id)}
-              onAction={handleTimelineAction}
-              onClearFeed={clearFeed}
+              edgeOnline={edgeOnline}
+              edgePingMs={edgePingMs}
+              bleScanning={bleScanning}
+              activeAlerts={activeAlerts}
+              searchQuery={searchQuery}
+              onSearchQueryChange={setSearchQuery}
+              bluetoothSupported={bluetooth.supported}
+              bluetoothConnected={watchConnected}
+              bluetoothConnecting={bluetooth.connecting}
+              bluetoothDeviceName={watchName}
+              bluetoothHeartbeatAt={watchHeartbeatLabel}
+              bluetoothHr={watchHr}
+              bluetoothBattery={watchBattery}
+              onBluetoothToggle={handleBluetoothToggle}
+              onEmergencyRequest={() => setConfirmIntent({ kind: 'emergency' })}
             />
 
-            <ContextPanel
-              selectedEvent={selectedEvent}
-              relatedEvents={relatedEvents}
-              auditTrail={auditTrail}
-              onActionRequest={handleContextAction}
-            />
-          </motion.div>
+            <main id='main-content' className='mx-auto max-w-[1800px] px-3 pb-[140px] pt-[104px]'>
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.24 }}
+              >
+                <CondominiumOverview
+                  condominium={selectedCondominium}
+                  watchTelemetry={{
+                    connected: watchConnected,
+                    deviceName: watchName,
+                    hr: watchHr,
+                    spo2: edgeWatch.latestSpo2,
+                    steps: bluetooth.connected ? bluetooth.latestSteps : edgeWatch.latestSteps,
+                    battery: watchBattery,
+                    lastSeenAt: watchHeartbeatLabel,
+                  }}
+                />
+              </motion.div>
 
-          <div className='mt-2 flex justify-end'>
-            <button
-              type='button'
-              onClick={handleLogout}
-              className='border border-zinc-700 bg-zinc-900 px-2 py-1 text-[11px] uppercase tracking-[0.12em] text-zinc-300 transition hover:bg-zinc-800'
-            >
-              Sair da sessao ADM
-            </button>
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.24 }}
+                className='grid gap-2 lg:grid-cols-[1.5fr_1fr]'
+              >
+                <Timeline
+                  events={filteredEvents}
+                  selectedEventId={selectedEventId}
+                  activeFilters={activeFilters}
+                  loading={loading}
+                  error={error}
+                  offlineMode={offlineMode}
+                  onToggleFilter={toggleFilter}
+                  onSelectEvent={(event) => setSelectedEventId(event.id)}
+                  onAction={handleTimelineAction}
+                  onClearFeed={clearFeed}
+                />
+
+                <ContextPanel
+                  selectedEvent={selectedEvent}
+                  relatedEvents={relatedEvents}
+                  auditTrail={auditTrail}
+                  onActionRequest={handleContextAction}
+                />
+              </motion.div>
+
+              <div className='mt-2 flex justify-end'>
+                <button
+                  type='button'
+                  onClick={handleLogout}
+                  className='border border-zinc-700 bg-zinc-900 px-2 py-1 text-[11px] uppercase tracking-[0.12em] text-zinc-300 transition hover:bg-zinc-800'
+                >
+                  Sair da sessao ADM
+                </button>
+              </div>
+            </main>
+
+            <CommandQueueBar
+              commands={condominiumCommands}
+              onRetryFailed={handleRetryFailed}
+            />
+
+            <ConfirmDialog
+              open={Boolean(confirmIntent)}
+              title={confirmDialogTitle}
+              description={confirmDialogDescription}
+              requireReason={requiresReason(confirmIntent)}
+              danger={isDangerIntent(confirmIntent)}
+              confirmLabel='Confirmar'
+              cancelLabel='Cancelar'
+              onCancel={() => setConfirmIntent(null)}
+              onConfirm={handleConfirmDialog}
+            />
           </div>
-        </main>
+        </MotionConfig>
+      )}
 
-        <CommandQueueBar
-          commands={condominiumCommands}
-          onRetryFailed={handleRetryFailed}
-        />
-
-        <ConfirmDialog
-          open={Boolean(confirmIntent)}
-          title={confirmDialogTitle}
-          description={confirmDialogDescription}
-          requireReason={requiresReason(confirmIntent)}
-          danger={isDangerIntent(confirmIntent)}
-          confirmLabel='Confirmar'
-          cancelLabel='Cancelar'
-          onCancel={() => setConfirmIntent(null)}
-          onConfirm={handleConfirmDialog}
-        />
-
-        <Toaster />
-      </div>
-    </MotionConfig>
+      <Toaster />
+    </>
   );
 }
