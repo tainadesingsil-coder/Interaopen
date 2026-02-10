@@ -6,6 +6,7 @@ import { Badge } from '@/app/components/console/Badge';
 import { SeverityDot } from '@/app/components/console/SeverityDot';
 
 interface CommandBarProps {
+  adminName: string;
   condominiums: string[];
   selectedCondominium: string;
   onSelectCondominium: (value: string) => void;
@@ -15,10 +16,16 @@ interface CommandBarProps {
   activeAlerts: number;
   searchQuery: string;
   onSearchQueryChange: (value: string) => void;
+  bluetoothSupported: boolean;
+  bluetoothConnected: boolean;
+  bluetoothConnecting: boolean;
+  bluetoothDeviceName: string | null;
+  onBluetoothToggle: () => void;
   onEmergencyRequest: () => void;
 }
 
 export function CommandBar({
+  adminName,
   condominiums,
   selectedCondominium,
   onSelectCondominium,
@@ -28,11 +35,21 @@ export function CommandBar({
   activeAlerts,
   searchQuery,
   onSearchQueryChange,
+  bluetoothSupported,
+  bluetoothConnected,
+  bluetoothConnecting,
+  bluetoothDeviceName,
+  onBluetoothToggle,
   onEmergencyRequest,
 }: CommandBarProps) {
   return (
     <header className='fixed inset-x-0 top-0 z-50 border-b border-zinc-800 bg-zinc-950/95 backdrop-blur'>
-      <div className='mx-auto grid max-w-[1800px] grid-cols-1 gap-2 px-3 py-2 lg:grid-cols-[220px_220px_160px_130px_minmax(240px,1fr)_220px] lg:items-center'>
+      <div className='mx-auto grid max-w-[1800px] grid-cols-1 gap-2 px-3 py-2 lg:grid-cols-[150px_220px_220px_190px_130px_minmax(220px,1fr)_180px_220px] lg:items-center'>
+        <div className='border border-zinc-800 bg-zinc-900 px-2 py-1.5'>
+          <p className='text-[10px] uppercase tracking-[0.14em] text-zinc-500'>Sessao</p>
+          <p className='truncate text-xs text-zinc-100'>ADM: {adminName}</p>
+        </div>
+
         <label className='flex items-center gap-2 border border-zinc-800 bg-zinc-900 px-2 py-1.5 text-xs text-zinc-300'>
           <span className='text-[10px] uppercase tracking-[0.14em] text-zinc-500'>
             Condomínio
@@ -68,6 +85,27 @@ export function CommandBar({
             <p className='text-xs text-zinc-100'>{bleScanning ? 'Scanning ON' : 'Scanning OFF'}</p>
           </div>
         </div>
+
+        <button
+          type='button'
+          onClick={onBluetoothToggle}
+          disabled={!bluetoothSupported || bluetoothConnecting}
+          className='border border-zinc-700 bg-zinc-900 px-2 py-1.5 text-left transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50'
+        >
+          <p className='text-[10px] uppercase tracking-[0.14em] text-zinc-500'>Relogio Vvfit</p>
+          <p className='text-xs text-zinc-100'>
+            {!bluetoothSupported
+              ? 'Nao suportado'
+              : bluetoothConnecting
+                ? 'Conectando...'
+                : bluetoothConnected
+                  ? 'Conectado'
+                  : 'Desconectado'}
+          </p>
+          {bluetoothConnected && bluetoothDeviceName ? (
+            <p className='truncate text-[11px] text-zinc-400'>{bluetoothDeviceName}</p>
+          ) : null}
+        </button>
 
         <div className='flex items-center justify-between border border-zinc-800 bg-zinc-900 px-2 py-1.5'>
           <span className='text-[10px] uppercase tracking-[0.14em] text-zinc-500'>Alertas</span>

@@ -17,6 +17,7 @@ export interface EventAction {
 
 export interface FeedEvent {
   id: string;
+  condominiumId: string;
   type: EventType;
   severity: SeverityLevel;
   title: string;
@@ -32,10 +33,21 @@ export type CommandStatus = 'pending' | 'running' | 'success' | 'fail';
 
 export interface CommandItem {
   id: string;
+  condominiumId: string;
   type: string;
   target: string;
   timestamp: string;
   status: CommandStatus;
   actor: string;
   notes?: string;
+}
+
+export interface CondominiumProfile {
+  id: string;
+  name: string;
+  city: string;
+  towers: string[];
+  gates: string[];
+  securityTeam: string[];
+  residentsCount: number;
 }

@@ -4,34 +4,33 @@ import { useEffect, useMemo, useState } from 'react';
 import { MotionConfig, motion } from 'framer-motion';
 import { toast } from 'sonner';
 
+import { AdminLogin } from '@/app/components/console/AdminLogin';
 import { CommandBar } from '@/app/components/console/CommandBar';
 import { CommandQueueBar } from '@/app/components/console/CommandQueueBar';
+import { CondominiumOverview } from '@/app/components/console/CondominiumOverview';
 import { ConfirmDialog } from '@/app/components/console/ConfirmDialog';
 import { ContextPanel } from '@/app/components/console/ContextPanel';
 import { Timeline } from '@/app/components/console/Timeline';
 import { Toaster } from '@/app/components/ui/sonner';
+import { useBluetoothWatch } from '@/app/hooks/useBluetoothWatch';
 import { useRealtimeFeed } from '@/app/hooks/useRealtimeFeed';
 import { mockCommands } from '@/src/mock/commands';
+import { mockCondominiums } from '@/src/mock/condominiums';
 import type {
   CommandItem,
+  CondominiumProfile,
   EventAction,
   EventActionType,
   EventType,
   FeedEvent,
 } from '@/src/mock/types';
 
-const condominiumOptions = [
-  'Residencial Bella Vista',
-  'Condomínio Parque Sul',
-  'Condomínio Atlântico',
-];
-
 const eventTypeLabels: Record<EventType, string> = {
   intercom: 'Interfone',
   access: 'Acesso',
   patrol: 'Ronda',
-  duress: 'Coação',
-  emergency: 'Emergência',
+  duress: 'Coacao',
+  emergency: 'Emergencia',
 };
 
 type ConfirmationIntent =
@@ -86,18 +85,21 @@ function findAction(event: FeedEvent, type: EventActionType): EventAction | null
 function commandTemplateFromAction(
   event: FeedEvent,
   action: EventAction,
-  reason: string
-): Pick<CommandItem, 'type' | 'target' | 'actor' | 'notes'> {
+  reason: string,
+  condominiumId: string
+): Pick<CommandItem, 'condominiumId' | 'type' | 'target' | 'actor' | 'notes'> {
   switch (action.type) {
     case 'approve':
       return {
+        condominiumId,
         type: 'access.approve',
-        target: 'main_gate',
+        target: 'Portao Principal',
         actor: 'Operador Portaria',
         notes: `Interfone ${event.tower} ${event.unit}${reason ? ` | ${reason}` : ''}`,
       };
     case 'deny':
       return {
+        condominiumId,
         type: 'access.deny',
         target: `${event.tower}/${event.unit}`,
         actor: 'Operador Portaria',
@@ -105,28 +107,32 @@ function commandTemplateFromAction(
       };
     case 'open_gate':
       return {
+        condominiumId,
         type: 'access.open_gate',
-        target: 'service_gate',
+        target: 'Portao de Servico',
         actor: 'Operador Portaria',
-        notes: reason || `Solicitação manual ${event.tower}/${event.unit}`,
+        notes: reason || `Solicitacao manual ${event.tower}/${event.unit}`,
       };
     case 'view_camera':
       return {
+        condominiumId,
         type: 'camera.open',
         target: `camera://${event.tower.toLowerCase().replace(/\s+/g, '-')}`,
         actor: 'Operador Portaria',
-        notes: 'Visualização em tempo real',
+        notes: 'Visualizacao em tempo real',
       };
     case 'create_incident':
       return {
+        condominiumId,
         type: 'incident.create',
         target: `${event.tower}/${event.unit}`,
         actor: 'Operador Portaria',
-        notes: reason || 'Ocorrência operacional aberta',
+        notes: reason || 'Ocorrencia operacional aberta',
       };
     case 'acknowledge':
     default:
       return {
+        condominiumId,
         type: 'event.acknowledge',
         target: event.id,
         actor: 'Operador Portaria',
@@ -145,6 +151,7 @@ function eventFromAction(
 
   return {
     id: randomId('evt-local'),
+    condominiumId: event.condominiumId,
     type,
     severity,
     title:
@@ -153,8 +160,8 @@ function eventFromAction(
         : `${action.label} falhou`,
     description:
       status === 'success'
-        ? `Comando concluído para ${event.tower}/${event.unit}.`
-        : `Comando não confirmado para ${event.tower}/${event.unit}.`,
+        ? `Comando concluido para ${event.tower}/${event.unit}.`
+        : `Comando nao confirmado para ${event.tower}/${event.unit}.`,
     tower: event.tower,
     unit: event.unit,
     timestamp: getCurrentTimeLabel(),
@@ -167,8 +174,26 @@ function eventFromAction(
   };
 }
 
+function mapCondominiumById(items: CondominiumProfile[]) {
+  const byId = new Map<string, CondominiumProfile>();
+  for (const item of items) {
+    byId.set(item.id, item);
+  }
+  return byId;
+}
+
+const condominiumById = mapCondominiumById(mockCondominiums);
+
 export default function Page() {
-  const [selectedCondominium, setSelectedCondominium] = useState(condominiumOptions[0]);
+  const [adminUser, setAdminUser] = useState('');
+  const [adminPass, setAdminPass] = useState('');
+  const [authLoading, setAuthLoading] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [authenticated, setAuthenticated] = useState(false);
+
+  const [selectedCondominiumId, setSelectedCondominiumId] = useState(
+    mockCondominiums[0].id
+  );
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilters, setActiveFilters] = useState<EventType[]>([
     'intercom',
@@ -182,6 +207,8 @@ export default function Page() {
   const [edgePingMs, setEdgePingMs] = useState(31);
   const [confirmIntent, setConfirmIntent] = useState<ConfirmationIntent>(null);
 
+  const bluetooth = useBluetoothWatch();
+
   const {
     events,
     connectionState,
@@ -192,6 +219,51 @@ export default function Page() {
     clearFeed,
   } = useRealtimeFeed();
 
+  useEffect(() => {
+    const saved = window.localStorage.getItem('codexion-adm-session');
+    if (saved === 'ok') {
+      setAuthenticated(true);
+      setAdminUser('ADM');
+    }
+  }, []);
+
+  const handleLogin = () => {
+    setAuthLoading(true);
+    setAuthError(null);
+    window.setTimeout(() => {
+      const valid =
+        adminUser.trim().toUpperCase() === 'ADM' &&
+        adminPass.trim() === '123456';
+      if (!valid) {
+        setAuthLoading(false);
+        setAuthError('Credenciais invalidas. Use ADM / 123456.');
+        return;
+      }
+      window.localStorage.setItem('codexion-adm-session', 'ok');
+      setAuthenticated(true);
+      setAuthLoading(false);
+      toast.success('ADM autenticado no console operacional');
+    }, 500);
+  };
+
+  if (!authenticated) {
+    return (
+      <>
+        <AdminLogin
+          username={adminUser}
+          password={adminPass}
+          loading={authLoading}
+          error={authError}
+          onUsernameChange={setAdminUser}
+          onPasswordChange={setAdminPass}
+          onSubmit={handleLogin}
+        />
+        <Toaster />
+      </>
+    );
+  }
+
+  const selectedCondominium = condominiumById.get(selectedCondominiumId) || mockCondominiums[0];
   const edgeOnline = connectionState === 'online' || connectionState === 'mock';
   const bleScanning = edgeOnline && !offlineMode;
 
@@ -212,6 +284,9 @@ export default function Page() {
   const filteredEvents = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     return events.filter((event) => {
+      if (event.condominiumId !== selectedCondominiumId) {
+        return false;
+      }
       if (!activeFilters.includes(event.type)) {
         return false;
       }
@@ -231,7 +306,7 @@ export default function Page() {
         .toLowerCase();
       return haystack.includes(q);
     });
-  }, [events, activeFilters, searchQuery]);
+  }, [events, activeFilters, searchQuery, selectedCondominiumId]);
 
   useEffect(() => {
     if (filteredEvents.length === 0) {
@@ -244,29 +319,34 @@ export default function Page() {
   }, [filteredEvents, selectedEventId]);
 
   const selectedEvent = useMemo(
-    () => events.find((event) => event.id === selectedEventId) || null,
-    [events, selectedEventId]
+    () => filteredEvents.find((event) => event.id === selectedEventId) || null,
+    [filteredEvents, selectedEventId]
   );
 
   const relatedEvents = useMemo(() => {
     if (!selectedEvent) {
       return [];
     }
-    return events.filter(
+    return filteredEvents.filter(
       (event) =>
         event.id !== selectedEvent.id &&
         event.tower === selectedEvent.tower &&
         event.unit === selectedEvent.unit
     );
-  }, [events, selectedEvent]);
+  }, [filteredEvents, selectedEvent]);
+
+  const condominiumCommands = useMemo(
+    () => commands.filter((command) => command.condominiumId === selectedCondominiumId),
+    [commands, selectedCondominiumId]
+  );
 
   const auditTrail = useMemo(() => {
     if (!selectedEvent) {
-      return commands.slice(0, 5);
+      return condominiumCommands.slice(0, 5);
     }
     const lowerUnit = selectedEvent.unit.toLowerCase();
     const lowerTower = selectedEvent.tower.toLowerCase();
-    const related = commands.filter((command) => {
+    const related = condominiumCommands.filter((command) => {
       const target = command.target.toLowerCase();
       const notes = (command.notes || '').toLowerCase();
       return (
@@ -276,16 +356,19 @@ export default function Page() {
         notes.includes(lowerTower)
       );
     });
-    return (related.length > 0 ? related : commands).slice(0, 5);
-  }, [commands, selectedEvent]);
+    return (related.length > 0 ? related : condominiumCommands).slice(0, 5);
+  }, [condominiumCommands, selectedEvent]);
 
   const activeAlerts = useMemo(
-    () => events.filter((event) => event.severity !== 'info').length,
-    [events]
+    () => filteredEvents.filter((event) => event.severity !== 'info').length,
+    [filteredEvents]
   );
 
   const enqueueCommandExecution = (
-    commandTemplate: Pick<CommandItem, 'type' | 'target' | 'actor' | 'notes'>,
+    commandTemplate: Pick<
+      CommandItem,
+      'condominiumId' | 'type' | 'target' | 'actor' | 'notes'
+    >,
     eventContext?: {
       sourceEvent: FeedEvent;
       action: EventAction;
@@ -295,6 +378,7 @@ export default function Page() {
     const timestamp = getCurrentTimeLabel();
     const base: CommandItem = {
       id: commandId,
+      condominiumId: commandTemplate.condominiumId,
       type: commandTemplate.type,
       target: commandTemplate.target,
       timestamp,
@@ -303,7 +387,7 @@ export default function Page() {
       notes: commandTemplate.notes,
     };
 
-    setCommands((previous) => [base, ...previous].slice(0, 60));
+    setCommands((previous) => [base, ...previous].slice(0, 80));
     toast.message(`Comando enfileirado: ${base.type}`);
 
     window.setTimeout(() => {
@@ -333,7 +417,7 @@ export default function Page() {
         );
       }
       if (success) {
-        toast.success(`Comando ${base.type} concluído`);
+        toast.success(`Comando ${base.type} concluido`);
       } else {
         toast.error(`Comando ${base.type} falhou`);
       }
@@ -346,7 +430,12 @@ export default function Page() {
     reason: string,
     source: 'timeline' | 'context'
   ) => {
-    const template = commandTemplateFromAction(event, action, reason);
+    const template = commandTemplateFromAction(
+      event,
+      action,
+      reason,
+      selectedCondominiumId
+    );
     enqueueCommandExecution(template, {
       sourceEvent: event,
       action,
@@ -425,9 +514,9 @@ export default function Page() {
       return '';
     }
     if (confirmIntent.kind === 'emergency') {
-      return 'Ativar modo emergência';
+      return 'Ativar modo emergencia';
     }
-    return `Confirmar ação: ${confirmIntent.action.label}`;
+    return `Confirmar acao: ${confirmIntent.action.label}`;
   }, [confirmIntent]);
 
   const confirmDialogDescription = useMemo(() => {
@@ -435,9 +524,9 @@ export default function Page() {
       return '';
     }
     if (confirmIntent.kind === 'emergency') {
-      return 'Esta ação acionará protocolo operacional e notificará a segurança.';
+      return 'Esta acao acionara protocolo operacional e notificara a seguranca.';
     }
-    return `${confirmIntent.event.tower}/${confirmIntent.event.unit} • ${confirmIntent.event.title}`;
+    return `${confirmIntent.event.tower}/${confirmIntent.event.unit} - ${confirmIntent.event.title}`;
   }, [confirmIntent]);
 
   const handleConfirmDialog = (reason: string) => {
@@ -447,11 +536,12 @@ export default function Page() {
     if (confirmIntent.kind === 'emergency') {
       const emergencyEvent: FeedEvent = {
         id: randomId('evt-emg'),
+        condominiumId: selectedCondominiumId,
         type: 'emergency',
         severity: 'critical',
-        title: 'Modo emergência solicitado',
-        description: 'Protocolo de contingência iniciado pela portaria.',
-        tower: 'Condomínio',
+        title: 'Modo emergencia solicitado',
+        description: 'Protocolo de contingencia iniciado pela portaria.',
+        tower: 'Condominio',
         unit: 'GLOBAL',
         timestamp: getCurrentTimeLabel(),
         payload: {
@@ -461,12 +551,13 @@ export default function Page() {
       };
       pushLocalEvent(emergencyEvent);
       enqueueCommandExecution({
+        condominiumId: selectedCondominiumId,
         type: 'emergency.lockdown',
         target: 'all_gates',
         actor: 'Operador Portaria',
-        notes: reason || 'Ativação manual',
+        notes: reason || 'Ativacao manual',
       });
-      toast.warning('Modo emergência acionado');
+      toast.warning('Modo emergencia acionado');
       setConfirmIntent(null);
       return;
     }
@@ -480,23 +571,65 @@ export default function Page() {
     setConfirmIntent(null);
   };
 
+  const handleBluetoothToggle = async () => {
+    if (bluetooth.connected) {
+      await bluetooth.disconnect();
+      toast.message('Relogio Bluetooth desconectado');
+      return;
+    }
+    const ok = await bluetooth.connect();
+    if (ok) {
+      toast.success('Bluetooth conectado com sucesso');
+    } else if (bluetooth.error) {
+      toast.error(bluetooth.error);
+    }
+  };
+
+  const handleLogout = () => {
+    window.localStorage.removeItem('codexion-adm-session');
+    setAuthenticated(false);
+    setAdminPass('');
+    toast.message('Sessao ADM encerrada');
+  };
+
   return (
     <MotionConfig reducedMotion='user'>
       <div className='min-h-screen bg-[#070a0d] text-zinc-100'>
         <CommandBar
-          condominiums={condominiumOptions}
-          selectedCondominium={selectedCondominium}
-          onSelectCondominium={setSelectedCondominium}
+          adminName={adminUser || 'ADM'}
+          condominiums={mockCondominiums.map((item) => item.name)}
+          selectedCondominium={selectedCondominium.name}
+          onSelectCondominium={(value) => {
+            const match = mockCondominiums.find((item) => item.name === value);
+            if (!match) {
+              return;
+            }
+            setSelectedCondominiumId(match.id);
+            setSelectedEventId(null);
+          }}
           edgeOnline={edgeOnline}
           edgePingMs={edgePingMs}
           bleScanning={bleScanning}
           activeAlerts={activeAlerts}
           searchQuery={searchQuery}
           onSearchQueryChange={setSearchQuery}
+          bluetoothSupported={bluetooth.supported}
+          bluetoothConnected={bluetooth.connected}
+          bluetoothConnecting={bluetooth.connecting}
+          bluetoothDeviceName={bluetooth.deviceName}
+          onBluetoothToggle={handleBluetoothToggle}
           onEmergencyRequest={() => setConfirmIntent({ kind: 'emergency' })}
         />
 
         <main id='main-content' className='mx-auto max-w-[1800px] px-3 pb-[140px] pt-[104px]'>
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.24 }}
+          >
+            <CondominiumOverview condominium={selectedCondominium} />
+          </motion.div>
+
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
@@ -523,9 +656,22 @@ export default function Page() {
               onActionRequest={handleContextAction}
             />
           </motion.div>
+
+          <div className='mt-2 flex justify-end'>
+            <button
+              type='button'
+              onClick={handleLogout}
+              className='border border-zinc-700 bg-zinc-900 px-2 py-1 text-[11px] uppercase tracking-[0.12em] text-zinc-300 transition hover:bg-zinc-800'
+            >
+              Sair da sessao ADM
+            </button>
+          </div>
         </main>
 
-        <CommandQueueBar commands={commands} onRetryFailed={handleRetryFailed} />
+        <CommandQueueBar
+          commands={condominiumCommands}
+          onRetryFailed={handleRetryFailed}
+        />
 
         <ConfirmDialog
           open={Boolean(confirmIntent)}
