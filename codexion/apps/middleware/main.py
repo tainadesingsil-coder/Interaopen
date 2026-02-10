@@ -17,6 +17,7 @@ from src.security.crypto import AES256Cipher
 from src.services.access_control import AccessControlService, parse_authorized_uuids
 from src.services.coercion import CoercionService, TelemetrySample
 from src.services.round_checkin import RoundCheckinService
+from src.telemetry_sender import send_heartbeat, send_telemetry
 from src.storage.edge_outbox import EdgeOutbox
 
 
@@ -160,6 +161,27 @@ async def process_telemetry(payload: TelemetryPayload, source: str) -> Dict[str,
         "source": source,
     }
     outbox.append_event("telemetry_sample", telemetry_event)
+
+    # Mirror telemetry to the Edge Gateway (best-effort, non-blocking).
+    asyncio.create_task(
+        send_telemetry(
+            device_id=payload.watch_id,
+            hr=payload.hr_bpm,
+            steps=payload.steps_last_minute,
+            spo2=payload.spo2,
+            timestamp=recorded_at.isoformat(),
+        )
+    )
+    asyncio.create_task(
+        send_heartbeat(
+            device_id=payload.watch_id,
+            session_id=payload.watch_id,
+            hr=payload.hr_bpm,
+            steps=payload.steps_last_minute,
+            spo2=payload.spo2,
+            timestamp=recorded_at.isoformat(),
+        )
+    )
 
     sample = TelemetrySample(
         watch_id=payload.watch_id,
