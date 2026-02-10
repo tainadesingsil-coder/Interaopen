@@ -18,6 +18,7 @@ type Props = {
 
 export const Simulator = ({ locale, copy, pdfCopy, whatsappLink }: Props) => {
   const reduceMotion = useReducedMotion();
+  const shouldReduceMotion = !!reduceMotion;
   const {
     values,
     setValue,
@@ -26,7 +27,7 @@ export const Simulator = ({ locale, copy, pdfCopy, whatsappLink }: Props) => {
     animatedResults,
     handleDownloadPdf,
     formatCurrency,
-  } = useSimulator({ locale, reduceMotion, pdfCopy });
+  } = useSimulator({ locale, reduceMotion: shouldReduceMotion, pdfCopy });
 
   return (
     <section
@@ -63,10 +64,10 @@ export const Simulator = ({ locale, copy, pdfCopy, whatsappLink }: Props) => {
           </div>
           <motion.div
             className='glass-panel bg-[linear-gradient(180deg,rgba(10,18,24,0.7),rgba(6,12,18,0.95))] p-6 md:p-8'
-            initial={reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 14 }}
+            initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 14 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.3 }}
-            transition={reduceMotion ? { duration: 0 } : { duration: 0.6 }}
+            transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.6 }}
           >
             <div className='space-y-5 text-white'>
               <div className='grid gap-4 sm:grid-cols-2'>

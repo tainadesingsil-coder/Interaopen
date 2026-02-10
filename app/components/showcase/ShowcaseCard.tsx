@@ -32,10 +32,11 @@ export const ShowcaseCard = ({
   dialogLabel,
 }: Props) => {
   const reduceMotion = useReducedMotion();
+  const shouldReduceMotion = !!reduceMotion;
   const [isOpen, setIsOpen] = useState(false);
   const { index: imageIndex } = useGallery({
     length: images.length,
-    reduceMotion,
+    reduceMotion: shouldReduceMotion,
     auto: images.length > 1,
   });
 
@@ -60,10 +61,12 @@ export const ShowcaseCard = ({
         initial={{ opacity: 0, y: 16 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.2 }}
-        whileHover={reduceMotion ? undefined : { y: -6 }}
-        whileTap={reduceMotion ? undefined : { scale: 0.98 }}
+        whileHover={shouldReduceMotion ? undefined : { y: -6 }}
+        whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
         transition={
-          reduceMotion ? { duration: 0 } : { duration: 0.35, delay: index * 0.08 }
+          shouldReduceMotion
+            ? { duration: 0 }
+            : { duration: 0.35, delay: index * 0.08 }
         }
       >
         <div className='relative aspect-[16/10] w-full overflow-hidden rounded-[18px] border border-white/10'>
@@ -71,10 +74,10 @@ export const ShowcaseCard = ({
             <motion.div
               key={images[imageIndex]}
               className='absolute inset-0'
-              initial={reduceMotion ? { opacity: 1 } : { opacity: 0 }}
+              initial={shouldReduceMotion ? { opacity: 1 } : { opacity: 0 }}
               animate={{ opacity: 1 }}
-              exit={reduceMotion ? { opacity: 1 } : { opacity: 0 }}
-              transition={reduceMotion ? { duration: 0 } : { duration: 0.5 }}
+              exit={shouldReduceMotion ? { opacity: 1 } : { opacity: 0 }}
+              transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.5 }}
             >
               <OptimizedImage
                 src={images[imageIndex]}
