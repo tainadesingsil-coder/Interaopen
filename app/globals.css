@@ -4,14 +4,14 @@
 
 @layer base {
   :root {
-    --bg-0: #061018;
-    --bg-1: #071621;
-    --panel: rgba(255, 255, 255, 0.06);
-    --panel-strong: rgba(255, 255, 255, 0.1);
-    --stroke: rgba(255, 255, 255, 0.1);
+    --bg-0: #0a0a0a;
+    --bg-1: #1e211e;
+    --panel: rgba(255, 255, 255, 0.05);
+    --panel-strong: rgba(255, 255, 255, 0.08);
+    --stroke: rgba(255, 255, 255, 0.12);
     --text: rgba(255, 255, 255, 0.92);
     --muted: rgba(255, 255, 255, 0.7);
-    --gold: #c9a46a;
+    --gold: #10b981;
   }
 
   html {

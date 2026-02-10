@@ -1,6 +1,11 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: ['./src/**/*.{js,ts,jsx,tsx,mdx}'],
+  content: [
+    './app/**/*.{js,ts,jsx,tsx,mdx}',
+    './components/**/*.{js,ts,jsx,tsx,mdx}',
+    './lib/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/**/*.{js,ts,jsx,tsx,mdx}',
+  ],
   theme: {
     extend: {
       colors: {
@@ -9,6 +14,10 @@ export default {
         ink: '#1D2430',
         muted: '#6B7280',
         gold: '#B7925A',
+        codexionBg: '#0A0A0A',
+        codexionOlive: '#1E211E',
+        codexionEmerald: '#10B981',
+        codexionNeon: '#22D3EE',
       },
       boxShadow: {
         soft: '0 20px 45px rgba(8, 38, 58, 0.08)',

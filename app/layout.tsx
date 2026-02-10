@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
-import { Inter, Sora } from 'next/font/google';
+import { Geist, Inter } from 'next/font/google';
 import './globals.css';
-import { StructuredData } from '@/app/components/shared/StructuredData';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -9,48 +8,46 @@ const inter = Inter({
   display: 'swap',
 });
 
-const sora = Sora({
+const geist = Geist({
   subsets: ['latin'],
   variable: '--font-display',
   display: 'swap',
 });
 
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ?? 'https://bellavistaresidence.com.br';
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://codexion.local';
 
 export const metadata: Metadata = {
-  title:
-    'Bella Vista Beach Residence | Investimento Imobiliário no Litoral Sul da Bahia',
+  title: 'Codexion | Plataforma de Seguranca Patrimonial e Saude Industrial',
   description:
-    'Stúdios e apartamentos de 2 e 3 quartos com infraestrutura de resort em Coroa Vermelha. Alto potencial de valorização e rentabilidade garantida.',
+    'Cockpit local-first para monitoramento de seguranca patrimonial e saude industrial com smartwatches.',
   keywords: [
-    'bella vista',
-    'coroa vermelha',
-    'investimento imobiliário',
-    'litoral bahia',
-    'apartamento praia',
+    'codexion',
+    'seguranca patrimonial',
+    'saude industrial',
+    'smartwatch',
+    'middleware edge',
   ],
-  authors: [{ name: 'Bella Vista Beach Residence' }],
+  authors: [{ name: 'Codexion Labs' }],
   openGraph: {
     type: 'website',
     locale: 'pt_BR',
     url: siteUrl,
-    siteName: 'Bella Vista Beach Residence',
-    title: 'Bella Vista Beach Residence | Bahia',
-    description: 'Investimento imobiliário estratégico no Litoral Sul da Bahia',
+    siteName: 'Codexion',
+    title: 'Codexion Security OS',
+    description: 'Seguranca, interfonia e telemetria wearable em uma plataforma unificada.',
     images: [
       {
         url: `${siteUrl}/og-image.jpg`,
         width: 1200,
         height: 630,
-        alt: 'Bella Vista Beach Residence',
+        alt: 'Codexion Dashboard',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Bella Vista Beach Residence | Bahia',
-    description: 'Investimento imobiliário estratégico no Litoral Sul da Bahia',
+    title: 'Codexion Security OS',
+    description: 'Plataforma de seguranca patrimonial e saude industrial.',
     images: [`${siteUrl}/twitter-image.jpg`],
   },
   robots: {
@@ -59,11 +56,6 @@ export const metadata: Metadata = {
   },
   alternates: {
     canonical: siteUrl,
-    languages: {
-      'pt-BR': siteUrl,
-      en: `${siteUrl}/en`,
-      it: `${siteUrl}/it`,
-    },
   },
 };
 
@@ -74,11 +66,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang='pt-BR'>
-      <body className={`${inter.className} ${sora.variable}`}>
+      <body className={`${inter.className} ${geist.variable}`}>
         <a href='#main-content' className='skip-link'>
           Skip to content
         </a>
-        <StructuredData />
         {children}
       </body>
     </html>
