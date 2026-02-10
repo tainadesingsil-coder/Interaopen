@@ -17,15 +17,16 @@ const geist = Geist({
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://codexion.local';
 
 export const metadata: Metadata = {
-  title: 'Codexion | Plataforma de Seguranca Patrimonial e Saude Industrial',
+  title: 'Codexion | Dashboard de Portaria para Condominio',
   description:
-    'Cockpit local-first para monitoramento de seguranca patrimonial e saude industrial com smartwatches.',
+    'Dashboard dark para operacao da portaria com visao separada entre moradores e seguranca.',
   keywords: [
     'codexion',
+    'portaria',
+    'condominio',
+    'dashboard dark',
     'seguranca patrimonial',
-    'saude industrial',
     'smartwatch',
-    'middleware edge',
   ],
   authors: [{ name: 'Codexion Labs' }],
   openGraph: {
@@ -34,7 +35,7 @@ export const metadata: Metadata = {
     url: siteUrl,
     siteName: 'Codexion',
     title: 'Codexion Security OS',
-    description: 'Seguranca, interfonia e telemetria wearable em uma plataforma unificada.',
+    description: 'Portaria digital com controle de acessos e monitoramento em tempo real.',
     images: [
       {
         url: `${siteUrl}/og-image.jpg`,
@@ -47,7 +48,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Codexion Security OS',
-    description: 'Plataforma de seguranca patrimonial e saude industrial.',
+    description: 'Dashboard de portaria com visao clara de moradores e seguranca.',
     images: [`${siteUrl}/twitter-image.jpg`],
   },
   robots: {
