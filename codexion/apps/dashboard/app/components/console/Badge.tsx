@@ -3,11 +3,16 @@ import { cn } from '@/app/lib/cn';
 type Variant = 'neutral' | 'info' | 'warn' | 'critical' | 'success';
 
 const variantClasses: Record<Variant, string> = {
-  neutral: 'border-zinc-700 text-zinc-300 bg-zinc-900/70',
-  info: 'border-cyan-400/40 text-cyan-300 bg-cyan-950/30',
-  warn: 'border-amber-400/40 text-amber-300 bg-amber-950/30',
-  critical: 'border-rose-500/50 text-rose-300 bg-rose-950/35',
-  success: 'border-emerald-500/40 text-emerald-300 bg-emerald-950/35',
+  neutral:
+    'border-[var(--border-subtle)] text-[var(--text-secondary)] bg-[var(--bg-primary)]',
+  info:
+    'border-[var(--status-info)] text-[var(--status-info)] bg-[var(--bg-primary)]',
+  warn:
+    'border-[var(--status-warning)] text-[var(--status-warning)] bg-[var(--bg-primary)]',
+  critical:
+    'border-[var(--status-offline)] text-[var(--status-offline)] bg-[var(--bg-primary)]',
+  success:
+    'border-[var(--status-online)] text-[var(--status-online)] bg-[var(--bg-primary)]',
 };
 
 interface BadgeProps {
@@ -20,7 +25,7 @@ export function Badge({ label, variant = 'neutral', className }: BadgeProps) {
   return (
     <span
       className={cn(
-        'inline-flex items-center border px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.14em]',
+        'inline-flex items-center border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] font-mono',
         variantClasses[variant],
         className
       )}

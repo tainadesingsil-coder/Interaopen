@@ -4,7 +4,6 @@ import type { ComponentType } from 'react';
 import {
   Bell,
   DoorOpen,
-  Flame,
   ShieldAlert,
   ShieldCheck,
   Siren,
@@ -49,60 +48,61 @@ interface EventRowProps {
 
 export function EventRow({ event, selected, onSelect, onAction }: EventRowProps) {
   const Icon = eventIcon[event.type];
+  const severityClass =
+    event.severity === 'critical' ? 'critical' : event.severity === 'warn' ? 'warning' : 'info';
 
   return (
     <article
       className={cn(
-        'border border-zinc-800 bg-zinc-950/70 p-3 transition',
-        selected && 'border-cyan-500/50 bg-zinc-900'
+        'timeline-event flex flex-col gap-2 rounded border border-[var(--border-subtle)] bg-[var(--bg-primary)] p-3',
+        severityClass,
+        selected && 'border-[var(--status-info)] bg-[var(--bg-hover)]'
       )}
     >
       <button
         type='button'
-        className='w-full text-left'
+        className='flex w-full min-w-0 items-start gap-3 text-left'
         onClick={() => onSelect(event)}
       >
-        <div className='mb-2 flex items-start justify-between gap-2'>
-          <div className='flex min-w-0 items-center gap-2'>
-            <Icon className='h-4 w-4 shrink-0 text-zinc-300' />
-            <h4 className='truncate text-sm font-medium text-zinc-100'>{event.title}</h4>
+        <div className='w-[84px] shrink-0 text-[11px] text-[var(--text-muted)]'>
+          {event.timestamp}
+        </div>
+
+        <div className='mt-0.5 shrink-0'>
+          <Icon className='h-4 w-4 text-[var(--text-secondary)]' />
+        </div>
+
+        <div className='min-w-0 flex-1'>
+          <div className='flex flex-wrap items-center gap-2'>
+            <span className='truncate text-sm font-semibold text-[var(--text-primary)]'>
+              {event.title}
+            </span>
+            <Badge label={eventLabel[event.type]} variant='neutral' />
+            <Badge label={`${event.tower}/${event.unit}`} variant='info' />
+            <span className='inline-flex items-center gap-1 text-[11px] text-[var(--text-muted)]'>
+              <SeverityDot severity={event.severity} pulse={event.severity !== 'info'} />
+              {event.severity.toUpperCase()}
+            </span>
           </div>
-          <span className='text-[11px] text-zinc-500'>{event.timestamp}</span>
-        </div>
 
-        <div className='mb-2 flex flex-wrap items-center gap-2'>
-          <Badge label={eventLabel[event.type]} variant='neutral' />
-          <Badge
-            label={event.severity}
-            variant={
-              event.severity === 'critical'
-                ? 'critical'
-                : event.severity === 'warn'
-                  ? 'warn'
-                  : 'info'
-            }
-            className='uppercase'
-          />
-          <span className='inline-flex items-center gap-1 text-xs text-zinc-400'>
-            <SeverityDot severity={event.severity} pulse={event.severity !== 'info'} />
-            {event.tower} / {event.unit}
-          </span>
+          <p className='mt-1 text-xs text-[var(--text-secondary)]'>{event.description}</p>
         </div>
-
-        <p className='text-xs text-zinc-400'>{event.description}</p>
       </button>
 
-      <div className='mt-3 flex flex-wrap gap-1.5 border-t border-zinc-800 pt-2'>
+      <div className='flex flex-wrap gap-2 border-t border-[var(--border-subtle)] pt-2'>
         {event.actions.map((action) => (
           <button
             key={`${event.id}-${action.type}`}
             type='button'
-            onClick={() => onAction(event, action.type)}
+            onClick={(clickEvent) => {
+              clickEvent.stopPropagation();
+              onAction(event, action.type);
+            }}
             className={cn(
-              'border px-2 py-1 text-[11px] uppercase tracking-[0.12em] transition',
+              'rounded border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] transition',
               action.critical
-                ? 'border-rose-500/40 text-rose-300 hover:bg-rose-950/40'
-                : 'border-zinc-700 text-zinc-300 hover:bg-zinc-800'
+                ? 'border-red-700 bg-red-950/30 text-red-200 hover:bg-red-900/40'
+                : 'border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-[var(--text-primary)] hover:bg-[var(--bg-hover)]'
             )}
           >
             {actionLabel[action.type]}

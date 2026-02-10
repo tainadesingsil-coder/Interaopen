@@ -20,89 +20,107 @@ export function CondominiumOverview({
   condominium,
   watchTelemetry,
 }: CondominiumOverviewProps) {
+  const towersCount = condominium.towers.length;
+  const gatesCount = condominium.gates.length;
+  const teamCount = condominium.securityTeam.length;
+  const watchConnected = watchTelemetry.connected;
+
+  const watchHrLabel = watchTelemetry.hr === null || watchTelemetry.hr === undefined ? '--' : String(watchTelemetry.hr);
+  const watchBatteryLabel =
+    watchTelemetry.battery === null || watchTelemetry.battery === undefined
+      ? '--'
+      : `${watchTelemetry.battery}%`;
+
   return (
     <PanelSection
-      title='Contexto do Condominio'
-      description='Visao rapida de torres, portoes, equipe e telemetria operacional do relogio.'
-      className='mb-2'
+      title='Visão Operacional'
+      description='Resumo do condomínio, gates, equipe e telemetria do relógio.'
+      className='mb-3'
     >
-      <div className='grid gap-2 lg:grid-cols-4'>
-        <div className='border border-zinc-800 bg-zinc-950/50 p-2'>
-          <p className='mb-1 inline-flex items-center gap-1 text-[11px] uppercase tracking-[0.12em] text-zinc-500'>
-            <Building2 className='h-3.5 w-3.5' />
-            Torres
-          </p>
-          <ul className='space-y-1 text-xs text-zinc-300'>
-            {condominium.towers.map((tower) => (
-              <li key={tower} className='border border-zinc-800 bg-zinc-900/60 px-2 py-1'>
-                {tower}
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div className='border border-zinc-800 bg-zinc-950/50 p-2'>
-          <p className='mb-1 inline-flex items-center gap-1 text-[11px] uppercase tracking-[0.12em] text-zinc-500'>
-            <DoorClosed className='h-3.5 w-3.5' />
-            Nomes de portoes
-          </p>
-          <ul className='space-y-1 text-xs text-zinc-300'>
-            {condominium.gates.map((gate) => (
-              <li key={gate} className='border border-zinc-800 bg-zinc-900/60 px-2 py-1'>
-                {gate}
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div className='border border-zinc-800 bg-zinc-950/50 p-2'>
-          <p className='mb-1 inline-flex items-center gap-1 text-[11px] uppercase tracking-[0.12em] text-zinc-500'>
-            <Shield className='h-3.5 w-3.5' />
-            Equipe de seguranca
-          </p>
-          <ul className='space-y-1 text-xs text-zinc-300'>
-            {condominium.securityTeam.map((agent) => (
-              <li key={agent} className='border border-zinc-800 bg-zinc-900/60 px-2 py-1'>
-                {agent}
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div className='border border-zinc-800 bg-zinc-950/50 p-2'>
-          <p className='mb-1 inline-flex items-center gap-1 text-[11px] uppercase tracking-[0.12em] text-zinc-500'>
-            <Watch className='h-3.5 w-3.5' />
-            Telemetria do relogio
-          </p>
-          <div className='space-y-1 text-xs'>
-            <div className='border border-zinc-800 bg-zinc-900/60 px-2 py-1 text-zinc-300'>
-              Estado: {watchTelemetry.connected ? 'Conectado' : 'Desconectado'}
+      <div className='grid gap-3 lg:grid-cols-4'>
+        <div className='rounded border border-[var(--border-subtle)] bg-[var(--bg-primary)] p-4'>
+          <div className='mb-2 flex items-center justify-between'>
+            <div className='text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--text-muted)]'>
+              Torres
             </div>
-            <div className='border border-zinc-800 bg-zinc-900/60 px-2 py-1 text-zinc-300'>
-              Dispositivo: {watchTelemetry.deviceName || '--'}
+            <Building2 className='h-4 w-4 text-[var(--text-muted)]' />
+          </div>
+          <div className='metric-value text-[var(--status-info)]'>{towersCount}</div>
+          <div className='mt-1 text-xs text-[var(--text-secondary)]'>
+            {condominium.towers.join(' • ')}
+          </div>
+        </div>
+
+        <div className='rounded border border-[var(--border-subtle)] bg-[var(--bg-primary)] p-4'>
+          <div className='mb-2 flex items-center justify-between'>
+            <div className='text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--text-muted)]'>
+              Portões
             </div>
-            <div className='grid grid-cols-2 gap-1'>
-              <div className='border border-zinc-800 bg-zinc-900/60 px-2 py-1 text-zinc-300'>
-                <Activity className='mr-1 inline h-3 w-3 text-emerald-400' />
-                HR {watchTelemetry.hr ?? '--'}
+            <DoorClosed className='h-4 w-4 text-[var(--text-muted)]' />
+          </div>
+          <div className='metric-value text-[var(--status-info)]'>{gatesCount}</div>
+          <div className='mt-1 text-xs text-[var(--text-secondary)]'>
+            {condominium.gates.slice(0, 3).join(' • ')}
+            {condominium.gates.length > 3 ? ' • ...' : ''}
+          </div>
+        </div>
+
+        <div className='rounded border border-[var(--border-subtle)] bg-[var(--bg-primary)] p-4'>
+          <div className='mb-2 flex items-center justify-between'>
+            <div className='text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--text-muted)]'>
+              Equipe
+            </div>
+            <Shield className='h-4 w-4 text-[var(--text-muted)]' />
+          </div>
+          <div className='metric-value text-[var(--status-online)]'>{teamCount}</div>
+          <div className='mt-1 text-xs text-[var(--text-secondary)]'>
+            {condominium.securityTeam.slice(0, 3).join(' • ')}
+            {condominium.securityTeam.length > 3 ? ' • ...' : ''}
+          </div>
+        </div>
+
+        <div className='rounded border border-[var(--border-subtle)] bg-[var(--bg-primary)] p-4'>
+          <div className='mb-2 flex items-center justify-between'>
+            <div className='text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--text-muted)]'>
+              Relógio
+            </div>
+            <Watch className='h-4 w-4 text-[var(--text-muted)]' />
+          </div>
+
+          <div className='flex items-end justify-between gap-3'>
+            <div>
+              <div
+                className={
+                  watchConnected
+                    ? 'metric-value text-[var(--status-online)]'
+                    : 'metric-value text-[var(--text-muted)]'
+                }
+              >
+                {watchHrLabel}
+                <span className='ml-2 text-xs text-[var(--text-muted)]'>BPM</span>
               </div>
-              <div className='border border-zinc-800 bg-zinc-900/60 px-2 py-1 text-zinc-300'>
+              <div className='mt-1 text-xs text-[var(--text-secondary)]'>
+                {watchConnected ? 'CONECTADO' : 'DESCONECTADO'} • BAT {watchBatteryLabel}
+              </div>
+            </div>
+
+            <div className='text-right text-[11px] text-[var(--text-muted)]'>
+              <div className='inline-flex items-center gap-1'>
+                <Activity className='h-3.5 w-3.5' />
                 SpO2 {watchTelemetry.spo2 ?? '--'}
               </div>
-            </div>
-            <div className='grid grid-cols-2 gap-1'>
-              <div className='border border-zinc-800 bg-zinc-900/60 px-2 py-1 text-zinc-300'>
-                Passos {watchTelemetry.steps ?? '--'}
+              <div className='mt-1 inline-flex items-center gap-1'>
+                <Battery className='h-3.5 w-3.5' />
+                {watchTelemetry.lastSeenAt ? `HB ${watchTelemetry.lastSeenAt}` : 'HB --'}
               </div>
-              <div className='border border-zinc-800 bg-zinc-900/60 px-2 py-1 text-zinc-300'>
-                <Battery className='mr-1 inline h-3 w-3 text-zinc-400' />
-                {watchTelemetry.battery ?? '--'}%
-              </div>
-            </div>
-            <div className='border border-zinc-800 bg-zinc-900/60 px-2 py-1 text-zinc-400'>
-              Ultimo heartbeat: {watchTelemetry.lastSeenAt || '--'}
             </div>
           </div>
+
+          {watchTelemetry.deviceName ? (
+            <div className='mt-2 truncate text-[11px] text-[var(--text-muted)]'>
+              {watchTelemetry.deviceName}
+            </div>
+          ) : null}
         </div>
       </div>
     </PanelSection>

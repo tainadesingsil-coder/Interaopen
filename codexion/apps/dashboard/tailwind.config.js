@@ -29,8 +29,9 @@ export default {
         '2xl': '24px',
       },
       fontFamily: {
-        sans: ['var(--font-inter)', 'Inter', 'system-ui', 'sans-serif'],
-        display: ['var(--font-display)', 'Sora', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-operational)', 'IBM Plex Mono', 'JetBrains Mono', 'Courier New', 'monospace'],
+        display: ['var(--font-operational)', 'IBM Plex Mono', 'JetBrains Mono', 'Courier New', 'monospace'],
+        mono: ['var(--font-operational)', 'IBM Plex Mono', 'JetBrains Mono', 'Courier New', 'monospace'],
       },
     },
   },

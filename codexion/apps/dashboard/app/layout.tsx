@@ -1,16 +1,13 @@
 import type { Metadata } from 'next';
-import { Geist, Inter } from 'next/font/google';
 import './globals.css';
+import './styles/operational-theme.css';
 
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-inter',
-  display: 'swap',
-});
+import { IBM_Plex_Mono } from 'next/font/google';
 
-const geist = Geist({
+const operationalMono = IBM_Plex_Mono({
   subsets: ['latin'],
-  variable: '--font-display',
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-operational',
   display: 'swap',
 });
 
@@ -67,7 +64,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang='pt-BR'>
-      <body className={`${inter.className} ${geist.variable}`}>
+      <body className={operationalMono.variable}>
         <a href='#main-content' className='skip-link'>
           Skip to content
         </a>

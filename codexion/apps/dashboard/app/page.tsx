@@ -5,11 +5,12 @@ import { MotionConfig, motion } from 'framer-motion';
 import { toast } from 'sonner';
 
 import { AdminLogin } from '@/app/components/console/AdminLogin';
-import { CommandBar } from '@/app/components/console/CommandBar';
 import { CommandQueueBar } from '@/app/components/console/CommandQueueBar';
 import { CondominiumOverview } from '@/app/components/console/CondominiumOverview';
 import { ConfirmDialog } from '@/app/components/console/ConfirmDialog';
 import { ContextPanel } from '@/app/components/console/ContextPanel';
+import { OperationalHeader } from '@/app/components/console/OperationalHeader';
+import { OperationalSidebar } from '@/app/components/console/OperationalSidebar';
 import { Timeline } from '@/app/components/console/Timeline';
 import { Toaster } from '@/app/components/ui/sonner';
 import { useBluetoothWatch } from '@/app/hooks/useBluetoothWatch';
@@ -681,8 +682,8 @@ export default function Page() {
         />
       ) : (
         <MotionConfig reducedMotion='user'>
-          <div className='min-h-screen bg-[#070a0d] text-zinc-100'>
-            <CommandBar
+          <div className='min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]'>
+            <OperationalHeader
               adminName={adminUser || 'ADM'}
               condominiums={mockCondominiums.map((item) => item.name)}
               selectedCondominium={selectedCondominium.name}
@@ -711,63 +712,62 @@ export default function Page() {
               onEmergencyRequest={() => setConfirmIntent({ kind: 'emergency' })}
             />
 
-            <main id='main-content' className='mx-auto max-w-[1800px] px-3 pb-[140px] pt-[104px]'>
-              <motion.div
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.24 }}
-              >
-                <CondominiumOverview
-                  condominium={selectedCondominium}
-                  watchTelemetry={{
-                    connected: watchConnected,
-                    deviceName: watchName,
-                    hr: watchHr,
-                    spo2: edgeWatch.latestSpo2,
-                    steps: bluetooth.connected ? bluetooth.latestSteps : edgeWatch.latestSteps,
-                    battery: watchBattery,
-                    lastSeenAt: watchHeartbeatLabel,
-                  }}
-                />
-              </motion.div>
+            <div className='flex min-h-screen pt-16'>
+              <OperationalSidebar
+                adminName={adminUser || 'ADM'}
+                activeAlerts={activeAlerts}
+                onLogout={handleLogout}
+              />
 
-              <motion.div
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.24 }}
-                className='grid gap-2 lg:grid-cols-[1.5fr_1fr]'
-              >
-                <Timeline
-                  events={filteredEvents}
-                  selectedEventId={selectedEventId}
-                  activeFilters={activeFilters}
-                  loading={loading}
-                  error={error}
-                  offlineMode={offlineMode}
-                  onToggleFilter={toggleFilter}
-                  onSelectEvent={(event) => setSelectedEventId(event.id)}
-                  onAction={handleTimelineAction}
-                  onClearFeed={clearFeed}
-                />
+              <main id='main-content' className='flex min-w-0 flex-1 flex-col pb-[92px]'>
+                <div className='px-4 pt-4'>
+                  <motion.div
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.18 }}
+                  >
+                    <CondominiumOverview
+                      condominium={selectedCondominium}
+                      watchTelemetry={{
+                        connected: watchConnected,
+                        deviceName: watchName,
+                        hr: watchHr,
+                        spo2: edgeWatch.latestSpo2,
+                        steps: bluetooth.connected ? bluetooth.latestSteps : edgeWatch.latestSteps,
+                        battery: watchBattery,
+                        lastSeenAt: watchHeartbeatLabel,
+                      }}
+                    />
+                  </motion.div>
+                </div>
 
-                <ContextPanel
-                  selectedEvent={selectedEvent}
-                  relatedEvents={relatedEvents}
-                  auditTrail={auditTrail}
-                  onActionRequest={handleContextAction}
-                />
-              </motion.div>
+                <div className='min-h-0 flex-1 px-4 pb-4 pt-3'>
+                  <div className='grid h-full min-h-0 grid-cols-1 gap-3 xl:grid-cols-[1fr_360px]'>
+                    <Timeline
+                      events={filteredEvents}
+                      selectedEventId={selectedEventId}
+                      activeFilters={activeFilters}
+                      loading={loading}
+                      error={error}
+                      offlineMode={offlineMode}
+                      onToggleFilter={toggleFilter}
+                      onSelectEvent={(event) => setSelectedEventId(event.id)}
+                      onAction={handleTimelineAction}
+                      onClearFeed={clearFeed}
+                    />
 
-              <div className='mt-2 flex justify-end'>
-                <button
-                  type='button'
-                  onClick={handleLogout}
-                  className='border border-zinc-700 bg-zinc-900 px-2 py-1 text-[11px] uppercase tracking-[0.12em] text-zinc-300 transition hover:bg-zinc-800'
-                >
-                  Sair da sessao ADM
-                </button>
-              </div>
-            </main>
+                    <div className='min-h-0 overflow-y-auto'>
+                      <ContextPanel
+                        selectedEvent={selectedEvent}
+                        relatedEvents={relatedEvents}
+                        auditTrail={auditTrail}
+                        onActionRequest={handleContextAction}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </main>
+            </div>
 
             <CommandQueueBar
               commands={condominiumCommands}

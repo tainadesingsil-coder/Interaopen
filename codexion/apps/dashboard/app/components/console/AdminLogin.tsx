@@ -22,12 +22,14 @@ export function AdminLogin({
   onSubmit,
 }: AdminLoginProps) {
   return (
-    <main className='flex min-h-screen items-center justify-center bg-[#070a0d] px-4 py-10 text-zinc-100'>
-      <section className='w-full max-w-md border border-zinc-800 bg-zinc-950/95 p-5 shadow-[0_20px_80px_rgba(0,0,0,0.55)]'>
-        <header className='mb-4 border-b border-zinc-800 pb-3'>
-          <p className='text-[10px] uppercase tracking-[0.16em] text-zinc-500'>Console Operacional</p>
-          <h1 className='mt-1 text-xl font-semibold'>Acesso ADM</h1>
-          <p className='mt-1 text-sm text-zinc-400'>
+    <main className='flex min-h-screen items-center justify-center bg-[var(--bg-primary)] px-4 py-10 text-[var(--text-primary)]'>
+      <section className='w-full max-w-md rounded border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-6 shadow-[0_30px_90px_rgba(0,0,0,0.55)]'>
+        <header className='mb-5 border-b border-[var(--border-subtle)] pb-4'>
+          <p className='text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--text-muted)]'>
+            Console Operacional 24/7
+          </p>
+          <h1 className='mt-2 text-2xl font-semibold tracking-tight'>Acesso ADM</h1>
+          <p className='mt-2 text-sm text-[var(--text-secondary)]'>
             Entre com credenciais de administrador para acessar a portaria.
           </p>
         </header>
@@ -40,28 +42,32 @@ export function AdminLogin({
           className='space-y-3'
         >
           <div className='space-y-1'>
-            <label className='text-[11px] uppercase tracking-[0.14em] text-zinc-500'>Usuário</label>
+            <label className='text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]'>
+              Usuário
+            </label>
             <input
               value={username}
               onChange={(event) => onUsernameChange(event.target.value)}
               placeholder='ADM'
-              className='w-full border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:border-zinc-500 focus:outline-none'
+              className='w-full rounded border border-[var(--border-subtle)] bg-[var(--bg-primary)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--border-strong)] focus:outline-none'
             />
           </div>
 
           <div className='space-y-1'>
-            <label className='text-[11px] uppercase tracking-[0.14em] text-zinc-500'>Senha</label>
+            <label className='text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]'>
+              Senha
+            </label>
             <input
               type='password'
               value={password}
               onChange={(event) => onPasswordChange(event.target.value)}
               placeholder='******'
-              className='w-full border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:border-zinc-500 focus:outline-none'
+              className='w-full rounded border border-[var(--border-subtle)] bg-[var(--bg-primary)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--border-strong)] focus:outline-none'
             />
           </div>
 
           {error ? (
-            <p className='border border-rose-600/40 bg-rose-950/30 px-2 py-1 text-xs text-rose-300'>
+            <p className='rounded border border-[var(--status-offline)] bg-[var(--bg-primary)] px-3 py-2 text-xs text-[var(--status-offline)]'>
               {error}
             </p>
           ) : null}
@@ -69,14 +75,14 @@ export function AdminLogin({
           <button
             type='submit'
             disabled={loading}
-            className='inline-flex w-full items-center justify-center gap-2 border border-cyan-400/40 bg-cyan-900/30 px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-cyan-200 transition hover:bg-cyan-800/40 disabled:opacity-45'
+            className='inline-flex w-full items-center justify-center gap-2 rounded border border-[var(--status-info)] bg-[var(--bg-primary)] px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--status-info)] transition hover:bg-[var(--bg-hover)] disabled:opacity-45'
           >
             {loading ? <LockKeyhole className='h-4 w-4 animate-pulse' /> : <ShieldCheck className='h-4 w-4' />}
             {loading ? 'Entrando...' : 'Entrar no Console'}
           </button>
         </form>
 
-        <footer className='mt-4 border-t border-zinc-800 pt-3 text-xs text-zinc-500'>
+        <footer className='mt-5 border-t border-[var(--border-subtle)] pt-4 text-xs text-[var(--text-muted)]'>
           Demo inicial: usuario <strong>ADM</strong> e senha <strong>123456</strong>.
         </footer>
       </section>

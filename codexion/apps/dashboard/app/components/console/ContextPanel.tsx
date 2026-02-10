@@ -38,7 +38,7 @@ export function ContextPanel({
         description='Selecione um item da timeline para abrir detalhes.'
         className='h-full min-h-0'
       >
-        <div className='flex h-[460px] items-center justify-center border border-zinc-800 bg-zinc-950/40 text-sm text-zinc-500'>
+        <div className='flex h-[460px] items-center justify-center rounded border border-[var(--border-subtle)] bg-[var(--bg-primary)] text-sm text-[var(--text-muted)]'>
           Nenhum evento selecionado.
         </div>
       </PanelSection>
@@ -46,24 +46,24 @@ export function ContextPanel({
   }
 
   return (
-    <div className='space-y-2'>
+    <div className='space-y-3'>
       <PanelSection title='Evento Selecionado' className='h-auto'>
         <div className='mb-2 flex items-center gap-2'>
           <SeverityDot severity={selectedEvent.severity} pulse />
-          <p className='text-sm font-medium text-zinc-100'>{selectedEvent.title}</p>
-          <span className='ml-auto text-xs text-zinc-500'>{selectedEvent.timestamp}</span>
+          <p className='text-sm font-semibold text-[var(--text-primary)]'>{selectedEvent.title}</p>
+          <span className='ml-auto text-xs text-[var(--text-muted)]'>{selectedEvent.timestamp}</span>
         </div>
-        <p className='mb-2 text-xs text-zinc-400'>{selectedEvent.description}</p>
+        <p className='mb-2 text-xs text-[var(--text-secondary)]'>{selectedEvent.description}</p>
         <div className='mb-3 flex flex-wrap gap-1.5'>
           <Badge label={selectedEvent.type} variant='neutral' />
           <Badge label={`${selectedEvent.tower}/${selectedEvent.unit}`} variant='info' />
         </div>
-        <div className='border border-zinc-800 bg-zinc-950/60 p-2'>
-          <p className='mb-1 inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.14em] text-zinc-500'>
+        <div className='rounded border border-[var(--border-subtle)] bg-[var(--bg-primary)] p-3'>
+          <p className='mb-2 inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]'>
             <FileStack className='h-3.5 w-3.5' />
             Payload
           </p>
-          <pre className='noc-scroll max-h-52 overflow-auto whitespace-pre-wrap break-all text-[11px] leading-5 text-zinc-300'>
+          <pre className='noc-scroll max-h-52 overflow-auto whitespace-pre-wrap break-all text-[11px] leading-5 text-[var(--text-secondary)]'>
             {JSON.stringify(selectedEvent.payload, null, 2)}
           </pre>
         </div>
@@ -71,19 +71,21 @@ export function ContextPanel({
 
       <PanelSection title='Histórico Relacionado' description='Últimos 5 eventos da mesma unidade'>
         {relatedEvents.length === 0 ? (
-          <p className='text-xs text-zinc-500'>Sem histórico relacionado.</p>
+          <p className='text-xs text-[var(--text-muted)]'>Sem histórico relacionado.</p>
         ) : (
           <ul className='space-y-1.5'>
             {relatedEvents.slice(0, 5).map((item) => (
               <li
                 key={item.id}
-                className='flex items-center justify-between border border-zinc-800 bg-zinc-950/50 px-2 py-1.5'
+                className='flex items-center justify-between rounded border border-[var(--border-subtle)] bg-[var(--bg-primary)] px-3 py-2'
               >
                 <div className='min-w-0'>
-                  <p className='truncate text-xs text-zinc-200'>{item.title}</p>
-                  <p className='text-[11px] text-zinc-500'>{item.type}</p>
+                  <p className='truncate text-xs font-semibold text-[var(--text-primary)]'>
+                    {item.title}
+                  </p>
+                  <p className='text-[11px] text-[var(--text-muted)]'>{item.type}</p>
                 </div>
-                <span className='text-[11px] text-zinc-500'>{item.timestamp}</span>
+                <span className='text-[11px] text-[var(--text-muted)]'>{item.timestamp}</span>
               </li>
             ))}
           </ul>
@@ -104,10 +106,10 @@ export function ContextPanel({
                     source: 'context',
                   })
                 }
-                className='inline-flex items-center justify-between border border-zinc-800 bg-zinc-950/50 px-2 py-2 text-xs text-zinc-200 transition hover:border-zinc-600 hover:bg-zinc-900'
+                className='inline-flex items-center justify-between rounded border border-[var(--border-subtle)] bg-[var(--bg-primary)] px-3 py-2 text-xs text-[var(--text-primary)] transition hover:bg-[var(--bg-hover)]'
               >
                 <span>{action.label}</span>
-                <span className='inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.12em] text-zinc-500'>
+                <span className='inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]'>
                   <Play className='h-3 w-3' />
                   {requireReason ? 'Confirmação + motivo' : 'Confirmar'}
                 </span>
@@ -119,22 +121,22 @@ export function ContextPanel({
 
       <PanelSection title='Audit Trail' description='Operador e status dos comandos executados'>
         {auditTrail.length === 0 ? (
-          <p className='text-xs text-zinc-500'>Nenhum comando relacionado.</p>
+          <p className='text-xs text-[var(--text-muted)]'>Nenhum comando relacionado.</p>
         ) : (
           <ul className='space-y-1.5'>
             {auditTrail.map((command) => (
               <li
                 key={command.id}
-                className='border border-zinc-800 bg-zinc-950/40 px-2 py-1.5'
+                className='rounded border border-[var(--border-subtle)] bg-[var(--bg-primary)] px-3 py-2'
               >
                 <div className='mb-1 flex items-center justify-between gap-2'>
-                  <p className='inline-flex items-center gap-1 text-xs text-zinc-200'>
-                    <ClipboardList className='h-3.5 w-3.5 text-zinc-500' />
+                  <p className='inline-flex items-center gap-1 text-xs font-semibold text-[var(--text-primary)]'>
+                    <ClipboardList className='h-3.5 w-3.5 text-[var(--text-muted)]' />
                     {command.type}
                   </p>
                   <Badge label={command.status} variant={statusVariant(command.status)} />
                 </div>
-                <div className='flex items-center justify-between text-[11px] text-zinc-500'>
+                <div className='flex items-center justify-between text-[11px] text-[var(--text-muted)]'>
                   <span className='inline-flex items-center gap-1'>
                     <History className='h-3 w-3' />
                     {command.timestamp}
