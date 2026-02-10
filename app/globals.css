@@ -291,9 +291,10 @@
     padding: 20px;
   }
 
-  button,
-  a.inline-flex {
+  a.inline-flex,
+  button.inline-flex {
     min-height: 44px;
+    padding: 12px 24px;
   }
 
 }
