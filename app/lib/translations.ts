@@ -80,21 +80,21 @@ export const translations = {
         {
           label: 'AMBIENTE TOTAL',
           title: 'Ambiente completo',
-          desc: 'Resort com estrutura completa',
+          desc: 'Infraestrutura completa de resort',
           details: [
             {
               icon: Waves,
               label: 'Piscina',
-              value: 'Piscina de borda infinita',
+              value: 'Borda infinita',
             },
             { icon: Sun, label: 'Beach Club', value: 'Exclusivo' },
             { icon: Sparkles, label: 'Bem-estar', value: 'SPA e academia' },
             {
               icon: Trees,
               label: 'Lazer',
-              value: 'Lounge bar e trilhas',
+              value: 'Lounge e trilhas',
             },
-            { icon: Shield, label: 'Segurança', value: '24 horas' },
+            { icon: Shield, label: 'Segurança', value: '24h' },
           ],
           images: showcaseImages.amenities,
         },
@@ -265,19 +265,19 @@ export const translations = {
         {
           label: 'AMENITIES',
           title: 'Resort amenities',
-          desc: 'Resort-style full amenities',
+          desc: 'Full resort amenities',
           details: [
             {
               icon: Waves,
               label: 'Pool',
-              value: 'Infinity-edge pool',
+              value: 'Infinity-edge',
             },
             { icon: Sun, label: 'Beach Club', value: 'Exclusive' },
             { icon: Sparkles, label: 'Wellness', value: 'Spa and fitness' },
             {
               icon: Trees,
               label: 'Leisure',
-              value: 'Lounge bar and trails',
+              value: 'Lounge and trails',
             },
             { icon: Shield, label: 'Security', value: '24/7 security' },
           ],
@@ -451,7 +451,7 @@ export const translations = {
         {
           label: 'SERVIZI',
           title: 'Servizi resort',
-          desc: 'Resort con struttura completa',
+          desc: 'Struttura resort completa',
           details: [
             {
               icon: Waves,
@@ -463,7 +463,7 @@ export const translations = {
             {
               icon: Trees,
               label: 'Tempo libero',
-              value: 'Lounge bar e percorsi',
+              value: 'Lounge e percorsi',
             },
             { icon: Shield, label: 'Sicurezza', value: '24/7' },
           ],

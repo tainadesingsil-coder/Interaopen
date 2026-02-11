@@ -58,20 +58,20 @@ export const ShowcaseModal = ({
           </span>
           <h3 className='mt-4 text-lg font-semibold md:text-xl'>{title}</h3>
           <p className='mt-2 text-xs text-white/70 md:text-sm'>{desc}</p>
-          <div className='mt-5 rounded-2xl border border-white/10 bg-white/5 p-4 md:p-6'>
-            <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6'>
+          <div className='mt-4 rounded-2xl border border-white/10 bg-white/5 p-3 md:p-5'>
+            <div className='grid grid-cols-1 gap-3 sm:grid-cols-2 md:gap-5'>
               {details.map((detail) => {
                 const Icon = detail.icon;
                 return (
                   <div key={detail.label} className='flex items-start gap-3 md:gap-4'>
-                    <span className='mt-0.5 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/5 text-[var(--gold)] md:h-12 md:w-12'>
-                      <Icon className='h-7 w-7' />
+                    <span className='mt-0.5 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/5 text-[var(--gold)] md:h-11 md:w-11'>
+                      <Icon className='h-6 w-6' />
                     </span>
                     <div className='min-w-0 flex-1'>
-                      <p className='text-[11px] uppercase tracking-[0.16em] text-white/50'>
+                      <p className='text-[10px] uppercase tracking-[0.16em] text-white/50'>
                         {detail.label}
                       </p>
-                      <p className='text-sm font-semibold text-white md:text-base'>
+                      <p className='text-sm font-semibold text-white'>
                         {detail.value}
                       </p>
                     </div>

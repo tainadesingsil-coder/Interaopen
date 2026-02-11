@@ -49,7 +49,7 @@ export const LanguageSwitcher = ({
       </button>
       {open && (
         <div
-          className='absolute left-0 right-auto top-full z-[60] mt-2 flex min-w-[140px] flex-col items-stretch gap-1 rounded-2xl border border-white/15 bg-[rgba(8,16,24,0.92)] p-1 text-white/85 shadow-[0_12px_30px_rgba(0,0,0,0.35)] backdrop-blur sm:left-auto sm:right-0 sm:flex-row sm:items-center sm:rounded-full'
+          className='absolute left-0 right-auto top-full z-[60] mt-2 flex min-w-[140px] max-w-[calc(100vw-32px)] flex-col items-stretch gap-1 rounded-2xl border border-white/15 bg-[rgba(8,16,24,0.92)] p-1 text-white/85 shadow-[0_12px_30px_rgba(0,0,0,0.35)] backdrop-blur sm:left-auto sm:right-0 sm:flex-row sm:items-center sm:rounded-full'
           role='menu'
         >
           {languageOptions.map((option) => {

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { Locale } from '@/app/types';
 
-const STORAGE_KEY = 'bella-vista-locale-v2';
+const STORAGE_KEY = 'bella-vista-locale-v3';
 
 export const useLocale = (initialLocale: Locale = 'pt') => {
   const [locale, setLocale] = useState<Locale>(initialLocale);
