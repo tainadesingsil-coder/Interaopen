@@ -21,8 +21,6 @@ export const showcaseImages = {
   apt2: [
     '/images/showcase/apt-2-1.jpg',
     '/images/showcase/apt-2-2.jpg',
-    '/images/showcase/apt-2-3.jpg',
-    '/images/showcase/apt-2-4.png',
   ],
   apt3: ['/images/showcase/apt-3-1.png', '/images/showcase/apt-3-2.png'],
   amenities: [
