@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - cursor/bela-vista-cloudflare-pages-1ffd
   workflow_dispatch:
 
 jobs:
