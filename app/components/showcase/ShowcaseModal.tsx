@@ -56,22 +56,22 @@ export const ShowcaseModal = ({
           <span className='inline-flex rounded-full border border-[var(--gold)]/40 bg-white/5 px-3 py-1 text-[0.6rem] uppercase tracking-[0.4em] text-[var(--gold)]'>
             {label}
           </span>
-          <h3 className='mt-4 text-xl font-semibold'>{title}</h3>
-          <p className='mt-2 text-sm text-white/70'>{desc}</p>
-          <div className='mt-6 rounded-2xl border border-white/10 bg-white/5 p-5 md:p-6'>
-            <div className='grid grid-cols-2 gap-4 md:gap-6'>
+          <h3 className='mt-4 text-lg font-semibold md:text-xl'>{title}</h3>
+          <p className='mt-2 text-xs text-white/70 md:text-sm'>{desc}</p>
+          <div className='mt-5 rounded-2xl border border-white/10 bg-white/5 p-4 md:p-6'>
+            <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6'>
               {details.map((detail) => {
                 const Icon = detail.icon;
                 return (
-                  <div key={detail.label} className='flex items-center gap-3 md:gap-4'>
-                    <span className='inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white/5 text-[var(--gold)]'>
+                  <div key={detail.label} className='flex items-start gap-3 md:gap-4'>
+                    <span className='mt-0.5 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/5 text-[var(--gold)] md:h-12 md:w-12'>
                       <Icon className='h-7 w-7' />
                     </span>
                     <div className='min-w-0 flex-1'>
-                      <p className='text-xs uppercase tracking-[0.18em] text-white/50'>
+                      <p className='text-[11px] uppercase tracking-[0.16em] text-white/50'>
                         {detail.label}
                       </p>
-                      <p className='text-base font-semibold text-white md:text-lg'>
+                      <p className='text-sm font-semibold text-white md:text-base'>
                         {detail.value}
                       </p>
                     </div>

@@ -80,19 +80,19 @@ export const translations = {
         {
           label: 'AMBIENTE TOTAL',
           title: 'Ambiente completo',
-          desc: 'Infraestrutura e lazer de resort',
+          desc: 'Resort com estrutura completa',
           details: [
             {
               icon: Waves,
               label: 'Piscina',
-              value: 'Borda infinita, vista para o mar',
+              value: 'Piscina de borda infinita',
             },
             { icon: Sun, label: 'Beach Club', value: 'Exclusivo' },
-            { icon: Sparkles, label: 'Bem-estar', value: 'SPA, academia e ofurôs' },
+            { icon: Sparkles, label: 'Bem-estar', value: 'SPA e academia' },
             {
               icon: Trees,
               label: 'Lazer',
-              value: 'Lounge bar, áreas verdes e trilhas',
+              value: 'Lounge bar e trilhas',
             },
             { icon: Shield, label: 'Segurança', value: '24 horas' },
           ],
@@ -265,19 +265,19 @@ export const translations = {
         {
           label: 'AMENITIES',
           title: 'Resort amenities',
-          desc: 'Resort-style infrastructure and leisure',
+          desc: 'Resort-style full amenities',
           details: [
             {
               icon: Waves,
               label: 'Pool',
-              value: 'Infinity-edge pool with sea views',
+              value: 'Infinity-edge pool',
             },
             { icon: Sun, label: 'Beach Club', value: 'Exclusive' },
-            { icon: Sparkles, label: 'Wellness', value: 'Spa, fitness, and hot tubs' },
+            { icon: Sparkles, label: 'Wellness', value: 'Spa and fitness' },
             {
               icon: Trees,
               label: 'Leisure',
-              value: 'Lounge bar, landscaped gardens, and trails',
+              value: 'Lounge bar and trails',
             },
             { icon: Shield, label: 'Security', value: '24/7 security' },
           ],
@@ -451,19 +451,19 @@ export const translations = {
         {
           label: 'SERVIZI',
           title: 'Servizi resort',
-          desc: 'Infrastrutture e servizi in stile resort',
+          desc: 'Resort con struttura completa',
           details: [
             {
               icon: Waves,
               label: 'Piscina',
-              value: 'Piscina a sfioro con vista mare',
+              value: 'Piscina a sfioro',
             },
             { icon: Sun, label: 'Beach Club', value: 'Esclusivo' },
-            { icon: Sparkles, label: 'Benessere', value: 'Spa, palestra e idromassaggi' },
+            { icon: Sparkles, label: 'Benessere', value: 'Spa e palestra' },
             {
               icon: Trees,
               label: 'Tempo libero',
-              value: 'Lounge bar, aree verdi e percorsi',
+              value: 'Lounge bar e percorsi',
             },
             { icon: Shield, label: 'Sicurezza', value: '24/7' },
           ],
