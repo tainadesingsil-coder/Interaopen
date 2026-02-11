@@ -1,0 +1,7 @@
+fastapi
+uvicorn[standard]
+bleak
+cryptography
+httpx
+pydantic
+python-dotenv
