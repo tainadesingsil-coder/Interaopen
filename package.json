@@ -11,8 +11,8 @@
     "lint": "next lint",
     "assets:download": "node scripts/download-images.js",
     "assets:optimize": "node scripts/optimize-images.mjs",
-    "deploy:cf": "wrangler pages deploy dist --project-name=solarenergy-5h5 --branch=production",
-    "deploy:cf:preview": "wrangler pages deploy dist --project-name=solarenergy-5h5 --branch=preview"
+    "deploy:cf": "wrangler pages deploy dist --project-name=bela-vista-oficial --branch=main",
+    "deploy:cf:preview": "wrangler pages deploy dist --project-name=bela-vista-oficial --branch=preview"
   },
   "dependencies": {
     "framer-motion": "^12.23.12",

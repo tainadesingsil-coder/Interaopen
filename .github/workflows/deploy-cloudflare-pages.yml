@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+      - cursor/bela-vista-cloudflare-pages-1ffd
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -19,6 +21,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
+          cache-dependency-path: package-lock.json
 
       - name: Install dependencies
         run: npm ci --no-audit --no-fund
@@ -29,8 +33,10 @@ jobs:
       - name: Publish to Cloudflare Pages
         uses: cloudflare/pages-action@v1
         with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: solarenergy-5h5
-          directory: ./dist
+          apiToken: ${{ secrets.CF_ACCOUNTBELA || secrets.CF_ACCOUNTBELAA || secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CF_ACCOUNT_IDBELA || secrets.CF_ACCOUNT_IDBELAA || secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: bela-vista-oficial
+          directory: dist
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
           branch: main
+          wranglerVersion: '3'
