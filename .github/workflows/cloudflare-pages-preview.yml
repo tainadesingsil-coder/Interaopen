@@ -1,16 +1,15 @@
-name: Cloudflare Pages
+name: Cloudflare Pages (Preview)
 
 on:
   pull_request:
     branches: [ main ]
   push:
-    branches:
+    branches-ignore:
       - main
-      - '**'
 
 jobs:
   deploy:
-    name: Deploy to Cloudflare Pages
+    name: Deploy preview to Cloudflare Pages
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -32,13 +31,21 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Compute Pages preview branch
+        run: |
+          BRANCH="${GITHUB_HEAD_REF:-${GITHUB_REF_NAME}}"
+          # Pages preview subdomain labels must be <= 63 chars.
+          SLUG="${BRANCH//\//-}"
+          SLUG="${SLUG:0:50}"
+          echo "CF_PAGES_BRANCH=$SLUG" >> "$GITHUB_ENV"
+
       - name: Publish to Cloudflare Pages
         uses: cloudflare/pages-action@v1
         with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: solarenergy-5h5
+          apiToken: ${{ secrets.CF_ACCOUNTBELAA || secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CF_ACCOUNT_IDBELAA || secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: bela-vista-oficial
           directory: dist
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref == 'refs/heads/cursor/landing-page-bella-vista-7d69' && 'cursor-landing-page-bella-vi' || github.ref == 'refs/heads/main' && 'main' || github.ref_name }}
+          branch: ${{ env.CF_PAGES_BRANCH }}
           wranglerVersion: '3'
