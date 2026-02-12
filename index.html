@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0b0f1a" />
+    <meta name="description" content="Taina Silveira — Marketing, Design e Inteligência Artificial integrados para marcas que desejam crescer com impacto." />
+    <title>Taina Silveira — Marketing, Design e IA</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;700;800&family=Inter:wght@400;600;700&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+    <link rel="stylesheet" href="styles.css" />
+
+    <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/examples/js/loaders/GLTFLoader.js" defer></script>
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <noscript>Ative o JavaScript para vivenciar todas as animações e interações.</noscript>
+
+    <header class="site-header" id="topo">
+      <div class="container header-inner">
+        <a href="#topo" class="brand" aria-label="Taina Silveira Home">
+                        <span class="brand-label">
+                                                     <span class="brand-text">Taina Silveira</span>
+                                                    <span class="brand-subtitle">Design, IA e Motion</span>
+                        </span>
+         </a>
+
+        <nav class="primary-nav" aria-label="Principal">
+          <button class="nav-toggle" aria-expanded="false" aria-controls="site-menu" aria-label="Abrir menu">
+            <span class="nav-bar" aria-hidden="true"></span>
+            <span class="nav-bar" aria-hidden="true"></span>
+            <span class="nav-bar" aria-hidden="true"></span>
+          </button>
+          <ul id="site-menu" class="nav-list">
+            <li><a href="#sobre">Sobre</a></li>
+            <li><a href="#servicos">Serviços</a></li>
+            <li><a href="#contato">Contato</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <!-- HERO 3D -->
+      <section id="hero" class="hero-section" aria-label="Apresentação">
+        <canvas id="hero-canvas" class="hero-canvas" aria-hidden="true"></canvas>
+        <img id="hero-fallback" class="hero-fallback" src="" alt="" style="display:none;" />
+        <canvas id="hero-2d" class="hero-2d" aria-hidden="true" style="display:none;"></canvas>
+        <img id="hero-gif" class="hero-gif" src="https://i.postimg.cc/dtyXdS27/Design-sem-nome-2025-08-13-T193626-115.png" alt="Animação central — Taina com laptop" />
+
+        <div class="hero-content container hero-panel">
+          <div>
+            <p class="hero-lead animate-in">Estrategista criativa unindo estética, dados e automação para impulsionar marcas com experiências memoráveis.</p>
+            <form class="assistant-form" id="assistant-form" autocomplete="off" style="margin-top:12px;">
+              <input id="assistant-input" class="assistant-input" type="text" inputmode="text" placeholder="Em que posso ajudar?" aria-label="Em que posso ajudar?" />
+              <button type="submit" class="assistant-send" aria-label="Enviar pergunta">
+                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M2 21 23 12 2 3v7l15 2-15 2v7Z"/></svg>
+              </button>
+            </form>
+            <div id="assistant-response" class="assistant-response" aria-live="polite" hidden></div>
+          </div>
+        </div>
+
+        <button class="scroll-indicator" aria-label="Rolar para baixo" onclick="document.querySelector('#sobre').scrollIntoView({behavior: 'smooth'})">
+          <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="currentColor" d="M12 16.5a1 1 0 0 1-.7-.3l-7-7a1 1 0 1 1 1.4-1.4L12 14.1l6.3-6.3a1 1 0 1 1 1.4 1.4l-7 7a1 1 0 0 1-.7.3Z"/></svg>
+        </button>
+      </section>
+
+      <!-- SOBRE -->
+      <section id="sobre" class="section about-section">
+        <div class="container about-grid">
+          <div class="about-media" aria-hidden="true">
+            <img class="about-photo about-single" src="https://i.postimg.cc/s2wWBvkm/Design-sem-nome-2025-08-13-T170406-567.png" alt="Taina — retrato (PNG)" />
+          </div>
+          <div class="about-copy">
+            <h2>Sobre</h2>
+            <p>Sou Taina Silveira, especialista em marketing digital, design e estratégias com inteligência artificial.</p>
+            <p>Minha missão é criar marcas memoráveis, interfaces modernas e soluções criativas que unem estética, tecnologia e resultado.</p>
+            <p>Atendo empresas, criadores e empreendedores que querem se destacar no mercado, usando design minimalista, animações 3D e estratégias inteligentes para atrair e converter clientes.</p>
+            <p>Cada projeto que entrego é pensado para fortalecer seu posicionamento, aumentar sua autoridade e gerar impacto visual.</p>
+            <p>Vamos construir juntos o próximo nível da sua presença digital.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- SERVIÇOS -->
+      <section id="servicos" class="section services-section">
+        <div class="container">
+          <h2>Serviços</h2>
+          
+          <div class="services-grid">
+            <article class="service-card" tabindex="0" role="button" data-service="Marketing Digital" aria-label="Marketing Digital">
+              <div class="card-3d">
+                <div class="card-head">
+                  <span class="icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="28" height="28"><path fill="currentColor" d="M3 4h18v2H3V4m0 14h18v2H3v-2m0-7h18v2H3v-2Z"/></svg>
+                  </span>
+                  <h3>Marketing Digital</h3>
+                </div>
+                <p>Estratégia e execução de aquisição com mídia paga (Meta/Google), funis TOFU–BOFU, criativos de alta performance e mensuração para crescimento previsível.</p>
+              </div>
+            </article>
+            <article class="service-card" tabindex="0" role="button" data-service="Design e Identidade Visual" aria-label="Design e Identidade Visual">
+              <div class="card-3d">
+                <div class="card-head">
+                  <span class="icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="28" height="28"><path fill="currentColor" d="M12 2l4 4-8 8-4-4L12 2m6 6l2 2-8 8-2-2 8-8M4 14l-2 6 6-2-4-4Z"/></svg>
+                  </span>
+                  <h3>Design e Identidade Visual</h3>
+                </div>
+                <p>Construção de identidades e sistemas visuais consistentes, com estética contemporânea, aplicações para social/web e guias claros para fortalecer sua marca.</p>
+              </div>
+            </article>
+            <article class="service-card" tabindex="0" role="button" data-service="Automação com IA" aria-label="Automação com IA">
+              <div class="card-3d">
+                <div class="card-head">
+                  <span class="icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="28" height="28"><path fill="currentColor" d="M12 2a10 10 0 0 1 10 10h-4a6 6 0 1 0-6 6v4A10 10 0 0 1 12 2Z"/></svg>
+                  </span>
+                  <h3>Automação com IA</h3>
+                </div>
+                <p>Automação com IA para atendimento, conteúdo e análise: chatbots, integrações (CRM/planilhas/e-mail) e workflows que aumentam eficiência e velocidade de resposta.</p>
+              </div>
+            </article>
+            <article class="service-card" tabindex="0" role="button" data-service="Consultoria Estratégica" aria-label="Consultoria Estratégica">
+              <div class="card-3d">
+                <div class="card-head">
+                  <span class="icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="28" height="28"><path fill="currentColor" d="M12 3l9 4.5v9L12 21 3 16.5v-9L12 3m0 2.2L6 7.5v2.8l6 3 6-3V7.5l-6-2.3Z"/></svg>
+                  </span>
+                  <h3>Consultoria Estratégica</h3>
+                </div>
+                <p>Planejamento personalizado para potencializar sua marca, integrando inovação, marketing digital e IA.</p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- CONTATO -->
+      <section id="contato" class="section contact-section">
+        <div class="container contact-grid">
+          <div class="contact-copy">
+            <h2>Contato</h2>
+            <p class="section-lead contact-lead-strong">Entre em contato para acelerar sua marca com estratégia, design e IA. Respondo rápido por e-mail.</p>
+            <ul class="contact-list">
+              <li><a href="mailto:tainadesingsil@gmail.com" class="contact-link">tainadesingsil@gmail.com</a></li>
+            </ul>
+          </div>
+          <form class="contact-form" id="contact-form" novalidate>
+            <div class="form-field">
+              <label for="nome">Nome</label>
+              <input type="text" id="nome" name="nome" placeholder="Seu nome" required />
+              <span class="error" aria-live="polite"></span>
+            </div>
+            <div class="form-field">
+              <label for="email">Email</label>
+              <input type="email" id="email" name="email" placeholder="seu@email.com" required />
+              <span class="error" aria-live="polite"></span>
+            </div>
+            <div class="form-field">
+              <label for="mensagem">Mensagem</label>
+              <textarea id="mensagem" name="mensagem" rows="5" placeholder="Conte-me sobre seu projeto" required></textarea>
+              <span class="error" aria-live="polite"></span>
+            </div>
+            <button type="submit" class="btn btn-primary full">Enviar</button>
+            <p class="form-success" id="form-success" role="status" hidden>Mensagem enviada! Retornarei em breve.</p>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <!-- Portfólio (movido para antes do rodapé) -->
+    <section id="portfolio" class="section portfolio-section">
+      <div class="container">
+        <h2>Portfólio</h2>
+        <p class="section-lead">Acesse meu portfólio completo no Canva.</p>
+        <p><a class="btn btn-primary" href="https://tainasilveira.my.canva.site/" target="_blank" rel="noopener">Ver Portfólio no Canva</a></p>
+      </div>
+    </section>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <p>© <span id="year"></span> Taina Silveira. Todos os direitos reservados.</p>
+        <div class="social-links">
+          <a href="https://instagram.com" target="_blank" rel="noopener" aria-label="Instagram">
+            <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7m10 2a1 1 0 0 1 1 1 1 1 0 0 1-1 1 1 1 0 0 1-1-1 1 1 0 0 1 1-1M12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Z"/></svg>
+          </a>
+          <a href="https://www.linkedin.com" target="_blank" rel="noopener" aria-label="LinkedIn">
+            <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14M8.3 17.7V9.6H6v8.1h2.3m-.9-9.4c.8 0 1.3-.5 1.3-1.2 0-.8-.5-1.3-1.3-1.3-.8 0-1.3.5-1.3 1.3 0 .7.5 1.2 1.3 1.2m4.9 9.4v-4.5c0-1.2.6-2 1.6-2 .7 0 1.1.5 1.1 1.2v5.3h2.3V12c0-1.9-1.1-3-2.6-3-1.1 0-1.8.6-2.1 1.4h-.1V9.6h-2.2v8.1h2.2Z"/></svg>
+          </a>
+          <a href="https://www.behance.net" target="_blank" rel="noopener" aria-label="Behance">
+            <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M7.1 10.3H9c.8 0 1.3-.4 1.3-1 0-.6-.5-.9-1.3-.9H7.1v1.9m1.8 1H7.1v2.1h1.9c.9 0 1.4-.4 1.4-1 0-.7-.5-1.1-1.5-1.1M4 6.9h5.3c2 0 3.2.9 3.2 2.4 0 1-.6 1.7-1.5 2 .9.2 1.7 1 1.7 2.1 0 1.7-1.4 2.6-3.6 2.6H4V6.9m10.2 4.7c0-2.4 1.8-4.3 4.4-4.3 1.9 0 3.1.9 3.7 2.1h-2c-.3-.4-.9-.6-1.7-.6-1.3 0-2.2 1.1-2.2 2.8 0 1.7.9 2.8 2.2 2.8.9 0 1.6-.5 1.7-1.3h-1.9v-1.7h3.9v4.3h-1.3l-.2-1c-.7.7-1.7 1.1-3 .1-2-.4-3.2-2.2-3.2-4.2M14.1 6H19v1.3h-4.9V6Z"/></svg>
+          </a>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Quick Links Bubble -->
+    <div class="quick-links">
+      <div class="quick-inline" role="group" aria-label="Links rápidos">
+        <a href="https://wa.me/5538991121521" target="_blank" rel="noopener" class="quick-btn" aria-label="WhatsApp">
+          <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.94 14.5L2 22l5.67-1.94A10 10 0 1 0 12 2m0 2a8 8 0 1 1 0 16 7.93 7.93 0 0 1-4.21-1.21L7 18l-2 .67.67-2a8 8 0 0 1 6.33-12.67m3.82 3.71c-.2 0-.46 0-.71.05-.22.05-.5.11-.61.45-.16.39-.41 1.23-.46 1.32-.06.11-.11.25-.2.36-.11.11-.22.27-.39.44-.16.17-.33.36-.14.72.19.36.86 1.41 1.86 2.28 1.28 1.1 2.36 1.48 2.72 1.64.36.16.58.14.8-.08.22-.22.91-1.02 1.14-1.39.23-.36.05-.58-.11-.74-.14-.14-.31-.36-.5-.55-.2-.19-.41-.22-.63-.14-.22.08-.5.27-.58.36-.08.08-.2.17-.36.14-.17-.03-.53-.19-1.09-.61-.56-.42-.94-.98-1.05-1.14-.11-.17-.01-.27.08-.36.08-.08.17-.22.25-.33.08-.11.11-.2.17-.33.06-.14.03-.27-.03-.36-.05-.09-.44-1.1-.63-1.47-.16-.36-.33-.39-.53-.39Z"/></svg>
+          <span>WhatsApp</span>
+        </a>
+        <a href="https://linktr.ee/" target="_blank" rel="noopener" class="quick-btn alt" aria-label="Linktree">
+          <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M12 2 8 6h3v5H9l3 4 3-4h-2V6h3Z"/></svg>
+          <span>Linktree</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Service Details Modal -->
+    <div id="service-modal" class="modal" aria-hidden="true" role="dialog" aria-modal="true">
+      <div class="modal-backdrop" data-close="true"></div>
+      <div class="modal-dialog" role="document">
+        <button class="modal-close" aria-label="Fechar" data-close="true">×</button>
+        <h3 id="modal-title">Serviço</h3>
+        <div id="modal-body" class="modal-body"></div>
+        <div class="modal-actions">
+          <a href="#contato" class="btn btn-primary" id="modal-cta">Quero saber mais</a>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
