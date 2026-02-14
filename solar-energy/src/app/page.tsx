@@ -646,7 +646,10 @@ const showcaseItems = [
       { icon: CarFront, label: 'Vaga', value: '1' },
       { icon: Ruler, label: 'Área', value: '82,48 m²' },
     ],
-    images: ['https://i.postimg.cc/cHNZ2FqK/CASA-TIPO-E-6.png'],
+    images: [
+      'https://i.postimg.cc/cHNZ2FqK/CASA-TIPO-E-6.png',
+      'https://i.postimg.cc/281JdnJM/CASA-TIPO-E-5.png',
+    ],
   },
   {
     label: 'AMBIENTE TOTAL',
