@@ -694,6 +694,14 @@ const progressImages = [
   'https://i.postimg.cc/90rCyBPd/20251113-080300.jpg',
 ];
 
+type SimulatorValues = {
+  propertyValue: number;
+  dailyRate: number;
+  occupancy: number;
+  monthlyCosts: number;
+  platformFee: number;
+};
+
 type PresetKey = 'conservative' | 'realistic' | 'high';
 
 const simulatorPresets: Array<{ key: PresetKey; values: SimulatorValues }> = [
