@@ -119,17 +119,15 @@ const detailLabelMap: Record<Locale, Record<string, string>> = {
 const detailValueMap: Record<Locale, Record<string, string>> = {
   pt: {},
   en: {
-    'Borda infinita, vista para o mar': 'Infinity edge, ocean view',
-    Exclusivo: 'Exclusive',
-    'SPA, academia e ofurôs': 'Spa, gym and hot tubs',
-    'Lounge bar, áreas verdes e trilhas': 'Lounge bar, green areas and trails',
+    'Vista para o mar': 'Ocean view',
+    Ofurôs: 'Hot tubs',
+    'Áreas verdes': 'Green areas',
     '24 horas': '24 hours',
   },
   it: {
-    'Borda infinita, vista para o mar': 'Bordo infinito, vista mare',
-    Exclusivo: 'Esclusivo',
-    'SPA, academia e ofurôs': 'Spa, palestra e ofurô',
-    'Lounge bar, áreas verdes e trilhas': 'Lounge bar, aree verdi e sentieri',
+    'Vista para o mar': 'Vista mare',
+    Ofurôs: 'Ofurô',
+    'Áreas verdes': 'Aree verdi',
     '24 horas': '24 ore',
   },
 };
@@ -504,13 +502,13 @@ const showcaseItems = [
       {
         icon: Waves,
         label: 'Piscina',
-        value: 'Borda infinita, vista para o mar',
+        value: 'Vista para o mar',
       },
-      { icon: Sparkles, label: 'Bem-estar', value: 'SPA, academia e ofurôs' },
+      { icon: Sparkles, label: 'Bem-estar', value: 'Ofurôs' },
       {
         icon: Trees,
         label: 'Lazer',
-        value: 'Lounge bar, áreas verdes e trilhas',
+        value: 'Áreas verdes',
       },
       { icon: Shield, label: 'Segurança', value: '24 horas' },
     ],
