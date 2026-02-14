@@ -239,7 +239,7 @@ const baseCopy = {
     tag: 'CONTATO',
     title: 'Fale com nossa equipe',
     body: 'Atendimento consultivo e rápido para você avançar com segurança.',
-    email: 'contato@bellavistabeach.com.br',
+    email: 'gestaocliente@bellaimperial.com.br',
     location: 'Costa do Descobrimento • Bahia',
     whatsappValue: 'Atendimento imediato',
     form: {
@@ -600,7 +600,7 @@ const translations: Record<Locale, typeof baseCopy> = {
 };
 
 const whatsappLink =
-  'https://wa.me/5573999545185?text=Ol%C3%A1%2C%20gostaria%20de%20mais%20informa%C3%A7%C3%B5es';
+  'https://wa.me/557399833471?text=Ol%C3%A1%20gostaria%20de%20saber%20mais%20sobre%20o%20bella%20vista%20beach%20residense';
 
 const showcaseItems = [
   {
@@ -739,6 +739,7 @@ const simulatorPresets: Array<{ key: PresetKey; values: SimulatorValues }> = [
 
 const mapEmbedUrl =
   'https://www.google.com/maps?q=Bella%20Vista%20Beach%20Residence%2C%20BA-001%2C%20Km%20367%2C%20Praia%20do%20Mutari%2C%20Santa%20Cruz%20Cabr%C3%A1lia%20-%20BA&output=embed';
+const mapLocationUrl = mapEmbedUrl.replace('&output=embed', '');
 
 
 
@@ -1845,9 +1846,14 @@ export default function HomePage() {
                       <p className='text-xs uppercase tracking-[0.2em] text-white/50'>
                         {copy.contact.cards.location}
                       </p>
-                      <p className='mt-1 text-sm font-semibold text-white'>
+                      <a
+                        href={mapLocationUrl}
+                        target='_blank'
+                        rel='noreferrer'
+                        className='mt-1 block text-sm font-semibold text-white transition hover:text-[var(--gold)]'
+                      >
                         {copy.contact.location}
-                      </p>
+                      </a>
                     </div>
                   </div>
                 </div>
