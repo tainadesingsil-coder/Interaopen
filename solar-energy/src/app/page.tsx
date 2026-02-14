@@ -499,14 +499,13 @@ const showcaseItems = [
   {
     label: 'AMBIENTE TOTAL',
     title: 'Ambiente completo',
-    desc: 'Infraestrutura e lazer de resort',
+    desc: 'Borda infinita • SPA e academia • Lounge e trilhas',
     details: [
       {
         icon: Waves,
         label: 'Piscina',
         value: 'Borda infinita, vista para o mar',
       },
-      { icon: Sun, label: 'Beach Club', value: 'Exclusivo' },
       { icon: Sparkles, label: 'Bem-estar', value: 'SPA, academia e ofurôs' },
       {
         icon: Trees,
