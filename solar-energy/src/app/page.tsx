@@ -1760,7 +1760,7 @@ export default function HomePage() {
                   </p>
                   <form
                     className='glass-panel mt-6 space-y-4 p-6 md:p-8'
-                    action='https://formspree.io/f/maqojlbv'
+                    action='https://formspree.io/f/mgolwpwv'
                     method='POST'
                   >
                     <div className='grid gap-4 sm:grid-cols-2'>
