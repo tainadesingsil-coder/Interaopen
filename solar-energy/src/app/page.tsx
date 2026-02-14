@@ -646,12 +646,7 @@ const showcaseItems = [
       { icon: CarFront, label: 'Vaga', value: '1' },
       { icon: Ruler, label: 'Área', value: '82,48 m²' },
     ],
-    images: [
-      'https://i.postimg.cc/kX7Z3XSm/Design-sem-nome-2026-01-24T013513-644.png',
-      'https://i.postimg.cc/6QBTCZ4p/Design-sem-nome-2026-01-24T013506-098.png',
-      'https://i.postimg.cc/gJTJ9BM5/Design-sem-nome-2026-01-24T013459-346.png',
-      'https://i.postimg.cc/qq67pXS1/Design-sem-nome-2026-01-24T013356-074.png',
-    ],
+    images: ['https://i.postimg.cc/cHNZ2FqK/CASA-TIPO-E-6.png'],
   },
   {
     label: 'AMBIENTE TOTAL',
