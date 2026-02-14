@@ -13,6 +13,7 @@ import {
   CarFront,
   Clock,
   Coins,
+  Globe,
   Mail,
   MapPin,
   PhoneCall,
@@ -70,7 +71,27 @@ const buildPdf = (lines: string[]) => {
   pdf += `trailer << /Size 6 /Root 1 0 R >>\nstartxref\n${xrefStart}\n%%EOF`;
   return pdf;
 };
-const copy = {
+
+type Locale = 'pt' | 'en' | 'it';
+
+const STORAGE_KEY = 'bella-vista-locale';
+
+const localeOptions = [
+  { value: 'pt', label: 'PT', name: 'Português' },
+  { value: 'en', label: 'EN', name: 'English' },
+  { value: 'it', label: 'IT', name: 'Italiano' },
+] as const;
+
+const baseCopy = {
+  nav: {
+    location: 'Localização',
+    works: 'Obras',
+    investment: 'Investimento',
+    contact: 'Contato',
+    menu: 'Menu',
+    menuAria: 'Abrir menu',
+    languageLabel: 'Selecionar idioma',
+  },
   hero: {
     eyebrow: 'Costa do Descobrimento · Bahia',
     title: 'Viva perto do mar.\nInvista onde o futuro passa.',
@@ -133,6 +154,170 @@ const copy = {
   },
   floating: {
     ariaLabel: 'Abrir conversa no WhatsApp',
+  },
+};
+
+const translations: Record<Locale, typeof baseCopy> = {
+  pt: baseCopy,
+  en: {
+    ...baseCopy,
+    nav: {
+      location: 'Location',
+      works: 'Construction',
+      investment: 'Investment',
+      contact: 'Contact',
+      menu: 'Menu',
+      menuAria: 'Open menu',
+      languageLabel: 'Select language',
+    },
+    hero: {
+      ...baseCopy.hero,
+      eyebrow: 'Discovery Coast · Bahia',
+      title: 'Live near the sea.\nInvest where the future moves.',
+      subtitle:
+        'Studios and apartments in one of Bahia’s most desired regions, with strong appreciation potential.',
+      subtitleDesktop:
+        'Studios and apartments on the Discovery Coast, with strategic location and appreciation potential.',
+      primaryCta: 'Request an exclusive presentation',
+      primaryCtaDesktop: 'Request an exclusive presentation',
+      secondaryCta: 'View location',
+    },
+    location: {
+      ...baseCopy.location,
+      tag: 'STRATEGIC LOCATION',
+      title: 'Where access turns into demand.',
+      body:
+        'Between BR-367 and the tourism hubs, fast access and liquidity for living or income.',
+      benefits: [
+        'Access via BR-367',
+        'Consistent tourist flow',
+        'Balance: privacy + movement',
+      ],
+    },
+    simulator: {
+      ...baseCopy.simulator,
+      tag: 'INVESTMENT',
+      title: 'Simulate your short-term rental return.',
+      subtitle:
+        'Adjust the numbers and see an estimate of revenue, costs, and annual return. Illustrative values.',
+      bullets: [
+        'Seasonal demand supports consistent occupancy.',
+        'Flexible model for personal use or income.',
+        'Lean operation with recurring potential.',
+      ],
+    },
+    progress: {
+      ...baseCopy.progress,
+      tag: 'CONSTRUCTION',
+      title: 'Construction is underway.',
+      body:
+        'Continuous progress with tracked stages. Visual updates recorded to follow each advance.',
+      highlights: ['Structure underway', 'Local team mobilized', 'Active schedule'],
+    },
+    finalCta: {
+      ...baseCopy.finalCta,
+      title: 'Everything ready for your next investment decision.',
+      body: 'Receive a full presentation and speak with a specialist.',
+      primary: 'Schedule a call',
+      secondary: 'View progress',
+    },
+    contact: {
+      ...baseCopy.contact,
+      tag: 'CONTACT',
+      title: 'Talk to our team',
+      body: 'Consultative, fast support to move forward with confidence.',
+      location: 'Discovery Coast • Bahia',
+    },
+    experience: {
+      ...baseCopy.experience,
+      tag: 'EXPERIENCE',
+      title: 'Some places you understand. Others you feel.',
+      body:
+        'Bella Vista balances desire and predictability. An invitation to live the coast with investment security.',
+    },
+    floating: {
+      ariaLabel: 'Open WhatsApp chat',
+    },
+  },
+  it: {
+    ...baseCopy,
+    nav: {
+      location: 'Posizione',
+      works: 'Cantiere',
+      investment: 'Investimento',
+      contact: 'Contatto',
+      menu: 'Menu',
+      menuAria: 'Apri menu',
+      languageLabel: 'Seleziona lingua',
+    },
+    hero: {
+      ...baseCopy.hero,
+      eyebrow: 'Costa do Descobrimento · Bahia',
+      title: 'Vivi vicino al mare.\nInvesti dove passa il futuro.',
+      subtitle:
+        'Monolocali e appartamenti in una delle zone più desiderate della Bahia, con alto potenziale di valorizzazione.',
+      subtitleDesktop:
+        'Monolocali e appartamenti sulla Costa do Descobrimento, con posizione strategica e potenziale di valorizzazione.',
+      primaryCta: 'Richiedi una presentazione esclusiva',
+      primaryCtaDesktop: 'Richiedi una presentazione esclusiva',
+      secondaryCta: 'Vedi posizione',
+    },
+    location: {
+      ...baseCopy.location,
+      tag: 'POSIZIONE STRATEGICA',
+      title: 'Dove l’accesso diventa domanda.',
+      body:
+        'Tra la BR-367 e i poli turistici, accesso rapido e liquidità per vivere o generare reddito.',
+      benefits: [
+        'Accesso via BR-367',
+        'Flusso turistico costante',
+        'Equilibrio: privacy + movimento',
+      ],
+    },
+    simulator: {
+      ...baseCopy.simulator,
+      tag: 'INVESTIMENTO',
+      title: 'Simula il rendimento con affitti brevi.',
+      subtitle:
+        'Regola i valori e vedi una stima di ricavi, costi e rendimento annuo. Valori indicativi.',
+      bullets: [
+        'La domanda stagionale favorisce un’occupazione costante.',
+        'Modello flessibile per uso personale o reddito.',
+        'Gestione snella con potenziale ricorrente.',
+      ],
+    },
+    progress: {
+      ...baseCopy.progress,
+      tag: 'CANTIERE',
+      title: 'I lavori sono in corso.',
+      body:
+        'Avanzamento continuo con fasi monitorate. Aggiornamenti visivi per seguire ogni progresso.',
+      highlights: ['Struttura in avanzamento', 'Team locale operativo', 'Cronoprogramma attivo'],
+    },
+    finalCta: {
+      ...baseCopy.finalCta,
+      title: 'Tutto pronto per la tua prossima decisione patrimoniale.',
+      body: 'Ricevi una presentazione completa e parla con uno specialista.',
+      primary: 'Prenota una chiamata',
+      secondary: 'Vedi cantiere',
+    },
+    contact: {
+      ...baseCopy.contact,
+      tag: 'CONTATTO',
+      title: 'Parla con il nostro team',
+      body: 'Assistenza consultiva e rapida per procedere con sicurezza.',
+      location: 'Costa do Descobrimento • Bahia',
+    },
+    experience: {
+      ...baseCopy.experience,
+      tag: 'ESPERIENZA',
+      title: 'Alcuni luoghi si capiscono. Altri si sentono.',
+      body:
+        'Bella Vista equilibra desiderio e prevedibilità. Un invito a vivere la costa con sicurezza patrimoniale.',
+    },
+    floating: {
+      ariaLabel: 'Apri WhatsApp',
+    },
   },
 };
 
@@ -297,7 +482,86 @@ function Reveal({
   );
 }
 
-function HeroNav() {
+function LanguageSwitcher({
+  locale,
+  onLocaleChange,
+  ariaLabel,
+}: {
+  locale: Locale;
+  onLocaleChange: (value: Locale) => void;
+  ariaLabel: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handleClickOutside = (event: MouseEvent) => {
+      if (!containerRef.current) return;
+      if (!containerRef.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    };
+    window.addEventListener('mousedown', handleClickOutside);
+    return () => window.removeEventListener('mousedown', handleClickOutside);
+  }, [open]);
+
+  return (
+    <div ref={containerRef} className='relative z-50'>
+      <button
+        type='button'
+        onClick={() => setOpen((prev) => !prev)}
+        aria-haspopup='menu'
+        aria-expanded={open}
+        aria-label={ariaLabel}
+        className='inline-flex h-10 items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-white/85 shadow-[0_8px_18px_rgba(5,12,18,0.35)] transition hover:border-[var(--gold)]/60 hover:text-white md:h-9 md:px-2.5'
+      >
+        <Globe className='h-4 w-4' />
+        <span>{locale.toUpperCase()}</span>
+      </button>
+      {open && (
+        <div
+          role='menu'
+          className='absolute right-0 top-full z-[60] mt-2 flex min-w-[140px] max-w-[calc(100vw-24px)] flex-col items-stretch gap-1 rounded-2xl border border-white/15 bg-[rgba(8,16,24,0.92)] p-1 text-white/85 shadow-[0_12px_30px_rgba(0,0,0,0.35)] backdrop-blur'
+        >
+          {localeOptions.map((option) => {
+            const isActive = locale === option.value;
+            return (
+              <button
+                key={option.value}
+                type='button'
+                onClick={() => {
+                  onLocaleChange(option.value);
+                  setOpen(false);
+                }}
+                aria-pressed={isActive}
+                aria-label={`${ariaLabel}: ${option.name}`}
+                className={`inline-flex items-center justify-center rounded-full px-3 py-2 text-[0.55rem] font-semibold tracking-[0.28em] transition ${
+                  isActive
+                    ? 'bg-[var(--gold)]/25 text-white shadow-[0_0_14px_rgba(201,164,106,0.35)]'
+                    : 'text-white/80 hover:bg-white/10 hover:text-white'
+                }`}
+                role='menuitemradio'
+              >
+                <span>{option.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function HeroNav({
+  labels,
+  locale,
+  onLocaleChange,
+}: {
+  labels: typeof baseCopy.nav;
+  locale: Locale;
+  onLocaleChange: (value: Locale) => void;
+}) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -314,19 +578,19 @@ function HeroNav() {
             href='#localizacao'
             className='transition hover:text-[#B7925A] hover:drop-shadow-[0_0_10px_rgba(183,146,90,0.55)]'
           >
-            Localização
+            {labels.location}
           </a>
           <a
             href='#obra'
             className='transition hover:text-[#B7925A] hover:drop-shadow-[0_0_10px_rgba(183,146,90,0.55)]'
           >
-            Obras
+            {labels.works}
           </a>
           <a
             href='#perfil'
             className='transition hover:text-[#B7925A] hover:drop-shadow-[0_0_10px_rgba(183,146,90,0.55)]'
           >
-            Investimento
+            {labels.investment}
           </a>
           <a
             href={whatsappLink}
@@ -334,19 +598,31 @@ function HeroNav() {
             rel='noreferrer'
             className='transition hover:text-[#B7925A] hover:drop-shadow-[0_0_10px_rgba(183,146,90,0.55)]'
           >
-            Contato
+            {labels.contact}
           </a>
+          <LanguageSwitcher
+            locale={locale}
+            onLocaleChange={onLocaleChange}
+            ariaLabel={labels.languageLabel}
+          />
         </div>
-        <button
-          type='button'
-          aria-label='Abrir menu'
-          aria-expanded={menuOpen}
-          aria-controls='hero-menu'
-          onClick={() => setMenuOpen((open) => !open)}
-          className='inline-flex items-center justify-center rounded-full border border-white/20 bg-white/10 px-3 py-2 text-xs uppercase tracking-[0.3em] text-white/80 transition hover:text-white md:hidden'
-        >
-          Menu
-        </button>
+        <div className='flex items-center gap-3 md:hidden'>
+          <LanguageSwitcher
+            locale={locale}
+            onLocaleChange={onLocaleChange}
+            ariaLabel={labels.languageLabel}
+          />
+          <button
+            type='button'
+            aria-label={labels.menuAria}
+            aria-expanded={menuOpen}
+            aria-controls='hero-menu'
+            onClick={() => setMenuOpen((open) => !open)}
+            className='inline-flex items-center justify-center rounded-full border border-white/20 bg-white/10 px-3 py-2 text-xs uppercase tracking-[0.3em] text-white/80 transition hover:text-white'
+          >
+            {labels.menu}
+          </button>
+        </div>
       </nav>
       {menuOpen && (
         <div
@@ -359,21 +635,21 @@ function HeroNav() {
               className='transition hover:text-[#B7925A] hover:drop-shadow-[0_0_10px_rgba(183,146,90,0.55)]'
               onClick={() => setMenuOpen(false)}
             >
-              Localização
+              {labels.location}
             </a>
             <a
               href='#obra'
               className='transition hover:text-[#B7925A] hover:drop-shadow-[0_0_10px_rgba(183,146,90,0.55)]'
               onClick={() => setMenuOpen(false)}
             >
-              Obras
+              {labels.works}
             </a>
             <a
               href='#perfil'
               className='transition hover:text-[#B7925A] hover:drop-shadow-[0_0_10px_rgba(183,146,90,0.55)]'
               onClick={() => setMenuOpen(false)}
             >
-              Investimento
+              {labels.investment}
             </a>
             <a
               href={whatsappLink}
@@ -382,7 +658,7 @@ function HeroNav() {
               className='transition hover:text-[#B7925A] hover:drop-shadow-[0_0_10px_rgba(183,146,90,0.55)]'
               onClick={() => setMenuOpen(false)}
             >
-              Contato
+              {labels.contact}
             </a>
           </div>
         </div>
@@ -563,6 +839,7 @@ function InteractiveMap() {
 
 export default function HomePage() {
   const reduceMotion = useReducedMotion();
+  const [locale, setLocale] = useState<Locale>('pt');
   const [heroVideoReady, setHeroVideoReady] = useState(false);
   const [propertyValue, setPropertyValue] = useState(250000);
   const [dailyRate, setDailyRate] = useState(250);
@@ -571,6 +848,19 @@ export default function HomePage() {
   const [platformFee, setPlatformFee] = useState(12);
   const [activePreset, setActivePreset] = useState('Realista');
   const [progressIndex, setProgressIndex] = useState(0);
+  const copy = translations[locale];
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem(STORAGE_KEY);
+    if (saved === 'pt' || saved === 'en' || saved === 'it') {
+      setLocale(saved);
+    }
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem(STORAGE_KEY, locale);
+    document.documentElement.lang = locale === 'pt' ? 'pt-BR' : locale;
+  }, [locale]);
   const simulatorResults = useMemo(() => {
     const nightsPerMonth = (30 * occupancy) / 100;
     const grossMonthly = nightsPerMonth * dailyRate;
@@ -668,7 +958,7 @@ export default function HomePage() {
   return (
     <MotionConfig reducedMotion='user'>
       <div className='bg-[var(--bg-0)] text-[var(--text)]'>
-        <HeroNav />
+        <HeroNav labels={copy.nav} locale={locale} onLocaleChange={setLocale} />
         <main>
           <section
             id='inicio'
