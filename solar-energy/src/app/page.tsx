@@ -180,11 +180,46 @@ const baseCopy = {
       'Modelo flexível para uso próprio ou renda.',
       'Operação enxuta com potencial recorrente.',
     ],
+    presets: {
+      conservative: 'Conservador',
+      realistic: 'Realista',
+      high: 'Alta Temporada',
+    },
+    fields: {
+      propertyValue: 'Valor do imóvel (R$)',
+      dailyRate: 'Diária média (R$)',
+      occupancy: 'Ocupação (%)',
+      monthlyCosts: 'Custos mensais (R$)',
+      platformFee: 'Taxa de plataforma (%)',
+    },
+    results: {
+      revenue: 'Faturamento',
+      profit: 'Lucro mensal',
+      annualReturn: 'Retorno anual',
+      payback: 'Payback',
+    },
+    ctaPrimary: 'Receber simulação no WhatsApp',
+    ctaSecondary: 'Baixar PDF da simulação',
+    disclaimer: 'Estimativa. Não substitui análise financeira.',
+    paybackUnit: 'anos',
+    notAvailable: '—',
   },
   showcase: {
+    title: 'Vitrine do Bella Vista Beach Residence',
+    subtitle: 'Explore o interior pensado para viver e investir bem.',
     detailsOpen: 'Ver detalhes',
     detailsClose: 'Fechar',
     dialogLabel: 'Detalhes do card',
+    items: [
+      { label: 'STUDIO', title: 'Apartamento studio', desc: '27 m²' },
+      { label: '2 QUARTOS', title: 'Apartamento 2 quartos', desc: '45 m²' },
+      { label: '3 QUARTOS', title: 'Apartamento 3 quartos', desc: '82,48 m²' },
+      {
+        label: 'AMBIENTE TOTAL',
+        title: 'Ambiente completo',
+        desc: 'Borda infinita • SPA e academia • Lounge e trilhas',
+      },
+    ],
   },
   progress: {
     tag: 'ANDAMENTO DA OBRA',
@@ -206,6 +241,24 @@ const baseCopy = {
     body: 'Atendimento consultivo e rápido para você avançar com segurança.',
     email: 'contato@bellavistabeach.com.br',
     location: 'Costa do Descobrimento • Bahia',
+    whatsappValue: 'Atendimento imediato',
+    form: {
+      nameLabel: 'Nome',
+      emailLabel: 'Email',
+      messageLabel: 'Mensagem',
+      namePlaceholder: 'Seu nome',
+      emailPlaceholder: 'voce@email.com',
+      messagePlaceholder: 'Como podemos ajudar?',
+      submit: 'Enviar mensagem',
+    },
+    cards: {
+      whatsapp: 'WhatsApp',
+      email: 'Email',
+      location: 'Localização',
+    },
+  },
+  map: {
+    title: 'Mapa da região',
   },
   experience: {
     tag: 'Experiência',
@@ -282,6 +335,29 @@ const translations: Record<Locale, typeof baseCopy> = {
         'Flexible model for personal use or income.',
         'Lean operation with recurring potential.',
       ],
+      presets: {
+        conservative: 'Conservative',
+        realistic: 'Realistic',
+        high: 'High Season',
+      },
+      fields: {
+        propertyValue: 'Property value (R$)',
+        dailyRate: 'Average daily rate (R$)',
+        occupancy: 'Occupancy (%)',
+        monthlyCosts: 'Monthly costs (R$)',
+        platformFee: 'Platform fee (%)',
+      },
+      results: {
+        revenue: 'Revenue',
+        profit: 'Monthly profit',
+        annualReturn: 'Annual return',
+        payback: 'Payback',
+      },
+      ctaPrimary: 'Receive the simulation on WhatsApp',
+      ctaSecondary: 'Download the simulation PDF',
+      disclaimer: 'Estimate only. Not a financial analysis.',
+      paybackUnit: 'years',
+      notAvailable: '—',
     },
     progress: {
       ...baseCopy.progress,
@@ -304,6 +380,21 @@ const translations: Record<Locale, typeof baseCopy> = {
       title: 'Talk to our team',
       body: 'Consultative, fast support to move forward with confidence.',
       location: 'Discovery Coast • Bahia',
+      whatsappValue: 'Immediate support',
+      form: {
+        nameLabel: 'Name',
+        emailLabel: 'Email',
+        messageLabel: 'Message',
+        namePlaceholder: 'Your name',
+        emailPlaceholder: 'you@email.com',
+        messagePlaceholder: 'How can we help?',
+        submit: 'Send message',
+      },
+      cards: {
+        whatsapp: 'WhatsApp',
+        email: 'Email',
+        location: 'Location',
+      },
     },
     experience: {
       ...baseCopy.experience,
@@ -316,9 +407,24 @@ const translations: Record<Locale, typeof baseCopy> = {
       ariaLabel: 'Open WhatsApp chat',
     },
     showcase: {
+      title: 'Bella Vista Beach Residence Showcase',
+      subtitle: 'Explore interiors designed to live and invest well.',
       detailsOpen: 'View details',
       detailsClose: 'Close',
       dialogLabel: 'Card details',
+      items: [
+        { label: 'STUDIO', title: 'Studio apartment', desc: '27 m²' },
+        { label: '2 BEDROOMS', title: '2-bedroom apartment', desc: '45 m²' },
+        { label: '3 BEDROOMS', title: '3-bedroom apartment', desc: '82.48 m²' },
+        {
+          label: 'FULL AMENITIES',
+          title: 'Complete amenities',
+          desc: 'Infinity edge • Spa and gym • Lounge and trails',
+        },
+      ],
+    },
+    map: {
+      title: 'Regional map',
     },
     pdf: {
       title: 'Bella Vista Beach Residence',
@@ -383,6 +489,29 @@ const translations: Record<Locale, typeof baseCopy> = {
         'Modello flessibile per uso personale o reddito.',
         'Gestione snella con potenziale ricorrente.',
       ],
+      presets: {
+        conservative: 'Conservativo',
+        realistic: 'Realistico',
+        high: 'Alta stagione',
+      },
+      fields: {
+        propertyValue: 'Valore dell’immobile (R$)',
+        dailyRate: 'Tariffa media (R$)',
+        occupancy: 'Occupazione (%)',
+        monthlyCosts: 'Costi mensili (R$)',
+        platformFee: 'Commissione piattaforma (%)',
+      },
+      results: {
+        revenue: 'Ricavi',
+        profit: 'Utile mensile',
+        annualReturn: 'Rendimento annuo',
+        payback: 'Payback',
+      },
+      ctaPrimary: 'Ricevi la simulazione su WhatsApp',
+      ctaSecondary: 'Scarica il PDF della simulazione',
+      disclaimer: 'Stima indicativa. Non sostituisce un’analisi finanziaria.',
+      paybackUnit: 'anni',
+      notAvailable: '—',
     },
     progress: {
       ...baseCopy.progress,
@@ -405,6 +534,21 @@ const translations: Record<Locale, typeof baseCopy> = {
       title: 'Parla con il nostro team',
       body: 'Assistenza consultiva e rapida per procedere con sicurezza.',
       location: 'Costa do Descobrimento • Bahia',
+      whatsappValue: 'Assistenza immediata',
+      form: {
+        nameLabel: 'Nome',
+        emailLabel: 'Email',
+        messageLabel: 'Messaggio',
+        namePlaceholder: 'Il tuo nome',
+        emailPlaceholder: 'tu@email.com',
+        messagePlaceholder: 'Come possiamo aiutarti?',
+        submit: 'Invia messaggio',
+      },
+      cards: {
+        whatsapp: 'WhatsApp',
+        email: 'Email',
+        location: 'Posizione',
+      },
     },
     experience: {
       ...baseCopy.experience,
@@ -417,9 +561,24 @@ const translations: Record<Locale, typeof baseCopy> = {
       ariaLabel: 'Apri WhatsApp',
     },
     showcase: {
+      title: 'Vetrina Bella Vista Beach Residence',
+      subtitle: 'Esplora interni pensati per vivere e investire bene.',
       detailsOpen: 'Vedi dettagli',
       detailsClose: 'Chiudi',
       dialogLabel: 'Dettagli del card',
+      items: [
+        { label: 'STUDIO', title: 'Monolocale', desc: '27 m²' },
+        { label: '2 CAMERE', title: 'Appartamento 2 camere', desc: '45 m²' },
+        { label: '3 CAMERE', title: 'Appartamento 3 camere', desc: '82,48 m²' },
+        {
+          label: 'AMENITIES COMPLETE',
+          title: 'Servizi completi',
+          desc: 'Bordo infinito • Spa e palestra • Lounge e sentieri',
+        },
+      ],
+    },
+    map: {
+      title: 'Mappa della regione',
     },
     pdf: {
       title: 'Bella Vista Beach Residence',
@@ -535,9 +694,11 @@ const progressImages = [
   'https://i.postimg.cc/90rCyBPd/20251113-080300.jpg',
 ];
 
-const simulatorPresets = [
+type PresetKey = 'conservative' | 'realistic' | 'high';
+
+const simulatorPresets: Array<{ key: PresetKey; values: SimulatorValues }> = [
   {
-    label: 'Conservador',
+    key: 'conservative',
     values: {
       propertyValue: 260000,
       dailyRate: 220,
@@ -547,7 +708,7 @@ const simulatorPresets = [
     },
   },
   {
-    label: 'Realista',
+    key: 'realistic',
     values: {
       propertyValue: 250000,
       dailyRate: 250,
@@ -557,7 +718,7 @@ const simulatorPresets = [
     },
   },
   {
-    label: 'Alta Temporada',
+    key: 'high',
     values: {
       propertyValue: 250000,
       dailyRate: 320,
@@ -950,11 +1111,11 @@ function StudioShowcaseCard({
   );
 }
 
-function InteractiveMap() {
+function InteractiveMap({ title }: { title: string }) {
   return (
     <div className='relative h-[340px] w-full overflow-hidden rounded-[24px] border border-white/10 md:h-[360px]'>
       <iframe
-        title='Mapa da região'
+        title={title}
         src={mapEmbedUrl}
         className='h-full w-full border-0'
         loading='lazy'
@@ -973,9 +1134,17 @@ export default function HomePage() {
   const [occupancy, setOccupancy] = useState(55);
   const [monthlyCosts, setMonthlyCosts] = useState(650);
   const [platformFee, setPlatformFee] = useState(12);
-  const [activePreset, setActivePreset] = useState('Realista');
+  const [activePreset, setActivePreset] = useState<PresetKey>('realistic');
   const [progressIndex, setProgressIndex] = useState(0);
   const copy = translations[locale];
+  const localizedShowcaseItems = useMemo(
+    () =>
+      showcaseItems.map((item, index) => ({
+        ...item,
+        ...copy.showcase.items[index],
+      })),
+    [copy]
+  );
 
   useEffect(() => {
     const saved = window.localStorage.getItem(STORAGE_KEY);
@@ -1180,16 +1349,16 @@ export default function HomePage() {
             <div className='section-inner'>
               <div className='flex flex-col gap-3'>
                 <p className='text-xs uppercase tracking-[0.32em] text-[var(--muted)]'>
-                  Vitrine do Bella Vista Beach Residence
+                  {copy.showcase.title}
                 </p>
                 <h3 className='section-title font-semibold text-[var(--text)]'>
-                  Explore o interior pensado para viver e investir bem.
+                  {copy.showcase.subtitle}
                 </h3>
               </div>
               <div className='mt-6 flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory md:grid md:grid-cols-2 md:gap-6 md:overflow-visible md:snap-none lg:grid-cols-3'>
-                {showcaseItems.map((item, index) => (
+                {localizedShowcaseItems.map((item, index) => (
                   <StudioShowcaseCard
-                    key={item.label}
+                    key={`${item.label}-${index}`}
                     {...item}
                     index={index}
                     locale={locale}
@@ -1230,7 +1399,7 @@ export default function HomePage() {
                   viewport={{ once: true, amount: 0.3 }}
                   transition={reduceMotion ? { duration: 0 } : { duration: 0.35 }}
                 >
-                  <InteractiveMap />
+                  <InteractiveMap title={copy.map.title} />
                 </motion.div>
                 <motion.div
                   className='order-3 flex flex-wrap justify-center gap-3 text-sm text-white/80 lg:col-start-1 lg:justify-start'
@@ -1282,7 +1451,7 @@ export default function HomePage() {
                   <div className='flex gap-2 overflow-x-auto pb-1 lg:flex-wrap lg:justify-start lg:overflow-visible'>
                     {simulatorPresets.map((preset) => (
                       <button
-                        key={preset.label}
+                        key={preset.key}
                         type='button'
                         onClick={() => {
                           setPropertyValue(preset.values.propertyValue);
@@ -1290,15 +1459,15 @@ export default function HomePage() {
                           setOccupancy(preset.values.occupancy);
                           setMonthlyCosts(preset.values.monthlyCosts);
                           setPlatformFee(preset.values.platformFee);
-                          setActivePreset(preset.label);
+                          setActivePreset(preset.key);
                         }}
                         className={`flex-shrink-0 rounded-full border px-3 py-2 text-[10px] uppercase tracking-[0.2em] transition ${
-                          activePreset === preset.label
+                          activePreset === preset.key
                             ? 'border-[var(--gold)]/60 bg-[var(--panel-strong)] text-white'
                             : 'border-white/15 bg-white/5 text-white/70 hover:border-[var(--gold)]/40'
                         }`}
                       >
-                        {preset.label}
+                        {copy.simulator.presets[preset.key]}
                       </button>
                     ))}
                   </div>
@@ -1313,7 +1482,7 @@ export default function HomePage() {
                   <div className='space-y-5 text-white'>
                     <div className='grid gap-4 sm:grid-cols-2'>
                       <label className='space-y-2 text-[11px] text-white/60'>
-                        <span>Valor do imóvel (R$)</span>
+                        <span>{copy.simulator.fields.propertyValue}</span>
                         <input
                           type='number'
                           value={propertyValue}
@@ -1324,7 +1493,7 @@ export default function HomePage() {
                         />
                       </label>
                       <label className='space-y-2 text-[11px] text-white/60'>
-                        <span>Diária média (R$)</span>
+                        <span>{copy.simulator.fields.dailyRate}</span>
                         <input
                           type='number'
                           value={dailyRate}
@@ -1336,7 +1505,7 @@ export default function HomePage() {
                       </label>
                       <label className='space-y-2 text-[11px] text-white/60 sm:col-span-2'>
                         <div className='flex items-end justify-between'>
-                          <span>Ocupação (%)</span>
+                          <span>{copy.simulator.fields.occupancy}</span>
                           <span className='text-base font-semibold text-white'>
                             {occupancy}%
                           </span>
@@ -1353,7 +1522,7 @@ export default function HomePage() {
                         />
                       </label>
                       <label className='space-y-2 text-[11px] text-white/60'>
-                        <span>Custos mensais (R$)</span>
+                        <span>{copy.simulator.fields.monthlyCosts}</span>
                         <input
                           type='number'
                           value={monthlyCosts}
@@ -1364,7 +1533,7 @@ export default function HomePage() {
                         />
                       </label>
                       <label className='space-y-2 text-[11px] text-white/60'>
-                        <span>Taxa de plataforma (%)</span>
+                        <span>{copy.simulator.fields.platformFee}</span>
                         <input
                           type='number'
                           value={platformFee}
@@ -1382,7 +1551,7 @@ export default function HomePage() {
                         </span>
                         <div>
                           <p className='text-[9px] uppercase tracking-[0.2em] text-white/50'>
-                            Faturamento
+                            {copy.simulator.results.revenue}
                           </p>
                           <p className='mt-1 text-base font-semibold text-white'>
                             {formatCurrency(animatedResults.grossMonthly)}
@@ -1395,7 +1564,7 @@ export default function HomePage() {
                         </span>
                         <div>
                           <p className='text-[9px] uppercase tracking-[0.2em] text-white/50'>
-                            Lucro mensal
+                            {copy.simulator.results.profit}
                           </p>
                           <p className='mt-1 text-base font-semibold text-white'>
                             {formatCurrency(animatedResults.netMonthly)}
@@ -1408,7 +1577,7 @@ export default function HomePage() {
                         </span>
                         <div>
                           <p className='text-[9px] uppercase tracking-[0.2em] text-white/50'>
-                            Retorno anual
+                            {copy.simulator.results.annualReturn}
                           </p>
                           <p className='mt-1 text-base font-semibold text-white'>
                             {animatedResults.annualReturn.toFixed(1)}%
@@ -1421,12 +1590,12 @@ export default function HomePage() {
                         </span>
                         <div>
                           <p className='text-[9px] uppercase tracking-[0.2em] text-white/50'>
-                            Payback
+                            {copy.simulator.results.payback}
                           </p>
                           <p className='mt-1 text-base font-semibold text-white'>
                             {animatedResults.paybackYears
-                              ? `${animatedResults.paybackYears.toFixed(1)} anos`
-                              : '—'}
+                              ? `${animatedResults.paybackYears.toFixed(1)} ${copy.simulator.paybackUnit}`
+                              : copy.simulator.notAvailable}
                           </p>
                         </div>
                       </div>
@@ -1438,18 +1607,18 @@ export default function HomePage() {
                         rel='noreferrer'
                         className='inline-flex flex-1 items-center justify-center rounded-full bg-[var(--gold)] px-6 py-3 text-xs font-semibold text-[#0c1116] shadow-[0_12px_30px_rgba(201,164,106,0.25)] transition hover:brightness-110'
                       >
-                        Receber simulação no WhatsApp
+                        {copy.simulator.ctaPrimary}
                       </a>
                       <button
                         type='button'
                         onClick={handleDownloadPdf}
                         className='text-center text-xs text-white/60 underline-offset-4 transition hover:text-white hover:underline'
                       >
-                        Baixar PDF da simulação
+                        {copy.simulator.ctaSecondary}
                       </button>
                     </div>
                     <p className='text-[11px] text-white/50'>
-                      Estimativa. Não substitui análise financeira.
+                      {copy.simulator.disclaimer}
                     </p>
                   </div>
                 </motion.div>
@@ -1587,32 +1756,32 @@ export default function HomePage() {
                   >
                     <div className='grid gap-4 sm:grid-cols-2'>
                       <label className='space-y-2 text-sm text-white/70'>
-                        <span>Nome</span>
+                        <span>{copy.contact.form.nameLabel}</span>
                         <input
                           type='text'
                           name='name'
-                          placeholder='Seu nome'
+                          placeholder={copy.contact.form.namePlaceholder}
                           required
                           className='w-full rounded-xl border border-white/12 bg-[var(--panel)] px-4 py-3 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/40'
                         />
                       </label>
                       <label className='space-y-2 text-sm text-white/70'>
-                        <span>Email</span>
+                        <span>{copy.contact.form.emailLabel}</span>
                         <input
                           type='email'
                           name='email'
-                          placeholder='voce@email.com'
+                          placeholder={copy.contact.form.emailPlaceholder}
                           required
                           className='w-full rounded-xl border border-white/12 bg-[var(--panel)] px-4 py-3 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/40'
                         />
                       </label>
                     </div>
                     <label className='space-y-2 text-sm text-white/70'>
-                      <span>Mensagem</span>
+                      <span>{copy.contact.form.messageLabel}</span>
                       <textarea
                         rows={4}
                         name='message'
-                        placeholder='Como podemos ajudar?'
+                        placeholder={copy.contact.form.messagePlaceholder}
                         required
                         className='w-full resize-none rounded-xl border border-white/12 bg-[var(--panel)] px-4 py-3 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/40'
                       />
@@ -1621,7 +1790,7 @@ export default function HomePage() {
                       type='submit'
                       className='inline-flex w-full items-center justify-center rounded-full bg-[var(--gold)] px-6 py-3 text-sm font-semibold text-[#0c1116] transition hover:brightness-110'
                     >
-                      Enviar mensagem
+                      {copy.contact.form.submit}
                     </button>
                   </form>
                 </div>
@@ -1632,7 +1801,7 @@ export default function HomePage() {
                     </span>
                     <div>
                       <p className='text-xs uppercase tracking-[0.2em] text-white/50'>
-                        WhatsApp
+                        {copy.contact.cards.whatsapp}
                       </p>
                       <a
                         href={whatsappLink}
@@ -1640,7 +1809,7 @@ export default function HomePage() {
                         rel='noreferrer'
                         className='mt-1 block text-sm font-semibold text-white'
                       >
-                        Atendimento imediato
+                        {copy.contact.whatsappValue}
                       </a>
                     </div>
                   </div>
@@ -1650,7 +1819,7 @@ export default function HomePage() {
                     </span>
                     <div>
                       <p className='text-xs uppercase tracking-[0.2em] text-white/50'>
-                        Email
+                        {copy.contact.cards.email}
                       </p>
                       <a
                         href={`mailto:${copy.contact.email}`}
@@ -1666,7 +1835,7 @@ export default function HomePage() {
                     </span>
                     <div>
                       <p className='text-xs uppercase tracking-[0.2em] text-white/50'>
-                        Localização
+                        {copy.contact.cards.location}
                       </p>
                       <p className='mt-1 text-sm font-semibold text-white'>
                         {copy.contact.location}
