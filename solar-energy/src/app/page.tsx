@@ -82,6 +82,64 @@ const localeOptions = [
   { value: 'it', label: 'IT', name: 'Italiano' },
 ] as const;
 
+type ShowcaseDetail = { icon: LucideIcon; label: string; value: string };
+
+const detailLabelMap: Record<Locale, Record<string, string>> = {
+  pt: {},
+  en: {
+    Quartos: 'Bedrooms',
+    Suítes: 'Suites',
+    Vaga: 'Parking',
+    Vagas: 'Parking',
+    Área: 'Area',
+    Banheiro: 'Bathroom',
+    Banheiros: 'Bathrooms',
+    Piscina: 'Pool',
+    'Beach Club': 'Beach Club',
+    'Bem-estar': 'Wellness',
+    Lazer: 'Leisure',
+    Segurança: 'Security',
+  },
+  it: {
+    Quartos: 'Camere',
+    Suítes: 'Suite',
+    Vaga: 'Posto auto',
+    Vagas: 'Posti auto',
+    Área: 'Area',
+    Banheiro: 'Bagno',
+    Banheiros: 'Bagni',
+    Piscina: 'Piscina',
+    'Beach Club': 'Beach Club',
+    'Bem-estar': 'Benessere',
+    Lazer: 'Tempo libero',
+    Segurança: 'Sicurezza',
+  },
+};
+
+const detailValueMap: Record<Locale, Record<string, string>> = {
+  pt: {},
+  en: {
+    'Borda infinita, vista para o mar': 'Infinity edge, ocean view',
+    Exclusivo: 'Exclusive',
+    'SPA, academia e ofurôs': 'Spa, gym and hot tubs',
+    'Lounge bar, áreas verdes e trilhas': 'Lounge bar, green areas and trails',
+    '24 horas': '24 hours',
+  },
+  it: {
+    'Borda infinita, vista para o mar': 'Bordo infinito, vista mare',
+    Exclusivo: 'Esclusivo',
+    'SPA, academia e ofurôs': 'Spa, palestra e ofurô',
+    'Lounge bar, áreas verdes e trilhas': 'Lounge bar, aree verdi e sentieri',
+    '24 horas': '24 ore',
+  },
+};
+
+const localizeDetail = (detail: ShowcaseDetail, locale: Locale): ShowcaseDetail => ({
+  ...detail,
+  label: detailLabelMap[locale]?.[detail.label] ?? detail.label,
+  value: detailValueMap[locale]?.[detail.value] ?? detail.value,
+});
+
 const baseCopy = {
   nav: {
     location: 'Localização',
@@ -125,6 +183,11 @@ const baseCopy = {
       'Operação enxuta com potencial recorrente.',
     ],
   },
+  showcase: {
+    detailsOpen: 'Ver detalhes',
+    detailsClose: 'Fechar',
+    dialogLabel: 'Detalhes do card',
+  },
   progress: {
     tag: 'ANDAMENTO DA OBRA',
     title: 'Já estamos em obra.',
@@ -154,6 +217,22 @@ const baseCopy = {
   },
   floating: {
     ariaLabel: 'Abrir conversa no WhatsApp',
+  },
+  pdf: {
+    title: 'Bella Vista Beach Residence',
+    subtitle: 'Simulacao de retorno (valores ilustrativos)',
+    propertyValue: 'Valor do imovel',
+    dailyRate: 'Diaria media',
+    occupancy: 'Ocupacao',
+    monthlyCosts: 'Custos mensais',
+    platformFee: 'Taxa plataforma',
+    grossMonthly: 'Faturamento mensal',
+    netMonthly: 'Lucro mensal',
+    annualReturn: 'Retorno anual',
+    payback: 'Payback',
+    paybackUnit: 'anos',
+    notAvailable: '-',
+    fileName: 'simulacao-bella-vista.pdf',
   },
 };
 
@@ -238,6 +317,27 @@ const translations: Record<Locale, typeof baseCopy> = {
     floating: {
       ariaLabel: 'Open WhatsApp chat',
     },
+    showcase: {
+      detailsOpen: 'View details',
+      detailsClose: 'Close',
+      dialogLabel: 'Card details',
+    },
+    pdf: {
+      title: 'Bella Vista Beach Residence',
+      subtitle: 'Return simulation (illustrative values)',
+      propertyValue: 'Property value',
+      dailyRate: 'Average daily rate',
+      occupancy: 'Occupancy',
+      monthlyCosts: 'Monthly costs',
+      platformFee: 'Platform fee',
+      grossMonthly: 'Monthly revenue',
+      netMonthly: 'Monthly profit',
+      annualReturn: 'Annual return',
+      payback: 'Payback',
+      paybackUnit: 'years',
+      notAvailable: '-',
+      fileName: 'bella-vista-simulation.pdf',
+    },
   },
   it: {
     ...baseCopy,
@@ -317,6 +417,27 @@ const translations: Record<Locale, typeof baseCopy> = {
     },
     floating: {
       ariaLabel: 'Apri WhatsApp',
+    },
+    showcase: {
+      detailsOpen: 'Vedi dettagli',
+      detailsClose: 'Chiudi',
+      dialogLabel: 'Dettagli del card',
+    },
+    pdf: {
+      title: 'Bella Vista Beach Residence',
+      subtitle: 'Simulazione di rendimento (valori indicativi)',
+      propertyValue: "Valore dell'immobile",
+      dailyRate: 'Tariffa media',
+      occupancy: 'Occupazione',
+      monthlyCosts: 'Costi mensili',
+      platformFee: 'Commissione piattaforma',
+      grossMonthly: 'Ricavi mensili',
+      netMonthly: 'Utile mensile',
+      annualReturn: 'Rendimento annuo',
+      payback: 'Payback',
+      paybackUnit: 'anni',
+      notAvailable: '-',
+      fileName: 'simulazione-bella-vista.pdf',
     },
   },
 };
@@ -403,7 +524,7 @@ const showcaseItems = [
   },
 ];
 
-const showcaseDetails = [
+const showcaseDetails: ShowcaseDetail[] = [
   { icon: Ruler, label: 'Área', value: '48 m²' },
   { icon: BedDouble, label: 'Quartos', value: '1' },
   { icon: Bath, label: 'Banheiros', value: '1' },
@@ -674,19 +795,26 @@ function StudioShowcaseCard({
   images,
   details,
   index,
+  locale,
+  showcaseCopy,
 }: {
   label: string;
   title: string;
   desc: string;
   images: string[];
-  details?: Array<{ icon: LucideIcon; label: string; value: string }>;
+  details?: ShowcaseDetail[];
   index: number;
+  locale: Locale;
+  showcaseCopy: typeof baseCopy.showcase;
 }) {
   const reduceMotion = useReducedMotion();
   const [imageIndex, setImageIndex] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const hasCarousel = images.length > 1;
   const resolvedDetails = details ?? showcaseDetails;
+  const localizedDetails = resolvedDetails.map((detail) =>
+    localizeDetail(detail, locale)
+  );
 
   useEffect(() => {
     if (!hasCarousel) return undefined;
@@ -750,7 +878,9 @@ function StudioShowcaseCard({
             </h3>
             <p className='mt-1 text-sm text-[var(--muted)]'>{desc}</p>
           </div>
-          <div className='text-sm text-[var(--muted)]'>Ver detalhes →</div>
+          <div className='text-sm text-[var(--muted)]'>
+            {showcaseCopy.detailsOpen} →
+          </div>
         </div>
       </motion.button>
 
@@ -770,7 +900,7 @@ function StudioShowcaseCard({
             <motion.div
               role='dialog'
               aria-modal='true'
-              aria-label={`Detalhes do card ${title}`}
+              aria-label={`${showcaseCopy.dialogLabel} ${title}`}
               className='relative z-10 w-full max-w-md rounded-[24px] border border-white/10 bg-[rgba(6,16,24,0.96)] p-6 text-white shadow-[0_24px_60px_rgba(5,12,18,0.55),0_0_40px_rgba(183,146,90,0.12)]'
               initial={{ y: 16, opacity: 0, scale: 0.98 }}
               animate={{ y: 0, opacity: 1, scale: 1 }}
@@ -782,7 +912,7 @@ function StudioShowcaseCard({
                 type='button'
                 onClick={() => setIsOpen(false)}
                 className='absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/70 transition hover:text-white'
-                aria-label='Fechar'
+                aria-label={showcaseCopy.detailsClose}
               >
                 <X className='h-4 w-4' />
               </button>
@@ -792,7 +922,7 @@ function StudioShowcaseCard({
               <h3 className='mt-4 text-xl font-semibold'>{title}</h3>
               <p className='mt-2 text-sm text-white/70'>{desc}</p>
               <div className='mt-5 grid grid-cols-2 gap-3'>
-                {resolvedDetails.map((detail) => {
+                {localizedDetails.map((detail) => {
                   const Icon = detail.icon;
                   return (
                     <div
@@ -882,22 +1012,22 @@ export default function HomePage() {
   const [animatedResults, setAnimatedResults] = useState(simulatorResults);
   const handleDownloadPdf = () => {
     const lines = [
-      'Bella Vista Beach Residence',
-      'Simulacao de retorno (valores ilustrativos)',
+      copy.pdf.title,
+      copy.pdf.subtitle,
       '',
-      `Valor do imovel: ${formatCurrency(propertyValue)}`,
-      `Diaria media: ${formatCurrency(dailyRate)}`,
-      `Ocupacao: ${occupancy}%`,
-      `Custos mensais: ${formatCurrency(monthlyCosts)}`,
-      `Taxa plataforma: ${platformFee}%`,
+      `${copy.pdf.propertyValue}: ${formatCurrency(propertyValue)}`,
+      `${copy.pdf.dailyRate}: ${formatCurrency(dailyRate)}`,
+      `${copy.pdf.occupancy}: ${occupancy}%`,
+      `${copy.pdf.monthlyCosts}: ${formatCurrency(monthlyCosts)}`,
+      `${copy.pdf.platformFee}: ${platformFee}%`,
       '',
-      `Faturamento mensal: ${formatCurrency(simulatorResults.grossMonthly)}`,
-      `Lucro mensal: ${formatCurrency(simulatorResults.netMonthly)}`,
-      `Retorno anual: ${simulatorResults.annualReturn.toFixed(1)}%`,
-      `Payback: ${
+      `${copy.pdf.grossMonthly}: ${formatCurrency(simulatorResults.grossMonthly)}`,
+      `${copy.pdf.netMonthly}: ${formatCurrency(simulatorResults.netMonthly)}`,
+      `${copy.pdf.annualReturn}: ${simulatorResults.annualReturn.toFixed(1)}%`,
+      `${copy.pdf.payback}: ${
         simulatorResults.paybackYears
-          ? `${simulatorResults.paybackYears.toFixed(1)} anos`
-          : '-'
+          ? `${simulatorResults.paybackYears.toFixed(1)} ${copy.pdf.paybackUnit}`
+          : copy.pdf.notAvailable
       }`,
     ];
     const pdf = buildPdf(lines);
@@ -905,7 +1035,7 @@ export default function HomePage() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'simulacao-bella-vista.pdf';
+    link.download = copy.pdf.fileName;
     link.click();
     URL.revokeObjectURL(url);
   };
@@ -1061,7 +1191,13 @@ export default function HomePage() {
               </div>
               <div className='mt-6 flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory md:grid md:grid-cols-2 md:gap-6 md:overflow-visible md:snap-none lg:grid-cols-3'>
                 {showcaseItems.map((item, index) => (
-                  <StudioShowcaseCard key={item.label} {...item} index={index} />
+                  <StudioShowcaseCard
+                    key={item.label}
+                    {...item}
+                    index={index}
+                    locale={locale}
+                    showcaseCopy={copy.showcase}
+                  />
                 ))}
               </div>
             </div>
