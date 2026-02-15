@@ -412,7 +412,7 @@ const translations: Record<Locale, typeof baseCopy> = {
     },
     showcase: {
       title: 'Residence Collection',
-      subtitle: 'Explore spaces designed for living — and built for returns.',
+      subtitle: 'Explore spaces designed for living and built for returns.',
       detailsOpen: 'Explore',
       detailsClose: 'Close',
       dialogLabel: 'Residence details',
