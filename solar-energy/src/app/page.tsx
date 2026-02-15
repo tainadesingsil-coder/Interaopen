@@ -1157,13 +1157,6 @@ export default function HomePage() {
   );
 
   useEffect(() => {
-    const saved = window.localStorage.getItem(STORAGE_KEY);
-    if (saved === 'pt' || saved === 'en' || saved === 'it') {
-      setLocale(saved);
-    }
-  }, []);
-
-  useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, locale);
     document.documentElement.lang = locale === 'pt' ? 'pt-BR' : locale;
   }, [locale]);
