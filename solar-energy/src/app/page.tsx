@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   AnimatePresence,
   motion,
@@ -978,11 +979,16 @@ function StudioShowcaseCard({
   const reduceMotion = useReducedMotion();
   const [imageIndex, setImageIndex] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const hasCarousel = images.length > 1;
   const resolvedDetails = details ?? showcaseDetails;
   const localizedDetails = resolvedDetails.map((detail) =>
     localizeDetail(detail, locale)
   );
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!hasCarousel) return undefined;
@@ -994,12 +1000,93 @@ function StudioShowcaseCard({
 
   useEffect(() => {
     if (!isOpen) return undefined;
+    const { overflow, paddingRight } = document.body.style;
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+    document.body.style.overflow = 'hidden';
+    if (scrollbarWidth > 0) {
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+    }
+    return () => {
+      document.body.style.overflow = overflow;
+      document.body.style.paddingRight = paddingRight;
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return undefined;
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') setIsOpen(false);
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen]);
+
+  const modal = (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          className='fixed inset-0 z-[60] flex items-center justify-center p-6 overflow-y-auto'
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          <div
+            className='absolute inset-0 bg-black/60 backdrop-blur-sm'
+            onClick={() => setIsOpen(false)}
+            aria-hidden='true'
+          />
+          <motion.div
+            role='dialog'
+            aria-modal='true'
+            aria-label={`${showcaseCopy.dialogLabel} ${title}`}
+            className='relative z-10 w-full max-w-md rounded-[24px] border border-white/10 bg-[rgba(6,16,24,0.96)] p-6 text-white shadow-[0_24px_60px_rgba(5,12,18,0.55),0_0_40px_rgba(183,146,90,0.12)]'
+            initial={{ y: 16, opacity: 0, scale: 0.98 }}
+            animate={{ y: 0, opacity: 1, scale: 1 }}
+            exit={{ y: 12, opacity: 0, scale: 0.98 }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type='button'
+              onClick={() => setIsOpen(false)}
+              className='absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/70 transition hover:text-white'
+              aria-label={showcaseCopy.detailsClose}
+            >
+              <X className='h-4 w-4' />
+            </button>
+            <span className='inline-flex rounded-full border border-[var(--gold)]/40 bg-white/5 px-3 py-1 text-[0.6rem] uppercase tracking-[0.4em] text-[var(--gold)]'>
+              {label}
+            </span>
+            <h3 className='mt-4 text-xl font-semibold'>{title}</h3>
+            <p className='mt-2 text-sm text-white/70'>{desc}</p>
+            <div className='mt-5 grid grid-cols-2 gap-3'>
+              {localizedDetails.map((detail) => {
+                const Icon = detail.icon;
+                return (
+                  <div
+                    key={detail.label}
+                    className='flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3'
+                  >
+                    <span className='inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/5 text-[var(--gold)]'>
+                      <Icon className='h-4 w-4' />
+                    </span>
+                    <div>
+                      <p className='text-[10px] uppercase tracking-[0.2em] text-white/50'>
+                        {detail.label}
+                      </p>
+                      <p className='text-sm font-semibold text-white'>
+                        {detail.value}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
 
   return (
     <>
@@ -1051,72 +1138,7 @@ function StudioShowcaseCard({
           </div>
         </div>
       </motion.button>
-
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            className='fixed inset-0 z-[60] flex items-center justify-center p-6'
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <div
-              className='absolute inset-0 bg-black/60 backdrop-blur-sm'
-              onClick={() => setIsOpen(false)}
-              aria-hidden='true'
-            />
-            <motion.div
-              role='dialog'
-              aria-modal='true'
-              aria-label={`${showcaseCopy.dialogLabel} ${title}`}
-              className='relative z-10 w-full max-w-md rounded-[24px] border border-white/10 bg-[rgba(6,16,24,0.96)] p-6 text-white shadow-[0_24px_60px_rgba(5,12,18,0.55),0_0_40px_rgba(183,146,90,0.12)]'
-              initial={{ y: 16, opacity: 0, scale: 0.98 }}
-              animate={{ y: 0, opacity: 1, scale: 1 }}
-              exit={{ y: 12, opacity: 0, scale: 0.98 }}
-              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              onClick={(event) => event.stopPropagation()}
-            >
-              <button
-                type='button'
-                onClick={() => setIsOpen(false)}
-                className='absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/70 transition hover:text-white'
-                aria-label={showcaseCopy.detailsClose}
-              >
-                <X className='h-4 w-4' />
-              </button>
-              <span className='inline-flex rounded-full border border-[var(--gold)]/40 bg-white/5 px-3 py-1 text-[0.6rem] uppercase tracking-[0.4em] text-[var(--gold)]'>
-                {label}
-              </span>
-              <h3 className='mt-4 text-xl font-semibold'>{title}</h3>
-              <p className='mt-2 text-sm text-white/70'>{desc}</p>
-              <div className='mt-5 grid grid-cols-2 gap-3'>
-                {localizedDetails.map((detail) => {
-                  const Icon = detail.icon;
-                  return (
-                    <div
-                      key={detail.label}
-                      className='flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3'
-                    >
-                      <span className='inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/5 text-[var(--gold)]'>
-                        <Icon className='h-4 w-4' />
-                      </span>
-                      <div>
-                        <p className='text-[10px] uppercase tracking-[0.2em] text-white/50'>
-                          {detail.label}
-                        </p>
-                        <p className='text-sm font-semibold text-white'>
-                          {detail.value}
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
+      {mounted ? createPortal(modal, document.body) : null}
     </>
   );
 }
