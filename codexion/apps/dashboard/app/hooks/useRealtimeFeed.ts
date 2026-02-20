@@ -185,6 +185,119 @@ function parseIncomingEvent(payload: unknown): FeedEvent | null {
   });
 }
 
+function mapWatchSessionToFeedEvent(data: unknown): FeedEvent | null {
+  if (!data || typeof data !== 'object') {
+    return null;
+  }
+
+  const session = data as {
+    device_id?: unknown;
+    device_name?: unknown;
+    connected?: unknown;
+    battery_level?: unknown;
+    last_hr?: unknown;
+    last_steps?: unknown;
+    last_spo2?: unknown;
+    last_seen_at?: unknown;
+    updated_at?: unknown;
+  };
+
+  const deviceId = safeString(session.device_id);
+  if (!deviceId) {
+    return null;
+  }
+
+  const deviceName = safeString(session.device_name) || deviceId;
+  const connected = Boolean(session.connected);
+  const recordedAt = safeString(session.last_seen_at) || safeString(session.updated_at) || new Date().toISOString();
+  const battery = session.battery_level;
+  const hr = session.last_hr;
+  const steps = session.last_steps;
+  const spo2 = session.last_spo2;
+
+  return {
+    id: `watch-session-${deviceId}-${safeString(session.updated_at) || Date.now()}`,
+    condominiumId: DEFAULT_CONDO_ID,
+    type: 'access',
+    severity: connected ? 'info' : 'warn',
+    title: connected ? 'Relógio conectado' : 'Relógio desconectado',
+    description: connected
+      ? `Dispositivo ${deviceName} ativo • HR ${String(hr ?? '--')} • Passos ${String(steps ?? '--')} • SpO2 ${String(spo2 ?? '--')}`
+      : `Dispositivo ${deviceName} desconectado`,
+    tower: 'Vvfit',
+    unit: deviceName,
+    timestamp: toTimeLabel(recordedAt),
+    payload: {
+      device_id: deviceId,
+      device_name: deviceName,
+      connected,
+      battery_level: battery,
+      hr,
+      steps,
+      spo2,
+      recorded_at: recordedAt,
+    },
+    actions: [{ type: 'acknowledge', label: 'Reconhecer' }],
+  };
+}
+
+function mapWatchHeartbeatToFeedEvent(data: unknown): FeedEvent | null {
+  if (!data || typeof data !== 'object') {
+    return null;
+  }
+
+  const heartbeat = data as {
+    device_id?: unknown;
+    device_name?: unknown;
+    last_hr?: unknown;
+    last_steps?: unknown;
+    last_spo2?: unknown;
+    battery_level?: unknown;
+    last_seen_at?: unknown;
+    updated_at?: unknown;
+  };
+
+  const deviceId = safeString(heartbeat.device_id);
+  if (!deviceId) {
+    return null;
+  }
+
+  const deviceName = safeString(heartbeat.device_name) || deviceId;
+  const hr = Number(heartbeat.last_hr);
+  const steps = Number(heartbeat.last_steps);
+  const spo2 = heartbeat.last_spo2;
+  const battery = heartbeat.battery_level;
+  const recordedAt =
+    safeString(heartbeat.last_seen_at) || safeString(heartbeat.updated_at) || new Date().toISOString();
+
+  const hrSafe = Number.isFinite(hr) ? hr : null;
+  const stepsSafe = Number.isFinite(steps) ? steps : null;
+  const severity: FeedEvent['severity'] =
+    hrSafe !== null && hrSafe >= 130 ? 'warn' : 'info';
+
+  return {
+    id: `watch-heartbeat-${deviceId}-${safeString(heartbeat.last_seen_at) || Date.now()}`,
+    condominiumId: DEFAULT_CONDO_ID,
+    type: 'access',
+    severity,
+    title: 'Heartbeat do relógio',
+    description: `HR ${String(hrSafe ?? '--')} • Passos ${String(stepsSafe ?? '--')} • SpO2 ${String(spo2 ?? '--')} • Bateria ${String(battery ?? '--')}%`,
+    tower: 'Vvfit',
+    unit: deviceName,
+    timestamp: toTimeLabel(recordedAt),
+    payload: {
+      device_id: deviceId,
+      device_name: deviceName,
+      hr: hrSafe,
+      steps: stepsSafe,
+      spo2,
+      battery_level: battery,
+      recorded_at: recordedAt,
+    },
+    actions: [{ type: 'acknowledge', label: 'Reconhecer' }],
+  };
+}
+
 export function useRealtimeFeed(): UseRealtimeFeedResult {
   const wsRef = useRef<WebSocket | null>(null);
   const [events, setEvents] = useState<FeedEvent[]>(() => {
@@ -333,6 +446,24 @@ export function useRealtimeFeed(): UseRealtimeFeedResult {
             return;
           }
           setEvents((previous) => [event, ...previous].slice(0, 300));
+          return;
+        }
+
+        if (parsed.channel === 'watch.session') {
+          const watchSessionEvent = mapWatchSessionToFeedEvent(parsed.data);
+          if (!watchSessionEvent) {
+            return;
+          }
+          setEvents((previous) => [watchSessionEvent, ...previous].slice(0, 300));
+          return;
+        }
+
+        if (parsed.channel === 'watch.heartbeat') {
+          const watchHeartbeatEvent = mapWatchHeartbeatToFeedEvent(parsed.data);
+          if (!watchHeartbeatEvent) {
+            return;
+          }
+          setEvents((previous) => [watchHeartbeatEvent, ...previous].slice(0, 300));
         }
       } catch (_error) {
         // Ignore malformed WS payloads from unknown channels.

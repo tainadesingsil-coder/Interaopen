@@ -92,7 +92,7 @@ export function useEdgeWatchSession() {
     refresh();
     const interval = window.setInterval(() => {
       refresh();
-    }, 6000);
+    }, 2500);
     return () => window.clearInterval(interval);
   }, [enabled]);
 

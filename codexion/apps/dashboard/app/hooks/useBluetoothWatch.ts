@@ -121,7 +121,20 @@ export function useBluetoothWatch(options: UseBluetoothWatchOptions = {}) {
         steps: snapshot.steps,
         spo2: snapshot.spo2,
       });
-    }, 10000);
+
+      // Periodic telemetry fallback so operations keep flowing even when
+      // notifications are sparse on some watch firmwares.
+      if (typeof snapshot.hr === 'number') {
+        options.onTelemetry?.({
+          device_id: currentDeviceId,
+          hr: snapshot.hr,
+          steps: snapshot.steps,
+          spo2: snapshot.spo2,
+          timestamp,
+          battery_level: snapshot.battery,
+        });
+      }
+    }, 5000);
   };
 
   const sendImmediateHeartbeat = (currentDeviceId: string) => {
@@ -136,6 +149,17 @@ export function useBluetoothWatch(options: UseBluetoothWatchOptions = {}) {
       steps: snapshot.steps,
       spo2: snapshot.spo2,
     });
+
+    if (typeof snapshot.hr === 'number') {
+      options.onTelemetry?.({
+        device_id: currentDeviceId,
+        hr: snapshot.hr,
+        steps: snapshot.steps,
+        spo2: snapshot.spo2,
+        timestamp,
+        battery_level: snapshot.battery,
+      });
+    }
   };
 
   useEffect(() => {
