@@ -3,10 +3,15 @@ name: Cloudflare Pages
 on:
   pull_request:
     branches: [ main ]
+    paths-ignore:
+      - 'codexion/**'
+      - '.github/workflows/cloudflare-pages-codexion-dashboard.yml'
   push:
     branches:
       - main
-      - '**'
+    paths-ignore:
+      - 'codexion/**'
+      - '.github/workflows/cloudflare-pages-codexion-dashboard.yml'
 
 jobs:
   deploy:
