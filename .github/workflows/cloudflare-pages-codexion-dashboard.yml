@@ -23,8 +23,8 @@ jobs:
       contents: read
       deployments: write
     env:
-      CF_API_TOKEN: ${{ secrets.CF_API_TOKEN || secrets.CLOUDFLARE_API_TOKEN || secrets.CF_PAGES_API_TOKEN || vars.CF_API_TOKEN || vars.CLOUDFLARE_API_TOKEN }}
-      CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID || secrets.CLOUDFLARE_ACCOUNT_ID || vars.CF_ACCOUNT_ID || vars.CLOUDFLARE_ACCOUNT_ID }}
+      CF_API_TOKEN: ${{ secrets.CF_API_TOKEN || secrets.CLOUDFLARE_API_TOKEN || secrets.CF_PAGES_API_TOKEN || secrets.CF_ACCOUNTCODE || vars.CF_API_TOKEN || vars.CLOUDFLARE_API_TOKEN || vars.CF_ACCOUNTCODE }}
+      CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID || secrets.CLOUDFLARE_ACCOUNT_ID || secrets.CF_ACCOUNT_IDCODE || vars.CF_ACCOUNT_ID || vars.CLOUDFLARE_ACCOUNT_ID || vars.CF_ACCOUNT_IDCODE }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
