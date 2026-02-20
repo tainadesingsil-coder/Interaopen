@@ -1,57 +1,11 @@
-name: Cloudflare Pages
+name: Cloudflare Pages (Legacy Disabled)
 
 on:
-  pull_request:
-    branches: [ main ]
-    paths-ignore:
-      - 'codexion/**'
-      - '.github/workflows/cloudflare-pages-codexion-dashboard.yml'
-  push:
-    branches:
-      - main
-    paths-ignore:
-      - 'codexion/**'
-      - '.github/workflows/cloudflare-pages-codexion-dashboard.yml'
+  workflow_dispatch:
 
 jobs:
-  deploy:
-    name: Deploy to Cloudflare Pages
+  disabled:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      deployments: write
-    env:
-      CF_API_TOKEN: ${{ secrets.CF_API_TOKEN || secrets.CLOUDFLARE_API_TOKEN }}
-      CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID || secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: package-lock.json
-
-      - name: Install dependencies
-        run: npm ci --prefer-offline --no-audit --no-fund
-
-      - name: Build
-        run: npm run build
-
-      - name: Publish to Cloudflare Pages
-        if: ${{ env.CF_API_TOKEN != '' && env.CF_ACCOUNT_ID != '' }}
-        uses: cloudflare/pages-action@v1
-        with:
-          apiToken: ${{ env.CF_API_TOKEN }}
-          accountId: ${{ env.CF_ACCOUNT_ID }}
-          projectName: solarenergy-5h5
-          directory: dist
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref == 'refs/heads/cursor/landing-page-bella-vista-7d69' && 'cursor-landing-page-bella-vi' || github.ref == 'refs/heads/main' && 'main' || github.ref_name }}
-          wranglerVersion: '3'
-
-      - name: Skip Cloudflare publish (missing secrets)
-        if: ${{ env.CF_API_TOKEN == '' || env.CF_ACCOUNT_ID == '' }}
-        run: echo "Cloudflare secrets are missing. Configure CF_API_TOKEN/CF_ACCOUNT_ID or CLOUDFLARE_API_TOKEN/CLOUDFLARE_ACCOUNT_ID."
+      - name: Legacy workflow disabled
+        run: echo "This legacy workflow is disabled. Use 'Cloudflare Pages (Codexion Dashboard)'."
