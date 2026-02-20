@@ -1,6 +1,7 @@
 name: Cloudflare Pages (Codexion Dashboard)
 
 on:
+  workflow_dispatch:
   pull_request:
     branches: [ main ]
     paths:
