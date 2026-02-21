@@ -77,7 +77,10 @@ function mapEdgeCommand(command: EdgeCommand): CommandItem {
 }
 
 export function useCommandQueue(options?: { limit?: number; statuses?: string }) {
-  const apiBase = useMemo(() => process.env.NEXT_PUBLIC_EDGE_API_URL || '', []);
+  const apiBase = useMemo(
+    () => process.env.NEXT_PUBLIC_EDGE_API_URL || 'http://localhost:8787',
+    []
+  );
   const enabled = apiBase.length > 0;
   const limit = options?.limit ?? 20;
   const statuses = options?.statuses ?? 'pending,failed,dispatched';

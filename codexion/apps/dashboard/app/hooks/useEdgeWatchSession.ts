@@ -34,7 +34,7 @@ function safeNumber(value: unknown) {
 
 export function useEdgeWatchSession() {
   const apiBase = useMemo(
-    () => process.env.NEXT_PUBLIC_EDGE_API_URL || '',
+    () => process.env.NEXT_PUBLIC_EDGE_API_URL || 'http://localhost:8787',
     []
   );
   const [sessions, setSessions] = useState<SessionItem[]>([]);

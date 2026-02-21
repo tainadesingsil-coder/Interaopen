@@ -299,8 +299,9 @@ export default function Page() {
   };
 
   const selectedCondominium = condominiumById.get(selectedCondominiumId) || mockCondominiums[0];
-  const edgeApiUrl = process.env.NEXT_PUBLIC_EDGE_API_URL || '';
-  const middlewareApiUrl = process.env.NEXT_PUBLIC_MIDDLEWARE_API_URL || '';
+  const edgeApiUrl = process.env.NEXT_PUBLIC_EDGE_API_URL || 'http://localhost:8787';
+  const middlewareApiUrl =
+    process.env.NEXT_PUBLIC_MIDDLEWARE_API_URL || 'http://localhost:8081';
   const edgeOnline = connectionState === 'online';
   const bleScanning = edgeOnline && !offlineMode;
 

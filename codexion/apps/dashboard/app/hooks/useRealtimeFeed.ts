@@ -322,7 +322,7 @@ export function useRealtimeFeed(): UseRealtimeFeedResult {
     if (typeof window === 'undefined') {
       return '';
     }
-    return process.env.NEXT_PUBLIC_EDGE_API_URL || '';
+    return process.env.NEXT_PUBLIC_EDGE_API_URL || 'http://localhost:8787';
   }, []);
 
   const wsUrl = useMemo(() => {
