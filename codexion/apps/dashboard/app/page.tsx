@@ -17,6 +17,7 @@ import { useBluetoothWatch } from '@/app/hooks/useBluetoothWatch';
 import { useCommandQueue } from '@/app/hooks/useCommandQueue';
 import { useEdgeWatchSession } from '@/app/hooks/useEdgeWatchSession';
 import { useRealtimeFeed } from '@/app/hooks/useRealtimeFeed';
+import { getRuntimeEdgeApiUrl, getRuntimeMiddlewareApiUrl } from '@/app/lib/runtime-endpoints';
 import { mockCondominiums } from '@/src/mock/condominiums';
 import type {
   CommandItem,
@@ -299,9 +300,8 @@ export default function Page() {
   };
 
   const selectedCondominium = condominiumById.get(selectedCondominiumId) || mockCondominiums[0];
-  const edgeApiUrl = process.env.NEXT_PUBLIC_EDGE_API_URL || 'http://localhost:8787';
-  const middlewareApiUrl =
-    process.env.NEXT_PUBLIC_MIDDLEWARE_API_URL || 'http://localhost:8081';
+  const edgeApiUrl = useMemo(() => getRuntimeEdgeApiUrl(), []);
+  const middlewareApiUrl = useMemo(() => getRuntimeMiddlewareApiUrl(), []);
   const edgeOnline = connectionState === 'online';
   const bleScanning = edgeOnline && !offlineMode;
 

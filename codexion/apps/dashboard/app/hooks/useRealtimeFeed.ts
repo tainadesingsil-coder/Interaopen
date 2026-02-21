@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import useSWR from 'swr';
 
+import { getRuntimeEdgeApiUrl, getRuntimeEdgeWsUrl } from '@/app/lib/runtime-endpoints';
 import { mockEvents } from '@/src/mock/events';
 import type { EventAction, EventType, FeedEvent } from '@/src/mock/types';
 
@@ -322,15 +323,16 @@ export function useRealtimeFeed(): UseRealtimeFeedResult {
     if (typeof window === 'undefined') {
       return '';
     }
-    return process.env.NEXT_PUBLIC_EDGE_API_URL || 'http://localhost:8787';
+    return getRuntimeEdgeApiUrl();
   }, []);
 
   const wsUrl = useMemo(() => {
     if (typeof window === 'undefined') {
       return null;
     }
-    if (process.env.NEXT_PUBLIC_EDGE_WS_URL) {
-      return process.env.NEXT_PUBLIC_EDGE_WS_URL;
+    const runtimeWsUrl = getRuntimeEdgeWsUrl();
+    if (runtimeWsUrl) {
+      return runtimeWsUrl;
     }
     return null;
   }, []);

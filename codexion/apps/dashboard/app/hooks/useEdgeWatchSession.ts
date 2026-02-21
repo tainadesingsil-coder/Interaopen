@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState } from 'react';
 
+import { getRuntimeEdgeApiUrl } from '@/app/lib/runtime-endpoints';
+
 type SessionItem = {
   device_id: string;
   device_name: string | null;
@@ -34,7 +36,7 @@ function safeNumber(value: unknown) {
 
 export function useEdgeWatchSession() {
   const apiBase = useMemo(
-    () => process.env.NEXT_PUBLIC_EDGE_API_URL || 'http://localhost:8787',
+    () => getRuntimeEdgeApiUrl(),
     []
   );
   const [sessions, setSessions] = useState<SessionItem[]>([]);

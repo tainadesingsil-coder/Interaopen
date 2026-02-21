@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import useSWR from 'swr';
 
+import { getRuntimeEdgeApiUrl } from '@/app/lib/runtime-endpoints';
 import { mockCommands } from '@/src/mock/commands';
 import type { CommandItem } from '@/src/mock/types';
 
@@ -77,10 +78,7 @@ function mapEdgeCommand(command: EdgeCommand): CommandItem {
 }
 
 export function useCommandQueue(options?: { limit?: number; statuses?: string }) {
-  const apiBase = useMemo(
-    () => process.env.NEXT_PUBLIC_EDGE_API_URL || 'http://localhost:8787',
-    []
-  );
+  const apiBase = useMemo(() => getRuntimeEdgeApiUrl(), []);
   const enabled = apiBase.length > 0;
   const limit = options?.limit ?? 20;
   const statuses = options?.statuses ?? 'pending,failed,dispatched';
