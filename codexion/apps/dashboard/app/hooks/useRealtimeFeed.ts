@@ -217,7 +217,7 @@ function mapWatchSessionToFeedEvent(data: unknown): FeedEvent | null {
 
   return {
     id: `watch-session-${deviceId}-${safeString(session.updated_at) || Date.now()}`,
-    condominiumId: DEFAULT_CONDO_ID,
+    condominiumId: 'all',
     type: 'access',
     severity: connected ? 'info' : 'warn',
     title: connected ? 'Relógio conectado' : 'Relógio desconectado',
@@ -277,7 +277,7 @@ function mapWatchHeartbeatToFeedEvent(data: unknown): FeedEvent | null {
 
   return {
     id: `watch-heartbeat-${deviceId}-${safeString(heartbeat.last_seen_at) || Date.now()}`,
-    condominiumId: DEFAULT_CONDO_ID,
+    condominiumId: 'all',
     type: 'access',
     severity,
     title: 'Heartbeat do relógio',

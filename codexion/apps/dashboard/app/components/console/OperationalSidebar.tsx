@@ -24,10 +24,24 @@ const items: Array<{
 interface OperationalSidebarProps {
   adminName: string;
   activeAlerts: number;
+  bluetoothSupported: boolean;
+  bluetoothConnected: boolean;
+  bluetoothConnecting: boolean;
+  bluetoothDeviceName: string | null;
+  onBluetoothToggle: () => void;
   onLogout: () => void;
 }
 
-export function OperationalSidebar({ adminName, activeAlerts, onLogout }: OperationalSidebarProps) {
+export function OperationalSidebar({
+  adminName,
+  activeAlerts,
+  bluetoothSupported,
+  bluetoothConnected,
+  bluetoothConnecting,
+  bluetoothDeviceName,
+  onBluetoothToggle,
+  onLogout,
+}: OperationalSidebarProps) {
   const [active, setActive] = useState<NavKey>('timeline');
 
   const badgeByKey = useMemo(() => {
@@ -53,6 +67,34 @@ export function OperationalSidebar({ adminName, activeAlerts, onLogout }: Operat
           >
             Encerrar sessão
           </button>
+
+          <div className='mt-3 rounded border border-[var(--border-subtle)] bg-[var(--bg-primary)] p-2'>
+            <div className='text-[10px] uppercase tracking-[0.18em] text-[var(--text-muted)]'>
+              Relógio Vvfit
+            </div>
+            <div className='mt-1 text-xs font-semibold text-[var(--text-primary)]'>
+              {!bluetoothSupported
+                ? 'NÃO SUPORTADO'
+                : bluetoothConnecting
+                  ? 'CONECTANDO...'
+                  : bluetoothConnected
+                    ? 'CONECTADO'
+                    : 'DESCONECTADO'}
+            </div>
+            {bluetoothDeviceName ? (
+              <div className='mt-1 truncate text-[11px] text-[var(--text-secondary)]'>
+                {bluetoothDeviceName}
+              </div>
+            ) : null}
+            <button
+              type='button'
+              onClick={onBluetoothToggle}
+              disabled={!bluetoothSupported || bluetoothConnecting}
+              className='mt-2 inline-flex w-full items-center justify-center rounded border border-[var(--status-info)] bg-[var(--bg-secondary)] px-2 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--status-info)] transition hover:bg-[var(--bg-hover)] disabled:cursor-not-allowed disabled:opacity-50'
+            >
+              {bluetoothConnected ? 'Desconectar relógio' : 'Conectar relógio'}
+            </button>
+          </div>
         </div>
 
         <nav className='flex-1 space-y-1 p-3'>

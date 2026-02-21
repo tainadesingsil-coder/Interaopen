@@ -351,7 +351,7 @@ export default function Page() {
   const filteredEvents = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     return events.filter((event) => {
-      if (event.condominiumId !== selectedCondominiumId) {
+      if (event.condominiumId !== selectedCondominiumId && event.condominiumId !== 'all') {
         return false;
       }
       if (!activeFilters.includes(event.type)) {
@@ -716,6 +716,11 @@ export default function Page() {
               <OperationalSidebar
                 adminName={adminUser || 'ADM'}
                 activeAlerts={activeAlerts}
+                bluetoothSupported={bluetooth.supported}
+                bluetoothConnected={watchConnected}
+                bluetoothConnecting={bluetooth.connecting}
+                bluetoothDeviceName={watchName}
+                onBluetoothToggle={handleBluetoothToggle}
                 onLogout={handleLogout}
               />
 
