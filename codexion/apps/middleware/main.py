@@ -9,6 +9,7 @@ from uuid import uuid4
 import httpx
 import uvicorn
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from src.ble.vvfit_bridge import VvfitBleBridge
@@ -350,6 +351,14 @@ app = FastAPI(
     title="Middleware Seguranca Condominio Wearable",
     version="0.1.0",
     lifespan=lifespan,
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 

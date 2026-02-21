@@ -1,6 +1,6 @@
 'use client';
 
-import { AlertCircle, BluetoothSearching, Cpu, Search, Settings, Siren } from 'lucide-react';
+import { AlertCircle, BellRing, BluetoothSearching, Cpu, Search, Settings, Siren } from 'lucide-react';
 
 import { Badge } from '@/app/components/console/Badge';
 import { SeverityDot } from '@/app/components/console/SeverityDot';
@@ -24,6 +24,7 @@ interface OperationalHeaderProps {
   bluetoothHr: number | null;
   bluetoothBattery: number | null;
   onBluetoothToggle: () => void;
+  onWatchNotification: () => void;
   onEmergencyRequest: () => void;
 }
 
@@ -46,6 +47,7 @@ export function OperationalHeader({
   bluetoothHr,
   bluetoothBattery,
   onBluetoothToggle,
+  onWatchNotification,
   onEmergencyRequest,
 }: OperationalHeaderProps) {
   const ledClass = edgeOnline ? 'online' : 'offline';
@@ -175,6 +177,15 @@ export function OperationalHeader({
           >
             <Siren className='h-4 w-4 text-[var(--status-offline)]' />
             Emergência
+          </button>
+
+          <button
+            type='button'
+            onClick={onWatchNotification}
+            className='hidden lg:inline-flex items-center gap-2 rounded border border-[var(--status-info)] bg-[var(--bg-primary)] px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--status-info)] transition hover:bg-[var(--bg-hover)]'
+          >
+            <BellRing className='h-4 w-4' />
+            Notificar relógio
           </button>
 
           <button

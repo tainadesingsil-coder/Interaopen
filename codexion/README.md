@@ -41,6 +41,7 @@ cp .env.example .env
 
 Principais:
 - `NEXT_PUBLIC_EDGE_API_URL` (HTTP) e `NEXT_PUBLIC_EDGE_WS_URL` (WebSocket) → usados pelo dashboard
+- `NEXT_PUBLIC_MIDDLEWARE_API_URL` → usado para enviar notificação/comando ao relógio
 - `EDGE_GATEWAY_URL` → usado pelo middleware dentro do Docker network
 
 ## 🧪 Teste rápido: criar evento de interfone

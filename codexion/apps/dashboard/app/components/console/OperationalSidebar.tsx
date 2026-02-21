@@ -29,6 +29,7 @@ interface OperationalSidebarProps {
   bluetoothConnecting: boolean;
   bluetoothDeviceName: string | null;
   onBluetoothToggle: () => void;
+  onWatchNotification: () => void;
   onLogout: () => void;
 }
 
@@ -40,6 +41,7 @@ export function OperationalSidebar({
   bluetoothConnecting,
   bluetoothDeviceName,
   onBluetoothToggle,
+  onWatchNotification,
   onLogout,
 }: OperationalSidebarProps) {
   const [active, setActive] = useState<NavKey>('timeline');
@@ -93,6 +95,14 @@ export function OperationalSidebar({
               className='mt-2 inline-flex w-full items-center justify-center rounded border border-[var(--status-info)] bg-[var(--bg-secondary)] px-2 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--status-info)] transition hover:bg-[var(--bg-hover)] disabled:cursor-not-allowed disabled:opacity-50'
             >
               {bluetoothConnected ? 'Desconectar relógio' : 'Conectar relógio'}
+            </button>
+
+            <button
+              type='button'
+              onClick={onWatchNotification}
+              className='mt-2 inline-flex w-full items-center justify-center rounded border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-2 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--text-secondary)] transition hover:bg-[var(--bg-hover)]'
+            >
+              Enviar notificação
             </button>
           </div>
         </div>

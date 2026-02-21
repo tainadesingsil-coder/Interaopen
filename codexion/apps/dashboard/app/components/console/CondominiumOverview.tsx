@@ -13,6 +13,7 @@ interface CondominiumOverviewProps {
     steps: number | null;
     battery: number | null;
     lastSeenAt: string | null;
+    warning?: string | null;
   };
 }
 
@@ -119,6 +120,11 @@ export function CondominiumOverview({
           {watchTelemetry.deviceName ? (
             <div className='mt-2 truncate text-[11px] text-[var(--text-muted)]'>
               {watchTelemetry.deviceName}
+            </div>
+          ) : null}
+          {watchTelemetry.warning ? (
+            <div className='mt-2 rounded border border-[var(--status-warning)] bg-[var(--bg-secondary)] px-2 py-1 text-[11px] text-[var(--status-warning)]'>
+              {watchTelemetry.warning}
             </div>
           ) : null}
         </div>

@@ -47,6 +47,7 @@ const VVFIT_SERVICE_UUID_CANDIDATES = [
 ];
 
 const VVFIT_NAME_HINTS = ['vvfit', 'm6', 'm7', 'smart watch', 'smartwatch'];
+const APPLE_WATCH_NAME_HINTS = ['apple watch', 'watch series'];
 
 function normalizeName(name: string | null | undefined) {
   return String(name || '').trim().toLowerCase();
@@ -74,6 +75,8 @@ export function useBluetoothWatch(options: UseBluetoothWatchOptions = {}) {
   const [latestSteps, setLatestSteps] = useState<number>(0);
   const [batteryLevel, setBatteryLevel] = useState<number | null>(null);
   const heartbeatIntervalRef = useRef<number | null>(null);
+  const hrPollIntervalRef = useRef<number | null>(null);
+  const batteryPollIntervalRef = useRef<number | null>(null);
   const metricsRef = useRef<{
     hr: number | null;
     spo2: number | null;
@@ -104,6 +107,17 @@ export function useBluetoothWatch(options: UseBluetoothWatchOptions = {}) {
     if (heartbeatIntervalRef.current !== null) {
       window.clearInterval(heartbeatIntervalRef.current);
       heartbeatIntervalRef.current = null;
+    }
+  };
+
+  const stopSensorPollLoops = () => {
+    if (hrPollIntervalRef.current !== null) {
+      window.clearInterval(hrPollIntervalRef.current);
+      hrPollIntervalRef.current = null;
+    }
+    if (batteryPollIntervalRef.current !== null) {
+      window.clearInterval(batteryPollIntervalRef.current);
+      batteryPollIntervalRef.current = null;
     }
   };
 
@@ -165,6 +179,7 @@ export function useBluetoothWatch(options: UseBluetoothWatchOptions = {}) {
   useEffect(() => {
     return () => {
       stopHeartbeatLoop();
+      stopSensorPollLoops();
     };
   }, []);
 
@@ -175,6 +190,7 @@ export function useBluetoothWatch(options: UseBluetoothWatchOptions = {}) {
 
     const onDisconnected = () => {
       stopHeartbeatLoop();
+      stopSensorPollLoops();
       setState('disconnected');
       if (deviceId) {
         options.onDisconnected?.({
@@ -196,20 +212,57 @@ export function useBluetoothWatch(options: UseBluetoothWatchOptions = {}) {
       if (!characteristic) {
         return;
       }
-      const value = await characteristic.readValue();
-      if (value) {
-        const level = value.getUint8(0);
-        setBatteryLevel(level);
-        metricsRef.current.battery = level;
-        options.onHeartbeat?.({
-          device_id: currentDeviceId,
-          timestamp: nowIso(),
-          battery_level: level,
-          hr: metricsRef.current.hr,
-          steps: metricsRef.current.steps,
-          spo2: metricsRef.current.spo2,
+
+      const readBattery = async () => {
+        try {
+          const value = await characteristic.readValue();
+          if (!value) {
+            return;
+          }
+          const level = value.getUint8(0);
+          setBatteryLevel(level);
+          metricsRef.current.battery = level;
+          options.onHeartbeat?.({
+            device_id: currentDeviceId,
+            timestamp: nowIso(),
+            battery_level: level,
+            hr: metricsRef.current.hr,
+            steps: metricsRef.current.steps,
+            spo2: metricsRef.current.spo2,
+          });
+        } catch (_error) {
+          // Ignore periodic battery read failures.
+        }
+      };
+
+      await readBattery();
+
+      try {
+        await characteristic.startNotifications?.();
+        characteristic.addEventListener?.('characteristicvaluechanged', (event: Event) => {
+          const target = event.target as { value?: DataView };
+          if (!target?.value) {
+            return;
+          }
+          const level = target.value.getUint8(0);
+          setBatteryLevel(level);
+          metricsRef.current.battery = level;
+          options.onHeartbeat?.({
+            device_id: currentDeviceId,
+            timestamp: nowIso(),
+            battery_level: level,
+            hr: metricsRef.current.hr,
+            steps: metricsRef.current.steps,
+            spo2: metricsRef.current.spo2,
+          });
         });
+      } catch (_error) {
+        // Notifications may not be available for battery on some models.
       }
+
+      batteryPollIntervalRef.current = window.setInterval(() => {
+        readBattery();
+      }, 15000);
     } catch (_error) {
       // Battery service may not exist on every watch model.
     }
@@ -223,13 +276,7 @@ export function useBluetoothWatch(options: UseBluetoothWatchOptions = {}) {
         return;
       }
 
-      await characteristic.startNotifications();
-      characteristic.addEventListener('characteristicvaluechanged', (event: Event) => {
-        const target = event.target as { value?: DataView };
-        if (!target?.value) {
-          return;
-        }
-        const hr = parseHeartRate(target.value);
+      const emitHr = (hr: number) => {
         setLatestHr(hr);
         metricsRef.current.hr = hr;
         const sample: WatchTelemetrySample = {
@@ -241,7 +288,40 @@ export function useBluetoothWatch(options: UseBluetoothWatchOptions = {}) {
           battery_level: metricsRef.current.battery,
         };
         options.onTelemetry?.(sample);
+      };
+
+      const readHr = async () => {
+        try {
+          const value = await characteristic.readValue?.();
+          if (!value || value.byteLength < 2) {
+            return;
+          }
+          const hr = parseHeartRate(value);
+          if (Number.isFinite(hr)) {
+            emitHr(hr);
+          }
+        } catch (_error) {
+          // Ignore periodic HR read failures.
+        }
+      };
+
+      await readHr();
+
+      await characteristic.startNotifications();
+      characteristic.addEventListener('characteristicvaluechanged', (event: Event) => {
+        const target = event.target as { value?: DataView };
+        if (!target?.value) {
+          return;
+        }
+        const hr = parseHeartRate(target.value);
+        if (Number.isFinite(hr)) {
+          emitHr(hr);
+        }
       });
+
+      hrPollIntervalRef.current = window.setInterval(() => {
+        readHr();
+      }, 4000);
     } catch (_error) {
       // Heart rate profile may be unavailable depending on firmware.
     }
@@ -267,8 +347,13 @@ export function useBluetoothWatch(options: UseBluetoothWatchOptions = {}) {
       const selectedName = selected.name || 'Dispositivo sem nome';
       const selectedId = String(selected.id || selectedName || 'watch-unknown');
       const normalized = normalizeName(selected.name);
+      const isAppleWatch = APPLE_WATCH_NAME_HINTS.some((hint) => normalized.includes(hint));
 
-      if (!VVFIT_NAME_HINTS.some((hint) => normalized.includes(hint))) {
+      if (isAppleWatch) {
+        setError(
+          'Apple Watch conectado. iOS/WatchOS nao libera BPM/SpO2 por Web Bluetooth. Para dados reais e notificacoes bidirecionais, use app nativo (HealthKit + WatchConnectivity).'
+        );
+      } else if (!VVFIT_NAME_HINTS.some((hint) => normalized.includes(hint))) {
         setError(
           `Conectado em "${selectedName}". Se nao for Vvfit, valide o modelo e servicos BLE.`
         );
@@ -319,6 +404,7 @@ export function useBluetoothWatch(options: UseBluetoothWatchOptions = {}) {
       // Ignore disconnect exceptions from browser adapters.
     }
     stopHeartbeatLoop();
+    stopSensorPollLoops();
     if (!disconnectedByGattEvent && deviceId) {
       await options.onDisconnected?.({ device_id: deviceId });
     }

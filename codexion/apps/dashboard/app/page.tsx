@@ -300,6 +300,7 @@ export default function Page() {
 
   const selectedCondominium = condominiumById.get(selectedCondominiumId) || mockCondominiums[0];
   const edgeApiUrl = process.env.NEXT_PUBLIC_EDGE_API_URL || '';
+  const middlewareApiUrl = process.env.NEXT_PUBLIC_MIDDLEWARE_API_URL || '';
   const edgeOnline = connectionState === 'online';
   const bleScanning = edgeOnline && !offlineMode;
 
@@ -444,6 +445,11 @@ export default function Page() {
     bluetooth.batteryLevel !== null && bluetooth.batteryLevel !== undefined
       ? bluetooth.batteryLevel
       : edgeWatch.activeSession?.battery_level || null;
+  const isAppleWatch = (watchName || '').toLowerCase().includes('apple watch');
+  const watchTelemetryWarning =
+    watchConnected && isAppleWatch
+      ? 'Apple Watch conectado. BPM/SpO2 e notificações do app exigem integração nativa iOS/WatchOS.'
+      : null;
 
   const edgeApiEnabled = edgeApiUrl.length > 0;
 
@@ -656,8 +662,60 @@ export default function Page() {
     const ok = await bluetooth.connect();
     if (ok) {
       toast.success('Bluetooth conectado com sucesso');
+      if ((bluetooth.deviceName || '').toLowerCase().includes('apple watch')) {
+        toast.warning(
+          'Apple Watch via navegador tem limite de dados. Para BPM/SpO2/notificação real, use app nativo.'
+        );
+      }
     } else if (bluetooth.error) {
       toast.error(bluetooth.error);
+    }
+  };
+
+  const handleWatchNotification = async () => {
+    if (!middlewareApiUrl) {
+      toast.error(
+        'Defina NEXT_PUBLIC_MIDDLEWARE_API_URL para enviar notificação real ao relógio.'
+      );
+      return;
+    }
+
+    const message = selectedEvent
+      ? `${selectedEvent.title} • ${selectedEvent.tower}/${selectedEvent.unit}`
+      : 'Alerta operacional da portaria';
+
+    try {
+      const response = await fetch(`${middlewareApiUrl}/api/watch/command/vibrate`, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: 'Codexion Security',
+          message,
+          context: selectedEvent
+            ? {
+                event_id: selectedEvent.id,
+                event_type: selectedEvent.type,
+                severity: selectedEvent.severity,
+              }
+            : {
+                source: 'dashboard',
+              },
+        }),
+      });
+
+      if (!response.ok) {
+        const text = await response.text().catch(() => '');
+        throw new Error(`middleware ${response.status}${text ? `: ${text}` : ''}`);
+      }
+      toast.success('Notificação enviada ao relógio.');
+    } catch (unknownError) {
+      const messageError =
+        unknownError instanceof Error
+          ? unknownError.message
+          : 'Falha ao enviar notificação para o relógio.';
+      toast.error(messageError);
     }
   };
 
@@ -709,6 +767,7 @@ export default function Page() {
               bluetoothHr={watchHr}
               bluetoothBattery={watchBattery}
               onBluetoothToggle={handleBluetoothToggle}
+              onWatchNotification={handleWatchNotification}
               onEmergencyRequest={() => setConfirmIntent({ kind: 'emergency' })}
             />
 
@@ -721,6 +780,7 @@ export default function Page() {
                 bluetoothConnecting={bluetooth.connecting}
                 bluetoothDeviceName={watchName}
                 onBluetoothToggle={handleBluetoothToggle}
+                onWatchNotification={handleWatchNotification}
                 onLogout={handleLogout}
               />
 
@@ -741,6 +801,7 @@ export default function Page() {
                         steps: bluetooth.connected ? bluetooth.latestSteps : edgeWatch.latestSteps,
                         battery: watchBattery,
                         lastSeenAt: watchHeartbeatLabel,
+                        warning: watchTelemetryWarning,
                       }}
                     />
                   </motion.div>
