@@ -24,3 +24,7 @@ out
 *.njsproj
 *.sln
 *.sw?
+
+# Allow project lib files
+!src/lib/
+!src/lib/**
