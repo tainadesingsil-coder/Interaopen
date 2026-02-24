@@ -11,8 +11,8 @@
     "lint": "next lint",
     "assets:download": "node scripts/download-images.js",
     "assets:optimize": "node scripts/optimize-images.mjs",
-    "deploy:cf": "wrangler pages deploy dist --project-name=bella-6sa --branch=production",
-    "deploy:cf:preview": "wrangler pages deploy dist --project-name=bella-6sa --branch=preview"
+    "deploy:cf": "wrangler pages deploy dist --project-name=bella --branch=production",
+    "deploy:cf:preview": "wrangler pages deploy dist --project-name=bella --branch=preview"
   },
   "dependencies": {
     "framer-motion": "^12.23.12",

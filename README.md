@@ -72,7 +72,10 @@ app/
 
 ## ✅ Deploy Cloudflare Pages (`bella-6sa.pages.dev`)
 
-A publicação principal está configurada para o projeto **`bella-6sa`**.
+A publicação da Bella usa:
+
+- **Project name**: `bella`
+- **Domínio Pages**: `bella-6sa.pages.dev`
 
 No GitHub, crie estes secrets em **Settings → Secrets and variables → Actions**:
 
