@@ -9,6 +9,8 @@ npm install
 npm run dev
 ```
 
+Versao recomendada do Node.js: `22` (minimo `20.10`).
+
 ## ✅ Build e export
 
 ```bash
