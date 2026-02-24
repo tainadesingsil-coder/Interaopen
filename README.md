@@ -69,4 +69,26 @@ app/
 - WhatsApp integrado
 - Formulário com Formspree
 - SEO completo + Schema.org
+
+## ✅ Deploy Cloudflare Pages (`bella-6sa.pages.dev`)
+
+A publicação principal está configurada para o projeto **`bella-6sa`**.
+
+No GitHub, crie estes secrets em **Settings → Secrets and variables → Actions**:
+
+- `CLOUDFLARE_API_TOKEN`
+- `CLOUDFLARE_ACCOUNT_ID`
+
+Deploy manual (produção):
+
+```bash
+npm run build
+npm run deploy:cf
+```
+
+Deploy manual (preview):
+
+```bash
+npm run build
+npm run deploy:cf:preview
 ```
