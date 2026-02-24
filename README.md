@@ -2,6 +2,18 @@
 
 Landing page premium para o empreendimento Bella Vista Beach Residence, construída com Next.js (App Router), TailwindCSS e Framer Motion.
 
+## ✅ Pasta canônica da versão aprovada
+
+Para evitar mistura com outros projetos do repositório, a versão congelada da Bella está em:
+
+- `solar-energy/`
+
+Essa pasta replica a versão de referência publicada em:
+
+- `https://cursor-landing-page-bella-vi.solarenergy-5h5.pages.dev/`
+
+Os workflows de Cloudflare Pages foram fixados para build/deploy usando **somente** `solar-energy/`.
+
 ## ✅ Como rodar
 
 ```bash
@@ -82,9 +94,17 @@ No GitHub, crie estes secrets em **Settings → Secrets and variables → Action
 - `CLOUDFLARE_API_TOKEN`
 - `CLOUDFLARE_ACCOUNT_ID`
 
+Também são aceitos aliases antigos:
+
+- `CF_API_TOKEN`
+- `CF_ACCOUNT_ID`
+- `CF_ACCOUNTBELANOVO` (token)
+
 Deploy manual (produção):
 
 ```bash
+cd solar-energy
+npm ci
 npm run build
 npm run deploy:cf
 ```
@@ -92,6 +112,8 @@ npm run deploy:cf
 Deploy manual (preview):
 
 ```bash
+cd solar-energy
+npm ci
 npm run build
 npm run deploy:cf:preview
 ```

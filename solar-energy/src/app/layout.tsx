@@ -1,0 +1,39 @@
+import type { Metadata } from 'next';
+import { Inter, Sora } from 'next/font/google';
+import './globals.css';
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+  display: 'swap',
+});
+
+const sora = Sora({
+  subsets: ['latin'],
+  variable: '--font-display',
+  display: 'swap',
+});
+
+export const metadata: Metadata = {
+  title: 'Bella Vista Beach Residence | Bahia',
+  description:
+    'Stúdios e apartamentos com localização estratégica no Litoral Sul da Bahia. Atendimento consultivo via WhatsApp.',
+  openGraph: {
+    title: 'Bella Vista Beach Residence | Bahia',
+    description:
+      'Investimento imobiliário estratégico no Litoral Sul da Bahia, com alto potencial de valorização.',
+    type: 'website',
+  },
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang='pt-BR'>
+      <body className={`${inter.className} ${sora.variable}`}>{children}</body>
+    </html>
+  );
+}

@@ -19,11 +19,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
+          cache-dependency-path: solar-energy/package-lock.json
 
       - name: Install dependencies
+        working-directory: solar-energy
         run: npm ci --no-audit --no-fund
 
       - name: Build
+        working-directory: solar-energy
         run: npm run build
 
       - name: Publish to Cloudflare Pages
@@ -32,5 +36,5 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN || secrets.CF_API_TOKEN || secrets.CF_ACCOUNTBELANOVO }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID || secrets.CF_ACCOUNT_ID || vars.CLOUDFLARE_ACCOUNT_ID }}
           projectName: bella
-          directory: ./dist
+          directory: ./solar-energy/dist
           branch: main
