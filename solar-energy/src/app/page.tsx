@@ -877,7 +877,7 @@ function HeroNav({
             {labels.works}
           </a>
           <a
-            href='#perfil'
+            href='#proposta'
             className='transition hover:text-[#B7925A] hover:drop-shadow-[0_0_10px_rgba(183,146,90,0.55)]'
           >
             {labels.investment}
@@ -935,7 +935,7 @@ function HeroNav({
               {labels.works}
             </a>
             <a
-              href='#perfil'
+              href='#proposta'
               className='transition hover:text-[#B7925A] hover:drop-shadow-[0_0_10px_rgba(183,146,90,0.55)]'
               onClick={() => setMenuOpen(false)}
             >
