@@ -388,7 +388,7 @@ export default function HomePage() {
             animatedResults={animatedResults}
             formatCurrency={formatCurrency}
             handleDownloadPdf={handleDownloadPdf}
-            reduceMotion={reduceMotion}
+            reduceMotion={Boolean(reduceMotion)}
           />
 
           <section
