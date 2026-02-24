@@ -31,6 +31,7 @@ node_modules/
 .next/
 out/
 dist/
+cloudflare-pages/bella-vista/
 *.local
 .env*.local
 
