@@ -29,8 +29,8 @@ jobs:
       - name: Publish to Cloudflare Pages
         uses: cloudflare/pages-action@v1
         with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: solarenergy-5h5
+          apiToken: ${{ secrets.CF_APPMARCIA || secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CF_A_IDAPPMARCIA || secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: appmarcia
           directory: ./dist
           branch: main
