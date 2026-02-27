@@ -1,12 +1,7 @@
 name: Cloudflare Pages
 
 on:
-  pull_request:
-    branches: [ main ]
-  push:
-    branches:
-      - main
-      - '**'
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -35,10 +30,10 @@ jobs:
       - name: Publish to Cloudflare Pages
         uses: cloudflare/pages-action@v1
         with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: solarenergy-5h5
+          apiToken: ${{ secrets.CF_APPMARCIA || secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CF_A_IDAPPMARCIA || secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: appmarcia
           directory: dist
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref == 'refs/heads/cursor/landing-page-bella-vista-7d69' && 'cursor-landing-page-bella-vi' || github.ref == 'refs/heads/main' && 'main' || github.ref_name }}
+          branch: preview
           wranglerVersion: '3'
