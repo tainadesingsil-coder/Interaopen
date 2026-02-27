@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "postbuild": "rm -rf dist && cp -R out dist",
+    "postbuild": "rm -rf dist && cp -R out dist && cp MarciaKathllem_v7.html dist/index.html && mkdir -p dist/marcia && cp MarciaKathllem_v7.html dist/marcia/index.html",
     "start": "next start",
     "lint": "next lint",
     "assets:download": "node scripts/download-images.js",
