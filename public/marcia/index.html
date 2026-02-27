@@ -136,12 +136,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1a0800;
   background:rgba(26,12,4,.22);color:#fff;font-size:18px;font-weight:700;
   display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
 .sw-btn.off{opacity:.35;}
-.opt-nav{position:absolute;left:50%;transform:translateX(-50%);top:18px;z-index:70;
-  display:flex;gap:4px;padding:4px;border-radius:999px;
-  background:rgba(26,12,4,.12);backdrop-filter:blur(8px);}
-.opt-btn{height:24px;min-width:46px;border:none;border-radius:999px;cursor:pointer;
-  background:rgba(255,255,255,.3);color:#4a210d;font-size:10px;font-weight:700;font-family:inherit;padding:0 8px;}
-.opt-btn.on{background:#7a3e18;color:#fff;}
 
 .rp{position:absolute;border-radius:50%;background:rgba(100,50,20,.15);
   pointer-events:none;transform:translate(-50%,-50%) scale(0);
@@ -369,12 +363,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1a0800;
 <div class="sw-nav" id="swNav" style="display:none;">
   <button class="sw-btn" id="swPrev" onclick="goMain(-1)">‹</button>
   <button class="sw-btn" id="swNext" onclick="goMain(1)">›</button>
-</div>
-<div class="opt-nav" id="optNav" style="display:none;">
-  <button class="opt-btn" id="opt0" onclick="nav('s0')">Pers</button>
-  <button class="opt-btn" id="opt1" onclick="nav('s1')">30D</button>
-  <button class="opt-btn" id="opt2" onclick="nav('s2')">Dance</button>
-  <button class="opt-btn" id="opt3" onclick="nav('s3')">Dicas</button>
 </div>
 
 <!-- DRAWER -->
@@ -791,7 +779,19 @@ var AI_TIP_DETAILS = [
   }
 ];
 
-var AI_STATE = { topic: 'geral' };
+var AI_STATE = {
+  topic: 'geral',
+  memory: [],
+  profile: {
+    goal: 'condicionamento',
+    level: 'iniciante',
+    daysPerWeek: 4,
+    minutesPerSession: 45,
+    dietStyle: 'equilibrada'
+  },
+  lastPlan: ''
+};
+var AGENT_CHIPS = ['Montar plano completo', 'Criar dieta semanal', 'Checklist diario'];
 
 function normTxt(v){
   return (v||'').toLowerCase()
@@ -802,6 +802,98 @@ function normTxt(v){
 
 function aiTopicMeta(topic){
   return AI_TOPICS[topic] || AI_TOPICS.geral;
+}
+
+function detectAgentProfile(question){
+  var q = normTxt(question);
+  var out = {};
+  if(/emagrec|perder gordura|secar/.test(q)) out.goal = 'emagrecimento';
+  if(/ganhar massa|hipertrof|musculo|defin/.test(q)) out.goal = 'hipertrofia';
+  if(/condicion|resisten|folego|cardio/.test(q)) out.goal = 'condicionamento';
+
+  if(/iniciante|comec|comecar|primeira vez/.test(q)) out.level = 'iniciante';
+  if(/intermediari/.test(q)) out.level = 'intermediario';
+  if(/avancad/.test(q)) out.level = 'avancado';
+
+  var days = q.match(/(\d)\s*(x|vezes?)\s*(por|na)\s*semana/);
+  if(days) out.daysPerWeek = Math.max(2, Math.min(7, parseInt(days[1],10)));
+
+  var mins = q.match(/(\d{2,3})\s*min/);
+  if(mins) out.minutesPerSession = Math.max(20, Math.min(120, parseInt(mins[1],10)));
+
+  if(/vegetarian|vegano/.test(q)) out.dietStyle = 'vegetariana';
+  if(/low carb/.test(q)) out.dietStyle = 'low carb';
+  if(/normal|equilibrad/.test(q)) out.dietStyle = 'equilibrada';
+  return out;
+}
+
+function mergeAgentProfile(update){
+  if(!update) return;
+  var p = AI_STATE.profile;
+  for (var k in update) {
+    if(update[k]!==undefined && update[k]!==null && update[k]!=='') p[k]=update[k];
+  }
+}
+
+function formatProfileSummary(){
+  var p = AI_STATE.profile;
+  return 'Perfil atual:\n• Objetivo: ' + p.goal +
+    '\n• Nível: ' + p.level +
+    '\n• Frequência: ' + p.daysPerWeek + 'x por semana' +
+    '\n• Sessão: ' + p.minutesPerSession + ' min' +
+    '\n• Dieta: ' + p.dietStyle;
+}
+
+function buildWeeklyAgentPlan(topic){
+  var p = AI_STATE.profile;
+  var dias = ['Seg','Ter','Qua','Qui','Sex','Sab','Dom'];
+  var qtd = Math.max(2, Math.min(7, p.daysPerWeek));
+  var linhas = [];
+  for(var i=0;i<qtd;i++){
+    var dia = dias[i];
+    var bloco = 'Forca total + core';
+    if(topic==='dance') bloco='Hit Dance + core';
+    else if(topic==='desafio') bloco=(i%2===0)?'Forca progressiva':'Cardio + mobilidade';
+    else if(topic==='personal') bloco=(i%2===0)?'Inferiores + gluteo':'Superiores + postura';
+    linhas.push('• ' + dia + ': ' + bloco + ' (' + p.minutesPerSession + ' min)');
+  }
+  var extra = '\n• 1 dia de recuperacao ativa (caminhada/alongamento)\n• Hidratação: 2 a 3 litros/dia';
+  return 'Plano semanal da Marcinha (' + p.goal + '):\n' + linhas.join('\n') + extra;
+}
+
+function buildDietAgentPlan(){
+  var p = AI_STATE.profile;
+  var base = 'Plano alimentar base (' + p.dietStyle + '):\n' +
+    '• Cafe: proteina + fruta\n' +
+    '• Almoco: proteina + carbo de qualidade + salada\n' +
+    '• Lanche: iogurte/oleaginosas/fruta\n' +
+    '• Jantar: refeicao leve com proteina e legumes';
+  if(p.goal==='emagrecimento') base += '\n• Ajuste: déficit calórico leve, sem cortar proteina.';
+  if(p.goal==='hipertrofia') base += '\n• Ajuste: aumentar proteína e carbo no pré/pós treino.';
+  return base;
+}
+
+function buildAgentReply(question, topic){
+  var q = normTxt(question);
+  AI_STATE.memory.push(question);
+  if(AI_STATE.memory.length>12) AI_STATE.memory.shift();
+  mergeAgentProfile(detectAgentProfile(question));
+
+  if(/perfil|status|resumo/.test(q)) return formatProfileSummary();
+  if(/plano completo|plano semanal|montar plano|cronograma|organiza meu treino|agente/.test(q)){
+    AI_STATE.lastPlan = buildWeeklyAgentPlan(topic);
+    return AI_STATE.lastPlan + '\n\n' + formatProfileSummary();
+  }
+  if(/dieta semanal|cardapio|dieta|alimentacao|alimentar/.test(q)){
+    return buildDietAgentPlan() + '\n\nSe quiser, adapto para seu horario.';
+  }
+  if(/checklist|tarefas|habito|rotina diaria/.test(q)){
+    return 'Checklist diario:\n• Beber agua\n• Cumprir treino do dia\n• Proteina em todas as refeicoes\n• Dormir 7-8h\n• Registrar progresso no app';
+  }
+  if(/ajusta|adapt|troca|muda/.test(q) && AI_STATE.lastPlan){
+    return 'Claro! Vou ajustar mantendo seu objetivo.\n\n' + buildWeeklyAgentPlan(topic);
+  }
+  return buildAIReply(question, topic);
 }
 
 function buildAIReply(question, topic){
@@ -875,7 +967,7 @@ function sendAIMessage(){
   if(!q) return;
   input.value = '';
   addAIMessage('user', q);
-  var ans = buildAIReply(q, AI_STATE.topic);
+  var ans = buildAgentReply(q, AI_STATE.topic);
   setTimeout(function(){ addAIMessage('bot', ans); }, 220);
 }
 
@@ -886,25 +978,28 @@ function openAIChat(topic){
   for (var i = 0; i < meta.chips.length; i++) {
     chipsHtml += '<button class="ai-chip" onclick="askAIChip(\'' + meta.chips[i] + '\')">' + meta.chips[i] + '</button>';
   }
+  for (var j = 0; j < AGENT_CHIPS.length; j++) {
+    chipsHtml += '<button class="ai-chip" onclick="askAIChip(\'' + AGENT_CHIPS[j] + '\')">' + AGENT_CHIPS[j] + '</button>';
+  }
 
   document.getElementById('mt').textContent = 'IA da Márcia';
   document.getElementById('ms').textContent = meta.title;
   document.getElementById('mb').innerHTML =
     '<div class="ai-box">' +
-      '<div class="ai-head">Pergunte o que quiser sobre treino, dieta, recuperação e rotina.</div>' +
+      '<div class="ai-head">Modo Agente: eu entendo seu objetivo e monto plano, dieta e checklist personalizados.</div>' +
       '<div class="ai-msgs" id="aiMsgs"></div>' +
       '<div class="ai-chips">' + chipsHtml + '</div>' +
       '<div class="ai-input">' +
         '<input id="aiInput" type="text" placeholder="Ex: o que comer antes do treino?" />' +
         '<button class="ai-send" onclick="sendAIMessage()">Enviar</button>' +
       '</div>' +
-      '<div class="ai-note">Resposta automática da IA do app. Para avaliação clínica, consulte profissional presencial.</div>' +
+      '<div class="ai-note">Agente local da Marcinha: responde e cria plano por etapas. Para avaliação clínica, consulte profissional presencial.</div>' +
     '</div>';
   document.getElementById('mov').classList.add('open');
 
   addAIMessage('bot', 'Oi! Eu sou a Marcinha, assistente da Márcia Kathllem 💪');
   addAIMessage('bot', meta.intro);
-  addAIMessage('bot', 'Me fala seu objetivo de hoje e eu te entrego um passo a passo prático.');
+  addAIMessage('bot', 'Me fala seu objetivo e seu tempo por treino (ex: 4x por semana, 45 min) para eu montar seu plano completo.');
   var input = document.getElementById('aiInput');
   if(input){
     input.addEventListener('keydown', function(e){
@@ -977,13 +1072,9 @@ function updateMainUi(){
   pips.style.display=(idx>=0)?'flex':'none';
   var swNav=document.getElementById('swNav');
   if(swNav) swNav.style.display=(idx>=0)?'flex':'none';
-  var optNav=document.getElementById('optNav');
-  if(optNav) optNav.style.display=(idx>=0)?'flex':'none';
   for(var i=0;i<4;i++){
     var pip=document.getElementById('p'+i);
     if(pip) pip.className='pip'+(i===idx?' on':'');
-    var opt=document.getElementById('opt'+i);
-    if(opt) opt.className='opt-btn'+(i===idx?' on':'');
   }
   var prev=document.getElementById('swPrev');
   var next=document.getElementById('swNext');
