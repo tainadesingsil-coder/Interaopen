@@ -28,9 +28,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1a0800;
 .screen.active{transform:translateX(0);opacity:1;}
 .screen.gl{transform:translateX(-100%);opacity:0;pointer-events:none;}
 .screen.gr{transform:translateX(100%);opacity:0;pointer-events:none;}
+.screen.gl .mascot,.screen.gr .mascot,
+.screen.gl .lmascot,.screen.gr .lmascot,
+.screen.gl .pmascot,.screen.gr .pmascot{opacity:0;}
 
 .body{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;
-  scrollbar-width:none;padding:0 20px 115px;}
+  scrollbar-width:none;padding:0 20px 115px;touch-action:pan-y;}
 .body::-webkit-scrollbar{display:none;}
 
 .topbar{display:flex;align-items:center;justify-content:space-between;
@@ -129,8 +132,14 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1a0800;
 
 .pips{position:absolute;bottom:90px;left:50%;transform:translateX(-50%);
   display:flex;gap:6px;z-index:50;}
-.pip{width:6px;height:6px;border-radius:50%;background:rgba(100,50,20,.24);transition:all .3s;}
+.pip{width:6px;height:6px;border-radius:50%;background:rgba(100,50,20,.24);transition:all .3s;cursor:pointer;}
 .pip.on{background:#7a3e18;width:18px;border-radius:3px;}
+.sw-nav{position:absolute;left:0;right:0;bottom:126px;display:flex;justify-content:space-between;
+  padding:0 16px;z-index:60;pointer-events:none;}
+.sw-btn{width:36px;height:36px;border-radius:50%;border:none;cursor:pointer;pointer-events:all;
+  background:rgba(26,12,4,.22);color:#fff;font-size:18px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+.sw-btn.off{opacity:.35;}
 
 .rp{position:absolute;border-radius:50%;background:rgba(100,50,20,.15);
   pointer-events:none;transform:translate(-50%,-50%) scale(0);
@@ -351,8 +360,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1a0800;
 </div>
 
 <div class="pips" id="pips" style="display:none;">
-  <div class="pip" id="p0"></div><div class="pip" id="p1"></div>
-  <div class="pip" id="p2"></div><div class="pip" id="p3"></div>
+  <div class="pip" id="p0" onclick="nav('s0')"></div><div class="pip" id="p1" onclick="nav('s1')"></div>
+  <div class="pip" id="p2" onclick="nav('s2')"></div><div class="pip" id="p3" onclick="nav('s3')"></div>
+</div>
+<div class="sw-nav" id="swNav" style="display:none;">
+  <button class="sw-btn" id="swPrev" onclick="goMain(-1)">‹</button>
+  <button class="sw-btn" id="swNext" onclick="goMain(1)">›</button>
 </div>
 
 <!-- DRAWER -->
@@ -882,6 +895,7 @@ function openAIChat(topic){
 
   addAIMessage('bot', 'Oi! Eu sou a Marcinha, assistente da Márcia Kathllem 💪');
   addAIMessage('bot', meta.intro);
+  addAIMessage('bot', 'Me fala seu objetivo de hoje e eu te entrego um passo a passo prático.');
   var input = document.getElementById('aiInput');
   if(input){
     input.addEventListener('keydown', function(e){
@@ -923,6 +937,7 @@ function openTipsHub(){
 }
 
 window.addEventListener('DOMContentLoaded', initAIAgents);
+window.addEventListener('DOMContentLoaded', updateMainUi);
 
 var cur='s_login', day=12, liked=false, tips=[false,false,false];
 var ORDER=['s_login','s0','s1','s2','s3','s_profile'];
@@ -944,13 +959,29 @@ function nav(id){
     p.className='screen '+(ni>=pi?'gl':'gr');
   });
   cur=id;
+  updateMainUi();
+}
+
+function updateMainUi(){
   var main=['s0','s1','s2','s3'], idx=main.indexOf(cur);
   var pips=document.getElementById('pips');
   pips.style.display=(idx>=0)?'flex':'none';
+  var swNav=document.getElementById('swNav');
+  if(swNav) swNav.style.display=(idx>=0)?'flex':'none';
   for(var i=0;i<4;i++){
     var pip=document.getElementById('p'+i);
     if(pip) pip.className='pip'+(i===idx?' on':'');
   }
+  var prev=document.getElementById('swPrev');
+  var next=document.getElementById('swNext');
+  if(prev) prev.className='sw-btn'+(idx<=0?' off':'');
+  if(next) next.className='sw-btn'+(idx>=main.length-1?' off':'');
+}
+function goMain(step){
+  var main=['s0','s1','s2','s3'], ci=main.indexOf(cur);
+  if(ci<0) return;
+  var ni=Math.max(0,Math.min(main.length-1,ci+step));
+  nav(main[ni]);
 }
 
 var swp={x:0,y:0,ok:false};
@@ -958,7 +989,7 @@ function canSwipeFrom(target){
   if(document.getElementById('mov').classList.contains('open')) return false;
   if(document.getElementById('dov').classList.contains('open')) return false;
   var tag = target && target.tagName ? target.tagName.toLowerCase() : '';
-  return !/input|textarea|button/.test(tag);
+  return !/input|textarea/.test(tag);
 }
 function swipeStart(x,y,target){
   swp.x=x; swp.y=y; swp.ok=canSwipeFrom(target);
@@ -1025,6 +1056,25 @@ var nowCalDate=new Date();
 var CAL_STATE={year:nowCalDate.getFullYear(),month:nowCalDate.getMonth(),marks:{}};
 
 function calKey(y,m,d){return y+'-'+m+'-'+d;}
+function loadCalMarks(){
+  try{
+    var raw=localStorage.getItem('marcia-cal-marks');
+    if(raw) CAL_STATE.marks=JSON.parse(raw)||{};
+  }catch(_e){}
+}
+function saveCalMarks(){
+  try{
+    localStorage.setItem('marcia-cal-marks', JSON.stringify(CAL_STATE.marks));
+  }catch(_e){}
+}
+function listMonthMarks(){
+  var pref=CAL_STATE.year+'-'+(CAL_STATE.month+1)+'-';
+  var ds=Object.keys(CAL_STATE.marks).filter(function(k){return k.indexOf(pref)===0;})
+    .map(function(k){return parseInt(k.split('-')[2],10);})
+    .filter(function(v){return !isNaN(v);})
+    .sort(function(a,b){return a-b;});
+  return ds;
+}
 function isMarkedDay(d){
   return !!CAL_STATE.marks[calKey(CAL_STATE.year,CAL_STATE.month+1,d)];
 }
@@ -1032,6 +1082,7 @@ function toggleCalDate(d){
   var key=calKey(CAL_STATE.year,CAL_STATE.month+1,d);
   if(CAL_STATE.marks[key]) delete CAL_STATE.marks[key];
   else CAL_STATE.marks[key]=true;
+  saveCalMarks();
   renderCalendar();
 }
 function shiftCalMonth(step){
@@ -1069,11 +1120,25 @@ function renderCalendar(){
     '</div>' +
     '<div class="mi" style="margin:0 20px 10px"><button class="ai-mini-btn" onclick="openAIChat(\'desafio\')">Pedir plano da semana para a IA</button></div>';
 
+  var marked=listMonthMarks();
+  var markedTxt=marked.length?('Datas marcadas: '+marked.join(', ')):'Nenhuma data marcada ainda.';
+  var marksInfo='<div style="padding:0 20px 10px;font-size:12px;color:#5a2e10;font-weight:600">'+markedTxt+'</div>';
+  var clearBtn=marked.length?'<div style="padding:0 20px 10px"><button class="lgbtn" style="height:38px;color:#5a2e10;border-color:rgba(90,46,16,.25)" onclick="clearMonthMarks()">Limpar marcações deste mês</button></div>':'';
+
   document.getElementById('mt').textContent=CAL_MONTHS[mo]+' '+yr;
   document.getElementById('ms').textContent='Calendário interativo';
-  document.getElementById('mb').innerHTML=navC+leg+g+'<div style="height:10px"></div>';
+  document.getElementById('mb').innerHTML=navC+leg+marksInfo+clearBtn+g+'<div style="height:10px"></div>';
+}
+function clearMonthMarks(){
+  var pref=CAL_STATE.year+'-'+(CAL_STATE.month+1)+'-';
+  Object.keys(CAL_STATE.marks).forEach(function(k){
+    if(k.indexOf(pref)===0) delete CAL_STATE.marks[k];
+  });
+  saveCalMarks();
+  renderCalendar();
 }
 function openCal(){
+  loadCalMarks();
   renderCalendar();
   document.getElementById('mov').classList.add('open');
 }
