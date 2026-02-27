@@ -1,12 +1,7 @@
 name: Cloudflare Pages
 
 on:
-  pull_request:
-    branches: [ main ]
-  push:
-    branches:
-      - main
-      - '**'
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -40,5 +35,5 @@ jobs:
           projectName: appmarcia
           directory: dist
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.event_name == 'pull_request' && github.head_ref || github.ref_name }}
+          branch: preview
           wranglerVersion: '3'
