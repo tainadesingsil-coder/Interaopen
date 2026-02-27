@@ -7,6 +7,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="theme-color" content="#7a3e18"/>
+<meta name="apple-mobile-web-app-title" content="App Márcia"/>
+<meta name="application-name" content="App Márcia"/>
+<link rel="manifest" href="/manifest.webmanifest"/>
+<link rel="icon" type="image/png" href="https://i.postimg.cc/Qt6LPq29/Chat-GPT-Image-25-de-fev-de-2026-00-31-56-removebg-preview.png"/>
+<link rel="apple-touch-icon" href="https://i.postimg.cc/Qt6LPq29/Chat-GPT-Image-25-de-fev-de-2026-00-31-56-removebg-preview.png"/>
 <title>Márcia Kathllem · Personal Trainer</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
@@ -303,6 +308,32 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1a0800;
 .sd:nth-child(2){animation-delay:.22s;}.sd:nth-child(3){animation-delay:.44s;}
 @keyframes sdp{0%,100%{background:#5a2a10;transform:scale(1);}50%{background:#c89840;transform:scale(1.5);}}
 
+/* AI */
+.ai-ready{cursor:pointer;position:relative;}
+.ai-ready::after{content:'IA';position:absolute;right:6px;bottom:8px;
+  background:linear-gradient(135deg,#7a3e18,#3a1205);color:#fff;
+  border-radius:999px;padding:3px 7px;font-size:9px;font-weight:800;
+  letter-spacing:.4px;box-shadow:0 4px 10px rgba(0,0,0,.3);}
+.ai-box{background:#CBAA8E;border-radius:14px;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,.07);}
+.ai-head{font-size:11px;color:#5a2e10;margin-bottom:10px;line-height:1.45;}
+.ai-msgs{display:flex;flex-direction:column;gap:8px;max-height:260px;overflow-y:auto;padding-right:4px;margin-bottom:10px;}
+.ai-msg{padding:9px 11px;border-radius:12px;font-size:12px;line-height:1.5;white-space:pre-line;}
+.ai-msg.user{background:#7a3e18;color:#fff;align-self:flex-end;max-width:88%;}
+.ai-msg.bot{background:rgba(255,255,255,.58);color:#2b1307;align-self:flex-start;max-width:92%;}
+.ai-chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
+.ai-chip{background:rgba(122,62,24,.12);border:1px solid rgba(122,62,24,.25);border-radius:999px;
+  padding:6px 10px;font-size:11px;color:#4a210d;cursor:pointer;font-family:inherit;}
+.ai-chip:active{transform:scale(.98);}
+.ai-input{display:flex;gap:8px;align-items:center;}
+.ai-input input{flex:1;height:40px;border-radius:10px;border:1px solid rgba(0,0,0,.14);
+  padding:0 12px;font-size:13px;background:rgba(255,255,255,.72);font-family:inherit;color:#1a0c04;}
+.ai-send{height:40px;border-radius:10px;border:none;background:#7a3e18;color:#fff;
+  font-size:12px;font-weight:700;padding:0 12px;cursor:pointer;font-family:inherit;}
+.ai-note{font-size:10px;color:#6b3818;margin-top:8px;opacity:.8;}
+.ai-mini-btn{width:100%;height:40px;border:none;border-radius:10px;
+  background:linear-gradient(135deg,#7a3e18,#4a1e08);color:#fff;font-size:12px;
+  font-weight:700;cursor:pointer;font-family:inherit;}
+
 /* INSTALL TIP */
 .itip{margin-top:18px;font-size:11px;color:rgba(255,255,255,.28);text-align:center;line-height:1.7;}
 .itip b{color:rgba(200,152,64,.6);font-weight:600;}
@@ -547,7 +578,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1a0800;
   <div class="body">
     <div class="bc"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg> Dicas • Conhecimento</div>
     <h1 class="ptitle">Dicas de<br>Treino</h1>
-    <button class="lnk">Ver Todas as Dicas</button>
+    <button class="lnk" onclick="openTipsHub()">Ver Todas as Dicas</button>
     <div class="hero">
       <div class="icard">
     <div class="icard-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="9" y1="18" x2="15" y2="18"/><line x1="10" y1="22" x2="14" y2="22"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0018 8 6 6 0 006 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 018.91 14"/></svg></div>
@@ -668,6 +699,224 @@ function setImgs() {
 }
 window.addEventListener('DOMContentLoaded', setImgs);
 
+var AI_TOPICS = {
+  geral: {
+    title: 'Assistente de Treino',
+    intro: 'Sou sua IA de treino. Posso ajudar com treino, alimentação, recuperação e motivação.',
+    chips: ['Treino para hoje', 'Dica de dieta simples', 'Como voltar sem desanimar?']
+  },
+  personal: {
+    title: 'IA do Treino Personal',
+    intro: 'Vamos focar em resultados com treino individual, postura e progressão de carga.',
+    chips: ['Treino para pernas hoje', 'Como ganhar massa magra?', 'Quanto descansar entre séries?']
+  },
+  desafio: {
+    title: 'IA do Desafio 30 Dias',
+    intro: 'Vamos organizar rotina, consistência e metas semanais para completar o desafio.',
+    chips: ['Plano da semana', 'Como não faltar treino?', 'Meta para queimar gordura']
+  },
+  dance: {
+    title: 'IA do Hit Dance',
+    intro: 'Vou te ajudar com cardio, ritmo, respiração e gasto calórico nas aulas de dança.',
+    chips: ['Aquecimento para dança', 'Quantas calorias eu gasto?', 'Treino complementar em casa']
+  },
+  dicas: {
+    title: 'IA de Dicas',
+    intro: 'Você pergunta e eu respondo com dicas práticas para treino, dieta e recuperação.',
+    chips: ['Pré treino rápido', 'Pós treino ideal', 'Como melhorar postura']
+  },
+  perfil: {
+    title: 'IA da Márcia',
+    intro: 'Posso montar uma sugestão inicial para você chegar mais preparada no atendimento.',
+    chips: ['Montar plano iniciante', 'Dieta para emagrecer', 'Plano para definir abdômen']
+  },
+  login: {
+    title: 'IA de Boas-vindas',
+    intro: 'Bem-vinda! Me diga seu objetivo e eu monto um plano inicial agora.',
+    chips: ['Quero emagrecer', 'Quero ganhar massa', 'Quero condicionamento']
+  }
+};
+
+var AI_MODAL_MAP = {
+  atencao: 'personal',
+  horario: 'personal',
+  resultados: 'personal',
+  meta: 'desafio',
+  calorias: 'desafio',
+  medalhas: 'desafio',
+  plano_p: 'personal',
+  plano_d: 'desafio',
+  plano_hd: 'dance'
+};
+
+var AI_TIP_DETAILS = [
+  {
+    t: 'Nutrição Balanceada',
+    s: 'Ajuste simples para evoluir sem radicalismo',
+    b: '<div class="mi"><div class="mi-t">Estrutura prática</div><div class="mi-d">Em cada refeição: proteína + carboidrato de boa qualidade + vegetais + água. Exemplo: frango, arroz, salada e fruta.</div></div><div class="mi"><div class="mi-t">Antes e depois do treino</div><div class="mi-d">Pré-treino: refeição leve 60–90 min antes. Pós-treino: proteína e carboidrato para recuperação muscular.</div></div>'
+  },
+  {
+    t: 'Técnica Correta',
+    s: 'Movimento bem feito acelera resultado',
+    b: '<div class="mi"><div class="mi-t">Prioridade</div><div class="mi-d">Qualidade antes da carga: postura neutra, controle na descida e execução completa.</div></div><div class="mi"><div class="mi-t">Progresso seguro</div><div class="mi-d">Aumente peso somente quando conseguir todas as repetições com técnica limpa e sem dor.</div></div>'
+  },
+  {
+    t: 'Recuperação Ativa',
+    s: 'Descansar também é parte do treino',
+    b: '<div class="mi"><div class="mi-t">Recuperação inteligente</div><div class="mi-d">Sono de qualidade, hidratação e mobilidade diária ajudam a render mais no próximo treino.</div></div><div class="mi"><div class="mi-t">Sem dor excessiva</div><div class="mi-d">Se houver dor aguda, reduza intensidade e procure avaliação profissional antes de insistir.</div></div>'
+  }
+];
+
+var AI_STATE = { topic: 'geral' };
+
+function normTxt(v){
+  return (v||'').toLowerCase()
+    .replace(/[áàâãä]/g,'a').replace(/[éèêë]/g,'e')
+    .replace(/[íìîï]/g,'i').replace(/[óòôõö]/g,'o')
+    .replace(/[úùûü]/g,'u').replace(/ç/g,'c');
+}
+
+function aiTopicMeta(topic){
+  return AI_TOPICS[topic] || AI_TOPICS.geral;
+}
+
+function buildAIReply(question, topic){
+  var q = normTxt(question);
+  var t = aiTopicMeta(topic);
+
+  if(/dor|lesao|machuc|joelho|coluna|ombro|lombar/.test(q)){
+    return 'Se existir dor forte ou pontada, pare o exercício e busque avaliação presencial.\n\nPara hoje: reduza carga, faça mobilidade leve e mantenha movimentos sem dor.';
+  }
+  if(/dieta|aliment|nutri|caloria|comer|refeicao/.test(q)){
+    return 'Plano alimentar simples:\n• 3 refeições principais + 1 ou 2 lanches\n• Proteína em todas as refeições\n• Água ao longo do dia (2 a 3 litros)\n\nSe quiser, te passo um cardápio exemplo para rotina corrida.';
+  }
+  if(/emagrec|perder gordura|secar|deficit/.test(q)){
+    return 'Estratégia para emagrecer com saúde:\n• Déficit calórico leve\n• Treino de força 3 a 4x/semana\n• Cardio 2 a 3x/semana\n• Sono 7 a 8 horas\n\nCom constância por 4 semanas você já nota mudança.';
+  }
+  if(/massa|hipertrof|ganhar musculo|forte|definir/.test(q)){
+    return 'Para ganhar massa/definir:\n• Progressão de carga\n• 8 a 12 repetições na maior parte dos exercícios\n• Proteína diária adequada\n• Descanso entre 60 e 120 segundos por série\n\nPosso montar um treino A/B para você.';
+  }
+  if(/suplement|whey|creatina/.test(q)){
+    return 'Suplemento ajuda, mas não substitui rotina.\nBase: comida de verdade + treino + sono.\nWhey facilita proteína e creatina pode melhorar performance (uso diário).';
+  }
+  if(/hoje|treino de hoje|treino para hoje|rotina|semana|plano/.test(q)){
+    if(topic === 'dance'){
+      return 'Treino de hoje (Hit Dance):\n• 8 min aquecimento\n• 25 min dança intervalada\n• 10 min circuito de pernas e core\n• 5 min alongamento\n\nObjetivo: intensidade moderada a alta.';
+    }
+    if(topic === 'desafio'){
+      return 'Plano da semana (Desafio 30 dias):\n• Seg: força (inferiores)\n• Ter: cardio/dança\n• Qua: força (superiores)\n• Qui: mobilidade + caminhada\n• Sex: treino completo\n• Sáb: atividade leve\n• Dom: recuperação ativa';
+    }
+    return 'Treino base de hoje:\n• Agachamento 4x10\n• Remada 4x10\n• Desenvolvimento 3x12\n• Afundo 3x12\n• Prancha 3x40s\n\nSe for iniciante, reduza para 2-3 séries.';
+  }
+  if(/oi|ola|bom dia|boa tarde|boa noite/.test(q)){
+    return 'Oi! ' + t.intro + '\n\nMe conta seu objetivo: emagrecer, ganhar massa, condicionamento ou definição.';
+  }
+
+  if(topic === 'personal'){
+    return 'No Personal, o foco é resultado com segurança: técnica + progressão + constância.\n\nPergunte algo específico (treino, dieta, descanso ou dor) e eu te passo um plano objetivo.';
+  }
+  if(topic === 'desafio'){
+    return 'No Desafio 30 dias, o segredo é rotina simples e repetível.\n\nQuer que eu monte sua meta diária com tempo de treino e hidratação?';
+  }
+  if(topic === 'dance'){
+    return 'No Hit Dance, combine diversão com intensidade.\n\nPosso montar uma sequência de dança + funcional para acelerar o gasto calórico.';
+  }
+  return 'Perfeito. Posso te ajudar com treino, dieta, recuperação e motivação.\n\nMe diga: qual seu objetivo principal nos próximos 30 dias?';
+}
+
+function addAIMessage(role, text){
+  var msgs = document.getElementById('aiMsgs');
+  if(!msgs) return;
+  var div = document.createElement('div');
+  div.className = 'ai-msg ' + (role === 'user' ? 'user' : 'bot');
+  div.textContent = text;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function askAIChip(text){
+  var input = document.getElementById('aiInput');
+  if(!input) return;
+  input.value = text;
+  sendAIMessage();
+}
+
+function sendAIMessage(){
+  var input = document.getElementById('aiInput');
+  if(!input) return;
+  var q = input.value.trim();
+  if(!q) return;
+  input.value = '';
+  addAIMessage('user', q);
+  var ans = buildAIReply(q, AI_STATE.topic);
+  setTimeout(function(){ addAIMessage('bot', ans); }, 220);
+}
+
+function openAIChat(topic){
+  AI_STATE.topic = topic || 'geral';
+  var meta = aiTopicMeta(AI_STATE.topic);
+  var chipsHtml = '';
+  for (var i = 0; i < meta.chips.length; i++) {
+    chipsHtml += '<button class="ai-chip" onclick="askAIChip(\'' + meta.chips[i] + '\')">' + meta.chips[i] + '</button>';
+  }
+
+  document.getElementById('mt').textContent = 'IA da Márcia';
+  document.getElementById('ms').textContent = meta.title;
+  document.getElementById('mb').innerHTML =
+    '<div class="ai-box">' +
+      '<div class="ai-head">Pergunte o que quiser sobre treino, dieta, recuperação e rotina.</div>' +
+      '<div class="ai-msgs" id="aiMsgs"></div>' +
+      '<div class="ai-chips">' + chipsHtml + '</div>' +
+      '<div class="ai-input">' +
+        '<input id="aiInput" type="text" placeholder="Ex: o que comer antes do treino?" />' +
+        '<button class="ai-send" onclick="sendAIMessage()">Enviar</button>' +
+      '</div>' +
+      '<div class="ai-note">Resposta automática da IA do app. Para avaliação clínica, consulte profissional presencial.</div>' +
+    '</div>';
+  document.getElementById('mov').classList.add('open');
+
+  addAIMessage('bot', meta.intro);
+  var input = document.getElementById('aiInput');
+  if(input){
+    input.addEventListener('keydown', function(e){
+      if(e.key === 'Enter'){ e.preventDefault(); sendAIMessage(); }
+    });
+    setTimeout(function(){ input.focus(); }, 120);
+  }
+}
+
+function enableAIAgent(imgId, topic){
+  var img = document.getElementById(imgId);
+  if(!img || !img.parentElement) return;
+  var host = img.parentElement;
+  host.classList.add('ai-ready');
+  host.addEventListener('click', function(){ openAIChat(topic); });
+}
+
+function initAIAgents(){
+  enableAIAgent('img_flex', 'login');
+  enableAIAgent('img_personal', 'personal');
+  enableAIAgent('img_desafio', 'desafio');
+  enableAIAgent('img_dance', 'dance');
+  enableAIAgent('img_dicas', 'dicas');
+  enableAIAgent('img_flex2', 'perfil');
+  enableAIAgent('img_marcia', 'perfil');
+  enableAIAgent('drwPhoto', 'perfil');
+}
+
+function openTipsHub(){
+  document.getElementById('mt').textContent='Biblioteca de Dicas';
+  document.getElementById('ms').textContent='Toque em uma dica para ver ação e pedir ajuda da IA';
+  document.getElementById('mb').innerHTML =
+    '<div class="mi"><div class="mi-t">Nutrição Balanceada</div><div class="mi-d">Organize proteína, carboidrato e hidratação para treinar melhor.</div></div>' +
+    '<div class="mi"><div class="mi-t">Técnica Correta</div><div class="mi-d">Movimento bem feito vale mais que peso alto com execução ruim.</div></div>' +
+    '<div class="mi"><div class="mi-t">Recuperação Ativa</div><div class="mi-d">Dormir bem e recuperar reduz lesão e aumenta resultado.</div></div>' +
+    '<div class="mi" style="background:rgba(122,62,24,.12)"><button class="ai-mini-btn" onclick="openAIChat(\'dicas\')">Perguntar tudo para a IA</button></div>';
+  document.getElementById('mov').classList.add('open');
+}
+
+window.addEventListener('DOMContentLoaded', initAIAgents);
+
 var cur='s_login', day=12, liked=false, tips=[false,false,false];
 var ORDER=['s_login','s0','s1','s2','s3','s_profile'];
 
@@ -725,9 +974,14 @@ var MODS = {
 
 function openMod(k){
   var m=MODS[k]; if(!m)return;
+  var aiTopic = AI_MODAL_MAP[k];
+  var aiBlock = '';
+  if(aiTopic){
+    aiBlock = '<div class="mi" style="background:rgba(122,62,24,.12)"><button class="ai-mini-btn" onclick="openAIChat(\'' + aiTopic + '\')">Tirar dúvidas com a IA</button></div>';
+  }
   document.getElementById('mt').textContent=m.t;
   document.getElementById('ms').textContent=m.s;
-  document.getElementById('mb').innerHTML=m.b;
+  document.getElementById('mb').innerHTML=m.b + aiBlock;
   document.getElementById('mov').classList.add('open');
 }
 function closeMod(e){
@@ -778,6 +1032,12 @@ function tipT(i){
   tips[i]=!tips[i];
   document.getElementById('tc'+i).classList[tips[i]?'add':'remove']('done');
   document.getElementById('cg').style.display=tips.every(function(t){return t;})?'block':'none';
+  var d = AI_TIP_DETAILS[i];
+  if(!d) return;
+  document.getElementById('mt').textContent = d.t;
+  document.getElementById('ms').textContent = d.s;
+  document.getElementById('mb').innerHTML = d.b + '<div class="mi" style="background:rgba(122,62,24,.12)"><button class="ai-mini-btn" onclick="openAIChat(\'dicas\')">Perguntar sobre essa dica na IA</button></div>';
+  document.getElementById('mov').classList.add('open');
 }
 function rpl(e,el){
   var r=document.createElement('div');r.className='rp';
