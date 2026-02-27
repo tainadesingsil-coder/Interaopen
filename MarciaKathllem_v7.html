@@ -95,6 +95,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1a0800;
 .gallery{display:flex;flex-direction:column;gap:10px;}
 .gitem{border-radius:16px;overflow:hidden;box-shadow:0 5px 18px rgba(0,0,0,.18);aspect-ratio:4/3;}
 .gitem img{width:100%;height:100%;object-fit:cover;display:block;}
+.gitem.ytb{width:100%;border:none;cursor:pointer;
+  background:linear-gradient(135deg,#ff2f2f,#bf1111);
+  color:#fff;display:flex;align-items:center;justify-content:center;gap:10px;
+  font-size:14px;font-weight:800;font-family:inherit;}
+.gitem.ytb:active{transform:scale(.99);}
 
 .tcard{background:#CBAA8E;border-radius:14px;padding:13px 15px;
   display:flex;align-items:flex-start;gap:12px;cursor:pointer;
@@ -574,8 +579,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1a0800;
     <p class="sdesc">Hit Dance combina coreografia com aeróbica. Queime calorias dançando ao som das melhores músicas. Projeto exclusivo da Márcia Kathllem.</p>
     <div class="gallery">
       <div class="gitem"><img id="img_d1" src="" alt=""/></div>
-      <div class="gitem"><img id="img_d2" src="" alt=""/></div>
       <div class="gitem"><img id="img_d3" src="" alt=""/></div>
+      <button class="gitem ytb" onclick="openHitDanceYoutube()">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="10 8 16 12 10 16 10 8"/><rect x="2.5" y="6.5" width="19" height="11" rx="3.2"/></svg>
+        YouTube Axé Hit Dance
+      </button>
     </div>
   </div>
   <div class="bnav"><button class="nb" onclick="nav('s0')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></button><button class="nb" onclick="openCal()"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button><button class="sfab" onclick="nav('s1')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1a0c04" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button><button class="nb on" onclick="nav('s2')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></button><button class="nb" onclick="nav('s_profile')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></button></div>
@@ -1194,6 +1202,9 @@ window.addEventListener('DOMContentLoaded', initSwipe);
 
 function openDrw(){document.getElementById('dov').classList.add('open');document.getElementById('drw').classList.add('open');}
 function closeDrw(){document.getElementById('dov').classList.remove('open');document.getElementById('drw').classList.remove('open');}
+function openHitDanceYoutube(){
+  window.open('https://www.youtube.com/results?search_query=axe+hit+dance', '_blank');
+}
 
 var MODS = {
   atencao:{t:'Atenção Individual',s:'Tudo focado em você',b:'<div class="mi"><div class="mi-t">Avaliação Completa</div><div class="mi-d">Análise do seu condicionamento físico, objetivos e limitações para montar o treino ideal.</div></div><div class="mi"><div class="mi-t">Treino Personalizado</div><div class="mi-d">Cada exercício, série e carga calculado especificamente para o seu corpo e seus objetivos.</div></div><div class="mi"><div class="mi-t">Correção em Tempo Real</div><div class="mi-d">A Márcia ao seu lado corrigindo postura e técnica em cada exercício para máximos resultados.</div></div>'},
