@@ -6,12 +6,12 @@
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="theme-color" content="#5f2eea"/>
+<meta name="theme-color" content="#7a3e18"/>
 <meta name="apple-mobile-web-app-title" content="App Márcia"/>
 <meta name="application-name" content="App Márcia"/>
 <link rel="manifest" href="/manifest.webmanifest"/>
-<link rel="icon" type="image/svg+xml" href="/icons/marcinha-premium.svg"/>
-<link rel="apple-touch-icon" href="/icons/marcinha-premium.svg"/>
+<link rel="icon" type="image/png" href="/icons/marcinha-premium.png"/>
+<link rel="apple-touch-icon" href="/icons/marcinha-premium.png"/>
 <title>Márcia Kathllem · Personal Trainer</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
@@ -222,7 +222,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1a0800;
 .lwrap::-webkit-scrollbar{display:none;}
 .lin{min-height:100%;display:flex;flex-direction:column;
   align-items:center;padding:36px 28px 44px;}
-.lmascot{width:195px;height:215px;flex-shrink:0;margin-bottom:4px;}
+.lmascot{width:128px;height:148px;flex-shrink:0;margin-bottom:12px;}
 .lmascot img{width:100%;height:100%;object-fit:contain;object-position:top center;}
 .lname{font-size:22px;font-weight:900;color:#fff;margin-bottom:3px;}
 .lrole{font-size:11px;color:rgba(200,152,64,.72);letter-spacing:3px;
@@ -428,6 +428,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1a0800;
 <!-- LOGIN -->
 <div class="screen active" id="s_login">
   <div class="lwrap"><div class="lin">
+    <div class="lmascot"><img id="img_flex" src="" alt=""/></div>
     <div class="lname">Márcia Kathllem</div>
     <div class="lrole">Personal Trainer</div>
     <div class="linp">
@@ -701,7 +702,7 @@ var IMGS = {"flex": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAP0AAAF8CAYAA
 // Set all images
 function setImgs() {
   var m = {
-    'img_flex2': 'flex',
+    'img_flex': 'flex', 'img_flex2': 'flex',
     'img_personal': 'personal', 'img_dance': 'dance',
     'img_dicas': 'dicas', 'img_desafio': 'desafio',
     'img_marcia': 'marcia', 'drwPhoto': 'marcia',
@@ -712,7 +713,7 @@ function setImgs() {
     if(el) el.src = IMGS[m[id]];
   }
   var coverUrl = 'https://i.postimg.cc/Qt6LPq29/Chat-GPT-Image-25-de-fev-de-2026-00-31-56-removebg-preview.png';
-  var coverIds = ['img_flex2'];
+  var coverIds = ['img_flex', 'img_flex2'];
   for (var i = 0; i < coverIds.length; i++) {
     var coverEl = document.getElementById(coverIds[i]);
     if (coverEl) coverEl.src = coverUrl;
@@ -805,6 +806,18 @@ var AI_STATE = {
 };
 var AGENT_CHIPS = ['Montar plano completo', 'Criar dieta semanal', 'Checklist diario'];
 
+function fluidReply(text){
+  var t=(text||'').trim();
+  if(!t) return t;
+  var isStructured=/^Plano semanal|^Checklist|^Regra prática/i.test(t);
+  if(isStructured) return t;
+  var lines=t.split('\n').filter(function(l){return l.trim()!=='';});
+  if(lines.length>3){
+    return lines.slice(0,3).join('\n');
+  }
+  return t;
+}
+
 function normTxt(v){
   return (v||'').toLowerCase()
     .replace(/[áàâãä]/g,'a').replace(/[éèêë]/g,'e')
@@ -886,13 +899,13 @@ function buildWeeklyAgentPlan(topic){
     else if(topic==='personal') bloco=(i%2===0)?'Inferiores + gluteo':'Superiores + postura';
     linhas.push('• ' + dia + ': ' + bloco + ' (' + p.minutesPerSession + ' min)');
   }
-  var extra = '\n• 1 dia de recuperacao ativa (caminhada/alongamento)\n• Hidratação: 2 a 3 litros/dia';
+  var extra = '\n• 1 dia de recuperação ativa\n• Água: 2 a 3 litros';
   return 'Plano semanal da Marcinha (' + p.goal + '):\n' + linhas.join('\n') + extra;
 }
 
 function buildDietAgentPlan(){
   var p = AI_STATE.profile;
-  var base = 'Plano alimentar base (' + p.dietStyle + '):\n' +
+  var base = 'Dieta base (' + p.dietStyle + '):\n' +
     '• Cafe: proteina + fruta\n' +
     '• Almoco: proteina + carbo de qualidade + salada\n' +
     '• Lanche: iogurte/oleaginosas/fruta\n' +
@@ -915,7 +928,7 @@ function buildRestAnswer(){
   } else {
     rule += '• Foco condicionamento: 45 a 75s com ritmo controlado';
   }
-  rule += '\n\nSe estiver perdendo técnica, aumente 15 a 30s de descanso.';
+  rule += '\n\nSe perder técnica, aumenta 15–30s.';
   return rule;
 }
 
@@ -1046,7 +1059,7 @@ function sendAIMessage(){
   if(!q) return;
   input.value = '';
   addAIMessage('user', q);
-  var ans = buildAgentReply(q, AI_STATE.topic);
+  var ans = fluidReply(buildAgentReply(q, AI_STATE.topic));
   setTimeout(function(){ addAIMessage('bot', ans); }, 220);
 }
 
@@ -1065,20 +1078,20 @@ function openAIChat(topic){
   document.getElementById('ms').textContent = meta.title;
   document.getElementById('mb').innerHTML =
     '<div class="ai-box">' +
-      '<div class="ai-head">Modo Agente: eu entendo seu objetivo e monto plano, dieta e checklist personalizados.</div>' +
+      '<div class="ai-head">Fala comigo normal. Eu respondo curto e direto, com plano só quando você pedir.</div>' +
       '<div class="ai-msgs" id="aiMsgs"></div>' +
       '<div class="ai-chips">' + chipsHtml + '</div>' +
       '<div class="ai-input">' +
         '<input id="aiInput" type="text" placeholder="Ex: o que comer antes do treino?" />' +
         '<button class="ai-send" onclick="sendAIMessage()">Enviar</button>' +
       '</div>' +
-      '<div class="ai-note">Agente local da Marcinha: responde e cria plano por etapas. Para avaliação clínica, consulte profissional presencial.</div>' +
+      '<div class="ai-note">Se quiser detalhes, é só pedir: "aprofunda".</div>' +
     '</div>';
   document.getElementById('mov').classList.add('open');
 
-  addAIMessage('bot', 'Oi! Eu sou a Marcinha, assistente da Márcia Kathllem 💪');
+  addAIMessage('bot', 'Oi, eu sou a Marcinha 💪');
   addAIMessage('bot', meta.intro);
-  addAIMessage('bot', 'Me fala seu objetivo e seu tempo por treino (ex: 4x por semana, 45 min) para eu montar seu plano completo.');
+  addAIMessage('bot', 'Me fala objetivo + tempo de treino que eu te respondo direto.');
   var input = document.getElementById('aiInput');
   if(input){
     input.addEventListener('keydown', function(e){
@@ -1100,6 +1113,7 @@ function enableAIAgent(imgId, topic){
 }
 
 function initAIAgents(){
+  enableAIAgent('img_flex', 'login');
   enableAIAgent('img_personal', 'personal');
   enableAIAgent('img_desafio', 'desafio');
   enableAIAgent('img_dance', 'dance');
