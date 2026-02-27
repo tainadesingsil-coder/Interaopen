@@ -23,7 +23,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1a0800;
   background:#DEB99A;border-radius:48px;overflow:hidden;position:relative;
   box-shadow:0 0 0 1.5px rgba(255,255,255,.12),0 40px 90px rgba(0,0,0,.8);}
 
-.screen{position:absolute;inset:0;display:flex;flex-direction:column;
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;overflow:hidden;
   background:#DEB99A;transition:transform .38s cubic-bezier(.4,0,.2,1),opacity .38s ease;}
 .screen.active{transform:translateX(0);opacity:1;}
 .screen.gl{transform:translateX(-100%);opacity:0;pointer-events:none;}
@@ -48,7 +48,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1a0800;
   background:none;border:none;cursor:pointer;font-family:inherit;
   margin-bottom:16px;display:inline-block;}
 
-.hero{position:relative;height:192px;margin-bottom:20px;}
+.hero{position:relative;height:192px;margin-bottom:20px;overflow:hidden;}
 .icard{position:absolute;left:0;top:0;width:150px;background:#7a3e18;
   border-radius:20px;padding:15px 14px;z-index:3;
   box-shadow:0 10px 26px rgba(0,0,0,.28);}
@@ -58,8 +58,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1a0800;
 .icard-row{display:flex;align-items:center;gap:4px;font-size:10.5px;color:rgba(255,255,255,.8);margin-bottom:4px;}
 .icard-bold{font-size:12px;font-weight:700;color:#fff;}
 /* Mascote sem fundo */
-.mascot{position:absolute;right:-8px;top:-10px;width:198px;height:215px;z-index:2;}
+.mascot{position:absolute;right:-4px;top:-14px;width:202px;height:220px;z-index:2;}
 .mascot img{width:100%;height:100%;object-fit:contain;object-position:top center;}
+.lmascot,.pmascot{position:relative;overflow:visible;}
 
 .stitle{font-size:18px;font-weight:800;color:#1a0c04;margin-bottom:6px;}
 .sdesc{font-size:13px;color:#5a2e10;line-height:1.65;margin-bottom:16px;opacity:.9;}
@@ -202,11 +203,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1a0800;
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;padding:0 20px;}
 .cdn{text-align:center;font-size:11px;font-weight:600;color:#7a3e18;padding:6px 0;}
 .cd{width:100%;aspect-ratio:1;border-radius:50%;display:flex;align-items:center;
-  justify-content:center;font-size:12.5px;font-weight:500;color:#3a1808;}
+  justify-content:center;font-size:12.5px;font-weight:500;color:#3a1808;
+  border:none;background:transparent;cursor:pointer;font-family:inherit;}
+.cd:active{transform:scale(.96);}
 .cd.today{background:#7a3e18;color:#fff;font-weight:800;}
-.cd.ev{position:relative;}
-.cd.ev::after{content:'';position:absolute;bottom:3px;left:50%;
-  transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:#c89840;}
+.cd.mk{background:#c89840;color:#2f1608;font-weight:800;}
 .cd.om{opacity:.28;}
 
 /* LOGIN */
@@ -309,11 +310,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1a0800;
 @keyframes sdp{0%,100%{background:#5a2a10;transform:scale(1);}50%{background:#c89840;transform:scale(1.5);}}
 
 /* AI */
-.ai-ready{cursor:pointer;position:relative;}
+.ai-ready{cursor:pointer;position:relative;isolation:isolate;}
 .ai-ready::after{content:'IA';position:absolute;right:6px;bottom:8px;
   background:linear-gradient(135deg,#7a3e18,#3a1205);color:#fff;
   border-radius:999px;padding:3px 7px;font-size:9px;font-weight:800;
   letter-spacing:.4px;box-shadow:0 4px 10px rgba(0,0,0,.3);}
+.drw-av.ai-ready::after,.ppwrap.ai-ready::after{display:none;}
 .ai-box{background:#CBAA8E;border-radius:14px;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,.07);}
 .ai-head{font-size:11px;color:#5a2e10;margin-bottom:10px;line-height:1.45;}
 .ai-msgs{display:flex;flex-direction:column;gap:8px;max-height:260px;overflow-y:auto;padding-right:4px;margin-bottom:10px;}
@@ -702,37 +704,37 @@ window.addEventListener('DOMContentLoaded', setImgs);
 var AI_TOPICS = {
   geral: {
     title: 'Assistente de Treino',
-    intro: 'Sou sua IA de treino. Posso ajudar com treino, alimentação, recuperação e motivação.',
+    intro: 'Sou a Marcinha, assistente inteligente da Márcia. Posso te guiar em treino, alimentação, recuperação e motivação.',
     chips: ['Treino para hoje', 'Dica de dieta simples', 'Como voltar sem desanimar?']
   },
   personal: {
     title: 'IA do Treino Personal',
-    intro: 'Vamos focar em resultados com treino individual, postura e progressão de carga.',
+    intro: 'Aqui no Personal eu te ajudo com postura, progressão de carga e estratégia para resultado rápido com segurança.',
     chips: ['Treino para pernas hoje', 'Como ganhar massa magra?', 'Quanto descansar entre séries?']
   },
   desafio: {
     title: 'IA do Desafio 30 Dias',
-    intro: 'Vamos organizar rotina, consistência e metas semanais para completar o desafio.',
+    intro: 'No Desafio 30 Dias eu monto sua rotina para manter constância e bater metas semanais.',
     chips: ['Plano da semana', 'Como não faltar treino?', 'Meta para queimar gordura']
   },
   dance: {
     title: 'IA do Hit Dance',
-    intro: 'Vou te ajudar com cardio, ritmo, respiração e gasto calórico nas aulas de dança.',
+    intro: 'No Hit Dance eu te ajudo com ritmo, cardio, respiração e gasto calórico para render mais nas aulas.',
     chips: ['Aquecimento para dança', 'Quantas calorias eu gasto?', 'Treino complementar em casa']
   },
   dicas: {
     title: 'IA de Dicas',
-    intro: 'Você pergunta e eu respondo com dicas práticas para treino, dieta e recuperação.',
+    intro: 'Me pergunta qualquer coisa: treino, dieta, técnica, recuperação e rotina real de quem treina.',
     chips: ['Pré treino rápido', 'Pós treino ideal', 'Como melhorar postura']
   },
   perfil: {
     title: 'IA da Márcia',
-    intro: 'Posso montar uma sugestão inicial para você chegar mais preparada no atendimento.',
+    intro: 'Posso montar uma orientação inicial para você chegar preparada ao atendimento com a Márcia.',
     chips: ['Montar plano iniciante', 'Dieta para emagrecer', 'Plano para definir abdômen']
   },
   login: {
     title: 'IA de Boas-vindas',
-    intro: 'Bem-vinda! Me diga seu objetivo e eu monto um plano inicial agora.',
+    intro: 'Bem-vinda! Eu sou a Marcinha e já posso montar um plano inicial com base no seu objetivo.',
     chips: ['Quero emagrecer', 'Quero ganhar massa', 'Quero condicionamento']
   }
 };
@@ -811,6 +813,9 @@ function buildAIReply(question, topic){
   if(/oi|ola|bom dia|boa tarde|boa noite/.test(q)){
     return 'Oi! ' + t.intro + '\n\nMe conta seu objetivo: emagrecer, ganhar massa, condicionamento ou definição.';
   }
+  if(/quem e voce|quem e vc|quem e você|quem é voce|quem é vc|marcinha/.test(q)){
+    return 'Eu sou a Marcinha, assistente inteligente da Márcia Kathllem 🤎\n\nPosso te responder sobre treino, dieta, rotina e recuperação, de forma prática.';
+  }
 
   if(topic === 'personal'){
     return 'No Personal, o foco é resultado com segurança: técnica + progressão + constância.\n\nPergunte algo específico (treino, dieta, descanso ou dor) e eu te passo um plano objetivo.';
@@ -875,6 +880,7 @@ function openAIChat(topic){
     '</div>';
   document.getElementById('mov').classList.add('open');
 
+  addAIMessage('bot', 'Oi! Eu sou a Marcinha, assistente da Márcia Kathllem 💪');
   addAIMessage('bot', meta.intro);
   var input = document.getElementById('aiInput');
   if(input){
@@ -890,7 +896,10 @@ function enableAIAgent(imgId, topic){
   if(!img || !img.parentElement) return;
   var host = img.parentElement;
   host.classList.add('ai-ready');
-  host.addEventListener('click', function(){ openAIChat(topic); });
+  host.addEventListener('click', function(e){
+    e.stopPropagation();
+    openAIChat(topic);
+  });
 }
 
 function initAIAgents(){
@@ -900,8 +909,6 @@ function initAIAgents(){
   enableAIAgent('img_dance', 'dance');
   enableAIAgent('img_dicas', 'dicas');
   enableAIAgent('img_flex2', 'perfil');
-  enableAIAgent('img_marcia', 'perfil');
-  enableAIAgent('drwPhoto', 'perfil');
 }
 
 function openTipsHub(){
@@ -946,16 +953,39 @@ function nav(id){
   }
 }
 
-var tx=0,ty=0;
-document.getElementById('phone').addEventListener('touchstart',function(e){tx=e.touches[0].clientX;ty=e.touches[0].clientY;},{passive:true});
-document.getElementById('phone').addEventListener('touchend',function(e){
-  var dx=e.changedTouches[0].clientX-tx, dy=e.changedTouches[0].clientY-ty;
+var swp={x:0,y:0,ok:false};
+function canSwipeFrom(target){
+  if(document.getElementById('mov').classList.contains('open')) return false;
+  if(document.getElementById('dov').classList.contains('open')) return false;
+  var tag = target && target.tagName ? target.tagName.toLowerCase() : '';
+  return !/input|textarea|button/.test(tag);
+}
+function swipeStart(x,y,target){
+  swp.x=x; swp.y=y; swp.ok=canSwipeFrom(target);
+}
+function swipeEnd(x,y){
+  if(!swp.ok) return;
+  var dx=x-swp.x, dy=y-swp.y;
+  var ax=Math.abs(dx), ay=Math.abs(dy);
   var m=['s0','s1','s2','s3'],ci=m.indexOf(cur);
-  if(ci>=0&&Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>46){
-    if(dx<0&&ci<3)nav(m[ci+1]);
-    else if(dx>0&&ci>0)nav(m[ci-1]);
-  }
-},{passive:true});
+  if(ci<0) return;
+  if(ax<28||ax<ay+10) return;
+  if(dx<0&&ci<m.length-1) nav(m[ci+1]);
+  else if(dx>0&&ci>0) nav(m[ci-1]);
+}
+function initSwipe(){
+  var phone=document.getElementById('phone');
+  if(!phone) return;
+  phone.addEventListener('touchstart',function(e){
+    if(!e.touches||!e.touches[0]) return;
+    swipeStart(e.touches[0].clientX,e.touches[0].clientY,e.target);
+  },{passive:true});
+  phone.addEventListener('touchend',function(e){
+    if(!e.changedTouches||!e.changedTouches[0]) return;
+    swipeEnd(e.changedTouches[0].clientX,e.changedTouches[0].clientY);
+  },{passive:true});
+}
+window.addEventListener('DOMContentLoaded', initSwipe);
 
 function openDrw(){document.getElementById('dov').classList.add('open');document.getElementById('drw').classList.add('open');}
 function closeDrw(){document.getElementById('dov').classList.remove('open');document.getElementById('drw').classList.remove('open');}
@@ -989,26 +1019,62 @@ function closeMod(e){
   document.getElementById('mov').classList.remove('open');
 }
 
-function openCal(){
-  var now=new Date(), mo=now.getMonth(), yr=now.getFullYear();
-  var mn=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-  var dn=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+var CAL_MONTHS=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+var CAL_DAYS=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+var nowCalDate=new Date();
+var CAL_STATE={year:nowCalDate.getFullYear(),month:nowCalDate.getMonth(),marks:{}};
+
+function calKey(y,m,d){return y+'-'+m+'-'+d;}
+function isMarkedDay(d){
+  return !!CAL_STATE.marks[calKey(CAL_STATE.year,CAL_STATE.month+1,d)];
+}
+function toggleCalDate(d){
+  var key=calKey(CAL_STATE.year,CAL_STATE.month+1,d);
+  if(CAL_STATE.marks[key]) delete CAL_STATE.marks[key];
+  else CAL_STATE.marks[key]=true;
+  renderCalendar();
+}
+function shiftCalMonth(step){
+  CAL_STATE.month+=step;
+  if(CAL_STATE.month<0){CAL_STATE.month=11;CAL_STATE.year--;}
+  if(CAL_STATE.month>11){CAL_STATE.month=0;CAL_STATE.year++;}
+  renderCalendar();
+}
+function renderCalendar(){
+  var yr=CAL_STATE.year, mo=CAL_STATE.month;
   var fd=new Date(yr,mo,1).getDay(), dim=new Date(yr,mo+1,0).getDate();
-  var evs=[3,7,10,14,17,21,24,28];
+  var today=new Date();
+  var isCurMonth=(today.getFullYear()===yr&&today.getMonth()===mo);
   var g='<div class="cal-grid">';
-  dn.forEach(function(d){g+='<div class="cdn">'+d+'</div>';});
-  for(var i=0;i<fd;i++)g+='<div></div>';
+  for(var i=0;i<CAL_DAYS.length;i++) g+='<div class="cdn">'+CAL_DAYS[i]+'</div>';
+  for(var b=0;b<fd;b++) g+='<div class="cd om"></div>';
   for(var d=1;d<=dim;d++){
     var cls='cd';
-    if(d===now.getDate())cls+=' today';
-    if(evs.indexOf(d)>=0)cls+=' ev';
-    g+='<div class="'+cls+'">'+d+'</div>';
+    if(isCurMonth&&d===today.getDate()) cls+=' today';
+    if(isMarkedDay(d)) cls+=' mk';
+    g+='<button class="'+cls+'" onclick="toggleCalDate('+d+')">'+d+'</button>';
   }
   g+='</div>';
-  var leg='<div style="display:flex;align-items:center;gap:8px;padding:10px 20px 14px"><div style="width:9px;height:9px;border-radius:50%;background:#c89840"></div><span style="font-size:12px;color:#5a2e10">Ponto dourado = treino marcado</span></div>';
-  document.getElementById('mt').textContent=mn[mo]+' '+yr;
-  document.getElementById('ms').textContent='Calendário de treinos';
-  document.getElementById('mb').innerHTML=leg+g+'<div style="height:10px"></div>';
+
+  var navC=
+    '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 20px 12px">' +
+      '<button class="pbtn" onclick="shiftCalMonth(-1)" style="width:36px;height:36px">‹</button>' +
+      '<div style="font-size:13px;font-weight:700;color:#5a2e10">Escolha as datas para marcar treino</div>' +
+      '<button class="pbtn" onclick="shiftCalMonth(1)" style="width:36px;height:36px">›</button>' +
+    '</div>';
+  var leg=
+    '<div style="display:flex;align-items:center;gap:8px;padding:0 20px 12px">' +
+      '<div style="width:9px;height:9px;border-radius:50%;background:#c89840"></div>' +
+      '<span style="font-size:12px;color:#5a2e10">Data dourada = treino marcado</span>' +
+    '</div>' +
+    '<div class="mi" style="margin:0 20px 10px"><button class="ai-mini-btn" onclick="openAIChat(\'desafio\')">Pedir plano da semana para a IA</button></div>';
+
+  document.getElementById('mt').textContent=CAL_MONTHS[mo]+' '+yr;
+  document.getElementById('ms').textContent='Calendário interativo';
+  document.getElementById('mb').innerHTML=navC+leg+g+'<div style="height:10px"></div>';
+}
+function openCal(){
+  renderCalendar();
   document.getElementById('mov').classList.add('open');
 }
 
