@@ -6,12 +6,12 @@
   "scope": "/",
   "display": "standalone",
   "background_color": "#1a0800",
-  "theme_color": "#7a3e18",
+  "theme_color": "#5f2eea",
   "icons": [
     {
-      "src": "https://i.postimg.cc/Qt6LPq29/Chat-GPT-Image-25-de-fev-de-2026-00-31-56-removebg-preview.png",
-      "sizes": "512x512",
-      "type": "image/png",
+      "src": "/icons/marcinha-premium.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
       "purpose": "any maskable"
     }
   ]

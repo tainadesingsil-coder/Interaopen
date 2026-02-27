@@ -6,12 +6,12 @@
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="theme-color" content="#7a3e18"/>
+<meta name="theme-color" content="#5f2eea"/>
 <meta name="apple-mobile-web-app-title" content="App Márcia"/>
 <meta name="application-name" content="App Márcia"/>
 <link rel="manifest" href="/manifest.webmanifest"/>
-<link rel="icon" type="image/png" href="https://i.postimg.cc/Qt6LPq29/Chat-GPT-Image-25-de-fev-de-2026-00-31-56-removebg-preview.png"/>
-<link rel="apple-touch-icon" href="https://i.postimg.cc/Qt6LPq29/Chat-GPT-Image-25-de-fev-de-2026-00-31-56-removebg-preview.png"/>
+<link rel="icon" type="image/svg+xml" href="/icons/marcinha-premium.svg"/>
+<link rel="apple-touch-icon" href="/icons/marcinha-premium.svg"/>
 <title>Márcia Kathllem · Personal Trainer</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
@@ -428,7 +428,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1a0800;
 <!-- LOGIN -->
 <div class="screen active" id="s_login">
   <div class="lwrap"><div class="lin">
-    <div class="lmascot"><img id="img_flex" src="" alt=""/></div>
     <div class="lname">Márcia Kathllem</div>
     <div class="lrole">Personal Trainer</div>
     <div class="linp">
@@ -702,7 +701,7 @@ var IMGS = {"flex": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAP0AAAF8CAYAA
 // Set all images
 function setImgs() {
   var m = {
-    'img_flex': 'flex', 'img_flex2': 'flex',
+    'img_flex2': 'flex',
     'img_personal': 'personal', 'img_dance': 'dance',
     'img_dicas': 'dicas', 'img_desafio': 'desafio',
     'img_marcia': 'marcia', 'drwPhoto': 'marcia',
@@ -713,7 +712,7 @@ function setImgs() {
     if(el) el.src = IMGS[m[id]];
   }
   var coverUrl = 'https://i.postimg.cc/Qt6LPq29/Chat-GPT-Image-25-de-fev-de-2026-00-31-56-removebg-preview.png';
-  var coverIds = ['img_flex', 'img_flex2'];
+  var coverIds = ['img_flex2'];
   for (var i = 0; i < coverIds.length; i++) {
     var coverEl = document.getElementById(coverIds[i]);
     if (coverEl) coverEl.src = coverUrl;
@@ -1101,7 +1100,6 @@ function enableAIAgent(imgId, topic){
 }
 
 function initAIAgents(){
-  enableAIAgent('img_flex', 'login');
   enableAIAgent('img_personal', 'personal');
   enableAIAgent('img_desafio', 'desafio');
   enableAIAgent('img_dance', 'dance');
