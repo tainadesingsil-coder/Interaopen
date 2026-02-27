@@ -23,7 +23,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1a0800;
   background:#DEB99A;border-radius:48px;overflow:hidden;position:relative;
   box-shadow:0 0 0 1.5px rgba(255,255,255,.12),0 40px 90px rgba(0,0,0,.8);}
 
-.screen{position:absolute;inset:0;display:flex;flex-direction:column;overflow:hidden;
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;
   background:#DEB99A;transition:transform .38s cubic-bezier(.4,0,.2,1),opacity .38s ease;}
 .screen.active{transform:translateX(0);opacity:1;}
 .screen.gl{transform:translateX(-100%);opacity:0;pointer-events:none;}
@@ -136,11 +136,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1a0800;
   background:rgba(26,12,4,.22);color:#fff;font-size:18px;font-weight:700;
   display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
 .sw-btn.off{opacity:.35;}
-.opt-nav{position:absolute;left:12px;right:12px;top:72px;z-index:70;
-  display:flex;gap:6px;padding:6px;border-radius:12px;
-  background:rgba(26,12,4,.16);backdrop-filter:blur(8px);}
-.opt-btn{flex:1;height:30px;border:none;border-radius:8px;cursor:pointer;
-  background:rgba(255,255,255,.28);color:#4a210d;font-size:11px;font-weight:700;font-family:inherit;}
+.opt-nav{position:absolute;left:50%;transform:translateX(-50%);top:18px;z-index:70;
+  display:flex;gap:4px;padding:4px;border-radius:999px;
+  background:rgba(26,12,4,.12);backdrop-filter:blur(8px);}
+.opt-btn{height:24px;min-width:46px;border:none;border-radius:999px;cursor:pointer;
+  background:rgba(255,255,255,.3);color:#4a210d;font-size:10px;font-weight:700;font-family:inherit;padding:0 8px;}
 .opt-btn.on{background:#7a3e18;color:#fff;}
 
 .rp{position:absolute;border-radius:50%;background:rgba(100,50,20,.15);
@@ -370,8 +370,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1a0800;
   <button class="sw-btn" id="swNext" onclick="goMain(1)">›</button>
 </div>
 <div class="opt-nav" id="optNav" style="display:none;">
-  <button class="opt-btn" id="opt0" onclick="nav('s0')">Personal</button>
-  <button class="opt-btn" id="opt1" onclick="nav('s1')">Desafio</button>
+  <button class="opt-btn" id="opt0" onclick="nav('s0')">Pers</button>
+  <button class="opt-btn" id="opt1" onclick="nav('s1')">30D</button>
   <button class="opt-btn" id="opt2" onclick="nav('s2')">Dance</button>
   <button class="opt-btn" id="opt3" onclick="nav('s3')">Dicas</button>
 </div>
