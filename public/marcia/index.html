@@ -789,7 +789,10 @@ var AI_STATE = {
     minutesPerSession: 45,
     dietStyle: 'equilibrada'
   },
-  lastPlan: ''
+  lastPlan: '',
+  lastIntent: '',
+  pendingQuestion: '',
+  lastReply: ''
 };
 var AGENT_CHIPS = ['Montar plano completo', 'Criar dieta semanal', 'Checklist diario'];
 
@@ -802,6 +805,23 @@ function normTxt(v){
 
 function aiTopicMeta(topic){
   return AI_TOPICS[topic] || AI_TOPICS.geral;
+}
+
+function isYesAnswer(q){
+  return /^(sim|s|claro|ok|pode|quero|bora|vamos|isso)$/i.test((q||'').trim());
+}
+function isNoAnswer(q){
+  return /^(nao|não|n|depois|agora nao|agora não)$/i.test((q||'').trim());
+}
+function finalizeAgentReply(text, intent, pending){
+  var out = text || '';
+  if(out && out === AI_STATE.lastReply){
+    out = out + '\n\nPosso te conduzir passo a passo, só me dizer seu objetivo agora.';
+  }
+  AI_STATE.lastReply = out;
+  if(intent) AI_STATE.lastIntent = intent;
+  if(pending !== undefined) AI_STATE.pendingQuestion = pending;
+  return out;
 }
 
 function detectAgentProfile(question){
@@ -873,27 +893,77 @@ function buildDietAgentPlan(){
   return base;
 }
 
+function buildRestAnswer(){
+  var p = AI_STATE.profile;
+  var goal = p.goal;
+  var rule = 'Regra prática de descanso entre séries:\n' +
+    '• Exercícios grandes (agachamento, supino, remada): 90 a 120s\n' +
+    '• Exercícios isolados: 45 a 75s\n';
+  if(goal === 'hipertrofia'){
+    rule += '• Foco hipertrofia: 60 a 90s na maior parte das séries';
+  } else if(goal === 'emagrecimento'){
+    rule += '• Foco emagrecimento: 30 a 60s para manter intensidade';
+  } else {
+    rule += '• Foco condicionamento: 45 a 75s com ritmo controlado';
+  }
+  rule += '\n\nSe estiver perdendo técnica, aumente 15 a 30s de descanso.';
+  return rule;
+}
+
 function buildAgentReply(question, topic){
   var q = normTxt(question);
   AI_STATE.memory.push(question);
   if(AI_STATE.memory.length>12) AI_STATE.memory.shift();
   mergeAgentProfile(detectAgentProfile(question));
 
-  if(/perfil|status|resumo/.test(q)) return formatProfileSummary();
+  if(isYesAnswer(question)){
+    if(AI_STATE.pendingQuestion === 'need_profile'){
+      return finalizeAgentReply('Perfeito! Me manda assim: objetivo + frequência + tempo.\nExemplo: "hipertrofia, 4x por semana, 50 min".', 'profile_collect', 'need_profile_data');
+    }
+    if(AI_STATE.pendingQuestion === 'offer_plan'){
+      var yesPlan = buildWeeklyAgentPlan(topic) + '\n\n' + formatProfileSummary();
+      AI_STATE.lastPlan = yesPlan;
+      return finalizeAgentReply(yesPlan, 'plan_generated', 'plan_adjust');
+    }
+    if(AI_STATE.pendingQuestion === 'offer_diet'){
+      return finalizeAgentReply(buildDietAgentPlan(), 'diet_generated', '');
+    }
+    return finalizeAgentReply('Ótimo. Quer que eu monte agora um plano completo com treino + dieta + checklist?', 'offer_combo', 'offer_plan');
+  }
+  if(isNoAnswer(question)){
+    if(AI_STATE.pendingQuestion){
+      return finalizeAgentReply('Sem problema. Me diga então exatamente o que você quer agora: treino de hoje, descanso entre séries, dieta ou plano semanal.', 'clarify_request', '');
+    }
+    return finalizeAgentReply('Tudo bem. Quando quiser, me chama com seu objetivo e eu monto passo a passo.', 'no_answer', '');
+  }
+
+  if(/descans|intervalo|serie|series/.test(q)){
+    return finalizeAgentReply(buildRestAnswer() + '\n\nQuer que eu personalize esse descanso para seu treino atual?', 'rest_answered', 'need_profile');
+  }
+  if(/perfil|status|resumo/.test(q)) return finalizeAgentReply(formatProfileSummary(), 'profile_summary', '');
   if(/plano completo|plano semanal|montar plano|cronograma|organiza meu treino|agente/.test(q)){
     AI_STATE.lastPlan = buildWeeklyAgentPlan(topic);
-    return AI_STATE.lastPlan + '\n\n' + formatProfileSummary();
+    return finalizeAgentReply(AI_STATE.lastPlan + '\n\n' + formatProfileSummary(), 'plan_generated', 'plan_adjust');
   }
   if(/dieta semanal|cardapio|dieta|alimentacao|alimentar/.test(q)){
-    return buildDietAgentPlan() + '\n\nSe quiser, adapto para seu horario.';
+    return finalizeAgentReply(buildDietAgentPlan() + '\n\nSe quiser, adapto para seu horário e rotina de treino.', 'diet_generated', 'offer_plan');
   }
   if(/checklist|tarefas|habito|rotina diaria/.test(q)){
-    return 'Checklist diario:\n• Beber agua\n• Cumprir treino do dia\n• Proteina em todas as refeicoes\n• Dormir 7-8h\n• Registrar progresso no app';
+    return finalizeAgentReply('Checklist diário:\n• Beber água\n• Cumprir treino do dia\n• Proteína em todas as refeições\n• Dormir 7-8h\n• Registrar progresso no app', 'checklist', '');
   }
   if(/ajusta|adapt|troca|muda/.test(q) && AI_STATE.lastPlan){
-    return 'Claro! Vou ajustar mantendo seu objetivo.\n\n' + buildWeeklyAgentPlan(topic);
+    return finalizeAgentReply('Claro! Vou ajustar mantendo seu objetivo.\n\n' + buildWeeklyAgentPlan(topic), 'plan_adjusted', '');
   }
-  return buildAIReply(question, topic);
+  if(/objetivo|meta|quero|preciso/.test(q)){
+    return finalizeAgentReply('Perfeito. Agora me diga frequência e tempo por treino para eu fechar seu plano.\nExemplo: 4x por semana, 45 min.', 'goal_received', 'need_profile_data');
+  }
+  if(AI_STATE.pendingQuestion === 'need_profile_data'){
+    return finalizeAgentReply('Recebi. Para fechar com precisão, confirma seu nível (iniciante/intermediário/avançado).', 'need_level', 'need_level');
+  }
+  if(AI_STATE.pendingQuestion === 'need_level'){
+    return finalizeAgentReply(buildWeeklyAgentPlan(topic) + '\n\nQuer que eu já gere também sua dieta semanal?', 'plan_generated', 'offer_diet');
+  }
+  return finalizeAgentReply(buildAIReply(question, topic), 'fallback', 'need_profile');
 }
 
 function buildAIReply(question, topic){
