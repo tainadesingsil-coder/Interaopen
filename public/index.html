@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Guia de Turismo de Belmonte — Materiais</title>
+    <meta name="color-scheme" content="light" />
+    <style>
+      :root {
+        --ocean: #2C4D7B;
+        --sky: #4C9ED9;
+        --gold: #F3A64D;
+        --bg: #ffffff;
+      }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, sans-serif;
+        background: var(--bg);
+        color: #1a202c;
+      }
+      .wrap {
+        max-width: 820px;
+        margin: 0 auto;
+        padding: 32px 20px 56px;
+      }
+      .card {
+        background: rgba(255,255,255,0.9);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(76,158,217,0.25);
+        border-radius: 16px;
+        box-shadow: 0 12px 28px rgba(44,77,123,0.12);
+        padding: 28px;
+      }
+      h1 {
+        margin: 0 0 8px;
+        color: var(--ocean);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+      }
+      p.lead { color: #3a495a; margin: 0 0 18px; }
+      ul.links { list-style: none; padding: 0; margin: 14px 0 0; }
+      ul.links li { margin: 12px 0; }
+      a {
+        color: var(--sky);
+        text-decoration: none;
+        font-weight: 600;
+      }
+      a:hover { text-decoration: underline; }
+      .cta {
+        display: inline-block;
+        background: var(--gold);
+        color: #fff;
+        padding: 12px 16px;
+        border-radius: 12px;
+        box-shadow: 0 8px 20px rgba(243,166,77,0.35);
+      }
+      .qr {
+        margin-top: 20px;
+        display: flex;
+        gap: 16px;
+        align-items: center;
+      }
+      .qr img { width: 140px; height: auto; border-radius: 12px; box-shadow: 0 8px 20px rgba(44,77,123,0.18); }
+      footer { margin-top: 16px; color: #718096; font-size: 14px; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="card">
+        <h1>Guia de Turismo de Belmonte</h1>
+        <p class="lead">Acesse os materiais da apresentação e o QR para o app.</p>
+        <ul class="links">
+          <li>• <a href="Belmonte_Deck.pdf" download>PDF (apresentação)</a></li>
+          <li>• <a href="Belmonte_Deck.pptx" download>PPTX (editável)</a></li>
+          <li>• <a class="cta" href="Belmonte_Deck.zip" download>ZIP (tudo em um)</a></li>
+          <li>• <a href="Belmonte_Imagens.zip" download>Banco de imagens (ZIP)</a></li>
+        </ul>
+        <div class="qr">
+          <img src="Belmonte_QR.png" alt="QR para acessar o app" />
+          <div>
+            <div>Escaneie o QR para abrir o app/pitch no celular.</div>
+            <div><a href="#" id="deeplink">Abrir no navegador</a></div>
+          </div>
+        </div>
+        <footer>Paleta: #2C4D7B · #4C9ED9 · #F3A64D · #FFFFFF</footer>
+      </div>
+    </div>
+    <script>
+      // Substitua pelo link curto final se necessário
+      const url = new URLSearchParams(location.search).get('u') || 'https://belmonte.app/pitch';
+      document.getElementById('deeplink').href = url;
+    </script>
+  </body>
+  </html>
+
