@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Órbita — Protótipo</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app">
+    <header class="appbar">
+      <div class="left"><button class="icon" aria-label="Pesquisar" id="btnSearch">🔎</button></div>
+      <div class="title">Órbita</div>
+      <div class="right">
+        <button class="icon" aria-label="Voz" id="btnVoice">🎤</button>
+        <button class="icon" aria-label="Notificações">🔔</button>
+      </div>
+    </header>
+
+    <main id="views">
+      <section id="view-feed" class="view active">
+        <div class="filters">
+          <button class="pill selected">Sci‑fi</button>
+          <button class="pill">Música</button>
+          <button class="pill">Cinema</button>
+          <button class="pill">Games</button>
+          <button class="pill">Tecnologia</button>
+        </div>
+        <div class="actions-row">
+          <button id="btnAdjust" class="btn ghost">Ajustar Feed</button>
+        </div>
+        <div id="feedList" class="list">
+          <!-- cards injected by JS -->
+        </div>
+      </section>
+
+      <section id="view-studio" class="view">
+        <div class="prompt-panel">
+          <textarea id="studioPrompt" placeholder="Descreva seu vídeo... (ex.: roteiro de 45s sobre economia criativa em jogos)"></textarea>
+          <div class="prompt-actions">
+            <button class="chip" data-suggest="roteiro">Criar roteiro</button>
+            <button class="chip" data-suggest="cortes">Gerar cortes</button>
+            <button class="chip" data-suggest="legendas">Legendas</button>
+            <button class="chip" data-suggest="thumb">Criar thumbnail</button>
+          </div>
+        </div>
+        <div class="preview">Pré‑visualização</div>
+        <div class="timeline">
+          <div class="track video">Faixa de vídeo</div>
+          <div class="track audio">Faixa de áudio</div>
+        </div>
+        <div class="studio-actions">
+          <button id="btnGenerateCuts" class="btn">Gerar cortes</button>
+          <button id="btnAB" class="btn ghost">A/B</button>
+          <button id="btnPublish" class="btn primary">Publicar</button>
+        </div>
+      </section>
+
+      <section id="view-parties" class="view">
+        <div class="live-header"><span class="live-dot"></span> Ao vivo — Watch Party</div>
+        <div class="player">Vídeo do evento</div>
+        <div class="party">
+          <div class="chat" id="chat">
+            <div class="msg ia">IA: Bem‑vindo! Pergunte algo ou crie uma enquete.</div>
+          </div>
+          <div class="party-actions">
+            <input id="partyInput" placeholder="Escreva sua pergunta..." />
+            <button id="btnAsk" class="btn">Enviar</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-profile" class="view">
+        <h2>Memória & Preferências</h2>
+        <div class="memory-meter"><div class="bar" style="width:72%"></div></div>
+        <ul class="memory-list" id="memoryList"></ul>
+        <div class="profile-actions">
+          <button id="btnExport" class="btn ghost">Exportar dados</button>
+        </div>
+      </section>
+
+      <section id="view-settings" class="view">
+        <h2>Privacidade & Segurança</h2>
+        <div class="setting"><label><input type="checkbox" id="permMic" checked/> Microfone</label></div>
+        <div class="setting"><label><input type="checkbox" id="permCam" checked/> Câmera</label></div>
+        <div class="setting"><label><input type="checkbox" id="permLoc"/> Localização</label></div>
+        <div class="setting"><label><input type="checkbox" id="modeNoRecord"/> Modo sem registro</label></div>
+        <div class="setting"><label>Proatividade da IA
+          <input type="range" min="0" max="10" value="4" />
+        </label></div>
+        <div class="setting"><label>Tema
+          <select id="themeSelect">
+            <option value="dark">Escuro</option>
+            <option value="light">Claro</option>
+            <option value="hc">Alto contraste</option>
+          </select>
+        </label></div>
+        <button id="btnDeleteAll" class="btn danger">Excluir todos os dados</button>
+      </section>
+    </main>
+
+    <nav class="bottomnav">
+      <button data-view="feed" class="active">🏠<span>Feed</span></button>
+      <button data-view="studio">🎬<span>Studio</span></button>
+      <button data-view="parties">🎉<span>Parties</span></button>
+      <button data-view="profile">👤<span>Perfil</span></button>
+      <button data-view="settings">⚙️<span>Config</span></button>
+    </nav>
+
+    <button class="fab" id="fab">＋</button>
+
+    <div id="sheet" class="sheet" aria-hidden="true">
+      <div class="handle"></div>
+      <div class="sheet-content" id="sheetContent"></div>
+      <button class="sheet-close" id="sheetClose">Fechar</button>
+    </div>
+
+    <div id="toast" class="toast" aria-hidden="true"></div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
