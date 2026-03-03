@@ -1,0 +1,77 @@
+<svg width="384" height="384" viewBox="0 0 384 384" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="45%" r="70%">
+      <stop offset="0%" stop-color="#0B8D3A" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#0A0C0E"/>
+    </radialGradient>
+    <linearGradient id="health" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1E9E63"/>
+      <stop offset="100%" stop-color="#0B8D3A"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FFCC00"/>
+      <stop offset="100%" stop-color="#F2994A"/>
+    </linearGradient>
+    <filter id="cardShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="2" stdDeviation="6" flood-color="#000" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+
+  <!-- circular screen mask -->
+  <clipPath id="screen">
+    <circle cx="192" cy="192" r="184"/>
+  </clipPath>
+
+  <g clip-path="url(#screen)">
+    <!-- background -->
+    <rect x="0" y="0" width="384" height="384" fill="url(#bg)"/>
+
+    <!-- header -->
+    <g transform="translate(24,20)">
+      <rect x="0" y="0" rx="12" ry="12" width="336" height="48" fill="#121418" stroke="#21252B"/>
+      <text x="18" y="30" font-family="Inter, Roboto, system-ui" font-size="18" fill="#E6EBF0">Saúde • ENIGMA</text>
+      <!-- health icon -->
+      <g transform="translate(300,12)">
+        <circle cx="12" cy="12" r="12" fill="url(#health)"/>
+        <rect x="10.5" y="6" width="3" height="12" fill="white" rx="1.5"/>
+        <rect x="6" y="10.5" width="12" height="3" fill="white" rx="1.5"/>
+      </g>
+    </g>
+
+    <!-- vitals card -->
+    <g transform="translate(24,80)" filter="url(#cardShadow)">
+      <rect x="0" y="0" rx="16" ry="16" width="336" height="96" fill="#121418" stroke="#21252B"/>
+      <text x="16" y="28" font-family="Inter, Roboto, system-ui" font-size="14" fill="#9AA4AF">Seus sinais (agora)</text>
+      <g font-family="Inter, Roboto, system-ui" font-size="20" fill="#E6EBF0">
+        <text x="16" y="64">HR 72</text>
+        <text x="104" y="64">HRV 38 ms</text>
+        <text x="224" y="64">SpO2 98%</text>
+      </g>
+    </g>
+
+    <!-- next steps card -->
+    <g transform="translate(24,188)" filter="url(#cardShadow)">
+      <rect x="0" y="0" rx="16" ry="16" width="336" height="86" fill="#121418" stroke="#21252B"/>
+      <text x="16" y="26" font-family="Inter, Roboto, system-ui" font-size="14" fill="#9AA4AF">Próximos passos</text>
+      <text x="16" y="56" font-family="Inter, Roboto, system-ui" font-size="18" fill="#E6EBF0">Consulta 14:30 • UBS Vila</text>
+      <g transform="translate(244,46)">
+        <rect x="0" y="-14" rx="10" ry="10" width="76" height="28" fill="url(#accent)"/>
+        <text x="38" y="5" font-family="Inter, Roboto, system-ui" font-size="12" fill="#0A0C0E" text-anchor="middle">Telemed</text>
+      </g>
+    </g>
+
+    <!-- exams card -->
+    <g transform="translate(24,282)" filter="url(#cardShadow)">
+      <rect x="0" y="0" rx="16" ry="16" width="336" height="82" fill="#121418" stroke="#21252B"/>
+      <text x="16" y="26" font-family="Inter, Roboto, system-ui" font-size="14" fill="#9AA4AF">Exames & Receitas</text>
+      <text x="16" y="56" font-family="Inter, Roboto, system-ui" font-size="16" fill="#E6EBF0">Último exame • PDF</text>
+      <text x="280" y="56" font-family="Inter, Roboto, system-ui" font-size="14" fill="#9AA4AF">Histórico ›</text>
+    </g>
+
+    <!-- privacy note -->
+    <text x="192" y="372" font-family="Inter, Roboto, system-ui" font-size="12" fill="#9AA4AF" text-anchor="middle">Processado no relógio • Sem dados brutos</text>
+  </g>
+
+  <!-- outer ring -->
+  <circle cx="192" cy="192" r="186" stroke="#0B8D3A" stroke-opacity="0.25" stroke-width="4" fill="none"/>
+</svg>
