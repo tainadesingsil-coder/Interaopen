@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AudioLines, Loader2, Mic, Volume2 } from 'lucide-react';
+import RotatingEarth from '@/app/components/RotatingEarth';
 
 type VoiceState = 'idle' | 'listening' | 'thinking' | 'speaking';
 type MessageRole = 'user' | 'model';
@@ -15,19 +16,32 @@ const SYSTEM_PROMPT = `Você é o ENIGMA, um assistente de voz misterioso, intel
 Responda sempre em português brasileiro.
 Seja direto, elegante e levemente enigmático no tom.
 Suas respostas serão lidas em voz alta, então sem listas ou markdown.
-Máximo 3 frases curtas e impactantes.`;
+Máximo 3 frases curtas e impactantes.
+Chame o usuário sempre de Estrela da Manhã em toda resposta.`;
 
 const GEMINI_ENDPOINT =
   'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
 const STORAGE_KEY = 'enigma_messages_v1';
 const FALLBACK_REPLY =
   'O sinal está instável no momento. Tente novamente em instantes.';
+const STAR_TITLE = 'Estrela da Manhã';
 
 const STATE_LABEL: Record<VoiceState, string> = {
   idle: 'TOQUE PARA FALAR',
   listening: 'OUVINDO...',
   thinking: 'PENSANDO...',
   speaking: 'FALANDO...',
+};
+
+const withStarTitle = (text: string): string => {
+  const normalized = text.toLowerCase();
+  if (
+    normalized.includes('estrela da manhã') ||
+    normalized.includes('estrela da manha')
+  ) {
+    return text;
+  }
+  return `${STAR_TITLE}, ${text}`;
 };
 
 export default function HomePage() {
@@ -130,8 +144,9 @@ export default function HomePage() {
       }
 
       if (!apiKey) {
-        const missingKeyReply =
-          'A chave do oráculo não foi encontrada. Defina NEXT_PUBLIC_GEMINI_API_KEY.';
+        const missingKeyReply = withStarTitle(
+          'A chave do oráculo não foi encontrada. Defina NEXT_PUBLIC_GEMINI_API_KEY.'
+        );
         const userMessage: ChatMessage = { role: 'user', text: cleanedInput };
         const modelMessage: ChatMessage = { role: 'model', text: missingKeyReply };
         setErrorMessage(missingKeyReply);
@@ -180,21 +195,22 @@ export default function HomePage() {
           throw new Error('Resposta vazia do Gemini');
         }
 
-        const modelMessage: ChatMessage = { role: 'model', text: reply };
-        setLastAssistantReply(reply);
+        const decoratedReply = withStarTitle(reply);
+        const modelMessage: ChatMessage = { role: 'model', text: decoratedReply };
+        setLastAssistantReply(decoratedReply);
         setMessages((previous) => [...previous, modelMessage]);
-        speakText(reply);
+        speakText(decoratedReply);
       } catch {
         setErrorMessage(
           'Não consegui consultar o Gemini agora. Vou responder com fallback.'
         );
         const fallbackMessage: ChatMessage = {
           role: 'model',
-          text: FALLBACK_REPLY,
+          text: withStarTitle(FALLBACK_REPLY),
         };
-        setLastAssistantReply(FALLBACK_REPLY);
+        setLastAssistantReply(fallbackMessage.text);
         setMessages((previous) => [...previous, fallbackMessage]);
-        speakText(FALLBACK_REPLY);
+        speakText(fallbackMessage.text);
       }
     },
     [speakText]
@@ -296,56 +312,63 @@ export default function HomePage() {
   return (
     <main className='enigma-shell' id='main-content'>
       <div className='enigma-grid' aria-hidden='true' />
+      <div className='earth-stage'>
+        <RotatingEarth width={980} height={720} />
+      </div>
 
-      <header className='enigma-header'>
-        <h1 className='enigma-logo' data-text='ENIGMA'>
-          ENIGMA
-        </h1>
-        <p className='enigma-subtitle'>Voz sintética. Mente afiada. Mistério calculado.</p>
-      </header>
+      <div className='enigma-front'>
+        <header className='enigma-header'>
+          <h1 className='enigma-logo' data-text='ENIGMA'>
+            ENIGMA
+          </h1>
+          <p className='enigma-subtitle'>
+            Voz sintética. Mente afiada. Mistério calculado.
+          </p>
+        </header>
 
-      <section className='enigma-core'>
-        <div className={`ring-layer ring-layer--outer state-${voiceState}`} />
-        <div className={`ring-layer ring-layer--inner state-${voiceState}`} />
+        <section className='enigma-core'>
+          <div className={`ring-layer ring-layer--outer state-${voiceState}`} />
+          <div className={`ring-layer ring-layer--inner state-${voiceState}`} />
 
-        <button
-          type='button'
-          className={`enigma-button state-${voiceState}`}
-          onClick={handleMainButton}
-          aria-label={STATE_LABEL[voiceState]}
-        >
-          {voiceState === 'idle' && <Mic size={40} />}
-          {voiceState === 'listening' && <AudioLines size={40} />}
-          {voiceState === 'thinking' && <Loader2 size={40} className='icon-spin' />}
-          {voiceState === 'speaking' && <Volume2 size={40} />}
-        </button>
+          <button
+            type='button'
+            className={`enigma-button state-${voiceState}`}
+            onClick={handleMainButton}
+            aria-label={STATE_LABEL[voiceState]}
+          >
+            {voiceState === 'idle' && <Mic size={40} />}
+            {voiceState === 'listening' && <AudioLines size={40} />}
+            {voiceState === 'thinking' && <Loader2 size={40} className='icon-spin' />}
+            {voiceState === 'speaking' && <Volume2 size={40} />}
+          </button>
 
-        <div
-          className={`audio-visualizer ${isVisualizerActive ? 'active' : ''}`}
-          aria-hidden='true'
-        >
-          {Array.from({ length: 18 }).map((_, index) => (
-            <span
-              key={`bar-${index}`}
-              style={{ animationDelay: `${index * 0.07}s` }}
-            />
-          ))}
-        </div>
+          <div
+            className={`audio-visualizer ${isVisualizerActive ? 'active' : ''}`}
+            aria-hidden='true'
+          >
+            {Array.from({ length: 18 }).map((_, index) => (
+              <span
+                key={`bar-${index}`}
+                style={{ animationDelay: `${index * 0.07}s` }}
+              />
+            ))}
+          </div>
 
-        <p className='status-label'>{STATE_LABEL[voiceState]}</p>
-      </section>
+          <p className='status-label'>{STATE_LABEL[voiceState]}</p>
+        </section>
 
-      <section className='dialog-panel' aria-live='polite'>
-        <article className='dialog-item'>
-          <h2>VOCÊ</h2>
-          <p>{lastUserInput || 'Aguardando sua voz...'}</p>
-        </article>
-        <article className='dialog-item'>
-          <h2>ENIGMA</h2>
-          <p>{lastAssistantReply || 'No silêncio, preparo a próxima resposta.'}</p>
-        </article>
-        {errorMessage ? <p className='error-text'>{errorMessage}</p> : null}
-      </section>
+        <section className='dialog-panel' aria-live='polite'>
+          <article className='dialog-item'>
+            <h2>VOCÊ</h2>
+            <p>{lastUserInput || 'Aguardando sua voz...'}</p>
+          </article>
+          <article className='dialog-item'>
+            <h2>ENIGMA</h2>
+            <p>{lastAssistantReply || 'No silêncio, preparo a próxima resposta.'}</p>
+          </article>
+          {errorMessage ? <p className='error-text'>{errorMessage}</p> : null}
+        </section>
+      </div>
     </main>
   );
 }
