@@ -1,4 +1,4 @@
-name: Cloudflare Pages (ENGIMA Preview)
+name: Cloudflare Pages (INTERAOPEN Preview)
 
 on:
   pull_request:
@@ -9,7 +9,7 @@ on:
 
 jobs:
   preview:
-    name: Deploy ENGIMA preview
+    name: Deploy INTERAOPEN preview
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -34,9 +34,9 @@ jobs:
       - name: Publish to Cloudflare Pages (preview)
         uses: cloudflare/pages-action@v1
         with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: engima
+          apiToken: ${{ secrets.CF_ACCOUNTENIGMA }}
+          accountId: ${{ secrets.CF_ACCOUNT_IDENIGMA }}
+          projectName: interaopen
           directory: dist
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ github.head_ref || github.ref_name }}

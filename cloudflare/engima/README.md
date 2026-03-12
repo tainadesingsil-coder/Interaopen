@@ -1,22 +1,22 @@
-# Cloudflare ENGIMA
+# Cloudflare ENGIMA / INTERAOPEN
 
-Esta pasta organiza a configuração de deploy do projeto **engima** no Cloudflare Pages.
+Esta pasta organiza a configuração de deploy do projeto **interaopen** no Cloudflare Pages.
 
 ## Secrets necessários no GitHub
 
-Configure no repositório:
+Configure no repositório (já cadastrados por você):
 
-- `CLOUDFLARE_API_TOKEN`
-- `CLOUDFLARE_ACCOUNT_ID`
+- `CF_ACCOUNTENIGMA`
+- `CF_ACCOUNT_IDENIGMA`
 
 ## Projeto Cloudflare Pages
 
-Crie um projeto no Cloudflare Pages com o nome:
+Projeto Cloudflare Pages usado:
 
-`engima`
+`interaopen`
 
 Depois disso:
 
-- Push em `main` publica produção.
+- Push em `main` publica produção em `interaopen.pages.dev`.
 - Push em outras branches gera preview/dev automaticamente pelo workflow.
 
