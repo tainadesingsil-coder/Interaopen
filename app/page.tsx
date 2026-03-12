@@ -1,11 +1,10 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AudioLines, Loader2, Mic, Volume2 } from 'lucide-react';
-import RotatingEarth from '@/app/components/RotatingEarth';
+import { FormEvent, useCallback, useEffect, useRef, useState } from 'react';
+import { Loader2, SendHorizontal, Sparkles, Volume2 } from 'lucide-react';
 import { ShaderAnimation } from '@/app/components/ShaderAnimation';
 
-type VoiceState = 'idle' | 'listening' | 'thinking' | 'speaking';
+type AssistantState = 'booting' | 'ready' | 'thinking' | 'speaking';
 type MessageRole = 'user' | 'model';
 
 interface ChatMessage {
@@ -13,25 +12,28 @@ interface ChatMessage {
   text: string;
 }
 
-const SYSTEM_PROMPT = `Você é o ENIGMA, um assistente de voz misterioso, inteligente e preciso.
+const SYSTEM_PROMPT = `Você é o ENIGMA, um assistente digital extremamente competente, no estilo JARVIS.
 Responda sempre em português brasileiro.
-Seja direto, elegante e levemente enigmático no tom.
-Suas respostas serão lidas em voz alta, então sem listas ou markdown.
-Máximo 3 frases curtas e impactantes.
-Chame o usuário sempre de Estrela da Manhã em toda resposta.`;
+Seja objetivo, técnico quando necessário e confiante.
+Não use markdown, bullets ou listas.
+Suas respostas serão lidas em voz alta: use no máximo 3 frases curtas e fortes.
+Sempre chame o usuário de Estrela da Manhã.`;
 
 const GEMINI_ENDPOINT =
   'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
 const STORAGE_KEY = 'enigma_messages_v1';
+const BOOT_STORAGE_KEY = 'enigma_booted_v1';
 const FALLBACK_REPLY =
   'O sinal está instável no momento. Tente novamente em instantes.';
 const STAR_TITLE = 'Estrela da Manhã';
+const BOOT_MESSAGE =
+  'ENIGMA online. Estrela da Manhã, sistemas sincronizados. Aguardando seu comando.';
 
-const STATE_LABEL: Record<VoiceState, string> = {
-  idle: 'TOQUE PARA FALAR',
-  listening: 'OUVINDO...',
+const STATE_LABEL: Record<AssistantState, string> = {
+  booting: 'INICIANDO ENIGMA...',
+  ready: 'PRONTO PARA SUA ORDEM',
   thinking: 'PENSANDO...',
-  speaking: 'FALANDO...',
+  speaking: 'ENIGMA FALANDO...',
 };
 
 const withStarTitle = (text: string): string => {
@@ -46,21 +48,13 @@ const withStarTitle = (text: string): string => {
 };
 
 export default function HomePage() {
-  const [voiceState, setVoiceState] = useState<VoiceState>('idle');
+  const [assistantState, setAssistantState] = useState<AssistantState>('booting');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [lastUserInput, setLastUserInput] = useState('');
-  const [lastAssistantReply, setLastAssistantReply] = useState('');
+  const [inputText, setInputText] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
-  const recognitionRef = useRef<any>(null);
-  const hasRecognitionResultRef = useRef(false);
-  const voiceStateRef = useRef<VoiceState>('idle');
   const messagesRef = useRef<ChatMessage[]>([]);
   const synthRef = useRef<SpeechSynthesis | null>(null);
-
-  useEffect(() => {
-    voiceStateRef.current = voiceState;
-  }, [voiceState]);
 
   useEffect(() => {
     messagesRef.current = messages;
@@ -78,20 +72,11 @@ export default function HomePage() {
         const parsed = JSON.parse(stored) as ChatMessage[];
         if (Array.isArray(parsed)) {
           setMessages(parsed);
-          const latestUser = [...parsed].reverse().find((item) => item.role === 'user');
-          const latestModel = [...parsed].reverse().find((item) => item.role === 'model');
-          setLastUserInput(latestUser?.text ?? '');
-          setLastAssistantReply(latestModel?.text ?? '');
         }
       } catch {
         window.sessionStorage.removeItem(STORAGE_KEY);
       }
     }
-
-    return () => {
-      recognitionRef.current?.stop?.();
-      window.speechSynthesis?.cancel();
-    };
   }, []);
 
   useEffect(() => {
@@ -100,14 +85,14 @@ export default function HomePage() {
     }
   }, [messages]);
 
-  const speakText = useCallback((text: string) => {
+  const speakText = useCallback((text: string, isBootMessage = false) => {
     if (typeof window === 'undefined') {
       return;
     }
 
     const synth = synthRef.current ?? window.speechSynthesis;
     if (!synth) {
-      setVoiceState('idle');
+      setAssistantState('ready');
       return;
     }
 
@@ -127,41 +112,17 @@ export default function HomePage() {
       utterance.voice = portugueseVoice;
     }
 
-    utterance.onstart = () => setVoiceState('speaking');
-    utterance.onend = () => setVoiceState('idle');
-    utterance.onerror = () => setVoiceState('idle');
-
-    setVoiceState('speaking');
-    synth.speak(utterance);
-  }, []);
-
-  const requestMicrophoneAccess = useCallback(async (): Promise<boolean> => {
-    if (typeof window === 'undefined') {
-      return false;
-    }
-
-    if (!navigator.mediaDevices?.getUserMedia) {
-      setErrorMessage(
-        'Seu navegador não permite acesso ao microfone por getUserMedia.'
-      );
-      return false;
-    }
-
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      stream.getTracks().forEach((track) => track.stop());
-      return true;
-    } catch (error) {
-      const err = error as DOMException;
-      if (err?.name === 'NotAllowedError') {
-        setErrorMessage('Permita o microfone no navegador para falar com o ENIGMA.');
-      } else if (err?.name === 'NotFoundError') {
-        setErrorMessage('Nenhum microfone foi encontrado no dispositivo.');
-      } else {
-        setErrorMessage('Não foi possível acessar o microfone agora.');
+    utterance.onstart = () => setAssistantState('speaking');
+    utterance.onend = () => {
+      setAssistantState('ready');
+      if (isBootMessage && typeof window !== 'undefined') {
+        window.sessionStorage.setItem(BOOT_STORAGE_KEY, '1');
       }
-      return false;
-    }
+    };
+    utterance.onerror = () => setAssistantState('ready');
+
+    setAssistantState('speaking');
+    synth.speak(utterance);
   }, []);
 
   const askGemini = useCallback(
@@ -169,7 +130,7 @@ export default function HomePage() {
       const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
       const cleanedInput = inputText.trim();
       if (!cleanedInput) {
-        setVoiceState('idle');
+        setAssistantState('ready');
         return;
       }
 
@@ -180,15 +141,13 @@ export default function HomePage() {
         const userMessage: ChatMessage = { role: 'user', text: cleanedInput };
         const modelMessage: ChatMessage = { role: 'model', text: missingKeyReply };
         setErrorMessage(missingKeyReply);
-        setLastAssistantReply(missingKeyReply);
         setMessages((previous) => [...previous, userMessage, modelMessage]);
         speakText(missingKeyReply);
         return;
       }
 
       setErrorMessage('');
-      setLastUserInput(cleanedInput);
-      setVoiceState('thinking');
+      setAssistantState('thinking');
 
       const userMessage: ChatMessage = { role: 'user', text: cleanedInput };
       const conversation: ChatMessage[] = [...messagesRef.current, userMessage];
@@ -227,7 +186,6 @@ export default function HomePage() {
 
         const decoratedReply = withStarTitle(reply);
         const modelMessage: ChatMessage = { role: 'model', text: decoratedReply };
-        setLastAssistantReply(decoratedReply);
         setMessages((previous) => [...previous, modelMessage]);
         speakText(decoratedReply);
       } catch {
@@ -238,7 +196,6 @@ export default function HomePage() {
           role: 'model',
           text: withStarTitle(FALLBACK_REPLY),
         };
-        setLastAssistantReply(fallbackMessage.text);
         setMessages((previous) => [...previous, fallbackMessage]);
         speakText(fallbackMessage.text);
       }
@@ -246,107 +203,41 @@ export default function HomePage() {
     [speakText]
   );
 
-  const buildRecognition = useCallback(() => {
+  useEffect(() => {
     if (typeof window === 'undefined') {
-      return null;
+      return;
     }
 
-    const SpeechRecognitionAPI =
-      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-
-    if (!SpeechRecognitionAPI) {
-      return null;
+    if (window.sessionStorage.getItem(BOOT_STORAGE_KEY)) {
+      setAssistantState('ready');
+      return;
     }
 
-    const recognition = new SpeechRecognitionAPI();
-    recognition.lang = 'pt-BR';
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
-    recognition.continuous = false;
+    const timer = window.setTimeout(() => {
+      const bootMessage = withStarTitle(BOOT_MESSAGE);
+      setMessages((previous) => {
+        if (previous.length > 0) {
+          return previous;
+        }
+        return [...previous, { role: 'model', text: bootMessage }];
+      });
+      speakText(bootMessage, true);
+    }, 650);
 
-    recognition.onresult = (event: any) => {
-      hasRecognitionResultRef.current = true;
-      const transcript = event.results?.[0]?.[0]?.transcript?.trim() ?? '';
+    return () => window.clearTimeout(timer);
+  }, [speakText]);
 
-      if (transcript) {
-        void askGemini(transcript);
-      } else {
-        setVoiceState('idle');
+  const handleSend = useCallback(
+    async (event: FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
+      const value = inputText.trim();
+      if (!value || assistantState === 'thinking') {
+        return;
       }
-    };
-
-    recognition.onerror = (event: any) => {
-      if (event?.error === 'not-allowed') {
-        setErrorMessage('Permissão de microfone negada. Autorize para continuar.');
-      } else if (event?.error === 'no-speech') {
-        setErrorMessage('Não detectei sua voz. Fale mais perto do microfone.');
-      } else if (event?.error === 'audio-capture') {
-        setErrorMessage('Falha ao capturar áudio. Verifique seu microfone.');
-      } else {
-        setErrorMessage('Não consegui ouvir com clareza. Tente falar novamente.');
-      }
-      setVoiceState('idle');
-    };
-
-    recognition.onend = () => {
-      if (!hasRecognitionResultRef.current && voiceStateRef.current === 'listening') {
-        setVoiceState('idle');
-      }
-    };
-
-    return recognition;
-  }, [askGemini]);
-
-  const handleMainButton = useCallback(async () => {
-    if (voiceStateRef.current === 'thinking') {
-      return;
-    }
-
-    if (voiceStateRef.current === 'speaking') {
-      synthRef.current?.cancel();
-      setVoiceState('idle');
-      return;
-    }
-
-    if (voiceStateRef.current === 'listening' && recognitionRef.current) {
-      recognitionRef.current.stop();
-      setVoiceState('idle');
-      return;
-    }
-
-    const hasMicrophoneAccess = await requestMicrophoneAccess();
-    if (!hasMicrophoneAccess) {
-      setVoiceState('idle');
-      return;
-    }
-
-    const recognition = buildRecognition();
-    if (!recognition) {
-      setErrorMessage(
-        'Seu navegador não suporta reconhecimento de voz Web Speech API.'
-      );
-      return;
-    }
-
-    hasRecognitionResultRef.current = false;
-    setErrorMessage('');
-    setVoiceState('listening');
-    window.speechSynthesis?.cancel();
-    recognitionRef.current = recognition;
-
-    try {
-      recognition.start();
-    } catch {
-      setErrorMessage(
-        'Microfone indisponível. Verifique a permissão e tente novamente.'
-      );
-      setVoiceState('idle');
-    }
-  }, [buildRecognition, requestMicrophoneAccess]);
-
-  const isVisualizerActive = useMemo(
-    () => voiceState === 'listening' || voiceState === 'speaking',
-    [voiceState]
+      setInputText('');
+      await askGemini(value);
+    },
+    [assistantState, askGemini, inputText]
   );
 
   return (
@@ -354,10 +245,7 @@ export default function HomePage() {
       <div className='shader-stage' aria-hidden='true'>
         <ShaderAnimation />
       </div>
-      <div className='enigma-grid' aria-hidden='true' />
-      <div className='earth-stage'>
-        <RotatingEarth width={980} height={720} />
-      </div>
+      <div className='jarvis-grid' aria-hidden='true' />
 
       <div className='enigma-front'>
         <header className='enigma-header'>
@@ -369,48 +257,68 @@ export default function HomePage() {
           </p>
         </header>
 
-        <section className='enigma-core'>
-          <div className={`ring-layer ring-layer--outer state-${voiceState}`} />
-          <div className={`ring-layer ring-layer--inner state-${voiceState}`} />
+        <section className='status-shell'>
+          <div className={`status-dot state-${assistantState}`} aria-hidden='true' />
+          <p className='status-label'>{STATE_LABEL[assistantState]}</p>
+        </section>
 
-          <button
-            type='button'
-            className={`enigma-button state-${voiceState}`}
-            onClick={() => void handleMainButton()}
-            aria-label={STATE_LABEL[voiceState]}
-          >
-            {voiceState === 'idle' && <Mic size={40} />}
-            {voiceState === 'listening' && <AudioLines size={40} />}
-            {voiceState === 'thinking' && <Loader2 size={40} className='icon-spin' />}
-            {voiceState === 'speaking' && <Volume2 size={40} />}
-          </button>
-
-          <div
-            className={`audio-visualizer ${isVisualizerActive ? 'active' : ''}`}
-            aria-hidden='true'
-          >
-            {Array.from({ length: 18 }).map((_, index) => (
-              <span
-                key={`bar-${index}`}
-                style={{ animationDelay: `${index * 0.07}s` }}
-              />
-            ))}
-          </div>
-
-          <p className='status-label'>{STATE_LABEL[voiceState]}</p>
+        <section className={`core-orb state-${assistantState}`} aria-hidden='true'>
+          {assistantState === 'thinking' ? (
+            <Loader2 size={34} className='spin-icon' />
+          ) : assistantState === 'speaking' ? (
+            <Volume2 size={34} />
+          ) : (
+            <Sparkles size={34} />
+          )}
+          <span className='core-ring' />
         </section>
 
         <section className='dialog-panel' aria-live='polite'>
-          <article className='dialog-item'>
-            <h2>VOCÊ</h2>
-            <p>{lastUserInput || 'Aguardando sua voz...'}</p>
-          </article>
-          <article className='dialog-item'>
-            <h2>ENIGMA</h2>
-            <p>{lastAssistantReply || 'No silêncio, preparo a próxima resposta.'}</p>
-          </article>
-          {errorMessage ? <p className='error-text'>{errorMessage}</p> : null}
+          {messages.length === 0 ? (
+            <article className='dialog-item model'>
+              <h2>ENIGMA</h2>
+              <p>Inicializando o núcleo cognitivo.</p>
+            </article>
+          ) : (
+            messages.slice(-6).map((message, index) => (
+              <article
+                key={`msg-${index}-${message.role}`}
+                className={`dialog-item ${message.role === 'user' ? 'user' : 'model'}`}
+              >
+                <h2>{message.role === 'user' ? 'VOCÊ' : 'ENIGMA'}</h2>
+                <p>{message.text}</p>
+              </article>
+            ))
+          )}
         </section>
+
+        <form className='composer' onSubmit={handleSend}>
+          <input
+            value={inputText}
+            onChange={(event) => setInputText(event.target.value)}
+            className='composer-input'
+            placeholder='Digite seu comando para o ENIGMA...'
+            autoComplete='off'
+          />
+          <button
+            type='submit'
+            className='composer-button'
+            aria-label='Enviar comando'
+            disabled={assistantState === 'thinking'}
+          >
+            {assistantState === 'thinking' ? (
+              <Loader2 size={18} className='spin-icon' />
+            ) : (
+              <SendHorizontal size={18} />
+            )}
+          </button>
+        </form>
+
+        <p className='helper-text'>
+          ENIGMA inicia falando quando abre. Você responde por texto.
+        </p>
+
+        {errorMessage ? <p className='error-text'>{errorMessage}</p> : null}
       </div>
     </main>
   );
