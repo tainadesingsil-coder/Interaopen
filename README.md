@@ -1,72 +1,37 @@
-# Bella Vista Beach Residence
+# ENIGMA - Assistente de Voz
 
-Landing page premium para o empreendimento Bella Vista Beach Residence, construída com Next.js (App Router), TailwindCSS e Framer Motion.
+Interface futurista com reconhecimento de voz, resposta textual via Gemini e leitura em voz alta.
 
-## ✅ Como rodar
+## Stack
+
+- Next.js (App Router)
+- TypeScript
+- Tailwind CSS
+- Web Speech API (SpeechRecognition + SpeechSynthesis)
+- Google Gemini (`gemini-1.5-flash`)
+
+## Como rodar
 
 ```bash
 npm install
+cp .env.example .env.local
 npm run dev
 ```
 
-## ✅ Build e export
+## Variáveis de ambiente
+
+Defina no `.env.local`:
+
+```env
+NEXT_PUBLIC_GEMINI_API_KEY=sua_chave_aqui
+```
+
+## Fluxo de uso
+
+Usuário fala no microfone, o app transcreve em `pt-BR`, envia o contexto para o Gemini e o ENIGMA responde com voz sintetizada também em `pt-BR`.
+
+## Build
 
 ```bash
 npm run build
-```
-
-O build gera `out/` e copia para `dist/` via script `postbuild`.
-
-## ✅ Variáveis de ambiente
-
-Crie o arquivo `.env.local` com base no `.env.example`:
-
-```
-cp .env.example .env.local
-```
-
-## ✅ Imagens locais
-
-As imagens foram migradas para `/public/images`. Para baixar os arquivos do CDN e gerar WebP/redimensionamentos:
-
-```bash
-npm run assets:download
-```
-
-Isso gera:
-- `public/images/hero`
-- `public/images/showcase`
-- `public/images/progress`
-
-Para rodar somente a conversão WebP (sem baixar novamente):
-
-```bash
-npm run assets:optimize
-```
-
-## ✅ Estrutura de pastas
-
-```
-app/
-  components/
-    hero/
-    showcase/
-    simulator/
-    location/
-    progress/
-    contact/
-    cta/
-    shared/
-  hooks/
-  lib/
-  types/
-```
-
-## ✅ Funcionalidades principais
-
-- Multilíngue (PT / EN / IT)
-- Simulador de ROI com PDF
-- WhatsApp integrado
-- Formulário com Formspree
-- SEO completo + Schema.org
 ```
