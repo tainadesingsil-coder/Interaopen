@@ -135,6 +135,35 @@ export default function HomePage() {
     synth.speak(utterance);
   }, []);
 
+  const requestMicrophoneAccess = useCallback(async (): Promise<boolean> => {
+    if (typeof window === 'undefined') {
+      return false;
+    }
+
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setErrorMessage(
+        'Seu navegador não permite acesso ao microfone por getUserMedia.'
+      );
+      return false;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach((track) => track.stop());
+      return true;
+    } catch (error) {
+      const err = error as DOMException;
+      if (err?.name === 'NotAllowedError') {
+        setErrorMessage('Permita o microfone no navegador para falar com o ENIGMA.');
+      } else if (err?.name === 'NotFoundError') {
+        setErrorMessage('Nenhum microfone foi encontrado no dispositivo.');
+      } else {
+        setErrorMessage('Não foi possível acessar o microfone agora.');
+      }
+      return false;
+    }
+  }, []);
+
   const askGemini = useCallback(
     async (inputText: string) => {
       const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
@@ -217,11 +246,7 @@ export default function HomePage() {
     [speakText]
   );
 
-  const ensureRecognition = useCallback(() => {
-    if (recognitionRef.current) {
-      return recognitionRef.current;
-    }
-
+  const buildRecognition = useCallback(() => {
     if (typeof window === 'undefined') {
       return null;
     }
@@ -250,8 +275,16 @@ export default function HomePage() {
       }
     };
 
-    recognition.onerror = () => {
-      setErrorMessage('Não consegui ouvir com clareza. Tente falar novamente.');
+    recognition.onerror = (event: any) => {
+      if (event?.error === 'not-allowed') {
+        setErrorMessage('Permissão de microfone negada. Autorize para continuar.');
+      } else if (event?.error === 'no-speech') {
+        setErrorMessage('Não detectei sua voz. Fale mais perto do microfone.');
+      } else if (event?.error === 'audio-capture') {
+        setErrorMessage('Falha ao capturar áudio. Verifique seu microfone.');
+      } else {
+        setErrorMessage('Não consegui ouvir com clareza. Tente falar novamente.');
+      }
       setVoiceState('idle');
     };
 
@@ -261,11 +294,10 @@ export default function HomePage() {
       }
     };
 
-    recognitionRef.current = recognition;
     return recognition;
   }, [askGemini]);
 
-  const handleMainButton = useCallback(() => {
+  const handleMainButton = useCallback(async () => {
     if (voiceStateRef.current === 'thinking') {
       return;
     }
@@ -276,7 +308,19 @@ export default function HomePage() {
       return;
     }
 
-    const recognition = ensureRecognition();
+    if (voiceStateRef.current === 'listening' && recognitionRef.current) {
+      recognitionRef.current.stop();
+      setVoiceState('idle');
+      return;
+    }
+
+    const hasMicrophoneAccess = await requestMicrophoneAccess();
+    if (!hasMicrophoneAccess) {
+      setVoiceState('idle');
+      return;
+    }
+
+    const recognition = buildRecognition();
     if (!recognition) {
       setErrorMessage(
         'Seu navegador não suporta reconhecimento de voz Web Speech API.'
@@ -284,16 +328,11 @@ export default function HomePage() {
       return;
     }
 
-    if (voiceStateRef.current === 'listening') {
-      recognition.stop();
-      setVoiceState('idle');
-      return;
-    }
-
     hasRecognitionResultRef.current = false;
     setErrorMessage('');
     setVoiceState('listening');
     window.speechSynthesis?.cancel();
+    recognitionRef.current = recognition;
 
     try {
       recognition.start();
@@ -303,7 +342,7 @@ export default function HomePage() {
       );
       setVoiceState('idle');
     }
-  }, [ensureRecognition]);
+  }, [buildRecognition, requestMicrophoneAccess]);
 
   const isVisualizerActive = useMemo(
     () => voiceState === 'listening' || voiceState === 'speaking',
@@ -337,7 +376,7 @@ export default function HomePage() {
           <button
             type='button'
             className={`enigma-button state-${voiceState}`}
-            onClick={handleMainButton}
+            onClick={() => void handleMainButton()}
             aria-label={STATE_LABEL[voiceState]}
           >
             {voiceState === 'idle' && <Mic size={40} />}
