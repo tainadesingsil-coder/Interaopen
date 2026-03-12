@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AudioLines, Loader2, Mic, Volume2 } from 'lucide-react';
 import RotatingEarth from '@/app/components/RotatingEarth';
+import { ShaderAnimation } from '@/app/components/ShaderAnimation';
 
 type VoiceState = 'idle' | 'listening' | 'thinking' | 'speaking';
 type MessageRole = 'user' | 'model';
@@ -311,6 +312,9 @@ export default function HomePage() {
 
   return (
     <main className='enigma-shell' id='main-content'>
+      <div className='shader-stage' aria-hidden='true'>
+        <ShaderAnimation />
+      </div>
       <div className='enigma-grid' aria-hidden='true' />
       <div className='earth-stage'>
         <RotatingEarth width={980} height={720} />

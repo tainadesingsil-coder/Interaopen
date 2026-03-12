@@ -46,7 +46,7 @@ body {
 .enigma-grid {
   position: absolute;
   inset: 0;
-  z-index: 1;
+  z-index: 2;
   background-image:
     linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
@@ -57,10 +57,23 @@ body {
   pointer-events: none;
 }
 
-.earth-stage {
+.shader-stage {
   position: absolute;
   inset: 0;
   z-index: 0;
+  pointer-events: none;
+  opacity: 0.34;
+}
+
+.shader-canvas-layer {
+  position: absolute;
+  inset: 0;
+}
+
+.earth-stage {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
   display: grid;
   place-items: center;
 }
@@ -115,7 +128,7 @@ body {
 
 .enigma-front {
   position: relative;
-  z-index: 2;
+  z-index: 3;
   width: min(820px, 100%);
   display: grid;
   justify-items: center;
