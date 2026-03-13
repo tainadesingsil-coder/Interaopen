@@ -17,7 +17,7 @@ export const Showcase = ({ copy }: Props) => {
             {copy.subtitle}
           </h3>
         </div>
-        <div className='mt-6 flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory md:grid md:grid-cols-2 md:gap-6 md:overflow-visible md:snap-none lg:grid-cols-3'>
+        <div className='mt-6 flex snap-x snap-mandatory gap-6 overflow-x-auto px-1 pb-4 md:grid md:grid-cols-2 md:gap-6 md:overflow-visible md:px-0 md:snap-none lg:grid-cols-3'>
           {copy.cards.map((item, index) => (
             <ShowcaseCard
               key={item.label}

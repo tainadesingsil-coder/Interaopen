@@ -17,7 +17,7 @@ export const SimulatorPresets = ({
   activePreset,
   onSelect,
 }: Props) => (
-  <div className='flex gap-2 overflow-x-auto pb-1 lg:flex-wrap lg:justify-start lg:overflow-visible'>
+  <div className='flex justify-center gap-2 overflow-x-auto pb-1 lg:flex-wrap lg:justify-start lg:overflow-visible'>
     {presets.map((preset) => {
       const presetLabel = labels[preset.key];
       return (
