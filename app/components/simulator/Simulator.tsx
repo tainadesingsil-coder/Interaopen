@@ -150,7 +150,7 @@ export const Simulator = ({ locale, copy, pdfCopy, whatsappLink }: Props) => {
                 <a
                   href={whatsappLink}
                   target='_blank'
-                  rel='noreferrer'
+                  rel='noopener noreferrer'
                   className='inline-flex flex-1 items-center justify-center rounded-full bg-[var(--gold)] px-6 py-3 text-xs font-semibold text-[#0c1116] shadow-[0_12px_30px_rgba(201,164,106,0.25)] transition hover:brightness-110'
                 >
                   {copy.ctaPrimary}

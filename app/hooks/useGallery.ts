@@ -11,7 +11,7 @@ type Options = {
 export const useGallery = ({
   length,
   auto = true,
-  delay = 4200,
+  delay = 5600,
   reduceMotion = false,
   initialIndex = 0,
 }: Options) => {
@@ -20,6 +20,7 @@ export const useGallery = ({
   useEffect(() => {
     if (!auto || reduceMotion || length < 2) return undefined;
     const interval = window.setInterval(() => {
+      if (document.hidden) return;
       setIndex((prev) => (prev + 1) % length);
     }, delay);
     return () => window.clearInterval(interval);

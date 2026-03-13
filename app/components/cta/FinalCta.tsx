@@ -20,7 +20,7 @@ export const FinalCta = ({ copy, whatsappLink }: Props) => (
           <a
             href={whatsappLink}
             target='_blank'
-            rel='noreferrer'
+            rel='noopener noreferrer'
             className='inline-flex items-center justify-center rounded-full bg-[var(--gold)] px-6 py-3 text-sm font-semibold text-[#0c1116] transition hover:brightness-110'
           >
             {copy.primary}

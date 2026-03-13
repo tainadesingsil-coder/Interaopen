@@ -77,7 +77,7 @@ export const Hero = ({ copy, whatsappLink }: Props) => {
                 <a
                   href={whatsappLink}
                   target='_blank'
-                  rel='noreferrer'
+                  rel='noopener noreferrer'
                   className='hero-cta-glow inline-flex w-full items-center justify-center rounded-full border border-white/12 bg-[#0B2A3A] px-7 py-3 text-sm font-semibold text-white shadow-[0_14px_34px_rgba(10,46,70,0.22)] transition duration-500 hover:-translate-y-0.5 hover:shadow-[0_0_18px_rgba(183,146,90,0.45)] lg:w-auto lg:bg-gradient-to-r lg:from-[#0B2A3A] lg:to-[#0A2231] lg:px-9 lg:py-4'
                 >
                   <span className='lg:hidden'>{copy.primaryCta}</span>
