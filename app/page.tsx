@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ShaderAnimation } from '@/app/components/ShaderAnimation';
 
 declare global {
@@ -35,10 +35,6 @@ const GEMINI_ENDPOINT =
   'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
 const STORAGE_KEY = 'enigma_messages_v2';
 const BOOT_STORAGE_KEY = 'enigma_booted_v2';
-const STAR_TITLE = 'Estrela da Manhã';
-const FALLBACK_REPLY =
-  'Estrela da Manhã, há instabilidade no núcleo agora. Repita em alguns segundos.';
-const FALLBACK_PUBLIC_GEMINI_KEY = 'AIzaSyAvso1Z2xzjp7jt5E-keW8BNaLga0jQYnA';
 
 const STATE_LABEL: Record<AssistantState, string> = {
   booting: 'Inicializando...',
@@ -46,17 +42,6 @@ const STATE_LABEL: Record<AssistantState, string> = {
   thinking: 'Pensando...',
   speaking: 'Respondendo...',
   offline: 'Toque para reativar.',
-};
-
-const withStarTitle = (text: string): string => {
-  const normalized = text.toLowerCase();
-  if (
-    normalized.includes('estrela da manhã') ||
-    normalized.includes('estrela da manha')
-  ) {
-    return text;
-  }
-  return `${STAR_TITLE}, ${text}`;
 };
 
 const getTemporalContext = () => {
@@ -77,7 +62,50 @@ const getBootMessage = () => {
   const hour = new Date().getHours();
   const greeting =
     hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite';
-  return `${greeting}, ${STAR_TITLE}. ENIGMA online em modo de voz natural.`;
+  return `${greeting}. ENIGMA online em modo de voz natural.`;
+};
+
+const getLocalReply = (input: string) => {
+  const normalized = input.toLowerCase();
+  const hour = new Date().getHours();
+  const greeting =
+    hour < 12 ? 'bom dia' : hour < 18 ? 'boa tarde' : 'boa noite';
+
+  if (
+    normalized.includes('tudo bem') ||
+    normalized.includes('como vai') ||
+    normalized.includes('como você está') ||
+    normalized.includes('como voce esta')
+  ) {
+    return 'Tudo sob controle. ENIGMA operacional e pronto para o seu próximo comando.';
+  }
+
+  if (
+    normalized.includes('bom dia') ||
+    normalized.includes('boa tarde') ||
+    normalized.includes('boa noite')
+  ) {
+    return `${greeting}. Estou online e atento a você.`;
+  }
+
+  if (
+    normalized.includes('hora') ||
+    normalized.includes('horas') ||
+    normalized.includes('que horas')
+  ) {
+    const time = new Date().toLocaleTimeString('pt-BR', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+    return `Agora são ${time}. Seguimos em modo de execução.`;
+  }
+
+  if (normalized.includes('data') || normalized.includes('dia de hoje')) {
+    const date = new Date().toLocaleDateString('pt-BR');
+    return `Hoje é ${date}. Posso continuar com a próxima tarefa.`;
+  }
+
+  return 'Comando recebido. Posso continuar com a próxima instrução.';
 };
 
 export default function HomePage() {
@@ -261,8 +289,7 @@ export default function HomePage() {
 
   const askGemini = useCallback(
     async (inputText: string) => {
-      const apiKey =
-        process.env.NEXT_PUBLIC_GEMINI_API_KEY || FALLBACK_PUBLIC_GEMINI_KEY;
+      const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
       const cleanedInput = inputText.trim();
       if (!cleanedInput) {
         startListening();
@@ -270,16 +297,14 @@ export default function HomePage() {
       }
 
       if (!apiKey) {
-        const missingKeyReply = withStarTitle(
-          'A chave do oráculo não foi encontrada. Defina NEXT_PUBLIC_GEMINI_API_KEY.'
-        );
-        setErrorMessage(missingKeyReply);
+        const localReply = getLocalReply(cleanedInput);
+        setErrorMessage('');
         setMessages((previous) => [
           ...previous,
           { role: 'user', text: cleanedInput },
-          { role: 'model', text: missingKeyReply },
+          { role: 'model', text: localReply },
         ]);
-        speakText(missingKeyReply, { resumeListening: true });
+        speakText(localReply, { resumeListening: true });
         return;
       }
 
@@ -321,14 +346,13 @@ export default function HomePage() {
           throw new Error('Resposta vazia do Gemini');
         }
 
-        const decoratedReply = withStarTitle(reply);
-        setMessages((previous) => [...previous, { role: 'model', text: decoratedReply }]);
-        speakText(decoratedReply, { resumeListening: true });
+        setMessages((previous) => [...previous, { role: 'model', text: reply }]);
+        speakText(reply, { resumeListening: true });
       } catch {
-        setErrorMessage('Falha ao consultar o Gemini. Resposta de contingência ativada.');
-        const fallback = withStarTitle(FALLBACK_REPLY);
-        setMessages((previous) => [...previous, { role: 'model', text: fallback }]);
-        speakText(fallback, { resumeListening: true });
+        const localReply = getLocalReply(cleanedInput);
+        setErrorMessage('');
+        setMessages((previous) => [...previous, { role: 'model', text: localReply }]);
+        speakText(localReply, { resumeListening: true });
       }
     },
     [speakText, startListening]
@@ -469,7 +493,7 @@ export default function HomePage() {
 
     const alreadyBooted = window.sessionStorage.getItem(BOOT_STORAGE_KEY);
     if (!alreadyBooted) {
-      const bootText = withStarTitle(getBootMessage());
+      const bootText = getBootMessage();
       setMessages((previous) => {
         if (previous.some((message) => message.text === bootText)) {
           return previous;
@@ -488,8 +512,6 @@ export default function HomePage() {
     void activateVoiceMode();
   }, [activateVoiceMode]);
 
-  const latestMessages = useMemo(() => messages.slice(-6), [messages]);
-
   return (
     <main className='enigma-shell' id='main-content'>
       <div className='shader-stage' aria-hidden='true'>
@@ -500,38 +522,12 @@ export default function HomePage() {
       <div className='enigma-front'>
         <header className='enigma-header'>
           <h1 className='enigma-logo'>ENIGMA</h1>
-          <p className='enigma-subtitle'>Assistente natural de voz.</p>
         </header>
 
         <section className='status-shell'>
           <div className={`status-dot state-${assistantState}`} aria-hidden='true' />
           <p className='status-label'>{STATE_LABEL[assistantState]}</p>
         </section>
-
-        <section className='dialog-panel' aria-live='polite'>
-          {latestMessages.length === 0 ? (
-            <article className='dialog-item model'>
-              <h2>ENIGMA</h2>
-              <p>Sincronizando protocolo de voz inteligente.</p>
-            </article>
-          ) : (
-            latestMessages.map((message, index) => (
-              <article
-                key={`msg-${index}-${message.role}`}
-                className={`dialog-item ${message.role === 'user' ? 'user' : 'model'}`}
-              >
-                <h2>{message.role === 'user' ? 'VOCÊ' : 'ENIGMA'}</h2>
-                <p>{message.text}</p>
-              </article>
-            ))
-          )}
-        </section>
-
-        <p className='helper-text'>
-          Sem digitação e sem botão de microfone. Fale naturalmente.
-        </p>
-
-        {errorMessage ? <p className='error-text'>{errorMessage}</p> : null}
 
         {assistantState === 'offline' ? (
           <button
@@ -542,6 +538,8 @@ export default function HomePage() {
             Reativar voz
           </button>
         ) : null}
+
+        {errorMessage ? <p className='error-text'>{errorMessage}</p> : null}
       </div>
     </main>
   );

@@ -68,9 +68,9 @@ body {
 .enigma-front {
   position: relative;
   z-index: 2;
-  width: min(740px, 100%);
+  width: min(620px, 100%);
   border-radius: 20px;
-  padding: 1.1rem 0.85rem 0.9rem;
+  padding: 1rem 0.7rem 0.8rem;
   background: transparent;
   border: none;
   box-shadow: none;
@@ -98,7 +98,7 @@ body {
 }
 
 .status-shell {
-  margin-top: 0.9rem;
+  margin-top: 0.6rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -185,100 +185,15 @@ body {
   animation: pulseRing 1s ease-in-out infinite;
 }
 
-.dialog-panel {
-  margin-top: 1rem;
-  display: grid;
-  gap: 0.55rem;
-  max-height: 290px;
-  overflow-y: auto;
-  padding-right: 0.15rem;
-}
-
-.dialog-item {
-  border-radius: 12px;
-  border: 1px solid rgba(31, 208, 255, 0.24);
-  padding: 0.65rem 0.75rem;
-  background: rgba(5, 14, 20, 0.65);
-  backdrop-filter: blur(8px);
-}
-
-.dialog-item.user {
-  background: rgba(8, 24, 34, 0.7);
-}
-
-.dialog-item.model {
-  background: rgba(7, 20, 31, 0.72);
-}
-
-.dialog-item h2 {
-  margin: 0 0 0.3rem;
-  font-size: 0.67rem;
-  color: #9ae8ff;
-  letter-spacing: 0.12em;
-}
-
-.dialog-item p {
-  margin: 0;
-  color: #ddf8ff;
-  font-size: 0.88rem;
-  line-height: 1.4;
-}
-
-.composer {
-  margin-top: 0.95rem;
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
-}
-
-.composer-input {
-  flex: 1;
-  border-radius: 12px;
-  border: 1px solid rgba(0, 0, 0, 0.26);
-  padding: 0.75rem 0.82rem;
-  font: inherit;
-  color: #060606;
-  background: rgba(255, 255, 255, 0.86);
-}
-
-.composer-input::placeholder {
-  color: #515151;
-}
-
-.composer-button {
-  width: 44px;
-  height: 44px;
-  border: none;
-  border-radius: 12px;
-  background: linear-gradient(145deg, #1f1f1f, #070707);
-  color: #f4f4f4;
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-}
-
-.composer-button:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-.helper-text {
-  margin: 0.6rem 0 0;
-  font-size: 0.69rem;
-  letter-spacing: 0.09em;
-  color: #8db0bd;
-  text-align: center;
-}
-
 .error-text {
-  margin: 0.55rem 0 0;
+  margin: 0.5rem 0 0;
   color: var(--danger);
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   text-align: center;
 }
 
 .reactivate-button {
-  margin: 0.6rem auto 0;
+  margin: 0.5rem auto 0;
   display: block;
   border: 1px solid rgba(31, 208, 255, 0.35);
   border-radius: 999px;
@@ -357,8 +272,8 @@ body {
     letter-spacing: 0.12em;
   }
 
-  .dialog-item p {
-    font-size: 0.82rem;
+  .status-label {
+    font-size: 0.66rem;
   }
 }
 
