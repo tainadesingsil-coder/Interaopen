@@ -34,13 +34,13 @@ YOUTUBE_DATA_API_KEY=sua_chave_youtube_data_api_v3
 
 ### Fontes do Radar IA
 
-Configuradas em `app/api/radar-ia/route.ts` no array `NEWS_FEEDS`.
+Configuradas em `functions/api/radar-ia.js` no array `NEWS_FEEDS`.
 
-- OpenAI Blog
-- Google AI Blog
-- Anthropic News
-- Hugging Face Blog
-- The Verge AI
+- Olhar Digital IA (PT-BR)
+- Canaltech (PT-BR)
+- Google Notícias IA (PT-BR)
+
+YouTube do Radar IA prioriza canais e vídeos em português sobre Inteligência Artificial.
 
 Para adicionar/trocar fontes:
 1. Edite `NEWS_FEEDS` com nome + URL RSS/Atom.

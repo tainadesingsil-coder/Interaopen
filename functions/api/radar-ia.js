@@ -3,15 +3,46 @@ const SOURCE_TIMEOUT_MS = 4000;
 const MAX_QUERY_LENGTH = 80;
 
 const NEWS_FEEDS = [
-  { name: 'OpenAI Blog', url: 'https://openai.com/news/rss.xml' },
-  { name: 'Google AI Blog', url: 'https://blog.google/technology/ai/rss/' },
-  { name: 'Anthropic News', url: 'https://www.anthropic.com/news/rss.xml' },
-  { name: 'Hugging Face Blog', url: 'https://huggingface.co/blog/feed.xml' },
-  { name: 'The Verge AI', url: 'https://www.theverge.com/rss/ai-artificial-intelligence/index.xml' },
+  { name: 'Olhar Digital IA', url: 'https://olhardigital.com.br/tag/inteligencia-artificial/feed/' },
+  { name: 'Canaltech', url: 'https://feeds2.feedburner.com/canaltechbr' },
+  {
+    name: 'Google Notícias IA (PT-BR)',
+    url: 'https://news.google.com/rss/search?q=intelig%C3%AAncia+artificial&hl=pt-BR&gl=BR&ceid=BR:pt-419',
+  },
 ];
 
 const ALLOWED_TYPES = ['all', 'youtube', 'news', 'instagram'];
 const ALLOWED_RANGES = ['24h', '7d', '30d'];
+const YOUTUBE_CHANNEL_LIMIT = 5;
+const YOUTUBE_VIDEOS_PER_CHANNEL = 4;
+
+const PT_STOPWORDS = new Set([
+  'de',
+  'do',
+  'da',
+  'dos',
+  'das',
+  'para',
+  'com',
+  'sobre',
+  'como',
+  'mais',
+  'noticia',
+  'notícias',
+  'agora',
+  'hoje',
+  'novo',
+  'nova',
+  'tecnologia',
+  'mercado',
+  'artificial',
+  'inteligencia',
+  'inteligência',
+  'brasil',
+]);
+
+const AI_TOPIC_PATTERN =
+  /\b(ia|ai|intelig[eê]ncia artificial|machine learning|aprendizado de m[aá]quina|openai|chatgpt|n8n|automa[cç][aã]o|agente)\b/i;
 
 const getCache = () => {
   const key = '__RADAR_IA_CACHE__';
@@ -30,6 +61,15 @@ const sanitizeQuery = (value = '') =>
 
 const parseType = (value) => (ALLOWED_TYPES.includes(value) ? value : 'all');
 const parseRange = (value) => (ALLOWED_RANGES.includes(value) ? value : '7d');
+
+const isAiRelated = (value = '') => AI_TOPIC_PATTERN.test(value.toLowerCase());
+
+const isLikelyPortuguese = (value = '') => {
+  const normalized = value.toLowerCase();
+  const words = normalized.split(/\s+/).filter(Boolean);
+  const stopwordHits = words.reduce((count, word) => (PT_STOPWORDS.has(word) ? count + 1 : count), 0);
+  return /[ãõáéíóúâêôç]/i.test(normalized) || stopwordHits >= 2;
+};
 
 const tokensFromQuery = (query) =>
   query
@@ -149,57 +189,150 @@ const parseFeedItems = (xml) =>
     })
     .filter((item) => item.title && item.link);
 
+const createYoutubeEndpoint = (apiKey, options) => {
+  const endpoint = new URL('https://www.googleapis.com/youtube/v3/search');
+  endpoint.searchParams.set('part', 'snippet');
+  endpoint.searchParams.set('key', apiKey);
+
+  Object.entries(options).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') {
+      endpoint.searchParams.set(key, value);
+    }
+  });
+
+  return endpoint.toString();
+};
+
+const normalizeYoutubeItem = (item, query) => {
+  const videoId = item?.id?.videoId || '';
+  const title = (item?.snippet?.title || '').trim();
+  if (!videoId || !title) {
+    return null;
+  }
+
+  const description = (item?.snippet?.description || '').trim();
+  const publishedAt = safeIsoDate(item?.snippet?.publishedAt || '');
+  const thumbnail =
+    item?.snippet?.thumbnails?.high?.url ||
+    item?.snippet?.thumbnails?.medium?.url ||
+    item?.snippet?.thumbnails?.default?.url ||
+    null;
+  const channelTitle = item?.snippet?.channelTitle || null;
+  const aiChannelBoost = isAiRelated(channelTitle || '') ? 6 : 0;
+  const aiTopicBoost = isAiRelated(`${title} ${description}`) ? 4 : 0;
+
+  return {
+    id: `yt-${videoId}`,
+    kind: 'youtube',
+    title,
+    description,
+    url: `https://www.youtube.com/watch?v=${videoId}`,
+    source: 'YouTube',
+    publishedAt,
+    thumbnail,
+    channel: channelTitle,
+    score: computeScore(title, description, publishedAt, query) + aiChannelBoost + aiTopicBoost,
+    ctaLabel: 'Assistir',
+  };
+};
+
+const dedupeById = (items) => {
+  const map = new Map();
+  items.forEach((item) => {
+    if (!map.has(item.id)) {
+      map.set(item.id, item);
+    }
+  });
+  return [...map.values()];
+};
+
 const fetchYoutubeItems = async (query, range, env) => {
   const apiKey = (env.YOUTUBE_DATA_API_KEY || '').trim();
   if (!apiKey) return [];
 
-  const endpoint = new URL('https://www.googleapis.com/youtube/v3/search');
-  endpoint.searchParams.set('part', 'snippet');
-  endpoint.searchParams.set('type', 'video');
-  endpoint.searchParams.set('maxResults', '16');
-  endpoint.searchParams.set('q', query);
-  endpoint.searchParams.set('order', 'relevance');
-  endpoint.searchParams.set('publishedAfter', new Date(rangeCutoffMs(range)).toISOString());
-  endpoint.searchParams.set('key', apiKey);
+  const publishedAfter = new Date(rangeCutoffMs(range)).toISOString();
+  const aiQuery = `${query} inteligência artificial`;
 
-  const response = await fetchWithTimeout(endpoint.toString());
-  if (!response.ok) {
-    throw new Error('youtube_fetch_failed');
+  const channelSearchUrl = createYoutubeEndpoint(apiKey, {
+    type: 'channel',
+    q: aiQuery,
+    maxResults: '8',
+    order: 'relevance',
+    relevanceLanguage: 'pt',
+    regionCode: 'BR',
+  });
+
+  const channelsResponse = await fetchWithTimeout(channelSearchUrl);
+  if (!channelsResponse.ok) {
+    throw new Error('youtube_channel_fetch_failed');
   }
 
-  const payload = await response.json();
-  const items = payload?.items || [];
+  const channelsPayload = await channelsResponse.json();
+  const channelIds = dedupeById(
+    (channelsPayload?.items || [])
+      .map((item) => ({
+        id: item?.id?.channelId || '',
+      }))
+      .filter((item) => item.id)
+  )
+    .map((item) => item.id)
+    .slice(0, YOUTUBE_CHANNEL_LIMIT);
 
-  const mapped = items
-    .map((item) => {
-      const videoId = item?.id?.videoId || '';
-      const title = (item?.snippet?.title || '').trim();
-      if (!videoId || !title) return null;
-      const description = (item?.snippet?.description || '').trim();
-      const publishedAt = safeIsoDate(item?.snippet?.publishedAt || '');
-      const thumbnail =
-        item?.snippet?.thumbnails?.high?.url ||
-        item?.snippet?.thumbnails?.medium?.url ||
-        item?.snippet?.thumbnails?.default?.url ||
-        null;
+  const channelVideoRequests =
+    channelIds.length > 0
+      ? channelIds.map((channelId) =>
+          fetchWithTimeout(
+            createYoutubeEndpoint(apiKey, {
+              type: 'video',
+              q: aiQuery,
+              channelId,
+              maxResults: String(YOUTUBE_VIDEOS_PER_CHANNEL),
+              order: 'date',
+              publishedAfter,
+              relevanceLanguage: 'pt',
+              regionCode: 'BR',
+            })
+          ).then((response) => {
+            if (!response.ok) {
+              throw new Error(`youtube_channel_video_failed:${channelId}`);
+            }
+            return response.json();
+          })
+        )
+      : [];
 
-      return {
-        id: `yt-${videoId}`,
-        kind: 'youtube',
-        title,
-        description,
-        url: `https://www.youtube.com/watch?v=${videoId}`,
-        source: 'YouTube',
-        publishedAt,
-        thumbnail,
-        channel: item?.snippet?.channelTitle || null,
-        score: computeScore(title, description, publishedAt, query),
-        ctaLabel: 'Assistir',
-      };
-    })
-    .filter(Boolean);
+  const settled = await Promise.allSettled(channelVideoRequests);
+  let videoItems = settled.flatMap((result) =>
+    result.status === 'fulfilled' ? result.value?.items || [] : []
+  );
 
-  return sortByScoreAndDate(mapped);
+  if (videoItems.length === 0) {
+    const fallbackResponse = await fetchWithTimeout(
+      createYoutubeEndpoint(apiKey, {
+        type: 'video',
+        q: aiQuery,
+        maxResults: '16',
+        order: 'relevance',
+        publishedAfter,
+        relevanceLanguage: 'pt',
+        regionCode: 'BR',
+      })
+    );
+    if (!fallbackResponse.ok) {
+      throw new Error('youtube_video_fallback_failed');
+    }
+    const fallbackPayload = await fallbackResponse.json();
+    videoItems = fallbackPayload?.items || [];
+  }
+
+  const mapped = dedupeById(
+    videoItems
+      .map((item) => normalizeYoutubeItem(item, query))
+      .filter(Boolean)
+      .filter((item) => isAiRelated(`${item.title} ${item.description} ${item.channel || ''}`))
+  );
+
+  return sortByScoreAndDate(mapped).slice(0, 30);
 };
 
 const fetchNewsItems = async (query, range) => {
@@ -230,6 +363,9 @@ const fetchNewsItems = async (query, range) => {
 
   const items = settled.flatMap((result) => (result.status === 'fulfilled' ? result.value : []));
   const filtered = items.filter((item) => {
+    if (!isLikelyPortuguese(`${item.title} ${item.description}`)) {
+      return false;
+    }
     if (!item.publishedAt) return true;
     const parsed = Date.parse(item.publishedAt);
     if (Number.isNaN(parsed)) return true;
