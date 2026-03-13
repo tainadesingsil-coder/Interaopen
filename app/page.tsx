@@ -11,6 +11,7 @@ declare global {
 }
 
 type AssistantState = 'booting' | 'listening' | 'thinking' | 'speaking' | 'offline';
+type CaptureMode = 'speech-recognition' | 'recorder' | 'none';
 type MessageRole = 'user' | 'model';
 
 interface ChatMessage {
@@ -20,16 +21,16 @@ interface ChatMessage {
 
 const GEMINI_ENDPOINT =
   'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
-const STORAGE_KEY = 'enigma_messages_v3';
-const BOOT_STORAGE_KEY = 'enigma_booted_v3';
+const STORAGE_KEY = 'enigma_messages_v4';
+const BOOT_STORAGE_KEY = 'enigma_booted_v4';
 const GEMINI_TIMEOUT_MS = 12000;
+const RECORDER_WINDOW_MS = 4200;
 const FALLBACK_PUBLIC_GEMINI_KEY = 'AIzaSyAvso1Z2xzjp7jt5E-keW8BNaLga0jQYnA';
 
-const SYSTEM_PROMPT = `Você é o ENIGMA, um assistente digital avançado, natural e preciso.
-Responda sempre em português do Brasil.
-Fale de forma curta, humana e objetiva.
-Sem markdown, sem listas.
-No máximo 2 frases por resposta.`;
+const SYSTEM_PROMPT = `Você é o ENIGMA, um assistente digital avançado.
+Responda em português do Brasil, curto e natural.
+No máximo 2 frases.
+Sem markdown e sem listas.`;
 
 const WEATHER_CODE_MAP: Record<number, string> = {
   0: 'céu limpo',
@@ -38,9 +39,6 @@ const WEATHER_CODE_MAP: Record<number, string> = {
   3: 'nublado',
   45: 'neblina',
   48: 'névoa úmida',
-  51: 'garoa fraca',
-  53: 'garoa moderada',
-  55: 'garoa intensa',
   61: 'chuva fraca',
   63: 'chuva moderada',
   65: 'chuva forte',
@@ -83,7 +81,7 @@ const getTemporalContext = () => {
   });
   const hour = now.getHours();
   const greeting = hour < 12 ? 'bom dia' : hour < 18 ? 'boa tarde' : 'boa noite';
-  return `Hoje é ${date}, agora são ${time}. Saudação apropriada: ${greeting}.`;
+  return `Hoje é ${date}, agora são ${time}. Saudação sugerida: ${greeting}.`;
 };
 
 const getBootMessage = () => {
@@ -200,20 +198,41 @@ const fetchWithTimeout = async (
   }
 };
 
+const blobToBase64 = async (blob: Blob) => {
+  const buffer = await blob.arrayBuffer();
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  const chunkSize = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    const chunk = bytes.subarray(i, i + chunkSize);
+    binary += String.fromCharCode(...chunk);
+  }
+  return btoa(binary);
+};
+
 export default function HomePage() {
   const [assistantState, setAssistantState] = useState<AssistantState>('booting');
   const [errorMessage, setErrorMessage] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
 
   const synthRef = useRef<SpeechSynthesis | null>(null);
-  const recognitionRef = useRef<any>(null);
   const messagesRef = useRef<ChatMessage[]>([]);
-  const shouldListenRef = useRef(true);
-  const recognitionRunningRef = useRef(false);
-  const restartTimerRef = useRef<number | null>(null);
-  const startCooldownRef = useRef(0);
-  const speakingGuardRef = useRef<number | null>(null);
   const stateRef = useRef<AssistantState>('booting');
+  const shouldListenRef = useRef(true);
+  const captureModeRef = useRef<CaptureMode>('none');
+  const cooldownStartRef = useRef(0);
+
+  const recognitionRef = useRef<any>(null);
+  const recognitionActiveRef = useRef(false);
+
+  const streamRef = useRef<MediaStream | null>(null);
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const recorderActiveRef = useRef(false);
+  const recorderChunksRef = useRef<BlobPart[]>([]);
+
+  const restartTimerRef = useRef<number | null>(null);
+  const recordStopTimerRef = useRef<number | null>(null);
+  const speechGuardRef = useRef<number | null>(null);
 
   useEffect(() => {
     stateRef.current = assistantState;
@@ -233,29 +252,90 @@ export default function HomePage() {
     if (!errorMessage || typeof window === 'undefined') {
       return;
     }
-    const timer = window.setTimeout(() => {
-      setErrorMessage('');
-    }, 2200);
+    const timer = window.setTimeout(() => setErrorMessage(''), 2400);
     return () => window.clearTimeout(timer);
   }, [errorMessage]);
 
-  const scheduleRestart = useCallback((delay = 320) => {
-    if (typeof window === 'undefined') {
+  const stopCapture = useCallback(() => {
+    if (captureModeRef.current === 'speech-recognition') {
+      try {
+        recognitionRef.current?.stop?.();
+      } catch {
+        // ignore
+      }
       return;
     }
-    if (restartTimerRef.current) {
-      window.clearTimeout(restartTimerRef.current);
-    }
-    restartTimerRef.current = window.setTimeout(() => {
-      if (recognitionRef.current && shouldListenRef.current && !recognitionRunningRef.current) {
-        try {
-          recognitionRef.current.start();
-        } catch {
-          scheduleRestart(650);
-        }
+
+    if (captureModeRef.current === 'recorder') {
+      if (recordStopTimerRef.current) {
+        window.clearTimeout(recordStopTimerRef.current);
       }
-    }, delay);
+      if (recorderRef.current?.state === 'recording') {
+        recorderRef.current.stop();
+      }
+    }
   }, []);
+
+  const scheduleCapture = useCallback(
+    (delay = 300) => {
+      if (typeof window === 'undefined') {
+        return;
+      }
+      if (restartTimerRef.current) {
+        window.clearTimeout(restartTimerRef.current);
+      }
+      restartTimerRef.current = window.setTimeout(() => {
+        if (!shouldListenRef.current) {
+          return;
+        }
+        if (
+          stateRef.current === 'thinking' ||
+          stateRef.current === 'speaking' ||
+          stateRef.current === 'offline'
+        ) {
+          return;
+        }
+
+        const now = Date.now();
+        if (now - cooldownStartRef.current < 600) {
+          scheduleCapture(420);
+          return;
+        }
+
+        if (captureModeRef.current === 'speech-recognition') {
+          if (recognitionActiveRef.current) {
+            return;
+          }
+          try {
+            cooldownStartRef.current = now;
+            recognitionRef.current?.start?.();
+          } catch {
+            scheduleCapture(650);
+          }
+          return;
+        }
+
+        if (captureModeRef.current === 'recorder') {
+          if (!recorderRef.current || recorderActiveRef.current) {
+            return;
+          }
+          try {
+            recorderRef.current.start();
+            recorderActiveRef.current = true;
+            cooldownStartRef.current = now;
+            recordStopTimerRef.current = window.setTimeout(() => {
+              if (recorderRef.current?.state === 'recording') {
+                recorderRef.current.stop();
+              }
+            }, RECORDER_WINDOW_MS);
+          } catch {
+            scheduleCapture(700);
+          }
+        }
+      }, delay);
+    },
+    []
+  );
 
   const pickVoice = useCallback((voices: SpeechSynthesisVoice[]) => {
     const preferred = [
@@ -287,14 +367,16 @@ export default function HomePage() {
       if (typeof window === 'undefined') {
         return;
       }
+
+      stopCapture();
       const synth = synthRef.current ?? window.speechSynthesis;
       if (!synth) {
         setAssistantState('offline');
         return;
       }
 
-      if (speakingGuardRef.current) {
-        window.clearTimeout(speakingGuardRef.current);
+      if (speechGuardRef.current) {
+        window.clearTimeout(speechGuardRef.current);
       }
 
       synth.cancel();
@@ -314,25 +396,25 @@ export default function HomePage() {
       };
 
       utterance.onend = () => {
-        if (speakingGuardRef.current) {
-          window.clearTimeout(speakingGuardRef.current);
+        if (speechGuardRef.current) {
+          window.clearTimeout(speechGuardRef.current);
         }
         if (options?.boot) {
           window.sessionStorage.setItem(BOOT_STORAGE_KEY, '1');
         }
         setAssistantState('listening');
         if (options?.resume) {
-          scheduleRestart(180);
+          scheduleCapture(180);
         }
       };
 
       utterance.onerror = () => {
-        if (speakingGuardRef.current) {
-          window.clearTimeout(speakingGuardRef.current);
+        if (speechGuardRef.current) {
+          window.clearTimeout(speechGuardRef.current);
         }
         setAssistantState('listening');
         if (options?.resume) {
-          scheduleRestart(280);
+          scheduleCapture(300);
         }
       };
 
@@ -340,45 +422,43 @@ export default function HomePage() {
       synth.speak(utterance);
 
       if (options?.resume) {
-        speakingGuardRef.current = window.setTimeout(() => {
-          scheduleRestart(360);
+        speechGuardRef.current = window.setTimeout(() => {
+          scheduleCapture(380);
         }, 10000);
       }
     },
-    [pickVoice, scheduleRestart]
+    [pickVoice, scheduleCapture, stopCapture]
   );
 
   const getLiveWeather = useCallback(async (input: string) => {
     try {
       const location = extractWeatherLocation(input);
-      const geo = await fetchWithTimeout(
+      const geoResponse = await fetchWithTimeout(
         `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
           location
         )}&count=1&language=pt&format=json`,
         { method: 'GET' },
         GEMINI_TIMEOUT_MS
       );
-      if (!geo.ok) {
+      if (!geoResponse.ok) {
         return null;
       }
-
-      const geoPayload = await geo.json();
+      const geoPayload = await geoResponse.json();
       const place = geoPayload?.results?.[0];
       if (!place) {
         return null;
       }
 
-      const weather = await fetchWithTimeout(
+      const weatherResponse = await fetchWithTimeout(
         `https://api.open-meteo.com/v1/forecast?latitude=${place.latitude}&longitude=${place.longitude}` +
           '&current=temperature_2m,apparent_temperature,weather_code&timezone=auto',
         { method: 'GET' },
         GEMINI_TIMEOUT_MS
       );
-      if (!weather.ok) {
+      if (!weatherResponse.ok) {
         return null;
       }
-
-      const weatherPayload = await weather.json();
+      const weatherPayload = await weatherResponse.json();
       const current = weatherPayload?.current;
       if (!current) {
         return null;
@@ -403,7 +483,7 @@ export default function HomePage() {
     async (input: string) => {
       const cleaned = normalizeSpokenInput(input);
       if (!cleaned) {
-        scheduleRestart(260);
+        scheduleCapture(260);
         return;
       }
 
@@ -446,7 +526,7 @@ export default function HomePage() {
       setMessages(conversation);
 
       try {
-        const temporalContext = getTemporalContext();
+        const temporal = getTemporalContext();
         const response = await fetchWithTimeout(
           `${GEMINI_ENDPOINT}?key=${apiKey}`,
           {
@@ -454,7 +534,7 @@ export default function HomePage() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               systemInstruction: {
-                parts: [{ text: SYSTEM_PROMPT }, { text: temporalContext }],
+                parts: [{ text: SYSTEM_PROMPT }, { text: temporal }],
               },
               generationConfig: {
                 temperature: 0.7,
@@ -471,7 +551,7 @@ export default function HomePage() {
         );
 
         if (!response.ok) {
-          throw new Error('gemini_error');
+          throw new Error('gemini_not_ok');
         }
 
         const payload = await response.json();
@@ -492,18 +572,69 @@ export default function HomePage() {
         speak(reply, { resume: true });
       }
     },
-    [getLiveWeather, scheduleRestart, speak]
+    [getLiveWeather, scheduleCapture, speak]
   );
 
-  const initRecognition = useCallback(() => {
+  const transcribeWithGemini = useCallback(
+    async (blob: Blob) => {
+      const apiKey =
+        process.env.NEXT_PUBLIC_GEMINI_API_KEY || FALLBACK_PUBLIC_GEMINI_KEY;
+      if (!apiKey) {
+        return '';
+      }
+
+      try {
+        const base64Audio = await blobToBase64(blob);
+        const response = await fetchWithTimeout(
+          `${GEMINI_ENDPOINT}?key=${apiKey}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [
+                {
+                  role: 'user',
+                  parts: [
+                    {
+                      text: 'Transcreva esse áudio em português do Brasil. Responda apenas com o texto transcrito. Se não houver fala, responda VAZIO.',
+                    },
+                    {
+                      inline_data: {
+                        mime_type: blob.type || 'audio/webm',
+                        data: base64Audio,
+                      },
+                    },
+                  ],
+                },
+              ],
+            }),
+          },
+          GEMINI_TIMEOUT_MS
+        );
+
+        if (!response.ok) {
+          return '';
+        }
+
+        const payload = await response.json();
+        const text = payload?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ?? '';
+        if (!text || normalizeText(text) === 'vazio') {
+          return '';
+        }
+        return text;
+      } catch {
+        return '';
+      }
+    },
+    []
+  );
+
+  const initSpeechRecognition = useCallback(() => {
     if (typeof window === 'undefined') {
       return false;
     }
-
     const RecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!RecognitionCtor) {
-      setAssistantState('offline');
-      setErrorMessage('Seu navegador não suporta reconhecimento de voz.');
       return false;
     }
 
@@ -514,9 +645,9 @@ export default function HomePage() {
     recognition.maxAlternatives = 1;
 
     recognition.onstart = () => {
-      recognitionRunningRef.current = true;
-      setErrorMessage('');
+      recognitionActiveRef.current = true;
       setAssistantState('listening');
+      setErrorMessage('');
     };
 
     recognition.onresult = (event: any) => {
@@ -532,47 +663,123 @@ export default function HomePage() {
       if (transcript) {
         void askGemini(transcript);
       } else {
-        scheduleRestart(300);
+        scheduleCapture(320);
       }
     };
 
     recognition.onerror = (event: any) => {
-      recognitionRunningRef.current = false;
+      recognitionActiveRef.current = false;
       const code = event?.error;
       if (code === 'not-allowed') {
-        shouldListenRef.current = false;
-        setAssistantState('offline');
-        setErrorMessage('Permita o microfone para continuar.');
         return;
       }
-
       if (code === 'audio-capture') {
-        shouldListenRef.current = false;
-        setAssistantState('offline');
-        setErrorMessage('Microfone não detectado.');
         return;
       }
-
       if (shouldListenRef.current) {
-        scheduleRestart(code === 'no-speech' ? 520 : 760);
+        scheduleCapture(code === 'no-speech' ? 520 : 700);
       }
     };
 
     recognition.onend = () => {
-      recognitionRunningRef.current = false;
+      recognitionActiveRef.current = false;
       if (
         shouldListenRef.current &&
         stateRef.current !== 'thinking' &&
         stateRef.current !== 'speaking' &&
         stateRef.current !== 'offline'
       ) {
-        scheduleRestart(340);
+        scheduleCapture(360);
       }
     };
 
     recognitionRef.current = recognition;
+    captureModeRef.current = 'speech-recognition';
     return true;
-  }, [askGemini, scheduleRestart]);
+  }, [askGemini, scheduleCapture]);
+
+  const initRecorderFallback = useCallback(async () => {
+    if (!streamRef.current) {
+      return false;
+    }
+
+    const preferredTypes = [
+      'audio/webm;codecs=opus',
+      'audio/webm',
+      'audio/mp4',
+      'audio/ogg',
+    ];
+    const mimeType = preferredTypes.find((type) => MediaRecorder.isTypeSupported(type));
+
+    let recorder: MediaRecorder;
+    try {
+      recorder = mimeType
+        ? new MediaRecorder(streamRef.current, { mimeType })
+        : new MediaRecorder(streamRef.current);
+    } catch {
+      return false;
+    }
+
+    recorder.onstart = () => {
+      recorderActiveRef.current = true;
+      setAssistantState('listening');
+      setErrorMessage('');
+    };
+
+    recorder.ondataavailable = (event) => {
+      if (event.data && event.data.size > 0) {
+        recorderChunksRef.current.push(event.data);
+      }
+    };
+
+    recorder.onerror = () => {
+      recorderActiveRef.current = false;
+      if (shouldListenRef.current) {
+        scheduleCapture(720);
+      }
+    };
+
+    recorder.onstop = async () => {
+      recorderActiveRef.current = false;
+      if (recordStopTimerRef.current) {
+        window.clearTimeout(recordStopTimerRef.current);
+      }
+
+      const blob = new Blob(recorderChunksRef.current, {
+        type: recorder.mimeType || 'audio/webm',
+      });
+      recorderChunksRef.current = [];
+
+      if (!shouldListenRef.current) {
+        return;
+      }
+
+      if (
+        stateRef.current === 'thinking' ||
+        stateRef.current === 'speaking' ||
+        stateRef.current === 'offline'
+      ) {
+        scheduleCapture(320);
+        return;
+      }
+
+      if (blob.size < 3000) {
+        scheduleCapture(320);
+        return;
+      }
+
+      const transcript = await transcribeWithGemini(blob);
+      if (transcript) {
+        void askGemini(transcript);
+      } else {
+        scheduleCapture(340);
+      }
+    };
+
+    recorderRef.current = recorder;
+    captureModeRef.current = 'recorder';
+    return true;
+  }, [askGemini, scheduleCapture, transcribeWithGemini]);
 
   const activate = useCallback(async () => {
     if (typeof window === 'undefined') {
@@ -590,8 +797,9 @@ export default function HomePage() {
     }
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      stream.getTracks().forEach((track) => track.stop());
+      if (!streamRef.current) {
+        streamRef.current = await navigator.mediaDevices.getUserMedia({ audio: true });
+      }
     } catch {
       shouldListenRef.current = false;
       setAssistantState('offline');
@@ -599,21 +807,28 @@ export default function HomePage() {
       return;
     }
 
-    const ok = initRecognition();
-    if (!ok) {
+    let initialized = initSpeechRecognition();
+    if (!initialized) {
+      initialized = await initRecorderFallback();
+    }
+
+    if (!initialized) {
+      setAssistantState('offline');
+      setErrorMessage('Não consegui ativar a captura de voz neste navegador.');
       return;
     }
 
     const booted = window.sessionStorage.getItem(BOOT_STORAGE_KEY);
     if (!booted) {
-      const text = getBootMessage();
-      setMessages((prev) => [...prev, { role: 'model', text: text }]);
-      speak(text, { boot: true, resume: true });
+      const bootText = getBootMessage();
+      setMessages((prev) => [...prev, { role: 'model', text: bootText }]);
+      speak(bootText, { boot: true, resume: true });
       return;
     }
 
-    scheduleRestart(200);
-  }, [initRecognition, scheduleRestart, speak]);
+    setAssistantState('listening');
+    scheduleCapture(180);
+  }, [initRecorderFallback, initSpeechRecognition, scheduleCapture, speak]);
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -635,27 +850,32 @@ export default function HomePage() {
 
     void activate();
 
-    const onFirstGesture = () => {
+    const onGesture = () => {
       if (stateRef.current === 'offline') {
         void activate();
       }
     };
 
-    window.addEventListener('pointerdown', onFirstGesture);
+    window.addEventListener('pointerdown', onGesture);
 
     return () => {
       shouldListenRef.current = false;
-      window.removeEventListener('pointerdown', onFirstGesture);
+      window.removeEventListener('pointerdown', onGesture);
       if (restartTimerRef.current) {
         window.clearTimeout(restartTimerRef.current);
       }
-      if (speakingGuardRef.current) {
-        window.clearTimeout(speakingGuardRef.current);
+      if (recordStopTimerRef.current) {
+        window.clearTimeout(recordStopTimerRef.current);
       }
-      recognitionRef.current?.stop?.();
+      if (speechGuardRef.current) {
+        window.clearTimeout(speechGuardRef.current);
+      }
+      stopCapture();
+      streamRef.current?.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
       window.speechSynthesis?.cancel();
     };
-  }, [activate]);
+  }, [activate, stopCapture]);
 
   return (
     <main className='enigma-shell' id='main-content'>
