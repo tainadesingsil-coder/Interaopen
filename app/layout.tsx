@@ -9,22 +9,21 @@ const syne = Syne({
 });
 
 export const metadata: Metadata = {
-  title: 'ENIGMA | Assistente de Voz',
-  description:
-    'ENIGMA é um assistente de voz futurista com reconhecimento de fala, Gemini e resposta em voz sintetizada.',
-  keywords: ['enigma', 'assistente de voz', 'next.js', 'gemini', 'speech api'],
-  authors: [{ name: 'ENIGMA' }],
+  title: 'CODEXION | Portfolio',
+  description: 'Interface moderna de portfólio com sidebar animada e visual premium.',
+  keywords: ['codexion', 'portfolio', 'next.js', 'interface', 'design'],
+  authors: [{ name: 'CODEXION' }],
   openGraph: {
     type: 'website',
     locale: 'pt_BR',
-    siteName: 'ENIGMA',
-    title: 'ENIGMA | Assistente de Voz',
-    description: 'Fale com o ENIGMA e receba respostas em voz alta.',
+    siteName: 'CODEXION',
+    title: 'CODEXION | Portfolio',
+    description: 'Portfólio CODEXION com navegação lateral e apresentação de projetos.',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'ENIGMA | Assistente de Voz',
-    description: 'Reconhecimento de voz e respostas com Gemini.',
+    title: 'CODEXION | Portfolio',
+    description: 'Nova interface de portfólio para a marca CODEXION.',
   },
   robots: {
     index: true,
