@@ -64,15 +64,15 @@ export default function HomePage() {
     <main className='min-h-screen bg-neutral-950 text-neutral-100'>
       <Sidebar open={open} setOpen={setOpen} animate>
         <div className='flex min-h-screen w-full flex-col md:flex-row'>
-          <SidebarBody className='border-r border-white/10'>
-            <div className='flex h-full flex-col justify-between gap-8'>
-              <div className='space-y-8'>
+          <SidebarBody className='overflow-hidden border-r border-white/10'>
+            <div className='flex h-full flex-col justify-between gap-4 overflow-hidden'>
+              <div className='space-y-4 overflow-hidden'>
                 <div className='pt-3'>
-                  <p className='text-xs uppercase tracking-[0.25em] text-neutral-500'>
-                    Portfolio
+                  <p className='truncate text-[10px] uppercase tracking-[0.16em] text-neutral-500'>
+                    {open ? 'Portfolio' : 'PF'}
                   </p>
-                  <h1 className='mt-2 text-2xl font-extrabold tracking-[0.2em] text-white'>
-                    CODEXION
+                  <h1 className='mt-1 truncate text-base font-extrabold tracking-[0.12em] text-white'>
+                    {open ? 'CODEXION' : 'CX'}
                   </h1>
                 </div>
                 <nav className='space-y-1'>
@@ -85,9 +85,11 @@ export default function HomePage() {
                   ))}
                 </nav>
               </div>
-              <div className='rounded-lg border border-white/10 bg-white/5 p-3'>
-                <p className='text-xs text-neutral-400'>Status</p>
-                <p className='text-sm font-semibold text-white'>Disponível para novos projetos</p>
+              <div className='rounded-lg border border-white/10 bg-white/5 p-2'>
+                <p className='text-[10px] leading-tight text-neutral-400'>{open ? 'Status' : '•'}</p>
+                <p className='break-words text-[11px] font-semibold leading-tight text-white'>
+                  {open ? 'Disponível para novos projetos' : 'ON'}
+                </p>
               </div>
             </div>
           </SidebarBody>
