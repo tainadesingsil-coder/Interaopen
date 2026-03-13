@@ -15,6 +15,68 @@ const ALLOWED_TYPES = ['all', 'youtube', 'news', 'instagram'];
 const ALLOWED_RANGES = ['24h', '7d', '30d'];
 const YOUTUBE_CHANNEL_LIMIT = 5;
 const YOUTUBE_VIDEOS_PER_CHANNEL = 4;
+const CURATED_YOUTUBE_VIDEOS = [
+  {
+    id: 'flIPXJljv5g',
+    title: 'IA na prática: automações e produtividade',
+    channel: 'Canal recomendado de IA',
+    url: 'https://www.youtube.com/watch?v=flIPXJljv5g',
+  },
+  {
+    id: '-ffRm_Tu4zY',
+    title: 'Como usar IA no dia a dia do negócio',
+    channel: 'Canal recomendado de IA',
+    url: 'https://www.youtube.com/watch?v=-ffRm_Tu4zY',
+  },
+  {
+    id: 'h_l8wCr7M2Q',
+    title: 'Estratégias de IA para empresas',
+    channel: 'Canal recomendado de IA',
+    url: 'https://www.youtube.com/watch?v=h_l8wCr7M2Q',
+  },
+  {
+    id: 'CVze2NyauQc',
+    title: 'Aplicações de IA em negócios reais',
+    channel: 'Canal recomendado de IA',
+    url: 'https://www.youtube.com/watch?v=CVze2NyauQc',
+  },
+  {
+    id: 'Q5Vsu5DzBig',
+    title: 'Como Criar o Seu 1º Agente IA em Apenas 32 Minutos',
+    channel: 'Bruno Picinini',
+    url: 'https://www.youtube.com/watch?v=Q5Vsu5DzBig',
+  },
+  {
+    id: '-Ka4YKW7RwM',
+    title: 'Curso N8N Gratuito Para Iniciantes | Crie Automações com IA',
+    channel: 'NoCode StartUp',
+    url: 'https://www.youtube.com/watch?v=-Ka4YKW7RwM',
+  },
+  {
+    id: 'axZZGNmZ50I',
+    title: 'Agentes de IA para WhatsApp no N8N',
+    channel: 'Enzzo Panarotto',
+    url: 'https://www.youtube.com/watch?v=axZZGNmZ50I',
+  },
+  {
+    id: 'NvrBpnbNfv4',
+    title: 'N8N + WhatsApp com Agente de IA (Tutorial)',
+    channel: 'Guilherme Lazarotto',
+    url: 'https://www.youtube.com/watch?v=NvrBpnbNfv4',
+  },
+  {
+    id: 'UmuJeb0VvXA',
+    title: 'ChatGPT: o que é e como usar (tutorial em português)',
+    channel: 'Me Ensina',
+    url: 'https://www.youtube.com/watch?v=UmuJeb0VvXA',
+  },
+  {
+    id: '7Gg7CrayIE0',
+    title: 'Inteligência Artificial no Marketing',
+    channel: 'Canal de Marketing e IA',
+    url: 'https://www.youtube.com/watch?v=7Gg7CrayIE0',
+  },
+];
 
 const PT_STOPWORDS = new Set([
   'de',
@@ -246,9 +308,29 @@ const dedupeById = (items) => {
   return [...map.values()];
 };
 
+const buildCuratedYoutubeItems = (query) =>
+  CURATED_YOUTUBE_VIDEOS.map((video, index) => {
+    const description = `Vídeo recomendado para aprender IA, automação e aplicações em negócios.`;
+    const baseScore = 90 - index;
+    return {
+      id: `yt-${video.id}`,
+      kind: 'youtube',
+      title: video.title,
+      description,
+      url: video.url,
+      source: 'YouTube Curadoria Codexion',
+      publishedAt: null,
+      thumbnail: `https://i.ytimg.com/vi/${video.id}/hqdefault.jpg`,
+      channel: video.channel,
+      score: baseScore + computeScore(video.title, description, null, query),
+      ctaLabel: 'Assistir',
+    };
+  });
+
 const fetchYoutubeItems = async (query, range, env) => {
   const apiKey = (env.YOUTUBE_DATA_API_KEY || '').trim();
-  if (!apiKey) return [];
+  const curatedItems = buildCuratedYoutubeItems(query);
+  if (!apiKey) return curatedItems;
 
   const publishedAfter = new Date(rangeCutoffMs(range)).toISOString();
   const aiQuery = `${query} inteligência artificial`;
@@ -332,7 +414,7 @@ const fetchYoutubeItems = async (query, range, env) => {
       .filter((item) => isAiRelated(`${item.title} ${item.description} ${item.channel || ''}`))
   );
 
-  return sortByScoreAndDate(mapped).slice(0, 30);
+  return sortByScoreAndDate(dedupeById([...mapped, ...curatedItems])).slice(0, 30);
 };
 
 const fetchNewsItems = async (query, range) => {

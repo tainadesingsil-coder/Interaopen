@@ -33,7 +33,7 @@ const RANGE_LABEL: Record<RadarRange, string> = {
 };
 
 const MAX_QUERY_LENGTH = 80;
-const INITIAL_VISIBLE = 6;
+const INITIAL_VISIBLE = 10;
 
 const sanitizeClientQuery = (value: string) =>
   value
