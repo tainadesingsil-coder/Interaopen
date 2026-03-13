@@ -37,7 +37,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN || secrets.CF_API_TOKEN || secrets.CF_ACCOUNTCODEXION }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID || secrets.CF_ACCOUNT_ID || secrets.CF_ACCOUNT_IDCODEXION }}
-          projectName: solarenergy-5h5
+          projectName: ${{ vars.CLOUDFLARE_PAGES_PROJECT || 'codexionai' }}
           directory: dist
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ github.event_name == 'pull_request' && github.head_ref || github.ref_name }}
