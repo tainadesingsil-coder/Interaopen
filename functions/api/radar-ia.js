@@ -77,6 +77,26 @@ const CURATED_YOUTUBE_VIDEOS = [
     url: 'https://www.youtube.com/watch?v=7Gg7CrayIE0',
   },
 ];
+const CURATED_INSTAGRAM_PUBLICATIONS = [
+  {
+    id: 'instagram-hollyfield-ia-posts',
+    title: 'Publicações do perfil hollyfield.ia',
+    description: 'Acesse as publicações recentes do perfil recomendado de IA.',
+    url: 'https://www.instagram.com/hollyfield.ia/',
+  },
+  {
+    id: 'instagram-hollyfield-ia-reels',
+    title: 'Reels de IA do hollyfield.ia',
+    description: 'Veja vídeos curtos e insights práticos sobre inteligência artificial.',
+    url: 'https://www.instagram.com/hollyfield.ia/reels/',
+  },
+  {
+    id: 'instagram-hollyfield-ia-tagged',
+    title: 'Conteúdos em destaque de hollyfield.ia',
+    description: 'Explore conteúdos e menções do perfil dentro do Instagram.',
+    url: 'https://www.instagram.com/hollyfield.ia/tagged/',
+  },
+];
 
 const PT_STOPWORDS = new Set([
   'de',
@@ -308,6 +328,15 @@ const dedupeById = (items) => {
   return [...map.values()];
 };
 
+const takeTop = (items, count) => sortByScoreAndDate(items).slice(0, count);
+
+const buildBalancedAll = (results) => {
+  const topYoutube = takeTop(results.youtube, 3);
+  const topNews = takeTop(results.news, 3);
+  const topInstagram = takeTop(results.instagram, 3);
+  return [...topYoutube, ...topNews, ...topInstagram];
+};
+
 const buildCuratedYoutubeItems = (query) =>
   CURATED_YOUTUBE_VIDEOS.map((video, index) => {
     const description = `Vídeo recomendado para aprender IA, automação e aplicações em negócios.`;
@@ -458,26 +487,20 @@ const fetchNewsItems = async (query, range) => {
 };
 
 const fetchInstagramItems = async (query) => {
-  const url = 'https://www.instagram.com/hollyfield.ia?igsh=MWJxYWczbmdmYm02aw==';
-  const description = `Fonte recomendada para acompanhar tendências de IA. ${
-    query ? `Tema buscado: ${query}.` : ''
-  }`.trim();
-
-  return [
-    {
-      id: 'instagram-hollyfield-ia',
-      kind: 'instagram',
-      title: 'hollyfield.ia',
-      description,
-      url,
-      source: 'Instagram',
-      publishedAt: null,
-      thumbnail: null,
-      channel: '@hollyfield.ia',
-      score: computeScore('hollyfield ia instagram', description, null, query) + 1,
-      ctaLabel: 'Abrir no Instagram',
-    },
-  ];
+  return CURATED_INSTAGRAM_PUBLICATIONS.map((publication, index) => ({
+    id: publication.id,
+    kind: 'instagram',
+    title: publication.title,
+    description: `${publication.description} ${query ? `Tema buscado: ${query}.` : ''}`.trim(),
+    url: publication.url,
+    source: 'Instagram',
+    publishedAt: null,
+    thumbnail: null,
+    channel: '@hollyfield.ia',
+    score:
+      50 - index + computeScore(`${publication.title} hollyfield ia instagram`, publication.description, null, query),
+    ctaLabel: 'Abrir no Instagram',
+  }));
 };
 
 const emptyResponse = (query, type, range) => ({
@@ -522,11 +545,14 @@ const aggregateRadar = async (query, type, range, env) => {
   else if (requestedKinds.includes('instagram'))
     data.errors.instagram = 'Fonte Instagram indisponível no momento.';
 
-  data.all = sortByScoreAndDate([
-    ...data.results.youtube,
-    ...data.results.news,
-    ...data.results.instagram,
-  ]);
+  data.all =
+    type === 'all'
+      ? buildBalancedAll(data.results)
+      : sortByScoreAndDate([
+          ...data.results.youtube,
+          ...data.results.news,
+          ...data.results.instagram,
+        ]);
 
   return data;
 };
