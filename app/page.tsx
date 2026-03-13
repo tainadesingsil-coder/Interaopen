@@ -1,7 +1,6 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Loader2, Sparkles, Volume2, Waves } from 'lucide-react';
 import { ShaderAnimation } from '@/app/components/ShaderAnimation';
 
 declare global {
@@ -28,7 +27,8 @@ const SYSTEM_PROMPT = `Você é o ENIGMA, um assistente digital extremamente com
 Responda sempre em português brasileiro.
 Seja objetivo, técnico quando necessário e confiante.
 Não use markdown, bullets ou listas.
-Suas respostas serão lidas em voz alta: use no máximo 3 frases curtas e fortes.
+Suas respostas serão lidas em voz alta: use no máximo 2 frases curtas e fortes.
+Se o usuário cumprimentar, responda de forma natural considerando o horário local informado no contexto.
 Sempre chame o usuário de Estrela da Manhã.`;
 
 const GEMINI_ENDPOINT =
@@ -36,18 +36,16 @@ const GEMINI_ENDPOINT =
 const STORAGE_KEY = 'enigma_messages_v2';
 const BOOT_STORAGE_KEY = 'enigma_booted_v2';
 const STAR_TITLE = 'Estrela da Manhã';
-const BOOT_MESSAGE =
-  'ENIGMA online. Estrela da Manhã, modo de voz natural ativo. Estou ouvindo você.';
 const FALLBACK_REPLY =
   'Estrela da Manhã, há instabilidade no núcleo agora. Repita em alguns segundos.';
 const FALLBACK_PUBLIC_GEMINI_KEY = 'AIzaSyAvso1Z2xzjp7jt5E-keW8BNaLga0jQYnA';
 
 const STATE_LABEL: Record<AssistantState, string> = {
-  booting: 'INICIANDO NÚCLEO ENIGMA...',
-  listening: 'OUVINDO SUA VOZ...',
-  thinking: 'PROCESSANDO RESPOSTA...',
-  speaking: 'ENIGMA RESPONDENDO...',
-  offline: 'MODO OFFLINE - TOQUE PARA REATIVAR',
+  booting: 'Inicializando...',
+  listening: 'Pronto para você.',
+  thinking: 'Pensando...',
+  speaking: 'Respondendo...',
+  offline: 'Toque para reativar.',
 };
 
 const withStarTitle = (text: string): string => {
@@ -59,6 +57,27 @@ const withStarTitle = (text: string): string => {
     return text;
   }
   return `${STAR_TITLE}, ${text}`;
+};
+
+const getTemporalContext = () => {
+  const now = new Date();
+  const hour = now.getHours();
+  const greeting =
+    hour < 12 ? 'bom dia' : hour < 18 ? 'boa tarde' : 'boa noite';
+  const time = now.toLocaleTimeString('pt-BR', {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+  const date = now.toLocaleDateString('pt-BR');
+
+  return `Contexto temporal: hoje é ${date}, agora são ${time}. Saudação recomendada: ${greeting}.`;
+};
+
+const getBootMessage = () => {
+  const hour = new Date().getHours();
+  const greeting =
+    hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite';
+  return `${greeting}, ${STAR_TITLE}. ENIGMA online em modo de voz natural.`;
 };
 
 export default function HomePage() {
@@ -271,6 +290,7 @@ export default function HomePage() {
       setMessages(conversation);
 
       try {
+        const temporalContext = getTemporalContext();
         const response = await fetch(`${GEMINI_ENDPOINT}?key=${apiKey}`, {
           method: 'POST',
           headers: {
@@ -278,7 +298,7 @@ export default function HomePage() {
           },
           body: JSON.stringify({
             systemInstruction: {
-              parts: [{ text: SYSTEM_PROMPT }],
+              parts: [{ text: SYSTEM_PROMPT }, { text: temporalContext }],
             },
             contents: conversation.map((message) => ({
               role: message.role,
@@ -330,7 +350,7 @@ export default function HomePage() {
     const recognition = new RecognitionCtor();
     recognition.lang = 'pt-BR';
     recognition.interimResults = false;
-    recognition.continuous = false;
+    recognition.continuous = true;
     recognition.maxAlternatives = 1;
 
     recognition.onstart = () => {
@@ -338,10 +358,14 @@ export default function HomePage() {
     };
 
     recognition.onresult = (event: any) => {
+      if (stateRef.current === 'thinking' || stateRef.current === 'speaking') {
+        return;
+      }
       gotResultRef.current = true;
       const transcript = event.results?.[0]?.[0]?.transcript?.trim() ?? '';
       if (transcript) {
         setErrorMessage('');
+        recognition.stop();
         void askGemini(transcript);
       } else {
         scheduleListeningRestart(280);
@@ -445,7 +469,7 @@ export default function HomePage() {
 
     const alreadyBooted = window.sessionStorage.getItem(BOOT_STORAGE_KEY);
     if (!alreadyBooted) {
-      const bootText = withStarTitle(BOOT_MESSAGE);
+      const bootText = withStarTitle(getBootMessage());
       setMessages((previous) => {
         if (previous.some((message) => message.text === bootText)) {
           return previous;
@@ -476,31 +500,13 @@ export default function HomePage() {
       <div className='enigma-front'>
         <header className='enigma-header'>
           <h1 className='enigma-logo'>ENIGMA</h1>
-          <p className='enigma-subtitle'>Assistente de voz avançado em modo natural.</p>
+          <p className='enigma-subtitle'>Assistente natural de voz.</p>
         </header>
 
         <section className='status-shell'>
           <div className={`status-dot state-${assistantState}`} aria-hidden='true' />
           <p className='status-label'>{STATE_LABEL[assistantState]}</p>
         </section>
-
-        <button
-          type='button'
-          className={`core-orb state-${assistantState}`}
-          onClick={() => void activateVoiceMode()}
-          aria-label='Reativar modo de voz'
-        >
-          {assistantState === 'thinking' ? (
-            <Loader2 size={34} className='spin-icon' />
-          ) : assistantState === 'speaking' ? (
-            <Volume2 size={34} />
-          ) : assistantState === 'listening' ? (
-            <Waves size={34} />
-          ) : (
-            <Sparkles size={34} />
-          )}
-          <span className='core-ring' />
-        </button>
 
         <section className='dialog-panel' aria-live='polite'>
           {latestMessages.length === 0 ? (
@@ -522,10 +528,20 @@ export default function HomePage() {
         </section>
 
         <p className='helper-text'>
-          Sem digitação. O ENIGMA fala e escuta sua voz naturalmente.
+          Sem digitação e sem botão de microfone. Fale naturalmente.
         </p>
 
         {errorMessage ? <p className='error-text'>{errorMessage}</p> : null}
+
+        {assistantState === 'offline' ? (
+          <button
+            type='button'
+            className='reactivate-button'
+            onClick={() => void activateVoiceMode()}
+          >
+            Reativar voz
+          </button>
+        ) : null}
       </div>
     </main>
   );
