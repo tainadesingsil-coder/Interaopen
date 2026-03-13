@@ -1,14 +1,11 @@
-# ENIGMA - Assistente de Voz
-
-Interface futurista com reconhecimento de voz, resposta textual via Gemini e leitura em voz alta.
+# CODEXION Portfolio
 
 ## Stack
 
 - Next.js (App Router)
 - TypeScript
 - Tailwind CSS
-- Web Speech API (SpeechRecognition + SpeechSynthesis)
-- Google Gemini (`gemini-1.5-flash`)
+- API Routes (backend aggregation)
 
 ## Como rodar
 
@@ -24,11 +21,37 @@ Defina no `.env.local`:
 
 ```env
 NEXT_PUBLIC_GEMINI_API_KEY=sua_chave_aqui
+YOUTUBE_DATA_API_KEY=sua_chave_youtube_data_api_v3
 ```
 
-## Fluxo de uso
+## Radar IA
 
-Usuário fala no microfone, o app transcreve em `pt-BR`, envia o contexto para o Gemini e o ENIGMA responde com voz sintetizada também em `pt-BR`.
+- Endpoint: `/api/radar-ia?query=...&type=all|youtube|news|instagram&range=24h|7d|30d`
+- Implementação backend: `functions/api/radar-ia.js` (Cloudflare Pages Function)
+- Cache server-side: 12 minutos
+- Timeout por fonte: 4s (graceful degradation)
+- Fallback Instagram sem scraping (link oficial do perfil recomendado)
+
+### Fontes do Radar IA
+
+Configuradas em `app/api/radar-ia/route.ts` no array `NEWS_FEEDS`.
+
+- OpenAI Blog
+- Google AI Blog
+- Anthropic News
+- Hugging Face Blog
+- The Verge AI
+
+Para adicionar/trocar fontes:
+1. Edite `NEWS_FEEDS` com nome + URL RSS/Atom.
+2. Mantenha domínio confiável.
+3. Teste com `npm run build`.
+
+### Variáveis em produção (Cloudflare)
+
+No projeto Cloudflare Pages, configure:
+
+- `YOUTUBE_DATA_API_KEY`
 
 ## Build
 

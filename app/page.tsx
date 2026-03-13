@@ -10,6 +10,7 @@ import {
   ProjectCard,
   ScreenshotMockup,
 } from '@/app/components/portfolio/PortfolioBlocks';
+import { RadarIaSection } from '@/app/components/radar-ia/RadarIaSection';
 import {
   featuredProjects,
   productOffers,
@@ -20,6 +21,7 @@ import {
   LayoutGrid,
   Layers3,
   Mail,
+  RadioTower,
   Rocket,
 } from 'lucide-react';
 import { useState } from 'react';
@@ -39,6 +41,11 @@ const portfolioLinks = [
     label: 'Produtos',
     href: '#produtos',
     icon: <LayoutGrid className='h-4 w-4 text-[#9ca3af]' />,
+  },
+  {
+    label: 'Radar IA',
+    href: '#radar-ia',
+    icon: <RadioTower className='h-4 w-4 text-[#9ca3af]' />,
   },
   {
     label: 'Telas',
@@ -134,6 +141,8 @@ export default function HomePage() {
                   ))}
                 </div>
               </article>
+
+              <RadarIaSection />
 
               <article id='telas' className='space-y-4'>
                 <span id='diferenciais' className='sr-only'>

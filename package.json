@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "postbuild": "rm -rf dist && cp -R out dist",
+    "postbuild": "rm -rf dist && cp -R out dist && if [ -d functions ]; then cp -R functions dist/functions; fi",
     "start": "next start",
     "lint": "next lint",
     "assets:download": "node scripts/download-images.js",
