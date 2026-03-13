@@ -72,6 +72,8 @@ export default function HomePage() {
   const stateRef = useRef<AssistantState>('booting');
   const shouldAutoListenRef = useRef(true);
   const messagesRef = useRef<ChatMessage[]>([]);
+  const restartTimerRef = useRef<number | null>(null);
+  const lastRecognitionStartRef = useRef(0);
 
   useEffect(() => {
     stateRef.current = assistantState;
@@ -101,6 +103,9 @@ export default function HomePage() {
 
     return () => {
       shouldAutoListenRef.current = false;
+      if (restartTimerRef.current) {
+        window.clearTimeout(restartTimerRef.current);
+      }
       recognitionRef.current?.stop?.();
       window.speechSynthesis?.cancel();
     };
@@ -126,13 +131,35 @@ export default function HomePage() {
       return;
     }
 
+    const now = Date.now();
+    if (now - lastRecognitionStartRef.current < 650) {
+      return;
+    }
+
     try {
+      lastRecognitionStartRef.current = now;
       recognition.start();
+      setErrorMessage('');
       setAssistantState('listening');
     } catch {
       // Recognition can throw if start is called while already active.
     }
   }, []);
+
+  const scheduleListeningRestart = useCallback(
+    (delay = 260) => {
+      if (typeof window === 'undefined') {
+        return;
+      }
+      if (restartTimerRef.current) {
+        window.clearTimeout(restartTimerRef.current);
+      }
+      restartTimerRef.current = window.setTimeout(() => {
+        startListening();
+      }, delay);
+    },
+    [startListening]
+  );
 
   const pickPremiumVoice = useCallback((voices: SpeechSynthesisVoice[]) => {
     const rankedCandidates = [
@@ -196,21 +223,21 @@ export default function HomePage() {
         }
         setAssistantState('listening');
         if (options?.resumeListening) {
-          window.setTimeout(startListening, 140);
+          scheduleListeningRestart(180);
         }
       };
 
       utterance.onerror = () => {
         setAssistantState('listening');
         if (options?.resumeListening) {
-          window.setTimeout(startListening, 180);
+          scheduleListeningRestart(260);
         }
       };
 
       setAssistantState('speaking');
       synth.speak(utterance);
     },
-    [pickPremiumVoice, startListening]
+    [pickPremiumVoice, scheduleListeningRestart]
   );
 
   const askGemini = useCallback(
@@ -314,14 +341,37 @@ export default function HomePage() {
       gotResultRef.current = true;
       const transcript = event.results?.[0]?.[0]?.transcript?.trim() ?? '';
       if (transcript) {
+        setErrorMessage('');
         void askGemini(transcript);
       } else {
-        window.setTimeout(startListening, 180);
+        scheduleListeningRestart(280);
       }
     };
 
     recognition.onerror = (event: any) => {
       const code = event?.error;
+
+      if (code === 'aborted' || code === 'no-speech') {
+        if (
+          shouldAutoListenRef.current &&
+          stateRef.current !== 'thinking' &&
+          stateRef.current !== 'speaking' &&
+          stateRef.current !== 'offline'
+        ) {
+          setErrorMessage('');
+          scheduleListeningRestart(code === 'aborted' ? 520 : 760);
+        }
+        return;
+      }
+
+      if (code === 'network') {
+        setErrorMessage('Rede instável no reconhecimento de voz. Tentando novamente...');
+        if (shouldAutoListenRef.current) {
+          scheduleListeningRestart(1300);
+        }
+        return;
+      }
+
       if (code === 'not-allowed') {
         setErrorMessage('Permita o microfone para conversa natural com ENIGMA.');
         setAssistantState('offline');
@@ -336,14 +386,10 @@ export default function HomePage() {
         return;
       }
 
-      if (code === 'no-speech') {
-        setErrorMessage('Sem voz detectada. Continue falando normalmente.');
-      } else {
-        setErrorMessage('Oscilação na captura de voz. Reiniciando escuta...');
-      }
+      setErrorMessage('Oscilação na captura de voz. Reiniciando escuta...');
 
       if (shouldAutoListenRef.current) {
-        window.setTimeout(startListening, 400);
+        scheduleListeningRestart(880);
       }
     };
 
@@ -359,13 +405,13 @@ export default function HomePage() {
         stateRef.current !== 'speaking' &&
         stateRef.current !== 'offline'
       ) {
-        window.setTimeout(startListening, 220);
+        scheduleListeningRestart(340);
       }
     };
 
     recognitionRef.current = recognition;
     return true;
-  }, [askGemini, startListening]);
+  }, [askGemini, scheduleListeningRestart]);
 
   const activateVoiceMode = useCallback(async () => {
     if (typeof window === 'undefined') {
@@ -411,8 +457,8 @@ export default function HomePage() {
     }
 
     setAssistantState('listening');
-    window.setTimeout(startListening, 180);
-  }, [setupRecognition, speakText, startListening]);
+    scheduleListeningRestart(240);
+  }, [scheduleListeningRestart, setupRecognition, speakText]);
 
   useEffect(() => {
     void activateVoiceMode();
