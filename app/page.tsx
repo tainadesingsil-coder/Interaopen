@@ -108,6 +108,68 @@ const getLocalReply = (input: string) => {
   return 'Comando recebido. Posso continuar com a próxima instrução.';
 };
 
+const WEATHER_CODE_MAP: Record<number, string> = {
+  0: 'céu limpo',
+  1: 'predomínio de sol',
+  2: 'parcialmente nublado',
+  3: 'nublado',
+  45: 'neblina',
+  48: 'névoa úmida',
+  51: 'garoa fraca',
+  53: 'garoa moderada',
+  55: 'garoa intensa',
+  56: 'garoa congelante fraca',
+  57: 'garoa congelante intensa',
+  61: 'chuva fraca',
+  63: 'chuva moderada',
+  65: 'chuva forte',
+  66: 'chuva congelante fraca',
+  67: 'chuva congelante forte',
+  71: 'neve fraca',
+  73: 'neve moderada',
+  75: 'neve forte',
+  77: 'grãos de neve',
+  80: 'pancadas de chuva fracas',
+  81: 'pancadas de chuva moderadas',
+  82: 'pancadas de chuva fortes',
+  85: 'pancadas de neve fracas',
+  86: 'pancadas de neve fortes',
+  95: 'trovoadas',
+  96: 'trovoadas com granizo fraco',
+  99: 'trovoadas com granizo forte',
+};
+
+const isWeatherIntent = (input: string) => {
+  const normalized = input.toLowerCase();
+  return (
+    normalized.includes('clima') ||
+    normalized.includes('tempo') ||
+    normalized.includes('temperatura') ||
+    normalized.includes('previsão') ||
+    normalized.includes('previsao') ||
+    normalized.includes('chuva')
+  );
+};
+
+const extractWeatherLocation = (input: string) => {
+  const normalized = input.toLowerCase();
+  if (normalized.includes('montes claros')) {
+    return 'Montes Claros, Minas Gerais, Brasil';
+  }
+
+  const afterEm = normalized.match(/\bem\s+([a-zà-ú\s'-]{3,})/i);
+  if (afterEm?.[1]) {
+    const cleaned = afterEm[1]
+      .replace(/\b(agora|hoje|amanhã|amanha|por favor)\b/gi, '')
+      .trim();
+    if (cleaned.length >= 3) {
+      return cleaned;
+    }
+  }
+
+  return 'Montes Claros, Minas Gerais, Brasil';
+};
+
 export default function HomePage() {
   const [assistantState, setAssistantState] = useState<AssistantState>('booting');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -287,6 +349,54 @@ export default function HomePage() {
     [pickPremiumVoice, scheduleListeningRestart]
   );
 
+  const getLiveWeatherReply = useCallback(async (input: string) => {
+    try {
+      const locationQuery = extractWeatherLocation(input);
+      const geoUrl =
+        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
+          locationQuery
+        )}&count=1&language=pt&format=json`;
+      const geoResponse = await fetch(geoUrl);
+      if (!geoResponse.ok) {
+        return null;
+      }
+
+      const geoPayload = await geoResponse.json();
+      const result = geoPayload?.results?.[0];
+      if (!result) {
+        return null;
+      }
+
+      const weatherUrl =
+        `https://api.open-meteo.com/v1/forecast?latitude=${result.latitude}&longitude=${result.longitude}` +
+        '&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m' +
+        '&timezone=auto';
+      const weatherResponse = await fetch(weatherUrl);
+      if (!weatherResponse.ok) {
+        return null;
+      }
+
+      const weatherPayload = await weatherResponse.json();
+      const current = weatherPayload?.current;
+      if (!current) {
+        return null;
+      }
+
+      const condition =
+        WEATHER_CODE_MAP[current.weather_code as number] ?? 'condições variáveis';
+      const city = result.name as string;
+      const region = result.admin1 ? `, ${result.admin1}` : '';
+
+      return `Em ${city}${region}, agora está ${Math.round(
+        current.temperature_2m
+      )} graus, sensação de ${Math.round(
+        current.apparent_temperature
+      )} graus, com ${condition}.`;
+    } catch {
+      return null;
+    }
+  }, []);
+
   const askGemini = useCallback(
     async (inputText: string) => {
       const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
@@ -294,6 +404,20 @@ export default function HomePage() {
       if (!cleanedInput) {
         startListening();
         return;
+      }
+
+      if (isWeatherIntent(cleanedInput)) {
+        const weatherReply = await getLiveWeatherReply(cleanedInput);
+        if (weatherReply) {
+          setErrorMessage('');
+          setMessages((previous) => [
+            ...previous,
+            { role: 'user', text: cleanedInput },
+            { role: 'model', text: weatherReply },
+          ]);
+          speakText(weatherReply, { resumeListening: true });
+          return;
+        }
       }
 
       if (!apiKey) {
@@ -355,7 +479,7 @@ export default function HomePage() {
         speakText(localReply, { resumeListening: true });
       }
     },
-    [speakText, startListening]
+    [getLiveWeatherReply, speakText, startListening]
   );
 
   const setupRecognition = useCallback(() => {
@@ -413,7 +537,7 @@ export default function HomePage() {
       }
 
       if (code === 'network') {
-        setErrorMessage('Rede instável no reconhecimento de voz. Tentando novamente...');
+        setErrorMessage('');
         if (shouldAutoListenRef.current) {
           scheduleListeningRestart(1300);
         }
@@ -434,7 +558,7 @@ export default function HomePage() {
         return;
       }
 
-      setErrorMessage('Oscilação na captura de voz. Reiniciando escuta...');
+      setErrorMessage('');
 
       if (shouldAutoListenRef.current) {
         scheduleListeningRestart(880);
