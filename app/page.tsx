@@ -64,11 +64,20 @@ const getBootMessage = () => {
   const hour = new Date().getHours();
   const greeting =
     hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite';
-  return `${greeting}. ENIGMA online em modo de voz natural.`;
+  return `${greeting}, Estrela da Manhã. Quais instruções para agora?`;
 };
 
+const stripAccents = (value: string) =>
+  value.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+const normalizeIntentText = (input: string) =>
+  stripAccents(input.toLowerCase())
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
 const getLocalReply = (input: string) => {
-  const normalized = input.toLowerCase();
+  const normalized = normalizeIntentText(input);
   const hour = new Date().getHours();
   const greeting =
     hour < 12 ? 'bom dia' : hour < 18 ? 'boa tarde' : 'boa noite';
@@ -87,24 +96,25 @@ const getLocalReply = (input: string) => {
     normalized.includes('boa tarde') ||
     normalized.includes('boa noite')
   ) {
-    return `${greeting}. Estou online e atento a você.`;
+    return `${greeting}. Estou online e pronto para executar suas instruções.`;
   }
 
   if (
     normalized.includes('hora') ||
     normalized.includes('horas') ||
-    normalized.includes('que horas')
+    normalized.includes('que horas') ||
+    normalized.includes('horario')
   ) {
     const time = new Date().toLocaleTimeString('pt-BR', {
       hour: '2-digit',
       minute: '2-digit',
     });
-    return `Agora são ${time}. Seguimos em modo de execução.`;
+    return `Agora são ${time}.`;
   }
 
   if (normalized.includes('data') || normalized.includes('dia de hoje')) {
     const date = new Date().toLocaleDateString('pt-BR');
-    return `Hoje é ${date}. Posso continuar com a próxima tarefa.`;
+    return `Hoje é ${date}.`;
   }
 
   if (
@@ -117,6 +127,25 @@ const getLocalReply = (input: string) => {
   }
 
   return 'Comando recebido. Posso continuar com a próxima instrução.';
+};
+
+const isLocalIntent = (input: string) => {
+  const normalized = normalizeIntentText(input);
+  return (
+    normalized.includes('tudo bem') ||
+    normalized.includes('como vai') ||
+    normalized.includes('como voce esta') ||
+    normalized.includes('bom dia') ||
+    normalized.includes('boa tarde') ||
+    normalized.includes('boa noite') ||
+    normalized.includes('que horas') ||
+    normalized.includes('hora') ||
+    normalized.includes('horario') ||
+    normalized.includes('data') ||
+    normalized.includes('dia de hoje') ||
+    normalized.includes('quem e voce') ||
+    normalized.includes('o que voce faz')
+  );
 };
 
 const normalizeSpokenInput = (input: string) => {
@@ -172,15 +201,30 @@ const WEATHER_CODE_MAP: Record<number, string> = {
   99: 'trovoadas com granizo forte',
 };
 
+const isTimeIntent = (input: string) => {
+  const normalized = normalizeIntentText(input);
+  return (
+    normalized.includes('que horas') ||
+    normalized.includes('hora') ||
+    normalized.includes('horario')
+  );
+};
+
 const isWeatherIntent = (input: string) => {
-  const normalized = input.toLowerCase();
+  const normalized = normalizeIntentText(input);
+  if (isTimeIntent(input)) {
+    return false;
+  }
   return (
     normalized.includes('clima') ||
-    normalized.includes('tempo') ||
     normalized.includes('temperatura') ||
-    normalized.includes('previsão') ||
     normalized.includes('previsao') ||
-    normalized.includes('chuva')
+    normalized.includes('chuva') ||
+    normalized.includes('frio') ||
+    normalized.includes('calor') ||
+    normalized.includes('vento') ||
+    normalized.includes('como ta o tempo') ||
+    normalized.includes('como esta o tempo')
   );
 };
 
@@ -458,6 +502,18 @@ export default function HomePage() {
         return;
       }
 
+      if (isLocalIntent(cleanedInput)) {
+        const localReply = getLocalReply(cleanedInput);
+        setErrorMessage('');
+        setMessages((previous) => [
+          ...previous,
+          { role: 'user', text: cleanedInput },
+          { role: 'model', text: localReply },
+        ]);
+        speakText(localReply, { resumeListening: true });
+        return;
+      }
+
       if (isWeatherIntent(cleanedInput)) {
         const weatherReply = await getLiveWeatherReply(cleanedInput);
         if (weatherReply) {
@@ -535,7 +591,7 @@ export default function HomePage() {
         speakText(reply, { resumeListening: true });
       } catch {
         const localReply = getLocalReply(cleanedInput);
-        setErrorMessage('Usando modo local de inteligência.');
+        setErrorMessage('');
         setMessages((previous) => [...previous, { role: 'model', text: localReply }]);
         speakText(localReply, { resumeListening: true });
       }
