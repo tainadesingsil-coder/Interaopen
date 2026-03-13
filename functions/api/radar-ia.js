@@ -44,10 +44,15 @@ const htmlDecode = (value) =>
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")
     .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>');
+    .replace(/&gt;/g, '>')
+    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number.parseInt(code, 10)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, code) =>
+      String.fromCharCode(Number.parseInt(code, 16))
+    );
 
 const stripHtml = (value) =>
-  htmlDecode(value.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1').replace(/<[^>]+>/g, ' '))
+  htmlDecode(value.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1'))
+    .replace(/<[^>]+>/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
 
