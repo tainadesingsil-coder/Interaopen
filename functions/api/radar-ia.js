@@ -82,19 +82,22 @@ const CURATED_INSTAGRAM_PUBLICATIONS = [
     id: 'instagram-hollyfield-ia-posts',
     title: 'Publicações do perfil hollyfield.ia',
     description: 'Acesse as publicações recentes do perfil recomendado de IA.',
-    url: 'https://www.instagram.com/hollyfield.ia/',
+    url: 'https://www.instagram.com/hollyfield.ia?igsh=MWJxYWczbmdmYm02aw==',
+    ctaLabel: 'Ver posts',
   },
   {
     id: 'instagram-hollyfield-ia-reels',
     title: 'Reels de IA do hollyfield.ia',
     description: 'Veja vídeos curtos e insights práticos sobre inteligência artificial.',
     url: 'https://www.instagram.com/hollyfield.ia/reels/',
+    ctaLabel: 'Ver reels',
   },
   {
     id: 'instagram-hollyfield-ia-tagged',
     title: 'Conteúdos em destaque de hollyfield.ia',
     description: 'Explore conteúdos e menções do perfil dentro do Instagram.',
     url: 'https://www.instagram.com/hollyfield.ia/tagged/',
+    ctaLabel: 'Ver publicação',
   },
 ];
 
@@ -337,17 +340,27 @@ const buildBalancedAll = (results) => {
   return [...topYoutube, ...topNews, ...topInstagram];
 };
 
-const buildCuratedYoutubeItems = (query) =>
-  CURATED_YOUTUBE_VIDEOS.map((video, index) => {
-    const description = `Vídeo recomendado para aprender IA, automação e aplicações em negócios.`;
-    const baseScore = 90 - index;
+const buildCuratedYoutubeItems = (query, range) => {
+  const offsetByRange = {
+    '24h': 3,
+    '7d': 0,
+    '30d': 6,
+  };
+  const offset = offsetByRange[range] || 0;
+  const rotated = CURATED_YOUTUBE_VIDEOS.map(
+    (_, index) => CURATED_YOUTUBE_VIDEOS[(index + offset) % CURATED_YOUTUBE_VIDEOS.length]
+  );
+
+  return rotated.map((video, index) => {
+    const description = `Sugestão da sua base para aprender IA, automação e aplicações em negócios.`;
+    const baseScore = 12 - index;
     return {
       id: `yt-${video.id}`,
       kind: 'youtube',
       title: video.title,
       description,
       url: video.url,
-      source: 'YouTube Curadoria Codexion',
+      source: 'YouTube Sugestão da Base',
       publishedAt: null,
       thumbnail: `https://i.ytimg.com/vi/${video.id}/hqdefault.jpg`,
       channel: video.channel,
@@ -355,10 +368,11 @@ const buildCuratedYoutubeItems = (query) =>
       ctaLabel: 'Assistir',
     };
   });
+};
 
 const fetchYoutubeItems = async (query, range, env) => {
   const apiKey = (env.YOUTUBE_DATA_API_KEY || '').trim();
-  const curatedItems = buildCuratedYoutubeItems(query);
+  const curatedItems = buildCuratedYoutubeItems(query, range);
   if (!apiKey) return curatedItems;
 
   const publishedAfter = new Date(rangeCutoffMs(range)).toISOString();
@@ -443,6 +457,11 @@ const fetchYoutubeItems = async (query, range, env) => {
       .filter((item) => isAiRelated(`${item.title} ${item.description} ${item.channel || ''}`))
   );
 
+  if (mapped.length === 0) {
+    return sortByScoreAndDate(curatedItems).slice(0, 30);
+  }
+
+  // Keep your curated base as suggestion, but prioritize real-time API results.
   return sortByScoreAndDate(dedupeById([...mapped, ...curatedItems])).slice(0, 30);
 };
 
@@ -499,7 +518,7 @@ const fetchInstagramItems = async (query) => {
     channel: '@hollyfield.ia',
     score:
       50 - index + computeScore(`${publication.title} hollyfield ia instagram`, publication.description, null, query),
-    ctaLabel: 'Abrir no Instagram',
+    ctaLabel: publication.ctaLabel,
   }));
 };
 
