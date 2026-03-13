@@ -260,6 +260,8 @@ export default function HomePage() {
   const messagesRef = useRef<ChatMessage[]>([]);
   const restartTimerRef = useRef<number | null>(null);
   const lastRecognitionStartRef = useRef(0);
+  const isRecognitionActiveRef = useRef(false);
+  const speechGuardTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     stateRef.current = assistantState;
@@ -292,6 +294,9 @@ export default function HomePage() {
       if (restartTimerRef.current) {
         window.clearTimeout(restartTimerRef.current);
       }
+      if (speechGuardTimerRef.current) {
+        window.clearTimeout(speechGuardTimerRef.current);
+      }
       recognitionRef.current?.stop?.();
       window.speechSynthesis?.cancel();
     };
@@ -315,7 +320,11 @@ export default function HomePage() {
 
   const startListening = useCallback(() => {
     const recognition = recognitionRef.current;
-    if (!recognition || !shouldAutoListenRef.current) {
+    if (
+      !recognition ||
+      !shouldAutoListenRef.current ||
+      isRecognitionActiveRef.current
+    ) {
       return;
     }
 
@@ -338,7 +347,14 @@ export default function HomePage() {
       setErrorMessage('');
       setAssistantState('listening');
     } catch {
-      // Recognition can throw if start is called while already active.
+      if (typeof window !== 'undefined') {
+        if (restartTimerRef.current) {
+          window.clearTimeout(restartTimerRef.current);
+        }
+        restartTimerRef.current = window.setTimeout(() => {
+          startListening();
+        }, 900);
+      }
     }
   }, []);
 
@@ -409,11 +425,18 @@ export default function HomePage() {
         utterance.voice = voice;
       }
 
+      if (speechGuardTimerRef.current) {
+        window.clearTimeout(speechGuardTimerRef.current);
+      }
+
       utterance.onstart = () => {
         setAssistantState('speaking');
       };
 
       utterance.onend = () => {
+        if (speechGuardTimerRef.current) {
+          window.clearTimeout(speechGuardTimerRef.current);
+        }
         if (options?.isBoot && typeof window !== 'undefined') {
           window.sessionStorage.setItem(BOOT_STORAGE_KEY, '1');
         }
@@ -424,6 +447,9 @@ export default function HomePage() {
       };
 
       utterance.onerror = () => {
+        if (speechGuardTimerRef.current) {
+          window.clearTimeout(speechGuardTimerRef.current);
+        }
         setAssistantState('listening');
         if (options?.resumeListening) {
           scheduleListeningRestart(260);
@@ -432,6 +458,12 @@ export default function HomePage() {
 
       setAssistantState('speaking');
       synth.speak(utterance);
+
+      if (options?.resumeListening) {
+        speechGuardTimerRef.current = window.setTimeout(() => {
+          scheduleListeningRestart(320);
+        }, 10000);
+      }
     },
     [pickPremiumVoice, scheduleListeningRestart]
   );
@@ -503,6 +535,7 @@ export default function HomePage() {
       }
 
       if (isLocalIntent(cleanedInput)) {
+        setAssistantState('thinking');
         const localReply = getLocalReply(cleanedInput);
         setErrorMessage('');
         setMessages((previous) => [
@@ -515,6 +548,7 @@ export default function HomePage() {
       }
 
       if (isWeatherIntent(cleanedInput)) {
+        setAssistantState('thinking');
         const weatherReply = await getLiveWeatherReply(cleanedInput);
         if (weatherReply) {
           setErrorMessage('');
@@ -529,6 +563,7 @@ export default function HomePage() {
       }
 
       if (!apiKey) {
+        setAssistantState('thinking');
         const localReply = getLocalReply(cleanedInput);
         setErrorMessage('');
         setMessages((previous) => [
@@ -619,6 +654,7 @@ export default function HomePage() {
     recognition.maxAlternatives = 1;
 
     recognition.onstart = () => {
+      isRecognitionActiveRef.current = true;
       setAssistantState('listening');
     };
 
@@ -628,6 +664,10 @@ export default function HomePage() {
       }
       gotResultRef.current = true;
       const resultIndex = event.resultIndex ?? 0;
+      const isFinal = event.results?.[resultIndex]?.isFinal ?? true;
+      if (!isFinal) {
+        return;
+      }
       const transcript =
         event.results?.[resultIndex]?.[0]?.transcript?.trim() ??
         event.results?.[0]?.[0]?.transcript?.trim() ??
@@ -641,6 +681,7 @@ export default function HomePage() {
     };
 
     recognition.onerror = (event: any) => {
+      isRecognitionActiveRef.current = false;
       const code = event?.error;
 
       if (code === 'aborted' || code === 'no-speech') {
@@ -686,10 +727,9 @@ export default function HomePage() {
     };
 
     recognition.onend = () => {
-      if (gotResultRef.current) {
-        gotResultRef.current = false;
-        return;
-      }
+      isRecognitionActiveRef.current = false;
+      const hadResult = gotResultRef.current;
+      gotResultRef.current = false;
 
       if (
         shouldAutoListenRef.current &&
@@ -697,7 +737,7 @@ export default function HomePage() {
         stateRef.current !== 'speaking' &&
         stateRef.current !== 'offline'
       ) {
-        scheduleListeningRestart(340);
+        scheduleListeningRestart(hadResult ? 260 : 360);
       }
     };
 
