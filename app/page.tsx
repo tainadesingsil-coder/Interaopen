@@ -35,6 +35,8 @@ const GEMINI_ENDPOINT =
   'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
 const STORAGE_KEY = 'enigma_messages_v2';
 const BOOT_STORAGE_KEY = 'enigma_booted_v2';
+const GEMINI_TIMEOUT_MS = 12000;
+const FALLBACK_PUBLIC_GEMINI_KEY = 'AIzaSyAvso1Z2xzjp7jt5E-keW8BNaLga0jQYnA';
 
 const STATE_LABEL: Record<AssistantState, string> = {
   booting: 'Inicializando...',
@@ -105,7 +107,38 @@ const getLocalReply = (input: string) => {
     return `Hoje é ${date}. Posso continuar com a próxima tarefa.`;
   }
 
+  if (
+    normalized.includes('quem é você') ||
+    normalized.includes('quem e voce') ||
+    normalized.includes('o que você faz') ||
+    normalized.includes('o que voce faz')
+  ) {
+    return 'Sou o ENIGMA, seu assistente de voz. Entendo comandos naturais e respondo com precisão.';
+  }
+
   return 'Comando recebido. Posso continuar com a próxima instrução.';
+};
+
+const normalizeSpokenInput = (input: string) => {
+  return input
+    .replace(/^[,.\s]+|[,.\s]+$/g, '')
+    .replace(/^enigma[\s,:-]*/i, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+};
+
+const fetchWithTimeout = async (
+  url: string,
+  init: RequestInit,
+  timeoutMs: number
+) => {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
 };
 
 const WEATHER_CODE_MAP: Record<number, string> = {
@@ -225,6 +258,16 @@ export default function HomePage() {
       window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
     }
   }, [messages]);
+
+  useEffect(() => {
+    if (!errorMessage || typeof window === 'undefined') {
+      return;
+    }
+    const timer = window.setTimeout(() => {
+      setErrorMessage('');
+    }, 2200);
+    return () => window.clearTimeout(timer);
+  }, [errorMessage]);
 
   const startListening = useCallback(() => {
     const recognition = recognitionRef.current;
@@ -356,7 +399,11 @@ export default function HomePage() {
         `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
           locationQuery
         )}&count=1&language=pt&format=json`;
-      const geoResponse = await fetch(geoUrl);
+      const geoResponse = await fetchWithTimeout(
+        geoUrl,
+        { method: 'GET' },
+        GEMINI_TIMEOUT_MS
+      );
       if (!geoResponse.ok) {
         return null;
       }
@@ -371,7 +418,11 @@ export default function HomePage() {
         `https://api.open-meteo.com/v1/forecast?latitude=${result.latitude}&longitude=${result.longitude}` +
         '&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m' +
         '&timezone=auto';
-      const weatherResponse = await fetch(weatherUrl);
+      const weatherResponse = await fetchWithTimeout(
+        weatherUrl,
+        { method: 'GET' },
+        GEMINI_TIMEOUT_MS
+      );
       if (!weatherResponse.ok) {
         return null;
       }
@@ -399,8 +450,9 @@ export default function HomePage() {
 
   const askGemini = useCallback(
     async (inputText: string) => {
-      const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-      const cleanedInput = inputText.trim();
+      const apiKey =
+        process.env.NEXT_PUBLIC_GEMINI_API_KEY || FALLBACK_PUBLIC_GEMINI_KEY;
+      const cleanedInput = normalizeSpokenInput(inputText);
       if (!cleanedInput) {
         startListening();
         return;
@@ -440,21 +492,30 @@ export default function HomePage() {
 
       try {
         const temporalContext = getTemporalContext();
-        const response = await fetch(`${GEMINI_ENDPOINT}?key=${apiKey}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            systemInstruction: {
-              parts: [{ text: SYSTEM_PROMPT }, { text: temporalContext }],
+        const response = await fetchWithTimeout(
+          `${GEMINI_ENDPOINT}?key=${apiKey}`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
             },
-            contents: conversation.map((message) => ({
-              role: message.role,
-              parts: [{ text: message.text }],
-            })),
-          }),
-        });
+            body: JSON.stringify({
+              systemInstruction: {
+                parts: [{ text: SYSTEM_PROMPT }, { text: temporalContext }],
+              },
+              generationConfig: {
+                temperature: 0.7,
+                topP: 0.9,
+                maxOutputTokens: 180,
+              },
+              contents: conversation.map((message) => ({
+                role: message.role,
+                parts: [{ text: message.text }],
+              })),
+            }),
+          },
+          GEMINI_TIMEOUT_MS
+        );
 
         if (!response.ok) {
           throw new Error(`Gemini respondeu com status ${response.status}`);
@@ -474,7 +535,7 @@ export default function HomePage() {
         speakText(reply, { resumeListening: true });
       } catch {
         const localReply = getLocalReply(cleanedInput);
-        setErrorMessage('');
+        setErrorMessage('Usando modo local de inteligência.');
         setMessages((previous) => [...previous, { role: 'model', text: localReply }]);
         speakText(localReply, { resumeListening: true });
       }
@@ -498,7 +559,7 @@ export default function HomePage() {
     const recognition = new RecognitionCtor();
     recognition.lang = 'pt-BR';
     recognition.interimResults = false;
-    recognition.continuous = true;
+    recognition.continuous = false;
     recognition.maxAlternatives = 1;
 
     recognition.onstart = () => {
@@ -510,10 +571,13 @@ export default function HomePage() {
         return;
       }
       gotResultRef.current = true;
-      const transcript = event.results?.[0]?.[0]?.transcript?.trim() ?? '';
+      const resultIndex = event.resultIndex ?? 0;
+      const transcript =
+        event.results?.[resultIndex]?.[0]?.transcript?.trim() ??
+        event.results?.[0]?.[0]?.transcript?.trim() ??
+        '';
       if (transcript) {
         setErrorMessage('');
-        recognition.stop();
         void askGemini(transcript);
       } else {
         scheduleListeningRestart(280);
