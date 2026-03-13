@@ -8,7 +8,7 @@ type Props = {
 export const FinalCta = ({ copy, whatsappLink }: Props) => (
   <section
     id='experiencia'
-    className='section-shell section-base section-glow section-divider scroll-mt-24'
+    className='section-shell section-divider scroll-mt-24 bg-black'
   >
     <div className='section-inner'>
       <div className='flex flex-col items-center gap-6 text-center'>
