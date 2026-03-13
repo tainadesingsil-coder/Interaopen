@@ -224,6 +224,10 @@ export default function HomePage() {
 
   const recognitionRef = useRef<any>(null);
   const recognitionActiveRef = useRef(false);
+  const lastHeardTextRef = useRef('');
+  const recognitionFailuresRef = useRef(0);
+  const recorderAvailableRef = useRef(false);
+  const listeningStartedAtRef = useRef(0);
 
   const streamRef = useRef<MediaStream | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
@@ -233,6 +237,7 @@ export default function HomePage() {
   const restartTimerRef = useRef<number | null>(null);
   const recordStopTimerRef = useRef<number | null>(null);
   const speechGuardRef = useRef<number | null>(null);
+  const listeningWatchdogRef = useRef<number | null>(null);
 
   useEffect(() => {
     stateRef.current = assistantState;
@@ -336,6 +341,36 @@ export default function HomePage() {
     },
     []
   );
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    if (listeningWatchdogRef.current) {
+      window.clearInterval(listeningWatchdogRef.current);
+    }
+
+    listeningWatchdogRef.current = window.setInterval(() => {
+      if (!shouldListenRef.current) {
+        return;
+      }
+      if (stateRef.current !== 'listening') {
+        return;
+      }
+      const elapsed = Date.now() - listeningStartedAtRef.current;
+      if (elapsed > 9000) {
+        stopCapture();
+        scheduleCapture(120);
+      }
+    }, 1800) as unknown as number;
+
+    return () => {
+      if (listeningWatchdogRef.current) {
+        window.clearInterval(listeningWatchdogRef.current);
+      }
+    };
+  }, [scheduleCapture, stopCapture]);
 
   const pickVoice = useCallback((voices: SpeechSynthesisVoice[]) => {
     const preferred = [
@@ -646,6 +681,7 @@ export default function HomePage() {
 
     recognition.onstart = () => {
       recognitionActiveRef.current = true;
+      listeningStartedAtRef.current = Date.now();
       setAssistantState('listening');
       setErrorMessage('');
     };
@@ -661,6 +697,8 @@ export default function HomePage() {
         event.results?.[0]?.[0]?.transcript?.trim() ??
         '';
       if (transcript) {
+        recognitionFailuresRef.current = 0;
+        lastHeardTextRef.current = '';
         void askGemini(transcript);
       } else {
         scheduleCapture(320);
@@ -671,9 +709,28 @@ export default function HomePage() {
       recognitionActiveRef.current = false;
       const code = event?.error;
       if (code === 'not-allowed') {
+        if (recorderAvailableRef.current) {
+          captureModeRef.current = 'recorder';
+          setErrorMessage('Ajustando para modo de voz alternativo.');
+          scheduleCapture(240);
+          return;
+        }
         return;
       }
       if (code === 'audio-capture') {
+        if (recorderAvailableRef.current) {
+          captureModeRef.current = 'recorder';
+          setErrorMessage('Mudando para captura alternativa.');
+          scheduleCapture(240);
+          return;
+        }
+        return;
+      }
+      recognitionFailuresRef.current += 1;
+      if (recognitionFailuresRef.current >= 3 && recorderAvailableRef.current) {
+        captureModeRef.current = 'recorder';
+        setErrorMessage('Ajustando captura para modo mais estável.');
+        scheduleCapture(280);
         return;
       }
       if (shouldListenRef.current) {
@@ -683,6 +740,12 @@ export default function HomePage() {
 
     recognition.onend = () => {
       recognitionActiveRef.current = false;
+      if (lastHeardTextRef.current) {
+        const text = lastHeardTextRef.current;
+        lastHeardTextRef.current = '';
+        void askGemini(text);
+        return;
+      }
       if (
         shouldListenRef.current &&
         stateRef.current !== 'thinking' &&
@@ -722,6 +785,7 @@ export default function HomePage() {
 
     recorder.onstart = () => {
       recorderActiveRef.current = true;
+      listeningStartedAtRef.current = Date.now();
       setAssistantState('listening');
       setErrorMessage('');
     };
@@ -777,7 +841,7 @@ export default function HomePage() {
     };
 
     recorderRef.current = recorder;
-    captureModeRef.current = 'recorder';
+    recorderAvailableRef.current = true;
     return true;
   }, [askGemini, scheduleCapture, transcribeWithGemini]);
 
@@ -789,6 +853,8 @@ export default function HomePage() {
     shouldListenRef.current = true;
     setErrorMessage('');
     setAssistantState('booting');
+    captureModeRef.current = 'none';
+    recorderAvailableRef.current = false;
 
     if (!navigator.mediaDevices?.getUserMedia) {
       setAssistantState('offline');
@@ -807,16 +873,16 @@ export default function HomePage() {
       return;
     }
 
-    let initialized = initSpeechRecognition();
-    if (!initialized) {
-      initialized = await initRecorderFallback();
-    }
+    const speechReady = initSpeechRecognition();
+    const recorderReady = await initRecorderFallback();
 
-    if (!initialized) {
+    if (!speechReady && !recorderReady) {
       setAssistantState('offline');
       setErrorMessage('Não consegui ativar a captura de voz neste navegador.');
       return;
     }
+
+    captureModeRef.current = speechReady ? 'speech-recognition' : 'recorder';
 
     const booted = window.sessionStorage.getItem(BOOT_STORAGE_KEY);
     if (!booted) {
@@ -853,6 +919,14 @@ export default function HomePage() {
     const onGesture = () => {
       if (stateRef.current === 'offline') {
         void activate();
+        return;
+      }
+      if (
+        stateRef.current !== 'thinking' &&
+        stateRef.current !== 'speaking' &&
+        shouldListenRef.current
+      ) {
+        scheduleCapture(20);
       }
     };
 
@@ -870,12 +944,15 @@ export default function HomePage() {
       if (speechGuardRef.current) {
         window.clearTimeout(speechGuardRef.current);
       }
+      if (listeningWatchdogRef.current) {
+        window.clearTimeout(listeningWatchdogRef.current);
+      }
       stopCapture();
       streamRef.current?.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
       window.speechSynthesis?.cancel();
     };
-  }, [activate, stopCapture]);
+  }, [activate, scheduleCapture, stopCapture]);
 
   return (
     <main className='enigma-shell' id='main-content'>
