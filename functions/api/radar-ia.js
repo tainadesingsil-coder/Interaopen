@@ -143,6 +143,30 @@ const CURATED_YOUTUBE_VIDEOS = [
     channel: 'Canal recomendado',
     url: 'https://www.youtube.com/watch?v=CNjaG4-UxAo',
   },
+  {
+    id: 'DjuZGCwWUhA',
+    title: 'Conteúdo recomendado de IA #17',
+    channel: 'Canal recomendado',
+    url: 'https://www.youtube.com/watch?v=DjuZGCwWUhA',
+  },
+  {
+    id: 'oTptR7O0KNI',
+    title: 'Conteúdo recomendado de IA #18',
+    channel: 'Canal recomendado',
+    url: 'https://www.youtube.com/watch?v=oTptR7O0KNI',
+  },
+  {
+    id: '4gR6v5z2ObQ',
+    title: 'Conteúdo recomendado de IA #19',
+    channel: 'Canal recomendado',
+    url: 'https://www.youtube.com/watch?v=4gR6v5z2ObQ',
+  },
+  {
+    id: 'Lb9AUZdxk6Y',
+    title: 'Conteúdo recomendado de IA #20',
+    channel: 'Canal recomendado',
+    url: 'https://www.youtube.com/watch?v=Lb9AUZdxk6Y',
+  },
 ];
 const CURATED_INSTAGRAM_PUBLICATIONS = [
   {
