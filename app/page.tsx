@@ -6,18 +6,15 @@ import {
   SidebarLink,
 } from '@/app/components/Sidebar';
 import {
-  ProductCard,
   ProjectCard,
 } from '@/app/components/portfolio/PortfolioBlocks';
 import { RadarIaSection } from '@/app/components/radar-ia/RadarIaSection';
 import {
   featuredProjects,
-  productOffers,
 } from '@/app/data/portfolio';
 import {
   GalleryVerticalEnd,
   Home,
-  LayoutGrid,
   RadioTower,
 } from 'lucide-react';
 import { useState } from 'react';
@@ -32,11 +29,6 @@ const portfolioLinks = [
     label: 'Destaques',
     href: '#projetos',
     icon: <GalleryVerticalEnd className='h-4 w-4 text-[#9ca3af]' />,
-  },
-  {
-    label: 'Produtos',
-    href: '#produtos',
-    icon: <LayoutGrid className='h-4 w-4 text-[#9ca3af]' />,
   },
   {
     label: 'Radar IA',
@@ -98,23 +90,6 @@ export default function HomePage() {
                 <div className='grid gap-4 lg:grid-cols-3'>
                   {featuredProjects.map((project) => (
                     <ProjectCard key={project.id} project={project} />
-                  ))}
-                </div>
-              </article>
-
-              <article id='produtos' className='space-y-4'>
-                <span id='servicos' className='sr-only'>
-                  serviços
-                </span>
-                <header className='space-y-1'>
-                  <p className='text-xs uppercase tracking-[0.18em] text-[#9ca3af]'>Oferta Codexion</p>
-                  <h3 className='text-xl font-bold text-white md:text-2xl'>
-                    Produtos que entregamos
-                  </h3>
-                </header>
-                <div className='grid gap-4 sm:grid-cols-2 xl:grid-cols-3'>
-                  {productOffers.map((offer) => (
-                    <ProductCard key={offer.id} offer={offer} />
                   ))}
                 </div>
               </article>
