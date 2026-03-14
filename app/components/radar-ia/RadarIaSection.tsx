@@ -8,7 +8,7 @@ import {
   type RadarResponsePayload,
   type RadarType,
 } from '@/app/lib/radar-ia/types';
-import { Bot, Code2, ExternalLink, Megaphone, Newspaper, PlayCircle, Search } from 'lucide-react';
+import { Bot, Code2, ExternalLink, Megaphone, Newspaper, PlayCircle, Search, X } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 const QUICK_CHIPS = [
@@ -68,6 +68,23 @@ const useDebouncedValue = (value: string, delay = 450) => {
   return debounced;
 };
 
+const extractYoutubeId = (url: string) => {
+  try {
+    const parsed = new URL(url);
+    if (parsed.hostname.includes('youtu.be')) {
+      return parsed.pathname.replace('/', '').trim();
+    }
+    return parsed.searchParams.get('v') || '';
+  } catch {
+    return '';
+  }
+};
+
+const extractInstagramCode = (url: string) => {
+  const match = url.match(/\/p\/([a-zA-Z0-9_-]+)/);
+  return match?.[1] || '';
+};
+
 function SkeletonCard() {
   return (
     <div className='animate-pulse rounded-[18px] border border-white/10 bg-[#0b0b0f] p-4 shadow-[0_10px_24px_rgba(0,0,0,0.2)] sm:rounded-2xl md:p-5'>
@@ -80,7 +97,7 @@ function SkeletonCard() {
   );
 }
 
-function RadarCard({ item }: { item: RadarItem }) {
+function RadarCard({ item, onOpen }: { item: RadarItem; onOpen: (item: RadarItem) => void }) {
   const icon =
     item.kind === 'youtube' ? (
       <PlayCircle className='h-4 w-4 text-[#C6FF2E]' />
@@ -117,16 +134,100 @@ function RadarCard({ item }: { item: RadarItem }) {
         {item.channel ? `${item.source} · ${item.channel}` : item.source}
       </p>
 
-      <a
-        href={item.url}
-        target='_blank'
-        rel='noreferrer'
+      <button
+        type='button'
+        onClick={() => onOpen(item)}
         className='mt-5 inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-3.5 py-2.5 text-xs font-semibold text-white transition-all duration-200 ease-out hover:border-[#C6FF2E]/60 hover:text-[#C6FF2E] hover:shadow-[0_0_0_1px_rgba(198,255,46,0.14)] sm:w-fit'
       >
-        {item.ctaLabel}
+        Ver no Radar
         <ExternalLink className='h-3.5 w-3.5' />
-      </a>
+      </button>
     </article>
+  );
+}
+
+function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }) {
+  const youtubeId = item.kind === 'youtube' ? extractYoutubeId(item.url) : '';
+  const instagramCode = item.kind === 'instagram' ? extractInstagramCode(item.url) : '';
+  const readerUrl = `/api/radar-reader?url=${encodeURIComponent(item.url)}`;
+
+  useEffect(() => {
+    const handleEsc = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+    };
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', handleEsc);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', handleEsc);
+    };
+  }, [onClose]);
+
+  return (
+    <div className='fixed inset-0 z-50 bg-black/80 p-3 backdrop-blur-[2px] sm:p-5'>
+      <div className='mx-auto flex h-full w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#060608]'>
+        <header className='flex items-start justify-between gap-3 border-b border-white/10 p-4'>
+          <div>
+            <p className='text-[11px] uppercase tracking-[0.14em] text-[#9ca3af]'>
+              {item.kind === 'youtube' ? 'YouTube' : item.kind === 'news' ? 'Notícia' : 'Instagram'}
+            </p>
+            <h4 className='mt-1 line-clamp-2 text-sm font-semibold text-white sm:text-base'>{item.title}</h4>
+          </div>
+          <button
+            type='button'
+            onClick={onClose}
+            className='inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-[#9ca3af] transition hover:border-[#C6FF2E]/50 hover:text-[#C6FF2E]'
+            aria-label='Fechar visualizador'
+          >
+            <X className='h-4 w-4' />
+          </button>
+        </header>
+
+        <div className='min-h-0 flex-1 p-3 sm:p-4'>
+          {item.kind === 'youtube' && youtubeId ? (
+            <iframe
+              src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1&rel=0&modestbranding=1`}
+              title={item.title}
+              allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'
+              allowFullScreen
+              className='h-full min-h-[280px] w-full rounded-xl border border-white/10 bg-black sm:min-h-[420px]'
+            />
+          ) : item.kind === 'news' ? (
+            <iframe
+              src={readerUrl}
+              title={`Leitura interna - ${item.title}`}
+              className='h-full min-h-[320px] w-full rounded-xl border border-white/10 bg-[#0b0b0f] sm:min-h-[460px]'
+            />
+          ) : (
+            <div className='flex h-full min-h-[320px] flex-col gap-4 overflow-auto rounded-xl border border-white/10 bg-[#0b0b0f] p-4 sm:min-h-[460px] sm:p-5'>
+              <img
+                src={
+                  instagramCode
+                    ? `/api/instagram-image?code=${instagramCode}`
+                    : item.thumbnail || '/api/instagram-image?code=DV1OIoxDvbV'
+                }
+                alt={item.title}
+                className='w-full rounded-xl border border-white/10 object-cover'
+              />
+              <p className='text-sm leading-relaxed text-[#c9d1d9]'>{item.description}</p>
+            </div>
+          )}
+        </div>
+
+        <footer className='flex items-center justify-end border-t border-white/10 p-3 sm:p-4'>
+          <a
+            href={item.url}
+            target='_blank'
+            rel='noreferrer'
+            className='inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-3.5 py-2 text-xs font-semibold text-white transition hover:border-[#C6FF2E]/60 hover:text-[#C6FF2E]'
+          >
+            Abrir fonte original
+            <ExternalLink className='h-3.5 w-3.5' />
+          </a>
+        </footer>
+      </div>
+    </div>
   );
 }
 
@@ -139,6 +240,7 @@ export function RadarIaSection() {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE);
+  const [viewerItem, setViewerItem] = useState<RadarItem | null>(null);
 
   const debouncedDraft = useDebouncedValue(draftQuery, 500);
 
@@ -159,6 +261,7 @@ export function RadarIaSection() {
 
   useEffect(() => {
     setVisibleCount(INITIAL_VISIBLE);
+    setViewerItem(null);
   }, [activeTab, submittedQuery, activeRange]);
 
   useEffect(() => {
@@ -353,7 +456,7 @@ export function RadarIaSection() {
           <>
             <div className='grid gap-3 sm:gap-4 md:grid-cols-2 xl:grid-cols-3'>
               {displayedItems.map((item) => (
-                <RadarCard key={item.id} item={item} />
+                <RadarCard key={item.id} item={item} onOpen={setViewerItem} />
               ))}
             </div>
             {activeItems.length > visibleCount ? (
@@ -370,6 +473,7 @@ export function RadarIaSection() {
           </>
         )}
       </section>
+      {viewerItem ? <RadarViewer item={viewerItem} onClose={() => setViewerItem(null)} /> : null}
     </article>
   );
 }
