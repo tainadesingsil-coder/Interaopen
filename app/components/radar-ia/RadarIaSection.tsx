@@ -164,6 +164,31 @@ const buildCaptionSchedule = (lines: string[]) => {
   });
 };
 
+const blobToBase64 = (blob: Blob) =>
+  new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const result = String(reader.result || '');
+      const base64 = result.split(',')[1] || '';
+      resolve(base64);
+    };
+    reader.onerror = () => reject(new Error('blob_to_base64_failed'));
+    reader.readAsDataURL(blob);
+  });
+
+const pickRecorderMimeType = () => {
+  if (typeof MediaRecorder === 'undefined' || typeof MediaRecorder.isTypeSupported !== 'function') {
+    return '';
+  }
+  const candidates = ['audio/webm;codecs=opus', 'audio/ogg;codecs=opus', 'audio/webm', 'audio/ogg'];
+  for (const candidate of candidates) {
+    if (MediaRecorder.isTypeSupported(candidate)) {
+      return candidate;
+    }
+  }
+  return '';
+};
+
 function SkeletonCard() {
   return (
     <div className='animate-pulse rounded-[18px] border border-white/10 bg-[#0b0b0f] p-4 shadow-[0_10px_24px_rgba(0,0,0,0.2)] sm:rounded-2xl md:p-5'>
@@ -249,8 +274,15 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
   const isBrazilianPodcast =
     item.kind === 'podcast' && (item.source || '').toLowerCase().includes('pizza de dados');
   const podcastAudioRef = useRef<HTMLAudioElement | null>(null);
+  const podcastRecorderRef = useRef<MediaRecorder | null>(null);
+  const podcastRecorderStreamRef = useRef<MediaStream | null>(null);
+  const isCaptionRequestInFlightRef = useRef(false);
+  const isPodcastPlayingRef = useRef(false);
   const [isPodcastPlaying, setIsPodcastPlaying] = useState(false);
   const [captionLineIndex, setCaptionLineIndex] = useState(0);
+  const [liveCaptionText, setLiveCaptionText] = useState('');
+  const [liveCaptionError, setLiveCaptionError] = useState('');
+  const [isSpeechCaptionActive, setIsSpeechCaptionActive] = useState(false);
   const captionLines = useMemo(
     () => (item.kind === 'podcast' ? buildCaptionLines(item.translatedDescription || '') : []),
     [item.kind, item.translatedDescription]
@@ -282,7 +314,125 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
   useEffect(() => {
     setIsPodcastPlaying(false);
     setCaptionLineIndex(0);
+    setLiveCaptionText('');
+    setLiveCaptionError('');
+    isPodcastPlayingRef.current = false;
   }, [item.id]);
+
+  const stopSpeechCapture = () => {
+    const recorder = podcastRecorderRef.current;
+    if (recorder) {
+      if (recorder.state !== 'inactive') {
+        recorder.stop();
+      }
+      podcastRecorderRef.current = null;
+    }
+
+    const stream = podcastRecorderStreamRef.current;
+    if (stream) {
+      stream.getTracks().forEach((track) => track.stop());
+      podcastRecorderStreamRef.current = null;
+    }
+    setIsSpeechCaptionActive(false);
+  };
+
+  useEffect(() => {
+    return () => {
+      stopSpeechCapture();
+    };
+  }, [item.id]);
+
+  const sendAudioChunkToTranscribe = async (blob: Blob) => {
+    if (isCaptionRequestInFlightRef.current) return;
+    isCaptionRequestInFlightRef.current = true;
+
+    try {
+      const audioBase64 = await blobToBase64(blob);
+      if (!audioBase64 || audioBase64.length < 40) return;
+
+      const languageHint = (item.translatedLanguage || '').startsWith('pt') ? 'pt-BR' : 'en-US';
+      const response = await fetch('/api/podcast-transcribe', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          audioBase64,
+          mimeType: blob.type || 'audio/webm;codecs=opus',
+          languageHint,
+        }),
+      });
+
+      if (!response.ok) {
+        return;
+      }
+
+      const payload = (await response.json()) as {
+        ok?: boolean;
+        transcript?: string;
+        translatedText?: string;
+      };
+      const translated = String(payload?.translatedText || '').trim();
+      if (translated) {
+        setLiveCaptionText(translated);
+        setLiveCaptionError('');
+      }
+    } catch {
+      // Keep fallback caption when speech transcription fails.
+      setLiveCaptionError('Legenda por áudio indisponível neste momento.');
+    } finally {
+      isCaptionRequestInFlightRef.current = false;
+    }
+  };
+
+  const startSpeechCapture = async () => {
+    if (item.kind !== 'podcast') return;
+    if (podcastRecorderRef.current && podcastRecorderRef.current.state === 'recording') return;
+
+    const audioElement = podcastAudioRef.current as (HTMLAudioElement & {
+      captureStream?: () => MediaStream;
+      mozCaptureStream?: () => MediaStream;
+    }) | null;
+
+    if (!audioElement) return;
+    if (typeof window === 'undefined' || typeof MediaRecorder === 'undefined') return;
+
+    const captureStream =
+      (typeof audioElement.captureStream === 'function' && audioElement.captureStream.bind(audioElement)) ||
+      (typeof audioElement.mozCaptureStream === 'function' &&
+        audioElement.mozCaptureStream.bind(audioElement));
+
+    if (!captureStream) {
+      return;
+    }
+
+    try {
+      const stream = captureStream();
+      if (!stream || stream.getTracks().length === 0) {
+        return;
+      }
+
+      const mimeType = pickRecorderMimeType();
+      const recorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
+
+      recorder.ondataavailable = (event) => {
+        if (!event.data || event.data.size < 3000) return;
+        if (!isPodcastPlayingRef.current) return;
+        void sendAudioChunkToTranscribe(event.data);
+      };
+      recorder.onerror = () => {
+        setLiveCaptionError('Legenda por áudio indisponível neste momento.');
+      };
+
+      podcastRecorderStreamRef.current = stream;
+      podcastRecorderRef.current = recorder;
+      recorder.start(3200);
+      setIsSpeechCaptionActive(true);
+    } catch {
+      setLiveCaptionError('Seu navegador não permitiu legenda por áudio neste episódio.');
+      stopSpeechCapture();
+    }
+  };
 
   const togglePodcastCoverPlayback = async () => {
     const element = podcastAudioRef.current;
@@ -381,9 +531,21 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
                 preload='none'
                 playsInline
                 src={podcastAudioUrl}
-                onPlay={() => setIsPodcastPlaying(true)}
-                onPause={() => setIsPodcastPlaying(false)}
-                onEnded={() => setIsPodcastPlaying(false)}
+                onPlay={() => {
+                  setIsPodcastPlaying(true);
+                  isPodcastPlayingRef.current = true;
+                  void startSpeechCapture();
+                }}
+                onPause={() => {
+                  setIsPodcastPlaying(false);
+                  isPodcastPlayingRef.current = false;
+                  stopSpeechCapture();
+                }}
+                onEnded={() => {
+                  setIsPodcastPlaying(false);
+                  isPodcastPlayingRef.current = false;
+                  stopSpeechCapture();
+                }}
                 onTimeUpdate={(event) => {
                   if (captionLines.length === 0) return;
                   const element = event.currentTarget;
@@ -401,12 +563,15 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
                 className='block h-14 w-full min-w-0 rounded-lg border border-white/10 bg-black/20'
                 style={{ minHeight: 54 }}
               />
-              {captionLines.length > 0 ? (
+              {liveCaptionText || captionLines.length > 0 ? (
                 <div className='rounded-xl border border-[#C6FF2E]/25 bg-[#C6FF2E]/[0.06] p-3'>
-                  <p className='text-[10px] uppercase tracking-[0.11em] text-[#C6FF2E]'>Legenda ao vivo (PT-BR)</p>
-                  <p className='mt-1.5 min-h-[48px] whitespace-pre-wrap break-words text-sm leading-relaxed text-[#d1d5db]'>
-                    {captionLines[captionLineIndex] || captionLines[0]}
+                  <p className='text-[10px] uppercase tracking-[0.11em] text-[#C6FF2E]'>
+                    {isSpeechCaptionActive ? 'Legenda ao vivo por áudio (PT-BR)' : 'Legenda ao vivo (PT-BR)'}
                   </p>
+                  <p className='mt-1.5 min-h-[48px] whitespace-pre-wrap break-words text-sm leading-relaxed text-[#d1d5db]'>
+                    {liveCaptionText || captionLines[captionLineIndex] || captionLines[0]}
+                  </p>
+                  {liveCaptionError ? <p className='mt-1 text-[11px] text-[#fda4af]'>{liveCaptionError}</p> : null}
                 </div>
               ) : null}
               <div className='rounded-xl border border-white/10 bg-white/[0.02] p-4'>
