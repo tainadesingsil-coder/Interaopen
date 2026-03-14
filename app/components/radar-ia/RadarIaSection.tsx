@@ -73,8 +73,8 @@ const extractInstagramKind = (url: string) => {
 
 const buildInstagramEmbedUrl = (code: string, kind: string) => {
   if (!code) return '';
-  const base = kind === 'reel' ? `https://www.instagram.com/reel/${code}/embed` : `https://www.instagram.com/p/${code}/embed`;
-  return `${base}?utm_source=ig_embed&utm_campaign=loading`;
+  const base = kind === 'reel' ? `https://www.instagram.com/p/${code}/embed/captioned/` : `https://www.instagram.com/p/${code}/embed/captioned/`;
+  return base;
 };
 
 const extractEngagement = (description: string) => {
@@ -223,6 +223,7 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
                   title={`Instagram embed - ${item.title}`}
                   className='h-[430px] w-full rounded-xl border border-white/10 bg-black sm:h-[520px]'
                   allow='autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share'
+                  allowFullScreen
                 />
               ) : (
                 <img
