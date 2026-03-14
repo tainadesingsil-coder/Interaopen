@@ -376,94 +376,98 @@ const fetchYoutubeItems = async (query, range, env) => {
   const curatedItems = buildCuratedYoutubeItems(query, range);
   if (!apiKey) return curatedItems;
 
-  const publishedAfter = new Date(rangeCutoffMs(range)).toISOString();
-  const aiQuery = `${query} inteligência artificial`;
+  try {
+    const publishedAfter = new Date(rangeCutoffMs(range)).toISOString();
+    const aiQuery = `${query} inteligência artificial`;
 
-  const channelSearchUrl = createYoutubeEndpoint(apiKey, {
-    type: 'channel',
-    q: aiQuery,
-    maxResults: '8',
-    order: 'relevance',
-    relevanceLanguage: 'pt',
-    regionCode: 'BR',
-  });
+    const channelSearchUrl = createYoutubeEndpoint(apiKey, {
+      type: 'channel',
+      q: aiQuery,
+      maxResults: '8',
+      order: 'relevance',
+      relevanceLanguage: 'pt',
+      regionCode: 'BR',
+    });
 
-  const channelsResponse = await fetchWithTimeout(channelSearchUrl);
-  if (!channelsResponse.ok) {
-    throw new Error('youtube_channel_fetch_failed');
-  }
-
-  const channelsPayload = await channelsResponse.json();
-  const channelIds = dedupeById(
-    (channelsPayload?.items || [])
-      .map((item) => ({
-        id: item?.id?.channelId || '',
-      }))
-      .filter((item) => item.id)
-  )
-    .map((item) => item.id)
-    .slice(0, YOUTUBE_CHANNEL_LIMIT);
-
-  const channelVideoRequests =
-    channelIds.length > 0
-      ? channelIds.map((channelId) =>
-          fetchWithTimeout(
-            createYoutubeEndpoint(apiKey, {
-              type: 'video',
-              q: aiQuery,
-              channelId,
-              maxResults: String(YOUTUBE_VIDEOS_PER_CHANNEL),
-              order: 'date',
-              publishedAfter,
-              relevanceLanguage: 'pt',
-              regionCode: 'BR',
-            })
-          ).then((response) => {
-            if (!response.ok) {
-              throw new Error(`youtube_channel_video_failed:${channelId}`);
-            }
-            return response.json();
-          })
-        )
-      : [];
-
-  const settled = await Promise.allSettled(channelVideoRequests);
-  let videoItems = settled.flatMap((result) =>
-    result.status === 'fulfilled' ? result.value?.items || [] : []
-  );
-
-  if (videoItems.length === 0) {
-    const fallbackResponse = await fetchWithTimeout(
-      createYoutubeEndpoint(apiKey, {
-        type: 'video',
-        q: aiQuery,
-        maxResults: '16',
-        order: 'relevance',
-        publishedAfter,
-        relevanceLanguage: 'pt',
-        regionCode: 'BR',
-      })
-    );
-    if (!fallbackResponse.ok) {
-      throw new Error('youtube_video_fallback_failed');
+    const channelsResponse = await fetchWithTimeout(channelSearchUrl);
+    if (!channelsResponse.ok) {
+      return sortByScoreAndDate(curatedItems).slice(0, 30);
     }
-    const fallbackPayload = await fallbackResponse.json();
-    videoItems = fallbackPayload?.items || [];
-  }
 
-  const mapped = dedupeById(
-    videoItems
-      .map((item) => normalizeYoutubeItem(item, query))
-      .filter(Boolean)
-      .filter((item) => isAiRelated(`${item.title} ${item.description} ${item.channel || ''}`))
-  );
+    const channelsPayload = await channelsResponse.json();
+    const channelIds = dedupeById(
+      (channelsPayload?.items || [])
+        .map((item) => ({
+          id: item?.id?.channelId || '',
+        }))
+        .filter((item) => item.id)
+    )
+      .map((item) => item.id)
+      .slice(0, YOUTUBE_CHANNEL_LIMIT);
 
-  if (mapped.length === 0) {
+    const channelVideoRequests =
+      channelIds.length > 0
+        ? channelIds.map((channelId) =>
+            fetchWithTimeout(
+              createYoutubeEndpoint(apiKey, {
+                type: 'video',
+                q: aiQuery,
+                channelId,
+                maxResults: String(YOUTUBE_VIDEOS_PER_CHANNEL),
+                order: 'date',
+                publishedAfter,
+                relevanceLanguage: 'pt',
+                regionCode: 'BR',
+              })
+            ).then((response) => {
+              if (!response.ok) {
+                throw new Error(`youtube_channel_video_failed:${channelId}`);
+              }
+              return response.json();
+            })
+          )
+        : [];
+
+    const settled = await Promise.allSettled(channelVideoRequests);
+    let videoItems = settled.flatMap((result) =>
+      result.status === 'fulfilled' ? result.value?.items || [] : []
+    );
+
+    if (videoItems.length === 0) {
+      const fallbackResponse = await fetchWithTimeout(
+        createYoutubeEndpoint(apiKey, {
+          type: 'video',
+          q: aiQuery,
+          maxResults: '16',
+          order: 'relevance',
+          publishedAfter,
+          relevanceLanguage: 'pt',
+          regionCode: 'BR',
+        })
+      );
+      if (!fallbackResponse.ok) {
+        return sortByScoreAndDate(curatedItems).slice(0, 30);
+      }
+      const fallbackPayload = await fallbackResponse.json();
+      videoItems = fallbackPayload?.items || [];
+    }
+
+    const mapped = dedupeById(
+      videoItems
+        .map((item) => normalizeYoutubeItem(item, query))
+        .filter(Boolean)
+        .filter((item) => isAiRelated(`${item.title} ${item.description} ${item.channel || ''}`))
+    );
+
+    if (mapped.length === 0) {
+      return sortByScoreAndDate(curatedItems).slice(0, 30);
+    }
+
+    // Keep your curated base as suggestion, but prioritize real-time API results.
+    return sortByScoreAndDate(dedupeById([...mapped, ...curatedItems])).slice(0, 30);
+  } catch (error) {
     return sortByScoreAndDate(curatedItems).slice(0, 30);
   }
-
-  // Keep your curated base as suggestion, but prioritize real-time API results.
-  return sortByScoreAndDate(dedupeById([...mapped, ...curatedItems])).slice(0, 30);
 };
 
 const fetchNewsItems = async (query, range) => {
