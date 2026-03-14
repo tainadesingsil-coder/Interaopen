@@ -176,6 +176,35 @@ const htmlDecode = (value) =>
       String.fromCharCode(Number.parseInt(code, 16))
     );
 
+const escapeSvgText = (value = '') =>
+  value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+
+const buildInstagramThumbnail = (title) => {
+  const safeTitle = escapeSvgText(title || 'Radar Instagram');
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="720" height="405" viewBox="0 0 720 405">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#3f0f74"/>
+      <stop offset="55%" stop-color="#d62976"/>
+      <stop offset="100%" stop-color="#feda75"/>
+    </linearGradient>
+  </defs>
+  <rect width="720" height="405" fill="url(#bg)"/>
+  <rect x="18" y="18" width="684" height="369" rx="18" fill="rgba(6,6,8,0.5)" stroke="rgba(255,255,255,0.2)"/>
+  <text x="42" y="72" fill="#ffffff" font-size="24" font-family="Arial, sans-serif" font-weight="700">Instagram</text>
+  <text x="42" y="104" fill="#c9d1d9" font-size="18" font-family="Arial, sans-serif">@hollyfield.ia</text>
+  <text x="42" y="176" fill="#ffffff" font-size="30" font-family="Arial, sans-serif" font-weight="700">${safeTitle}</text>
+  <text x="42" y="350" fill="#C6FF2E" font-size="18" font-family="Arial, sans-serif" font-weight="700">Conteúdo atualizado</text>
+</svg>`;
+
+  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+};
+
 const stripHtml = (value) =>
   htmlDecode(value.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1'))
     .replace(/<[^>]+>/g, ' ')
@@ -372,7 +401,7 @@ const buildCuratedYoutubeItems = (query, range) => {
 };
 
 const fetchYoutubeItems = async (query, range, env) => {
-  const apiKey = (env.YOUTUBE_DATA_API_KEY || FALLBACK_YOUTUBE_DATA_API_KEY || '').trim();
+  const apiKey = (env?.YOUTUBE_DATA_API_KEY || FALLBACK_YOUTUBE_DATA_API_KEY || '').trim();
   const curatedItems = buildCuratedYoutubeItems(query, range);
   if (!apiKey) return curatedItems;
 
@@ -538,7 +567,7 @@ const fetchInstagramItems = async (query) => {
     url: publication.url,
     source: 'Instagram',
     publishedAt: null,
-    thumbnail: null,
+    thumbnail: buildInstagramThumbnail(publication.title),
     channel: '@hollyfield.ia',
     score:
       50 - index + computeScore(`${publication.title} hollyfield ia instagram`, publication.description, null, query),
@@ -579,7 +608,10 @@ const aggregateRadar = async (query, type, range, env) => {
   ]);
 
   if (youtubeResult.status === 'fulfilled') data.results.youtube = youtubeResult.value;
-  else if (requestedKinds.includes('youtube')) data.errors.youtube = 'Fonte YouTube indisponível no momento.';
+  else if (requestedKinds.includes('youtube')) {
+    data.errors.youtube = 'Fonte YouTube indisponível no momento.';
+    data.results.youtube = buildCuratedYoutubeItems(query, range);
+  }
 
   if (newsResult.status === 'fulfilled') data.results.news = newsResult.value;
   else if (requestedKinds.includes('news')) data.errors.news = 'Fonte de notícias indisponível no momento.';
