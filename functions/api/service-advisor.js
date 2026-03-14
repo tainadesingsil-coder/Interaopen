@@ -3,6 +3,13 @@ const GEMINI_ENDPOINT =
 const GEMINI_TIMEOUT_MS = 10000;
 const MAX_TEXT = 420;
 const FALLBACK_GEMINI_API_KEY = 'AIzaSyDmRPaN4CvD2OI04Jz8Y8APqktXggkTFAw';
+const AREA_PLAYBOOK = {
+  Software:
+    'foco em arquitetura escalável, estabilidade, integração e entrega orientada a produto',
+  Marketing:
+    'foco em aquisição, performance, otimização de funil e crescimento previsível',
+  IA: 'foco em automação inteligente, agentes operacionais e ganho real de produtividade',
+};
 
 const sanitizeText = (value = '') =>
   String(value)
@@ -22,17 +29,39 @@ const fetchWithTimeout = async (url, init = {}, timeoutMs = GEMINI_TIMEOUT_MS) =
 };
 
 const buildFallbackAnswer = (service, mode, question) => {
+  const areaGuide = AREA_PLAYBOOK[service.area] || 'foco em resultado prático e execução consistente';
+
   if (mode === 'explain') {
-    return `${service.title}: ${service.description} Aplicamos de forma prática para gerar resultado com previsibilidade e escala.`;
+    return `${service.title}: ${service.description} Na Codexion, trabalhamos com ${areaGuide}, sempre com escopo claro e metas mensuráveis.`;
   }
-  return `Sobre ${service.title}: ${service.description} Para sua dúvida "${question}", eu recomendo começar pelo objetivo principal e definir o fluxo operacional.`;
+
+  if (!question || question.length <= 3) {
+    return `Perfeito. Em ${service.title}, estruturamos estratégia, execução e medição para você ter clareza de investimento e retorno.`;
+  }
+
+  return `Sobre ${service.title}: ${service.description} Para sua dúvida "${question}", recomendamos começar pelo objetivo central, definir métricas e montar um plano de execução simples com checkpoints semanais.`;
 };
 
 const buildPrompt = (service, mode, question) => {
+  const areaGuide = AREA_PLAYBOOK[service.area] || 'foco em eficiência, previsibilidade e resultado';
+
   if (mode === 'explain') {
-    return `Explique o serviço "${service.title}" da Codexion em português do Brasil, de forma comercial e clara, com no máximo 5 frases curtas. Contexto: ${service.description}. Área: ${service.area}.`;
+    return `Explique o serviço "${service.title}" da Codexion em português do Brasil, de forma comercial e objetiva.
+Regras:
+- máximo 3 frases curtas
+- sem markdown
+- linguagem premium, clara e consultiva
+- incluir o valor para o cliente e como executamos
+Contexto do serviço: ${service.description}
+Área estratégica: ${service.area} (${areaGuide})`;
   }
-  return `Serviço: ${service.title}. Área: ${service.area}. Contexto: ${service.description}. Pergunta do cliente: ${question}. Responda em português do Brasil, direto, prático e comercial, no máximo 5 frases.`;
+
+  return `Você está respondendo um cliente sobre o serviço "${service.title}".
+Área: ${service.area} (${areaGuide})
+Descrição do serviço: ${service.description}
+Pergunta do cliente: ${question || 'Sem pergunta específica'}
+
+Responda em português do Brasil, com no máximo 3 frases curtas, sem markdown, em tom consultivo e orientado a decisão.`;
 };
 
 export async function onRequestPost(context) {
@@ -89,14 +118,14 @@ export async function onRequestPost(context) {
         systemInstruction: {
           parts: [
             {
-              text: 'Você é especialista comercial da Codexion. Fale em português do Brasil, direto e claro. Não use markdown.',
+              text: 'Você é especialista comercial da Codexion. Seja inteligente, conciso e objetivo. Fale em português do Brasil. Nunca use markdown. Foque em valor, escopo e resultado.',
             },
           ],
         },
         generationConfig: {
-          temperature: 0.55,
+          temperature: 0.4,
           topP: 0.9,
-          maxOutputTokens: 280,
+          maxOutputTokens: 220,
         },
         contents: [
           ...history.map((item) => ({
