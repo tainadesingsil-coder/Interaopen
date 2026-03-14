@@ -8,8 +8,8 @@ import {
   type RadarResponsePayload,
   type RadarType,
 } from '@/app/lib/radar-ia/types';
-import { Bot, Code2, ExternalLink, Megaphone, Mic2, Newspaper, PlayCircle, X } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { Bot, Code2, ExternalLink, Megaphone, Mic2, Newspaper, PauseCircle, PlayCircle, X } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 const KIND_LABEL: Record<RadarType | 'podcast', string> = {
   all: 'Tudo',
@@ -175,6 +175,10 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
   const engagement = item.kind === 'instagram' ? extractEngagement(item.description) : null;
   const podcastAudioUrl =
     item.kind === 'podcast' ? buildPodcastAudioProxyUrl(item.audioUrl || item.url) : '';
+  const isBrazilianPodcast =
+    item.kind === 'podcast' && (item.source || '').toLowerCase().includes('pizza de dados');
+  const podcastAudioRef = useRef<HTMLAudioElement | null>(null);
+  const [isPodcastPlaying, setIsPodcastPlaying] = useState(false);
   const readerUrl = `/api/radar-reader?url=${encodeURIComponent(item.url)}&fallbackTitle=${encodeURIComponent(
     item.title
   )}&fallbackDescription=${encodeURIComponent(item.description)}&fallbackSource=${encodeURIComponent(
@@ -193,6 +197,25 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
       window.removeEventListener('keydown', handleEsc);
     };
   }, [onClose]);
+
+  useEffect(() => {
+    setIsPodcastPlaying(false);
+  }, [item.id]);
+
+  const togglePodcastCoverPlayback = async () => {
+    const element = podcastAudioRef.current;
+    if (!element) return;
+
+    try {
+      if (element.paused) {
+        await element.play();
+      } else {
+        element.pause();
+      }
+    } catch {
+      // Native controls remain available as fallback.
+    }
+  };
 
   return (
     <div className='fixed inset-0 z-50 bg-black/80 p-2 backdrop-blur-[2px] sm:p-5'>
@@ -244,18 +267,43 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
           ) : item.kind === 'podcast' ? (
             <div className='flex h-full min-h-[320px] flex-col gap-3 overflow-auto rounded-xl border border-white/10 bg-[#0b0b0f] p-3 sm:min-h-[460px] sm:gap-4 sm:p-5'>
               {item.thumbnail ? (
-                <img
-                  src={item.thumbnail}
-                  alt={item.title}
-                  className='h-44 w-full rounded-xl border border-white/10 bg-black/35 object-contain p-1.5 sm:h-56'
-                />
+                <div className='relative'>
+                  <img
+                    src={item.thumbnail}
+                    alt={item.title}
+                    className='h-44 w-full rounded-xl border border-white/10 bg-black/35 object-contain p-1.5 sm:h-56'
+                  />
+                  {isBrazilianPodcast ? (
+                    <button
+                      type='button'
+                      onClick={() => {
+                        void togglePodcastCoverPlayback();
+                      }}
+                      className='absolute inset-0 flex items-center justify-center rounded-xl'
+                      aria-label={isPodcastPlaying ? 'Pausar podcast' : 'Reproduzir podcast'}
+                    >
+                      <span className='inline-flex h-14 w-14 items-center justify-center rounded-full border border-white/15 bg-black/55 text-[#C6FF2E] shadow-[0_0_0_1px_rgba(198,255,46,0.18)] transition hover:scale-[1.03]'>
+                        {isPodcastPlaying ? (
+                          <PauseCircle className='h-8 w-8' />
+                        ) : (
+                          <PlayCircle className='h-8 w-8' />
+                        )}
+                      </span>
+                    </button>
+                  ) : null}
+                </div>
               ) : null}
               <audio
+                ref={podcastAudioRef}
                 controls
                 preload='none'
                 playsInline
                 src={podcastAudioUrl}
-                className='block w-full min-w-0 rounded-lg border border-white/10 bg-black/20'
+                onPlay={() => setIsPodcastPlaying(true)}
+                onPause={() => setIsPodcastPlaying(false)}
+                onEnded={() => setIsPodcastPlaying(false)}
+                className='block h-14 w-full min-w-0 rounded-lg border border-white/10 bg-black/20'
+                style={{ minHeight: 54 }}
               />
               <div className='rounded-xl border border-white/10 bg-white/[0.02] p-4'>
                 <p className='text-[11px] uppercase tracking-[0.12em] text-[#9ca3af]'>Descrição do episódio</p>
