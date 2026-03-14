@@ -1,38 +1,18 @@
 const SOURCE_TIMEOUT_MS = 4000;
 
-const POST_CODE_SOURCES = {
-  DV1OIoxDvbV: {
-    mediaUrl: 'https://www.instagram.com/p/DV1OIoxDvbV/media/?size=l',
-    pageUrl: 'https://www.instagram.com/p/DV1OIoxDvbV/',
-  },
-  DV0pWgrlfaY: {
-    mediaUrl: 'https://www.instagram.com/p/DV0pWgrlfaY/media/?size=l',
-    pageUrl: 'https://www.instagram.com/p/DV0pWgrlfaY/',
-  },
-  DVtoYvkkSxm: {
-    mediaUrl: 'https://www.instagram.com/p/DVtoYvkkSxm/media/?size=l',
-    pageUrl: 'https://www.instagram.com/p/DVtoYvkkSxm/',
-  },
-  DVv4XchjiOj: {
-    mediaUrl: 'https://www.instagram.com/p/DVv4XchjiOj/media/?size=l',
-    pageUrl: 'https://www.instagram.com/p/DVv4XchjiOj/',
-  },
-  DVyQBtpjmYj: {
-    mediaUrl: 'https://www.instagram.com/p/DVyQBtpjmYj/media/?size=l',
-    pageUrl: 'https://www.instagram.com/p/DVyQBtpjmYj/',
-  },
-  DVwdlnwF1Lj: {
-    mediaUrl: 'https://www.instagram.com/p/DVwdlnwF1Lj/media/?size=l',
-    pageUrl: 'https://www.instagram.com/p/DVwdlnwF1Lj/',
-  },
-  DVbb0AHmWKZ: {
-    mediaUrl: 'https://www.instagram.com/p/DVbb0AHmWKZ/media/?size=l',
-    pageUrl: 'https://www.instagram.com/p/DVbb0AHmWKZ/',
-  },
-  DSmeB7ikeBX: {
-    mediaUrl: 'https://www.instagram.com/reel/DSmeB7ikeBX/media/?size=l',
-    pageUrl: 'https://www.instagram.com/reel/DSmeB7ikeBX/',
-  },
+const buildCandidateSources = (code, kind = '') => {
+  const post = {
+    mediaUrl: `https://www.instagram.com/p/${code}/media/?size=l`,
+    pageUrl: `https://www.instagram.com/p/${code}/`,
+  };
+  const reel = {
+    mediaUrl: `https://www.instagram.com/reel/${code}/media/?size=l`,
+    pageUrl: `https://www.instagram.com/reel/${code}/`,
+  };
+
+  if (kind === 'reel') return [reel, post];
+  if (kind === 'post') return [post, reel];
+  return [post, reel];
 };
 
 const fetchWithTimeout = async (url, init = {}, timeoutMs = SOURCE_TIMEOUT_MS) => {
@@ -89,9 +69,10 @@ export async function onRequestGet(context) {
   const requestUrl = new URL(context.request.url);
   const rawCode = requestUrl.searchParams.get('code') || '';
   const code = rawCode.replace(/[^a-zA-Z0-9]/g, '');
-  const source = POST_CODE_SOURCES[code];
+  const rawKind = (requestUrl.searchParams.get('kind') || '').toLowerCase();
+  const kind = rawKind === 'reel' || rawKind === 'post' ? rawKind : '';
 
-  if (!source) {
+  if (!code || code.length < 5) {
     return new Response('invalid_instagram_code', {
       status: 400,
       headers: { 'cache-control': 'no-store' },
@@ -99,45 +80,52 @@ export async function onRequestGet(context) {
   }
 
   try {
-    const response = await fetchWithTimeout(source.mediaUrl, {
-      headers: {
-        'user-agent':
-          'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36',
-      },
-    });
-
-    const contentType = response.headers.get('content-type') || '';
-    if (response.ok && contentType.toLowerCase().startsWith('image/')) {
-      const body = await response.arrayBuffer();
-      return new Response(body, {
+    const candidates = buildCandidateSources(code, kind);
+    for (const source of candidates) {
+      const response = await fetchWithTimeout(source.mediaUrl, {
         headers: {
-          'content-type': contentType,
-          'cache-control': 'public, max-age=1800',
+          'user-agent':
+            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36',
         },
       });
-    }
 
-    const pageResponse = await fetchWithTimeout(source.pageUrl, {
-      headers: {
-        'user-agent':
-          'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36',
-      },
-    });
-    if (pageResponse.ok) {
+      const contentType = response.headers.get('content-type') || '';
+      if (response.ok && contentType.toLowerCase().startsWith('image/')) {
+        const body = await response.arrayBuffer();
+        return new Response(body, {
+          headers: {
+            'content-type': contentType,
+            'cache-control': 'public, max-age=1800',
+          },
+        });
+      }
+
+      const pageResponse = await fetchWithTimeout(source.pageUrl, {
+        headers: {
+          'user-agent':
+            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36',
+        },
+      });
+      if (!pageResponse.ok) {
+        continue;
+      }
+
       const html = await pageResponse.text();
       const ogImage = extractMetaContent(html, 'og:image');
-      if (ogImage) {
-        const imageResponse = await fetchWithTimeout(ogImage);
-        const imageType = imageResponse.headers.get('content-type') || '';
-        if (imageResponse.ok && imageType.toLowerCase().startsWith('image/')) {
-          const imageBody = await imageResponse.arrayBuffer();
-          return new Response(imageBody, {
-            headers: {
-              'content-type': imageType,
-              'cache-control': 'public, max-age=1800',
-            },
-          });
-        }
+      if (!ogImage) {
+        continue;
+      }
+
+      const imageResponse = await fetchWithTimeout(ogImage);
+      const imageType = imageResponse.headers.get('content-type') || '';
+      if (imageResponse.ok && imageType.toLowerCase().startsWith('image/')) {
+        const imageBody = await imageResponse.arrayBuffer();
+        return new Response(imageBody, {
+          headers: {
+            'content-type': imageType,
+            'cache-control': 'public, max-age=1800',
+          },
+        });
       }
     }
 
