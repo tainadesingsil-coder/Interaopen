@@ -1,4 +1,4 @@
-const CACHE_TTL_MS = 12 * 60 * 1000;
+const CACHE_TTL_MS = 4 * 60 * 1000;
 const SOURCE_TIMEOUT_MS = 4000;
 const MAX_QUERY_LENGTH = 80;
 const FALLBACK_YOUTUBE_DATA_API_KEY = 'AIzaSyDmRPaN4CvD2OI04Jz8Y8APqktXggkTFAw';
@@ -379,92 +379,111 @@ const fetchYoutubeItems = async (query, range, env) => {
   try {
     const publishedAfter = new Date(rangeCutoffMs(range)).toISOString();
     const aiQuery = `${query} inteligência artificial`;
+    let videoItems = [];
 
-    const channelSearchUrl = createYoutubeEndpoint(apiKey, {
-      type: 'channel',
-      q: aiQuery,
-      maxResults: '8',
-      order: 'relevance',
-      relevanceLanguage: 'pt',
-      regionCode: 'BR',
-    });
+    try {
+      const channelSearchUrl = createYoutubeEndpoint(apiKey, {
+        type: 'channel',
+        q: aiQuery,
+        maxResults: '8',
+        order: 'relevance',
+        relevanceLanguage: 'pt',
+        regionCode: 'BR',
+      });
 
-    const channelsResponse = await fetchWithTimeout(channelSearchUrl);
-    if (!channelsResponse.ok) {
-      return sortByScoreAndDate(curatedItems).slice(0, 30);
+      const channelsResponse = await fetchWithTimeout(channelSearchUrl);
+      if (channelsResponse.ok) {
+        const channelsPayload = await channelsResponse.json();
+        const channelIds = dedupeById(
+          (channelsPayload?.items || [])
+            .map((item) => ({
+              id: item?.id?.channelId || '',
+            }))
+            .filter((item) => item.id)
+        )
+          .map((item) => item.id)
+          .slice(0, YOUTUBE_CHANNEL_LIMIT);
+
+        const channelVideoRequests =
+          channelIds.length > 0
+            ? channelIds.map((channelId) =>
+                fetchWithTimeout(
+                  createYoutubeEndpoint(apiKey, {
+                    type: 'video',
+                    q: aiQuery,
+                    channelId,
+                    maxResults: String(YOUTUBE_VIDEOS_PER_CHANNEL),
+                    order: 'date',
+                    publishedAfter,
+                    relevanceLanguage: 'pt',
+                    regionCode: 'BR',
+                  })
+                ).then((response) => {
+                  if (!response.ok) {
+                    throw new Error(`youtube_channel_video_failed:${channelId}`);
+                  }
+                  return response.json();
+                })
+              )
+            : [];
+
+        const settled = await Promise.allSettled(channelVideoRequests);
+        videoItems = settled.flatMap((result) =>
+          result.status === 'fulfilled' ? result.value?.items || [] : []
+        );
+      }
+    } catch (error) {
+      // Keep flow resilient: we'll still try direct video search below.
     }
 
-    const channelsPayload = await channelsResponse.json();
-    const channelIds = dedupeById(
-      (channelsPayload?.items || [])
-        .map((item) => ({
-          id: item?.id?.channelId || '',
-        }))
-        .filter((item) => item.id)
-    )
-      .map((item) => item.id)
-      .slice(0, YOUTUBE_CHANNEL_LIMIT);
-
-    const channelVideoRequests =
-      channelIds.length > 0
-        ? channelIds.map((channelId) =>
-            fetchWithTimeout(
-              createYoutubeEndpoint(apiKey, {
-                type: 'video',
-                q: aiQuery,
-                channelId,
-                maxResults: String(YOUTUBE_VIDEOS_PER_CHANNEL),
-                order: 'date',
-                publishedAfter,
-                relevanceLanguage: 'pt',
-                regionCode: 'BR',
-              })
-            ).then((response) => {
-              if (!response.ok) {
-                throw new Error(`youtube_channel_video_failed:${channelId}`);
-              }
-              return response.json();
-            })
-          )
-        : [];
-
-    const settled = await Promise.allSettled(channelVideoRequests);
-    let videoItems = settled.flatMap((result) =>
-      result.status === 'fulfilled' ? result.value?.items || [] : []
-    );
+    if (videoItems.length === 0) {
+      const latestResponse = await fetchWithTimeout(
+        createYoutubeEndpoint(apiKey, {
+          type: 'video',
+          q: aiQuery,
+          maxResults: '24',
+          order: 'date',
+          publishedAfter,
+          relevanceLanguage: 'pt',
+          regionCode: 'BR',
+        })
+      );
+      if (latestResponse.ok) {
+        const latestPayload = await latestResponse.json();
+        videoItems = latestPayload?.items || [];
+      }
+    }
 
     if (videoItems.length === 0) {
       const fallbackResponse = await fetchWithTimeout(
         createYoutubeEndpoint(apiKey, {
           type: 'video',
           q: aiQuery,
-          maxResults: '16',
+          maxResults: '24',
           order: 'relevance',
           publishedAfter,
           relevanceLanguage: 'pt',
           regionCode: 'BR',
         })
       );
-      if (!fallbackResponse.ok) {
-        return sortByScoreAndDate(curatedItems).slice(0, 30);
+      if (fallbackResponse.ok) {
+        const fallbackPayload = await fallbackResponse.json();
+        videoItems = fallbackPayload?.items || [];
       }
-      const fallbackPayload = await fallbackResponse.json();
-      videoItems = fallbackPayload?.items || [];
     }
 
-    const mapped = dedupeById(
-      videoItems
-        .map((item) => normalizeYoutubeItem(item, query))
-        .filter(Boolean)
-        .filter((item) => isAiRelated(`${item.title} ${item.description} ${item.channel || ''}`))
+    const dynamicItems = sortByScoreAndDate(
+      dedupeById(videoItems.map((item) => normalizeYoutubeItem(item, query)).filter(Boolean))
     );
 
-    if (mapped.length === 0) {
+    if (dynamicItems.length === 0) {
       return sortByScoreAndDate(curatedItems).slice(0, 30);
     }
 
-    // Keep your curated base as suggestion, but prioritize real-time API results.
-    return sortByScoreAndDate(dedupeById([...mapped, ...curatedItems])).slice(0, 30);
+    const dynamicIds = new Set(dynamicItems.map((item) => item.id));
+    const curatedRemainder = curatedItems.filter((item) => !dynamicIds.has(item.id));
+    // Prioritize fresh API videos and keep curated list as a safety net at the end.
+    return [...dynamicItems, ...curatedRemainder].slice(0, 30);
   } catch (error) {
     return sortByScoreAndDate(curatedItems).slice(0, 30);
   }
