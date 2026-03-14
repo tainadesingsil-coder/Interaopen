@@ -3,7 +3,7 @@ export const RADAR_RANGES = ['24h', '7d', '30d'] as const;
 
 export type RadarType = (typeof RADAR_TYPES)[number];
 export type RadarRange = (typeof RADAR_RANGES)[number];
-export type RadarItemKind = Exclude<RadarType, 'all'>;
+export type RadarItemKind = Exclude<RadarType, 'all'> | 'podcast';
 
 export interface RadarItem {
   id: string;
@@ -17,6 +17,7 @@ export interface RadarItem {
   channel: string | null;
   score: number;
   ctaLabel: string;
+  audioUrl?: string | null;
 }
 
 export interface RadarResponsePayload {

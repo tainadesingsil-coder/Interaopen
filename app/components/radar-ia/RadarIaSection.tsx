@@ -8,14 +8,15 @@ import {
   type RadarResponsePayload,
   type RadarType,
 } from '@/app/lib/radar-ia/types';
-import { Bot, Code2, ExternalLink, Megaphone, Newspaper, PlayCircle, X } from 'lucide-react';
+import { Bot, Code2, ExternalLink, Megaphone, Mic2, Newspaper, PlayCircle, X } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
-const TAB_LABEL: Record<RadarType, string> = {
+const KIND_LABEL: Record<RadarType | 'podcast', string> = {
   all: 'Tudo',
   youtube: 'YouTube',
   news: 'Notícias',
   instagram: 'Instagram',
+  podcast: 'Podcast',
 };
 
 const RANGE_LABEL: Record<RadarRange, string> = {
@@ -42,6 +43,12 @@ const formatDate = (value: string | null) => {
 };
 
 const DEFAULT_QUERY = 'agentes de IA';
+
+interface PodcastResponsePayload {
+  generatedAt: string;
+  items: RadarItem[];
+  errors: Partial<Record<string, string>>;
+}
 
 const extractYoutubeId = (url: string, fallbackId = '') => {
   try {
@@ -104,6 +111,8 @@ function RadarCard({ item, onOpen }: { item: RadarItem; onOpen: (item: RadarItem
       <PlayCircle className='h-4 w-4 text-[#C6FF2E]' />
     ) : item.kind === 'news' ? (
       <Newspaper className='h-4 w-4 text-[#C6FF2E]' />
+    ) : item.kind === 'podcast' ? (
+      <Mic2 className='h-4 w-4 text-[#C6FF2E]' />
     ) : (
       <Bot className='h-4 w-4 text-[#C6FF2E]' />
     );
@@ -124,7 +133,7 @@ function RadarCard({ item, onOpen }: { item: RadarItem; onOpen: (item: RadarItem
       <div className='mb-3 flex items-center justify-between gap-2'>
         <span className='inline-flex items-center gap-1 rounded-lg border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[10px] uppercase tracking-[0.14em] text-[#9ca3af]'>
           {icon}
-          {TAB_LABEL[item.kind]}
+          {KIND_LABEL[item.kind]}
         </span>
         <span className='text-[11px] tracking-wide text-[#9ca3af]'>{formatDate(item.publishedAt)}</span>
       </div>
@@ -215,6 +224,29 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
               title={`Leitura interna - ${item.title}`}
               className='h-full min-h-[320px] w-full rounded-xl border border-white/10 bg-[#0b0b0f] sm:min-h-[460px]'
             />
+          ) : item.kind === 'podcast' ? (
+            <div className='flex h-full min-h-[320px] flex-col gap-4 overflow-auto rounded-xl border border-white/10 bg-[#0b0b0f] p-4 sm:min-h-[460px] sm:p-5'>
+              {item.thumbnail ? (
+                <img
+                  src={item.thumbnail}
+                  alt={item.title}
+                  className='h-52 w-full rounded-xl border border-white/10 object-cover sm:h-56'
+                />
+              ) : null}
+              <audio
+                controls
+                preload='metadata'
+                autoPlay
+                src={item.audioUrl || item.url}
+                className='w-full rounded-lg border border-white/10 bg-black/20'
+              />
+              <div className='rounded-xl border border-white/10 bg-white/[0.02] p-4'>
+                <p className='text-[11px] uppercase tracking-[0.12em] text-[#9ca3af]'>Descrição do episódio</p>
+                <p className='mt-2 whitespace-pre-wrap break-words text-[15px] leading-relaxed text-[#d1d5db]'>
+                  {item.description}
+                </p>
+              </div>
+            </div>
           ) : (
             <div className='flex h-full min-h-[320px] flex-col gap-4 overflow-auto rounded-xl border border-white/10 bg-[#0b0b0f] p-4 sm:min-h-[460px] sm:p-5'>
               {instagramEmbedUrl ? (
@@ -284,6 +316,9 @@ export function RadarIaSection() {
   const [errorMessage, setErrorMessage] = useState('');
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE);
   const [viewerItem, setViewerItem] = useState<RadarItem | null>(null);
+  const [podcastItems, setPodcastItems] = useState<RadarItem[]>([]);
+  const [isLoadingPodcasts, setIsLoadingPodcasts] = useState(false);
+  const [podcastError, setPodcastError] = useState('');
 
   useEffect(() => {
     setVisibleCount(INITIAL_VISIBLE);
@@ -329,6 +364,36 @@ export function RadarIaSection() {
     void load();
     return () => controller.abort();
   }, [submittedQuery, activeTab, activeRange]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const loadPodcasts = async () => {
+      setIsLoadingPodcasts(true);
+      setPodcastError('');
+      try {
+        const response = await fetch('/api/podcasts?limit=12', {
+          method: 'GET',
+          signal: controller.signal,
+        });
+        if (!response.ok) {
+          throw new Error('podcasts_fetch_failed');
+        }
+        const data = (await response.json()) as PodcastResponsePayload;
+        setPodcastItems(data.items || []);
+      } catch (error) {
+        if (!controller.signal.aborted) {
+          setPodcastError('Não foi possível atualizar podcasts agora.');
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsLoadingPodcasts(false);
+        }
+      }
+    };
+
+    void loadPodcasts();
+    return () => controller.abort();
+  }, []);
 
   const activeItems = useMemo(() => {
     if (!payload) {
@@ -387,7 +452,7 @@ export function RadarIaSection() {
                       : 'border-white/10 bg-white/[0.03] text-[#9ca3af] hover:border-[#C6FF2E]/45 hover:text-[#C6FF2E]'
                   }`}
                 >
-                  {TAB_LABEL[tab]}
+                  {KIND_LABEL[tab]}
                 </button>
               ))}
             </div>
@@ -450,6 +515,37 @@ export function RadarIaSection() {
               </div>
             ) : null}
           </>
+        )}
+      </section>
+
+      <section className='rounded-[20px] border border-white/10 bg-[#0b0b0f] p-4 shadow-[0_10px_28px_rgba(0,0,0,0.2)] sm:rounded-2xl md:p-5'>
+        <header className='mb-4 space-y-1'>
+          <p className='text-xs uppercase tracking-[0.18em] text-[#9ca3af]'>Conteúdo em áudio</p>
+          <h4 className='text-lg font-bold text-white md:text-xl'>Podcasts</h4>
+        </header>
+
+        {podcastError ? (
+          <p className='mb-4 rounded-xl border border-[#fda4af]/30 bg-[#fda4af]/10 px-3 py-2 text-sm text-[#fecdd3]'>
+            {podcastError}
+          </p>
+        ) : null}
+
+        {isLoadingPodcasts ? (
+          <div className='grid gap-3 sm:gap-4 md:grid-cols-2 xl:grid-cols-3'>
+            {Array.from({ length: 3 }).map((_, index) => (
+              <SkeletonCard key={`podcast-skeleton-${index}`} />
+            ))}
+          </div>
+        ) : podcastItems.length === 0 ? (
+          <div className='rounded-xl border border-dashed border-white/10 bg-black/20 p-6 text-center sm:p-7'>
+            <p className='text-sm leading-relaxed text-[#9ca3af]'>Nenhum episódio de podcast disponível no momento.</p>
+          </div>
+        ) : (
+          <div className='grid gap-3 sm:gap-4 md:grid-cols-2 xl:grid-cols-3'>
+            {podcastItems.map((item) => (
+              <RadarCard key={item.id} item={item} onOpen={setViewerItem} />
+            ))}
+          </div>
         )}
       </section>
       {viewerItem ? <RadarViewer item={viewerItem} onClose={() => setViewerItem(null)} /> : null}
