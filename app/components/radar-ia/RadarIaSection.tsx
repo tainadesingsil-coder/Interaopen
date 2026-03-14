@@ -241,11 +241,6 @@ function RadarCard({ item, onOpen }: { item: RadarItem; onOpen: (item: RadarItem
 
       <h4 className='line-clamp-2 text-[15px] font-semibold leading-snug text-white md:text-base'>{item.title}</h4>
       <p className='mt-2 line-clamp-3 text-sm leading-relaxed text-[#9ca3af]'>{item.description}</p>
-      {item.kind === 'podcast' && item.translatedDescription ? (
-        <p className='mt-1 line-clamp-2 text-xs leading-relaxed text-[#C6FF2E]/85'>
-          Legenda PT-BR: {item.translatedDescription}
-        </p>
-      ) : null}
       <p className='mt-3 line-clamp-1 text-[11px] leading-relaxed text-[#9ca3af]'>
         {item.channel ? `${item.source} · ${item.channel}` : item.source}
       </p>
@@ -272,8 +267,7 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
   const engagement = item.kind === 'instagram' ? extractEngagement(item.description) : null;
   const podcastAudioUrl =
     item.kind === 'podcast' ? buildPodcastAudioProxyUrl(item.audioUrl || item.url) : '';
-  const isBrazilianPodcast =
-    item.kind === 'podcast' && (item.source || '').toLowerCase().includes('pizza de dados');
+  const isPodcastWithCoverPlay = item.kind === 'podcast';
   const podcastAudioRef = useRef<HTMLAudioElement | null>(null);
   const podcastRecorderRef = useRef<MediaRecorder | null>(null);
   const podcastRecorderStreamRef = useRef<MediaStream | null>(null);
@@ -291,6 +285,7 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
   const [isSpeechCaptionActive, setIsSpeechCaptionActive] = useState(false);
   const expectsRealtimeSpeech =
     item.kind === 'podcast' && (item.translatedLanguage || '').toLowerCase().startsWith('en');
+  const [useRealtimeCaptionMode, setUseRealtimeCaptionMode] = useState(expectsRealtimeSpeech);
   const captionLines = useMemo(
     () => (item.kind === 'podcast' ? buildCaptionLines(item.translatedDescription || '') : []),
     [item.kind, item.translatedDescription]
@@ -324,13 +319,14 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
     setCaptionLineIndex(0);
     setLiveCaptionText('');
     setLiveCaptionError('');
+    setUseRealtimeCaptionMode(expectsRealtimeSpeech);
     isPodcastPlayingRef.current = false;
     lastLiveCaptionRef.current = '';
     if (liveCaptionWatchdogRef.current) {
       clearTimeout(liveCaptionWatchdogRef.current);
       liveCaptionWatchdogRef.current = null;
     }
-  }, [item.id]);
+  }, [item.id, expectsRealtimeSpeech]);
 
   const stopSpeechCapture = () => {
     const recorder = podcastRecorderRef.current;
@@ -419,8 +415,9 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
         }
       }
     } catch {
-      // Keep fallback caption when speech transcription fails.
-      setLiveCaptionError('Legenda por áudio indisponível neste momento.');
+      setUseRealtimeCaptionMode(false);
+      setIsSpeechCaptionActive(false);
+      setLiveCaptionError('');
     } finally {
       isCaptionRequestInFlightRef.current = false;
     }
@@ -471,7 +468,9 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
             (typeof audioElement.mozCaptureStream === 'function' &&
               audioElement.mozCaptureStream.bind(audioElement));
           if (!captureStream) {
-            setLiveCaptionError('Seu navegador não suporta captura de áudio ao vivo.');
+            setUseRealtimeCaptionMode(false);
+            setIsSpeechCaptionActive(false);
+            setLiveCaptionError('');
             return;
           }
           stream = captureStream();
@@ -479,7 +478,9 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
       }
 
       if (!stream || stream.getTracks().length === 0) {
-        setLiveCaptionError('Não foi possível capturar o áudio do episódio em tempo real.');
+        setUseRealtimeCaptionMode(false);
+        setIsSpeechCaptionActive(false);
+        setLiveCaptionError('');
         return;
       }
 
@@ -492,23 +493,27 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
         void sendAudioChunkToTranscribe(event.data);
       };
       recorder.onerror = () => {
-        setLiveCaptionError('Legenda por áudio indisponível neste momento.');
+        setUseRealtimeCaptionMode(false);
+        setIsSpeechCaptionActive(false);
       };
 
       podcastRecorderStreamRef.current = stream;
       podcastRecorderRef.current = recorder;
       recorder.start(3200);
       setIsSpeechCaptionActive(true);
+      setUseRealtimeCaptionMode(true);
       if (liveCaptionWatchdogRef.current) {
         clearTimeout(liveCaptionWatchdogRef.current);
       }
       liveCaptionWatchdogRef.current = setTimeout(() => {
         if (!lastLiveCaptionRef.current) {
-          setLiveCaptionError('Não foi possível captar fala ao vivo neste episódio/navegador.');
+          setUseRealtimeCaptionMode(false);
+          setIsSpeechCaptionActive(false);
         }
       }, LIVE_TRANSCRIPTION_WATCHDOG_MS);
     } catch {
-      setLiveCaptionError('Seu navegador não permitiu legenda por áudio neste episódio.');
+      setUseRealtimeCaptionMode(false);
+      setIsSpeechCaptionActive(false);
       stopSpeechCapture();
     }
   };
@@ -584,7 +589,7 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
                     alt={item.title}
                     className='h-44 w-full rounded-xl border border-white/10 bg-black/35 object-contain p-1.5 sm:h-56'
                   />
-                  {isBrazilianPodcast ? (
+                  {isPodcastWithCoverPlay ? (
                     <button
                       type='button'
                       onClick={() => {
@@ -626,7 +631,7 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
                   stopSpeechCapture();
                 }}
                 onTimeUpdate={(event) => {
-                  if (expectsRealtimeSpeech) return;
+                  if (useRealtimeCaptionMode) return;
                   if (captionLines.length === 0) return;
                   const element = event.currentTarget;
                   if (captionSchedule.length === 0 || captionCycleDuration <= 0) return;
@@ -643,18 +648,18 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
                 className='block h-14 w-full min-w-0 rounded-lg border border-white/10 bg-black/20'
                 style={{ minHeight: 54 }}
               />
-              {liveCaptionText || captionLines.length > 0 || expectsRealtimeSpeech ? (
-                <div className='rounded-xl border border-[#C6FF2E]/25 bg-[#C6FF2E]/[0.06] p-3'>
-                  <p className='text-[10px] uppercase tracking-[0.11em] text-[#C6FF2E]'>
-                    {isSpeechCaptionActive ? 'Legenda ao vivo por áudio (PT-BR)' : 'Legenda (PT-BR)'}
+              {liveCaptionText || captionLines.length > 0 || useRealtimeCaptionMode ? (
+                <div className='rounded-xl border border-white/10 bg-white/[0.02] p-3'>
+                  <p className='text-[10px] uppercase tracking-[0.11em] text-[#9ca3af]'>
+                    {useRealtimeCaptionMode && isSpeechCaptionActive ? 'Legenda ao vivo (PT-BR)' : 'Legenda (PT-BR)'}
                   </p>
                   <p className='mt-1.5 min-h-[48px] whitespace-pre-wrap break-words text-sm leading-relaxed text-[#d1d5db]'>
                     {liveCaptionText ||
-                      (expectsRealtimeSpeech
+                      (useRealtimeCaptionMode
                         ? 'Ouvindo e traduzindo em tempo real...'
                         : captionLines[captionLineIndex] || captionLines[0])}
                   </p>
-                  {liveCaptionError ? <p className='mt-1 text-[11px] text-[#fda4af]'>{liveCaptionError}</p> : null}
+                  {liveCaptionError ? <p className='mt-1 text-[11px] text-[#9ca3af]'>{liveCaptionError}</p> : null}
                 </div>
               ) : null}
               <div className='rounded-xl border border-white/10 bg-white/[0.02] p-4'>
