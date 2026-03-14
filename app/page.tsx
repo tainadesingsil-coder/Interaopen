@@ -71,8 +71,8 @@ export default function HomePage() {
                   projetos
                 </span>
                 <header className='space-y-1'>
-                  <p className='text-xs uppercase tracking-[0.18em] text-[#9ca3af]'>Cases comerciais</p>
-                  <h3 className='text-xl font-bold text-white md:text-2xl'>Portfólio</h3>
+                  <p className='text-xs uppercase tracking-[0.18em] text-[#9ca3af]'>Modelos de canais</p>
+                  <h3 className='text-xl font-bold text-white md:text-2xl'>TikTok · Twitch · Discord</h3>
                 </header>
                 <div className='grid gap-4 lg:grid-cols-3'>
                   {featuredProjects.map((project) => (

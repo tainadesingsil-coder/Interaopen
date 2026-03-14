@@ -15,6 +15,7 @@ export interface FeaturedProject {
   summary: string;
   tags: string[];
   caseHref: string;
+  caseLabel?: string;
   screens: ProjectScreen[];
 }
 
@@ -27,70 +28,121 @@ export interface ProductOffer {
 
 export const featuredProjects: FeaturedProject[] = [
   {
-    id: 'enigma-voice-core',
-    title: 'ENIGMA Voice Core',
+    id: 'tiktok-ai-discovery',
+    title: 'TikTok · Descoberta de IA',
     category: 'IA',
     summary:
-      'Assistente conversacional com pipeline de voz e respostas naturais para operações e atendimento.',
-    tags: ['Next.js', 'Gemini', 'Speech', 'UX Voice'],
-    caseHref: '#case-enigma-voice-core',
+      'Modelo de monitoramento para identificar conteúdos, trends e creators de IA no TikTok em tempo real.',
+    tags: ['TikTok', 'Trends', 'IA', 'Curadoria'],
+    caseHref: 'https://www.tiktok.com/tag/inteligenciaartificial',
+    caseLabel: 'Abrir feed',
     screens: [
       {
-        id: 'enigma-desktop',
-        title: 'Console Operacional',
-        description: 'Painel principal com status em tempo real e histórico de interações.',
+        id: 'tiktok-discovery-desktop',
+        title: 'Descoberta de conteúdos',
+        description: 'Busca contínua por publicações novas relacionadas a IA.',
         device: 'desktop',
       },
       {
-        id: 'enigma-mobile',
-        title: 'Modo Mobile',
-        description: 'Fluxo de comando por voz otimizado para uso em campo.',
+        id: 'tiktok-discovery-mobile',
+        title: 'Modelo mobile',
+        description: 'Visual mobile para acompanhar vídeos em alta.',
         device: 'mobile',
       },
     ],
   },
   {
-    id: 'atlas-ops-platform',
-    title: 'Atlas Ops Platform',
-    category: 'Software',
-    summary:
-      'Plataforma de gestão com dashboards de performance, alertas e automações para equipes comerciais.',
-    tags: ['React', 'API', 'Analytics', 'SaaS'],
-    caseHref: '#case-atlas-ops-platform',
-    screens: [
-      {
-        id: 'atlas-desktop',
-        title: 'Dashboard Executivo',
-        description: 'Visão consolidada de funil, receita e produtividade.',
-        device: 'desktop',
-      },
-      {
-        id: 'atlas-mobile',
-        title: 'Painel Comercial',
-        description: 'Consulta rápida de metas e tarefas no app mobile.',
-        device: 'mobile',
-      },
-    ],
-  },
-  {
-    id: 'growth-command-ads',
-    title: 'Growth Command Ads',
+    id: 'tiktok-live-models',
+    title: 'TikTok · Lives e creators',
     category: 'Marketing',
     summary:
-      'Estrutura de aquisição com Google Ads, Meta Ads e otimização contínua orientada a ROI.',
-    tags: ['Google Ads', 'Meta Ads', 'SEO', 'Growth'],
-    caseHref: '#case-growth-command-ads',
+      'Modelo de curadoria para lives e criadores que falam de automação, IA e conteúdo digital.',
+    tags: ['Live', 'Creator', 'Social', 'Radar'],
+    caseHref: 'https://www.tiktok.com/discover/live-ia',
+    caseLabel: 'Abrir feed',
     screens: [
       {
-        id: 'growth-desktop',
-        title: 'Painel de Mídia',
-        description: 'Relatórios de campanhas e decisões baseadas em dados.',
+        id: 'tiktok-live-desktop',
+        title: 'Painel de creators',
+        description: 'Lista priorizada de perfis e lives recentes.',
         device: 'desktop',
       },
       {
-        id: 'growth-mobile',
-        title: 'Acompanhamento Diário',
-        description: 'Resumo de investimento e performance em formato mobile.',
+        id: 'tiktok-live-mobile',
+        title: 'Acompanhamento rápido',
+        description: 'Acesso mobile para validar conteúdo ao vivo.',
+        device: 'mobile',
+      },
+    ],
+  },
+  {
+    id: 'twitch-science-tech',
+    title: 'Twitch · Science & Technology',
+    category: 'Software',
+    summary:
+      'Modelo para acompanhar streams técnicos com foco em programação, IA aplicada e ferramentas de dev.',
+    tags: ['Twitch', 'Live Coding', 'IA', 'Dev'],
+    caseHref: 'https://www.twitch.tv/directory/category/science-and-technology',
+    caseLabel: 'Abrir feed',
+    screens: [
+      {
+        id: 'twitch-desktop',
+        title: 'Streams técnicas',
+        description: 'Monitoramento de streams para referências de produto e conteúdo.',
+        device: 'desktop',
+      },
+      {
+        id: 'twitch-mobile',
+        title: 'Visão mobile',
+        description: 'Acompanhamento rápido de transmissões ao vivo.',
+        device: 'mobile',
+      },
+    ],
+  },
+  {
+    id: 'discord-midjourney',
+    title: 'Discord · Midjourney Community',
+    category: 'IA',
+    summary:
+      'Modelo de comunidade para acompanhar anúncios, tendências e discussões práticas sobre IA generativa.',
+    tags: ['Discord', 'Comunidade', 'Midjourney', 'IA'],
+    caseHref: 'https://discord.com/servers/midjourney-662267976984297473',
+    caseLabel: 'Abrir comunidade',
+    screens: [
+      {
+        id: 'discord-midjourney-desktop',
+        title: 'Comunidade ativa',
+        description: 'Acompanhamento de canais e novidades em tempo real.',
+        device: 'desktop',
+      },
+      {
+        id: 'discord-midjourney-mobile',
+        title: 'Entrada rápida',
+        description: 'Acesso mobile para conversas e updates da comunidade.',
+        device: 'mobile',
+      },
+    ],
+  },
+  {
+    id: 'discord-huggingface',
+    title: 'Discord · Hugging Face',
+    category: 'IA',
+    summary:
+      'Modelo de comunidade técnica para acompanhar discussões de modelos, datasets e aplicações de IA.',
+    tags: ['Hugging Face', 'Discord', 'Modelos', 'Open Source'],
+    caseHref: 'https://huggingface.co/discord-community',
+    caseLabel: 'Abrir comunidade',
+    screens: [
+      {
+        id: 'discord-hf-desktop',
+        title: 'Hub técnico',
+        description: 'Espaço para acompanhar temas avançados de IA.',
+        device: 'desktop',
+      },
+      {
+        id: 'discord-hf-mobile',
+        title: 'Notificações',
+        description: 'Modelo para seguir canais e novidades no celular.',
         device: 'mobile',
       },
     ],

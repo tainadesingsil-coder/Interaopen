@@ -17,6 +17,8 @@ const AREA_COLOR: Record<ProductOffer['area'], string> = {
 };
 
 export function ProjectCard({ project }: { project: FeaturedProject }) {
+  const isExternalLink = /^https?:\/\//i.test(project.caseHref);
+
   return (
     <article
       className='group rounded-xl border border-white/10 bg-[#0b0b0f] p-5 transition duration-200 hover:border-[#C6FF2E] hover:shadow-[0_0_0_1px_rgba(198,255,46,0.18),0_8px_22px_rgba(198,255,46,0.09)]'
@@ -43,9 +45,11 @@ export function ProjectCard({ project }: { project: FeaturedProject }) {
 
       <Link
         href={project.caseHref}
+        target={isExternalLink ? '_blank' : undefined}
+        rel={isExternalLink ? 'noreferrer' : undefined}
         className='mt-5 inline-flex items-center rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-white transition hover:border-[#C6FF2E] hover:text-[#C6FF2E]'
       >
-        Ver case
+        {project.caseLabel || 'Ver case'}
       </Link>
     </article>
   );
