@@ -26,8 +26,9 @@ const RANGE_LABEL: Record<RadarRange, string> = {
 };
 
 const INITIAL_VISIBLE = 10;
-const LIVE_CAPTION_SECONDS_PER_LINE = 4.5;
-const LIVE_CAPTION_MAX_SECONDS_PER_LINE = 10;
+const LIVE_CAPTION_WORDS_PER_SECOND = 3.2;
+const LIVE_CAPTION_MIN_SECONDS_PER_LINE = 1.2;
+const LIVE_CAPTION_MAX_SECONDS_PER_LINE = 3.2;
 
 const formatDate = (value: string | null) => {
   if (!value) {
@@ -144,6 +145,25 @@ const buildCaptionLines = (value: string, maxLines = 22) => {
   return chunkWords(base, 95, maxLines).filter((line) => line.length >= 12);
 };
 
+const wordsPerLine = (line: string) => line.trim().split(/\s+/).filter(Boolean).length;
+
+const buildCaptionSchedule = (lines: string[]) => {
+  if (lines.length === 0) return [] as Array<{ start: number; end: number }>;
+
+  let cursor = 0;
+  return lines.map((line) => {
+    const words = Math.max(1, wordsPerLine(line));
+    const duration = Math.min(
+      LIVE_CAPTION_MAX_SECONDS_PER_LINE,
+      Math.max(LIVE_CAPTION_MIN_SECONDS_PER_LINE, words / LIVE_CAPTION_WORDS_PER_SECOND)
+    );
+    const start = cursor;
+    const end = cursor + duration;
+    cursor = end;
+    return { start, end };
+  });
+};
+
 function SkeletonCard() {
   return (
     <div className='animate-pulse rounded-[18px] border border-white/10 bg-[#0b0b0f] p-4 shadow-[0_10px_24px_rgba(0,0,0,0.2)] sm:rounded-2xl md:p-5'>
@@ -234,6 +254,11 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
   const captionLines = useMemo(
     () => (item.kind === 'podcast' ? buildCaptionLines(item.translatedDescription || '') : []),
     [item.kind, item.translatedDescription]
+  );
+  const captionSchedule = useMemo(() => buildCaptionSchedule(captionLines), [captionLines]);
+  const captionCycleDuration = useMemo(
+    () => (captionSchedule.length > 0 ? captionSchedule[captionSchedule.length - 1].end : 0),
+    [captionSchedule]
   );
   const readerUrl = `/api/radar-reader?url=${encodeURIComponent(item.url)}&fallbackTitle=${encodeURIComponent(
     item.title
@@ -362,22 +387,15 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
                 onTimeUpdate={(event) => {
                   if (captionLines.length === 0) return;
                   const element = event.currentTarget;
-                  const duration = Number.isFinite(element.duration) ? element.duration : 0;
-                  const adaptiveSecondsPerLine =
-                    duration > 0
-                      ? Math.min(
-                          LIVE_CAPTION_MAX_SECONDS_PER_LINE,
-                          Math.max(LIVE_CAPTION_SECONDS_PER_LINE, duration / Math.max(captionLines.length, 1))
-                        )
-                      : LIVE_CAPTION_SECONDS_PER_LINE;
-
-                  // Loop lines so captions continue for the entire playback duration.
+                  if (captionSchedule.length === 0 || captionCycleDuration <= 0) return;
+                  const localTime = ((element.currentTime % captionCycleDuration) + captionCycleDuration) % captionCycleDuration;
                   const nextIndex =
-                    Math.max(0, Math.floor(element.currentTime / Math.max(adaptiveSecondsPerLine, 0.1))) %
-                    captionLines.length;
+                    captionSchedule.findIndex((slot) => localTime >= slot.start && localTime < slot.end) ??
+                    0;
+                  const safeIndex = nextIndex >= 0 ? nextIndex : captionLines.length - 1;
 
-                  if (nextIndex !== captionLineIndex) {
-                    setCaptionLineIndex(nextIndex);
+                  if (safeIndex !== captionLineIndex) {
+                    setCaptionLineIndex(safeIndex);
                   }
                 }}
                 className='block h-14 w-full min-w-0 rounded-lg border border-white/10 bg-black/20'
