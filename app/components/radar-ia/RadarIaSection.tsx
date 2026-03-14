@@ -85,14 +85,23 @@ const extractInstagramKind = (url: string) => {
 const isTikTokUrl = (url: string) => /tiktok\.com/i.test(url);
 
 const extractTikTokVideoId = (url: string) => {
-  const match = url.match(/\/video\/(\d+)/i);
-  return match?.[1] || '';
+  const normalized = String(url || '');
+  const direct = normalized.match(/\/video\/(\d+)/i);
+  if (direct?.[1]) return direct[1];
+  try {
+    const parsed = new URL(normalized);
+    const fromParam = parsed.searchParams.get('item_id');
+    if (fromParam) return fromParam;
+  } catch {
+    // Ignore URL parsing failure.
+  }
+  return '';
 };
 
 const buildTikTokEmbedUrl = (url: string) => {
   const videoId = extractTikTokVideoId(url);
   if (!videoId) return '';
-  return `https://www.tiktok.com/player/v1/${videoId}`;
+  return `https://www.tiktok.com/embed/v2/${videoId}`;
 };
 
 const isTwitchUrl = (url: string) => /twitch\.tv/i.test(url);
@@ -256,6 +265,15 @@ const pickRecorderMimeType = () => {
   return '';
 };
 
+const dedupeViewerItems = (items: RadarItem[]) => {
+  const map = new Map<string, RadarItem>();
+  items.forEach((item) => {
+    if (!item?.id) return;
+    if (!map.has(item.id)) map.set(item.id, item);
+  });
+  return [...map.values()];
+};
+
 function SkeletonCard() {
   return (
     <div className='animate-pulse rounded-[18px] border border-white/10 bg-[#0b0b0f] p-4 shadow-[0_10px_24px_rgba(0,0,0,0.2)] sm:rounded-2xl md:p-5'>
@@ -323,7 +341,17 @@ function RadarCard({ item, onOpen }: { item: RadarItem; onOpen: (item: RadarItem
   );
 }
 
-function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }) {
+function RadarViewer({
+  item,
+  allItems,
+  onClose,
+  onSelectItem,
+}: {
+  item: RadarItem;
+  allItems: RadarItem[];
+  onClose: () => void;
+  onSelectItem: (next: RadarItem) => void;
+}) {
   const youtubeId =
     item.kind === 'youtube' ? extractYoutubeId(item.url, item.id.replace(/^yt-/, '').trim()) : '';
   const instagramCode = item.kind === 'instagram' ? extractInstagramCode(item.url) : '';
@@ -373,11 +401,35 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
           twitchParentHost
         )}&autoplay=true`
       : '';
+  const [tikTokEmbedFailed, setTikTokEmbedFailed] = useState(false);
+  const relatedTikTokItems = useMemo(() => {
+    if (!isTikTokNews) return [] as RadarItem[];
+    const creatorMatches = allItems.filter((candidate) => {
+      if (candidate.id === item.id) return false;
+      if (candidate.kind !== 'news') return false;
+      if (!isTikTokUrl(candidate.url) && !/tiktok/i.test(candidate.source)) return false;
+      if (item.channel && candidate.channel && candidate.channel === item.channel) return true;
+      return false;
+    });
+    if (creatorMatches.length > 0) return creatorMatches.slice(0, 8);
+    return allItems
+      .filter(
+        (candidate) =>
+          candidate.id !== item.id &&
+          candidate.kind === 'news' &&
+          (isTikTokUrl(candidate.url) || /tiktok/i.test(candidate.source))
+      )
+      .slice(0, 8);
+  }, [allItems, isTikTokNews, item.channel, item.id]);
   const readerUrl = `/api/radar-reader?url=${encodeURIComponent(item.url)}&fallbackTitle=${encodeURIComponent(
     item.title
   )}&fallbackDescription=${encodeURIComponent(item.description)}&fallbackSource=${encodeURIComponent(
     item.source
   )}`;
+
+  useEffect(() => {
+    setTikTokEmbedFailed(false);
+  }, [item.id]);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && window.location?.hostname) {
@@ -680,13 +732,47 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
             )
           ) : item.kind === 'news' ? (
             isTikTokNews && tikTokEmbedUrl ? (
-              <iframe
-                src={tikTokEmbedUrl}
-                title={`TikTok player - ${item.title}`}
-                allow='autoplay; encrypted-media; picture-in-picture; web-share'
-                allowFullScreen
-                className='h-full min-h-[320px] w-full rounded-xl border border-white/10 bg-black sm:min-h-[460px]'
-              />
+              <div className='flex h-full min-h-[320px] flex-col gap-3 overflow-auto rounded-xl border border-white/10 bg-[#0b0b0f] p-3 sm:min-h-[460px] sm:p-4'>
+                {!tikTokEmbedFailed ? (
+                  <iframe
+                    src={tikTokEmbedUrl}
+                    title={`TikTok player - ${item.title}`}
+                    allow='autoplay; encrypted-media; picture-in-picture; web-share'
+                    allowFullScreen
+                    onError={() => setTikTokEmbedFailed(true)}
+                    className='h-[54vh] min-h-[300px] w-full rounded-xl border border-white/10 bg-black sm:h-[64vh] sm:min-h-[420px]'
+                  />
+                ) : (
+                  <div className='flex min-h-[300px] items-center justify-center rounded-xl border border-white/10 bg-black/30 p-5 text-center sm:min-h-[420px]'>
+                    <p className='text-sm text-[#c9d1d9]'>
+                      Este vídeo não abriu no player interno. Clique em outro vídeo do criador abaixo.
+                    </p>
+                  </div>
+                )}
+
+                {relatedTikTokItems.length > 0 ? (
+                  <div className='rounded-xl border border-white/10 bg-white/[0.02] p-3'>
+                    <p className='text-[11px] uppercase tracking-[0.12em] text-[#9ca3af]'>
+                      {item.channel ? `Mais vídeos de ${item.channel}` : 'Mais vídeos do TikTok'}
+                    </p>
+                    <div className='mt-2 grid gap-2 sm:grid-cols-2'>
+                      {relatedTikTokItems.map((candidate) => (
+                        <button
+                          key={candidate.id}
+                          type='button'
+                          onClick={() => onSelectItem(candidate)}
+                          className='rounded-lg border border-white/10 bg-white/[0.02] px-3 py-2 text-left text-xs text-[#d1d5db] transition hover:border-[#C6FF2E]/45 hover:text-[#C6FF2E]'
+                        >
+                          <p className='line-clamp-2 font-medium'>{candidate.title}</p>
+                          <p className='mt-1 text-[11px] text-[#9ca3af]'>
+                            {candidate.channel || 'TikTok'} · clique para assistir
+                          </p>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+              </div>
             ) : isTwitchNews && twitchEmbedUrl ? (
               <iframe
                 src={twitchEmbedUrl}
@@ -961,6 +1047,7 @@ export function RadarIaSection() {
     () => activeItems.slice(0, visibleCount),
     [activeItems, visibleCount]
   );
+  const viewerItems = useMemo(() => dedupeViewerItems([...activeItems, ...podcastItems]), [activeItems, podcastItems]);
 
   return (
     <article id='radar-ia' className='space-y-4 sm:space-y-5'>
@@ -1103,7 +1190,14 @@ export function RadarIaSection() {
           </div>
         )}
       </section>
-      {viewerItem ? <RadarViewer item={viewerItem} onClose={() => setViewerItem(null)} /> : null}
+      {viewerItem ? (
+        <RadarViewer
+          item={viewerItem}
+          allItems={viewerItems}
+          onClose={() => setViewerItem(null)}
+          onSelectItem={setViewerItem}
+        />
+      ) : null}
     </article>
   );
 }

@@ -1400,7 +1400,7 @@ const buildBalancedAll = (results) => {
   const topYoutube = takeTop(results.youtube, 3);
   const tiktokNews = takeTop(
     results.news.filter((item) => /tiktok/i.test(String(item?.source || '')) || /tiktok\.com/i.test(String(item?.url || ''))),
-    1
+    2
   );
   const twitchNews = takeTop(
     results.news.filter((item) => /twitch/i.test(String(item?.source || '')) || /twitch\.tv/i.test(String(item?.url || ''))),
@@ -1410,7 +1410,7 @@ const buildBalancedAll = (results) => {
     results.news.filter((item) => /reddit/i.test(String(item?.source || '')) || /reddit\.com/i.test(String(item?.url || ''))),
     1
   );
-  const pickedSocial = dedupeByUrl([...tiktokNews, ...twitchNews, ...redditNews]).slice(0, 3);
+  const pickedSocial = dedupeByUrl([...tiktokNews, ...twitchNews, ...redditNews]).slice(0, 4);
   const editorialNews = takeTop(
     results.news.filter(
       (item) =>
@@ -1420,7 +1420,7 @@ const buildBalancedAll = (results) => {
     ),
     3
   );
-  const topNews = dedupeByUrl([...pickedSocial, ...editorialNews]).slice(0, 3);
+  const topNews = dedupeByUrl([...pickedSocial, ...editorialNews]).slice(0, 4);
   const topInstagram = takeTop(results.instagram, 3);
   return [...topYoutube, ...topNews, ...topInstagram];
 };
