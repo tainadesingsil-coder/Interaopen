@@ -68,7 +68,7 @@ const extractMetaContent = (html, key) => {
 export async function onRequestGet(context) {
   const requestUrl = new URL(context.request.url);
   const rawCode = requestUrl.searchParams.get('code') || '';
-  const code = rawCode.replace(/[^a-zA-Z0-9]/g, '');
+  const code = rawCode.replace(/[^a-zA-Z0-9_-]/g, '');
   const rawKind = (requestUrl.searchParams.get('kind') || '').toLowerCase();
   const kind = rawKind === 'reel' || rawKind === 'post' ? rawKind : '';
 

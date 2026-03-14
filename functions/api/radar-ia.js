@@ -326,6 +326,24 @@ const CURATED_INSTAGRAM_PUBLICATIONS = [
     thumbnail: '/api/instagram-image?code=DVrofSTknFL&kind=reel',
     ctaLabel: 'Ver reel',
   },
+  {
+    id: 'instagram-reel-dvhizj9ay-r',
+    title: 'Hollyfield Agency',
+    description:
+      'Reel sobre Claude Code Security e aplicação de capacidades avançadas de IA em defesa cibernética ativa.',
+    url: 'https://www.instagram.com/reel/DVHIzJ9AY-R/',
+    thumbnail: '/api/instagram-image?code=DVHIzJ9AY-R&kind=reel',
+    ctaLabel: 'Ver reel',
+  },
+  {
+    id: 'instagram-reel-dvj79dscstm',
+    title: 'Rony Meisler | Empreendedor',
+    description:
+      'Reel sobre aprendizagem personalizada com IA e potencial para revolucionar estudo e desenvolvimento.',
+    url: 'https://www.instagram.com/reel/DVj79dSCStm/',
+    thumbnail: '/api/instagram-image?code=DVj79dSCStm&kind=reel',
+    ctaLabel: 'Ver reel',
+  },
 ];
 
 const PT_STOPWORDS = new Set([
