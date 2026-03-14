@@ -299,7 +299,7 @@ export function RadarIaSection() {
                   key={tab}
                   type='button'
                   onClick={() => setActiveTab(tab)}
-                  className={`rounded-lg border px-3 py-2 text-xs font-semibold transition-all duration-200 ease-out ${
+                  className={`shrink-0 whitespace-nowrap rounded-lg border px-3 py-2 text-xs font-semibold leading-none transition-all duration-200 ease-out ${
                     activeTab === tab
                       ? 'border-[#C6FF2E]/60 bg-[#C6FF2E]/12 text-[#C6FF2E] shadow-[0_0_0_1px_rgba(198,255,46,0.14)]'
                       : 'border-white/10 bg-white/[0.03] text-[#9ca3af] hover:border-[#C6FF2E]/45 hover:text-[#C6FF2E]'
@@ -318,7 +318,7 @@ export function RadarIaSection() {
                   key={range}
                   type='button'
                   onClick={() => setActiveRange(range)}
-                  className={`rounded-lg border px-3 py-1.5 text-xs transition-all duration-200 ease-out ${
+                  className={`shrink-0 whitespace-nowrap rounded-lg border px-3 py-1.5 text-xs leading-none transition-all duration-200 ease-out ${
                     activeRange === range
                       ? 'border-[#C6FF2E]/60 bg-[#C6FF2E]/12 text-[#C6FF2E] shadow-[0_0_0_1px_rgba(198,255,46,0.14)]'
                       : 'border-white/10 bg-white/[0.03] text-[#9ca3af] hover:border-[#C6FF2E]/45 hover:text-[#C6FF2E]'

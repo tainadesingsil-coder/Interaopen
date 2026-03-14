@@ -26,14 +26,14 @@ const portfolioLinks = [
     icon: <Home className='h-4 w-4 text-[#9ca3af]' />,
   },
   {
-    label: 'Portfólio',
-    href: '#portfolio',
-    icon: <GalleryVerticalEnd className='h-4 w-4 text-[#9ca3af]' />,
-  },
-  {
     label: 'Radar IA',
     href: '#radar-ia',
     icon: <RadioTower className='h-4 w-4 text-[#9ca3af]' />,
+  },
+  {
+    label: 'Portfólio',
+    href: '#portfolio',
+    icon: <GalleryVerticalEnd className='h-4 w-4 text-[#9ca3af]' />,
   },
 ];
 
@@ -64,6 +64,8 @@ export default function HomePage() {
                 </h2>
               </article>
 
+              <RadarIaSection />
+
               <article id='portfolio' className='space-y-4'>
                 <span id='projetos' className='sr-only'>
                   projetos
@@ -78,8 +80,6 @@ export default function HomePage() {
                   ))}
                 </div>
               </article>
-
-              <RadarIaSection />
 
             </div>
           </section>
