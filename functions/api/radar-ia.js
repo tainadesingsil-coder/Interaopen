@@ -344,6 +344,46 @@ const CURATED_INSTAGRAM_PUBLICATIONS = [
     thumbnail: '/api/instagram-image?code=DVj79dSCStm&kind=reel',
     ctaLabel: 'Ver reel',
   },
+  {
+    id: 'instagram-post-dvinx6slufl',
+    title: 'Conteúdo de IA atualizado',
+    description: 'Novo post adicionado à curadoria do Radar IA.',
+    url: 'https://www.instagram.com/p/DVinx6SluFl/',
+    thumbnail: '/api/instagram-image?code=DVinx6SluFl',
+    ctaLabel: 'Ver post',
+  },
+  {
+    id: 'instagram-post-dvvryyjdj2p',
+    title: 'Conteúdo de IA atualizado',
+    description: 'Novo post adicionado à curadoria do Radar IA.',
+    url: 'https://www.instagram.com/p/DVvrYYjDJ2p/',
+    thumbnail: '/api/instagram-image?code=DVvrYYjDJ2p',
+    ctaLabel: 'Ver post',
+  },
+  {
+    id: 'instagram-post-dvv1dj9ak0k',
+    title: 'Conteúdo de IA atualizado',
+    description: 'Novo post adicionado à curadoria do Radar IA.',
+    url: 'https://www.instagram.com/p/DVv1Dj9AK0K/',
+    thumbnail: '/api/instagram-image?code=DVv1Dj9AK0K',
+    ctaLabel: 'Ver post',
+  },
+  {
+    id: 'instagram-post-dvtkv1ojukg',
+    title: 'Conteúdo de IA atualizado',
+    description: 'Novo post adicionado à curadoria do Radar IA.',
+    url: 'https://www.instagram.com/p/DVtKV1Ojukg/',
+    thumbnail: '/api/instagram-image?code=DVtKV1Ojukg',
+    ctaLabel: 'Ver post',
+  },
+  {
+    id: 'instagram-post-dvbrkftks5u',
+    title: 'Conteúdo de IA atualizado',
+    description: 'Novo post adicionado à curadoria do Radar IA.',
+    url: 'https://www.instagram.com/p/DVbrKfTkS5U/',
+    thumbnail: '/api/instagram-image?code=DVbrKfTkS5U',
+    ctaLabel: 'Ver post',
+  },
 ];
 
 const PT_STOPWORDS = new Set([
