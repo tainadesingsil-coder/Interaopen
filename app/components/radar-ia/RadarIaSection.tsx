@@ -98,6 +98,24 @@ const extractEngagement = (description: string) => {
   };
 };
 
+const buildCaptionLines = (value: string, maxLines = 18) => {
+  if (!value) return [] as string[];
+  const base = value.replace(/\s+/g, ' ').trim();
+  if (!base) return [] as string[];
+
+  const sentences = base
+    .split(/(?<=[.!?])\s+/)
+    .map((part) => part.trim())
+    .filter((part) => part.length >= 10);
+
+  const lines = (sentences.length > 0 ? sentences : [base])
+    .map((line) => line.slice(0, 220).trim())
+    .filter(Boolean)
+    .slice(0, maxLines);
+
+  return lines;
+};
+
 function SkeletonCard() {
   return (
     <div className='animate-pulse rounded-[18px] border border-white/10 bg-[#0b0b0f] p-4 shadow-[0_10px_24px_rgba(0,0,0,0.2)] sm:rounded-2xl md:p-5'>
@@ -184,6 +202,11 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
     item.kind === 'podcast' && (item.source || '').toLowerCase().includes('pizza de dados');
   const podcastAudioRef = useRef<HTMLAudioElement | null>(null);
   const [isPodcastPlaying, setIsPodcastPlaying] = useState(false);
+  const [captionLineIndex, setCaptionLineIndex] = useState(0);
+  const captionLines = useMemo(
+    () => (item.kind === 'podcast' ? buildCaptionLines(item.translatedDescription || '') : []),
+    [item.kind, item.translatedDescription]
+  );
   const readerUrl = `/api/radar-reader?url=${encodeURIComponent(item.url)}&fallbackTitle=${encodeURIComponent(
     item.title
   )}&fallbackDescription=${encodeURIComponent(item.description)}&fallbackSource=${encodeURIComponent(
@@ -205,6 +228,7 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
 
   useEffect(() => {
     setIsPodcastPlaying(false);
+    setCaptionLineIndex(0);
   }, [item.id]);
 
   const togglePodcastCoverPlayback = async () => {
@@ -307,22 +331,36 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
                 onPlay={() => setIsPodcastPlaying(true)}
                 onPause={() => setIsPodcastPlaying(false)}
                 onEnded={() => setIsPodcastPlaying(false)}
+                onTimeUpdate={(event) => {
+                  if (captionLines.length === 0) return;
+                  const element = event.currentTarget;
+                  const duration = Number.isFinite(element.duration) ? element.duration : 0;
+                  if (duration <= 0) return;
+                  const segment = duration / captionLines.length;
+                  const nextIndex = Math.min(
+                    captionLines.length - 1,
+                    Math.max(0, Math.floor(element.currentTime / Math.max(segment, 0.1)))
+                  );
+                  if (nextIndex !== captionLineIndex) {
+                    setCaptionLineIndex(nextIndex);
+                  }
+                }}
                 className='block h-14 w-full min-w-0 rounded-lg border border-white/10 bg-black/20'
                 style={{ minHeight: 54 }}
               />
+              {captionLines.length > 0 ? (
+                <div className='rounded-xl border border-[#C6FF2E]/25 bg-[#C6FF2E]/[0.06] p-3'>
+                  <p className='text-[10px] uppercase tracking-[0.11em] text-[#C6FF2E]'>Legenda ao vivo (PT-BR)</p>
+                  <p className='mt-1.5 min-h-[48px] whitespace-pre-wrap break-words text-sm leading-relaxed text-[#d1d5db]'>
+                    {captionLines[captionLineIndex] || captionLines[0]}
+                  </p>
+                </div>
+              ) : null}
               <div className='rounded-xl border border-white/10 bg-white/[0.02] p-4'>
                 <p className='text-[11px] uppercase tracking-[0.12em] text-[#9ca3af]'>Descrição do episódio</p>
                 <p className='mt-2 whitespace-pre-wrap break-words text-sm leading-relaxed text-[#d1d5db] sm:text-[15px]'>
                   {item.description}
                 </p>
-                {item.translatedDescription ? (
-                  <div className='mt-3 rounded-lg border border-[#C6FF2E]/25 bg-[#C6FF2E]/[0.06] p-3'>
-                    <p className='text-[10px] uppercase tracking-[0.11em] text-[#C6FF2E]'>Legenda traduzida (PT-BR)</p>
-                    <p className='mt-1.5 whitespace-pre-wrap break-words text-sm leading-relaxed text-[#d1d5db]'>
-                      {item.translatedDescription}
-                    </p>
-                  </div>
-                ) : null}
               </div>
             </div>
           ) : (

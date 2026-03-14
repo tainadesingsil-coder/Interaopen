@@ -12,6 +12,8 @@ const DEFAULT_USER_AGENT =
   'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36';
 const TRANSLATE_TITLE_MAX_CHARS = 180;
 const TRANSLATE_DESCRIPTION_MAX_CHARS = 420;
+const PODCAST_SUMMARY_MAX_CHARS = 320;
+const PODCAST_CAPTION_MAX_CHARS = 1100;
 const PORTUGUESE_SOURCE_PRIORITY = ['Pizza de Dados'];
 
 const PODCAST_FEEDS = [
@@ -126,6 +128,68 @@ const truncateText = (value = '', maxChars = 400) => {
   if (!value || value.length <= maxChars) return value;
   return `${value.slice(0, maxChars).trim()}...`;
 };
+
+const cleanPodcastDescription = (value = '') => {
+  const normalized = String(value || '')
+    .replace(/\s+/g, ' ')
+    .replace(/https?:\/\/\S+/gi, ' ')
+    .replace(/\(\d{1,2}:\d{2}(?::\d{2})?\)/g, ' ')
+    .replace(/–\s+/g, ' ')
+    .replace(/-\s+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  if (!normalized) return '';
+
+  const cutMarkers = [
+    'CONTACT LEX',
+    'EPISODE LINKS',
+    'SPONSORS',
+    'OUTLINE',
+    'PODCAST LINKS',
+    'CHECK OUT OUR SPONSORS',
+    'SEE BELOW FOR TIMESTAMPS',
+  ];
+
+  const upper = normalized.toUpperCase();
+  let cutIndex = normalized.length;
+  for (const marker of cutMarkers) {
+    const markerIndex = upper.indexOf(marker);
+    if (markerIndex > 0) {
+      cutIndex = Math.min(cutIndex, markerIndex);
+    }
+  }
+
+  return normalized.slice(0, cutIndex).trim();
+};
+
+const splitSentences = (value = '') =>
+  value
+    .split(/(?<=[.!?])\s+/)
+    .map((part) => part.trim())
+    .filter((part) => part.length >= 20);
+
+const buildShortSummary = (value = '', maxChars = PODCAST_SUMMARY_MAX_CHARS) => {
+  const cleaned = cleanPodcastDescription(value);
+  if (!cleaned) return '';
+
+  const sentences = splitSentences(cleaned);
+  if (sentences.length === 0) return truncateText(cleaned, maxChars);
+
+  let summary = '';
+  for (const sentence of sentences) {
+    const next = summary ? `${summary} ${sentence}` : sentence;
+    if (next.length > maxChars && summary) break;
+    summary = next.length > maxChars ? truncateText(next, maxChars) : next;
+    if (summary.length >= maxChars * 0.7) break;
+    if (summary.split(/[.!?]/).filter(Boolean).length >= 2) break;
+  }
+
+  return summary || truncateText(cleaned, maxChars);
+};
+
+const buildCaptionText = (value = '', maxChars = PODCAST_CAPTION_MAX_CHARS) =>
+  truncateText(cleanPodcastDescription(value), maxChars);
 
 const isLikelyPortuguese = (value = '') => {
   const normalized = String(value || '').toLowerCase();
@@ -453,25 +517,36 @@ const buildBalancedItems = (groupedItems, limit) => {
 const translatePodcastItems = async (items, env = {}) =>
   Promise.all(
     items.map(async (item) => {
+      const summaryBase = buildShortSummary(item.description || '');
+      const captionBase = buildCaptionText(item.description || '');
+
       const translatedTitle = await translateToPortuguese(item.title || '', TRANSLATE_TITLE_MAX_CHARS, env);
-      const translatedDescription = await translateToPortuguese(
-        item.description || '',
+      const translatedSummary = await translateToPortuguese(
+        summaryBase || item.description || '',
         TRANSLATE_DESCRIPTION_MAX_CHARS,
         env
       );
-      const translated = translatedTitle.translated || translatedDescription.translated;
+      const translatedCaption = await translateToPortuguese(captionBase || item.description || '', PODCAST_CAPTION_MAX_CHARS, env);
+
+      const translated = translatedTitle.translated || translatedSummary.translated;
       const englishLike =
-        (translatedDescription.detectedLanguage || translatedTitle.detectedLanguage || '').startsWith('en') ||
+        (translatedSummary.detectedLanguage || translatedTitle.detectedLanguage || '').startsWith('en') ||
         (!isLikelyPortuguese(item.title || '') && !isLikelyPortuguese(item.description || ''));
 
       return {
         ...item,
         title: translated && translatedTitle.text ? translatedTitle.text : item.title,
-        description: item.description,
+        description: truncateText(
+          translated && translatedSummary.text ? translatedSummary.text : summaryBase || item.description,
+          PODCAST_SUMMARY_MAX_CHARS
+        ),
         originalTitle: translated ? item.title : null,
-        originalDescription: translated ? item.description : null,
-        translatedDescription: translated && englishLike ? translatedDescription.text : null,
-        translatedLanguage: translatedDescription.detectedLanguage || translatedTitle.detectedLanguage || null,
+        originalDescription: translated ? summaryBase || item.description : null,
+        translatedDescription:
+          translated && englishLike
+            ? truncateText(translatedCaption.text || translatedSummary.text, PODCAST_CAPTION_MAX_CHARS)
+            : null,
+        translatedLanguage: translatedSummary.detectedLanguage || translatedTitle.detectedLanguage || null,
         source: translated ? `${item.source} · tradução Google` : item.source,
       };
     })
