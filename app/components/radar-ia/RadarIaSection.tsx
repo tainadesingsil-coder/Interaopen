@@ -304,6 +304,14 @@ const extractOpenUrlFromHash = (hashValue: string) => {
   return params.get('open') || '';
 };
 
+const extractOpenUrlFromLocation = () => {
+  if (typeof window === 'undefined') return '';
+  const searchParams = new URLSearchParams(window.location.search || '');
+  const fromSearch = searchParams.get('open') || '';
+  if (fromSearch) return fromSearch;
+  return extractOpenUrlFromHash(window.location.hash || '');
+};
+
 function SkeletonCard() {
   return (
     <div className='animate-pulse rounded-[18px] border border-white/10 bg-[#0b0b0f] p-4 shadow-[0_10px_24px_rgba(0,0,0,0.2)] sm:rounded-2xl md:p-5'>
@@ -1036,8 +1044,8 @@ export function RadarIaSection() {
   }, [activeTab, submittedQuery, activeRange]);
 
   useEffect(() => {
-    const syncFromHash = () => {
-      const openUrl = extractOpenUrlFromHash(window.location.hash || '');
+    const syncFromLocation = () => {
+      const openUrl = extractOpenUrlFromLocation();
       if (!openUrl) return;
       setPendingOpenUrl(openUrl);
       if (activeTab !== 'all') {
@@ -1045,9 +1053,13 @@ export function RadarIaSection() {
       }
     };
 
-    syncFromHash();
-    window.addEventListener('hashchange', syncFromHash);
-    return () => window.removeEventListener('hashchange', syncFromHash);
+    syncFromLocation();
+    window.addEventListener('hashchange', syncFromLocation);
+    window.addEventListener('popstate', syncFromLocation);
+    return () => {
+      window.removeEventListener('hashchange', syncFromLocation);
+      window.removeEventListener('popstate', syncFromLocation);
+    };
   }, [activeTab]);
 
   useEffect(() => {
@@ -1183,8 +1195,9 @@ export function RadarIaSection() {
     }
 
     setPendingOpenUrl('');
-    if (typeof window !== 'undefined' && window.location.hash.includes('?open=')) {
-      window.history.replaceState(null, '', '#radar-ia');
+    if (typeof window !== 'undefined') {
+      const nextUrl = `${window.location.pathname}#radar-ia`;
+      window.history.replaceState(null, '', nextUrl);
     }
   }, [pendingOpenUrl, viewerItems]);
 
