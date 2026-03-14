@@ -2,6 +2,17 @@ const CACHE_TTL_MS = 5 * 60 * 1000;
 const SOURCE_TIMEOUT_MS = 8000;
 const FALLBACK_DISCORD_APP_ID = '1482397432993026088';
 const FALLBACK_TWITCH_CHANNELS = ['cozycoding', 'theprimeagen', 'tsoding'];
+const FALLBACK_TIKTOK_VIDEO_URLS = [
+  'https://www.tiktok.com/@gabrieladamuchi/video/7601907452212235540',
+  'https://www.tiktok.com/@izabela.anholett/video/7611634628490710293',
+  'https://www.tiktok.com/@jotalinharesdesign/video/7513681439955684664',
+  'https://www.tiktok.com/@jefdicastech/video/7601248981095550226',
+  'https://www.tiktok.com/@islamsousa/video/7613833799423528199',
+  'https://www.tiktok.com/@jornadatop/video/7232292097313770757',
+];
+const FALLBACK_DISCORD_COMMUNITY_URLS = [
+  'https://discord.com/channels/327861810768117763/1181004493517758604/threads/1252303012634824865',
+];
 const TWITCH_TOPIC_QUERIES = [
   'inteligencia artificial',
   'marketing digital',
@@ -59,6 +70,15 @@ const safeText = (value = '', max = 320) =>
     .trim()
     .slice(0, max);
 
+const parseCommaSeparated = (value = '') =>
+  String(value || '')
+    .split(/[,\n;]/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+const toUniqueList = (items = [], max = 20) =>
+  [...new Set(items.map((item) => String(item || '').trim()).filter(Boolean))].slice(0, max);
+
 const parseEntries = (xml = '') => {
   const items = [...xml.matchAll(/<item[\s\S]*?<\/item>/gi)].map((match) => match[0]);
   if (items.length > 0) return items;
@@ -86,84 +106,92 @@ const extractImageFromBlock = (block = '') => {
   return null;
 };
 
-const parseTiktokRssFeeds = (env = {}) => {
-  const raw = String(env?.TIKTOK_RSS_FEEDS || env?.TIKTOK_RSS_URL || '').trim();
-  if (!raw) return [];
-  return raw
-    .split(/[,\n;]/)
-    .map((item) => item.trim())
-    .filter(Boolean)
-    .filter((item, index, arr) => arr.indexOf(item) === index)
-    .slice(0, 4);
+const normalizeTikTokUrl = (url = '') => {
+  try {
+    const parsed = new URL(String(url || '').trim());
+    parsed.search = '';
+    parsed.hash = '';
+    return `${parsed.origin}${parsed.pathname}`.replace(/\/+$/, '');
+  } catch {
+    return String(url || '').trim();
+  }
 };
 
-const tiktokFallbackItems = () => [
-  {
-    id: 'tiktok-fallback-ia',
-    title: 'TikTok · #inteligenciaartificial',
-    summary: 'Feed em tempo real com vídeos sobre IA no TikTok.',
-    url: 'https://www.tiktok.com/tag/inteligenciaartificial',
-    thumbnail: null,
-    tags: ['TikTok', 'IA', 'Trends'],
-    category: 'IA',
-    isLive: true,
-    metricLabel: 'Atualizando agora',
-    caseLabel: 'Abrir feed',
-    channel: '@tiktok',
-  },
-  {
-    id: 'tiktok-fallback-marketing',
-    title: 'TikTok · Marketing digital',
-    summary: 'Conteúdos e estratégias atuais de marketing digital.',
-    url: 'https://www.tiktok.com/discover/marketing-digital',
-    thumbnail: null,
-    tags: ['TikTok', 'Marketing', 'Conteúdo'],
-    category: 'Marketing',
-    isLive: true,
-    metricLabel: 'Atualizando agora',
-    caseLabel: 'Abrir feed',
-    channel: '@tiktok',
-  },
-];
+const extractTiktokHandleFromUrl = (url = '') => {
+  const match = String(url || '').match(/tiktok\.com\/@([a-z0-9._]{2,40})/i);
+  return match?.[1] ? `@${match[1].toLowerCase()}` : '@tiktok';
+};
+
+const parseTiktokVideoUrls = (env = {}) => {
+  const raw = String(
+    env?.TIKTOK_VIDEO_URLS || env?.TIKTOK_CREATOR_URLS || env?.TIKTOK_SEED_URLS || ''
+  ).trim();
+  const envUrls = raw ? parseCommaSeparated(raw) : [];
+  return toUniqueList(
+    [...envUrls, ...FALLBACK_TIKTOK_VIDEO_URLS]
+      .filter((url) => /^https?:\/\/(www\.)?tiktok\.com\/@[^/]+\/video\/\d+/i.test(url))
+      .map((url) => normalizeTikTokUrl(url)),
+    14
+  );
+};
+
+const resolveTiktokOEmbed = async (videoUrl = '') => {
+  try {
+    const endpoint = new URL('https://www.tiktok.com/oembed');
+    endpoint.searchParams.set('url', videoUrl);
+    const response = await fetchWithTimeout(
+      endpoint.toString(),
+      {
+        headers: {
+          accept: 'application/json',
+        },
+      },
+      5500
+    );
+    if (!response.ok) return null;
+    const payload = await response.json();
+    return {
+      title: safeText(payload?.title || '', 180),
+      thumbnail: String(payload?.thumbnail_url || '').trim() || null,
+      authorName: safeText(payload?.author_name || '', 120),
+    };
+  } catch {
+    return null;
+  }
+};
 
 const fetchTiktokItems = async (env = {}) => {
-  const feeds = parseTiktokRssFeeds(env);
-  if (feeds.length === 0) return tiktokFallbackItems();
-
+  const videoUrls = parseTiktokVideoUrls(env);
   const settled = await Promise.allSettled(
-    feeds.map(async (feedUrl) => {
-      const response = await fetchWithTimeout(feedUrl);
-      if (!response.ok) throw new Error(`tiktok_rss_failed:${response.status}`);
-      const xml = await response.text();
-      const entries = parseEntries(xml).slice(0, 8);
-      return entries.map((entry, index) => {
-        const title = extractTagValue(entry, ['title']);
-        const summary = extractTagValue(entry, ['description', 'summary', 'content']);
-        const link = extractTagValue(entry, ['link', 'id']);
-        if (!link) return null;
-        return {
-          id: `tiktok-${feedUrl}-${index}`.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 80),
-          title: title || 'TikTok · Conteúdo recente',
-          summary: safeText(summary || title || 'Novo conteúdo no TikTok.', 260),
-          url: link,
-          thumbnail: extractImageFromBlock(entry),
-          tags: ['TikTok', 'Trend', 'Atualização'],
-          category: 'Marketing',
-          isLive: true,
-          metricLabel: 'Atualizado há instantes',
-          caseLabel: 'Assistir',
-          channel: '@tiktok',
-        };
-      });
+    videoUrls.map(async (videoUrl, index) => {
+      const oEmbed = await resolveTiktokOEmbed(videoUrl);
+      const channel = extractTiktokHandleFromUrl(videoUrl);
+      const title = oEmbed?.title || `TikTok · ${channel}`;
+      return {
+        id: `tiktok-video-${videoUrl}`.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 80),
+        title,
+        summary:
+          oEmbed?.authorName
+            ? `Vídeo recente de ${oEmbed.authorName} na sua base de criadores.`
+            : 'Vídeo recente da sua base de criadores no TikTok.',
+        url: videoUrl,
+        thumbnail: oEmbed?.thumbnail || null,
+        tags: ['TikTok', 'Vídeo', 'Creator'],
+        category: /marketing|conteudo|social/i.test(title) ? 'Marketing' : 'IA',
+        isLive: true,
+        metricLabel: 'Atualizado pela base de criadores',
+        caseLabel: 'Ver no Radar',
+        channel,
+        rank: index,
+      };
     })
   );
 
-  const merged = settled
-    .flatMap((result) => (result.status === 'fulfilled' ? result.value : []))
-    .filter(Boolean)
+  return settled
+    .flatMap((result) => (result.status === 'fulfilled' ? [result.value] : []))
+    .sort((a, b) => Number(a.rank || 0) - Number(b.rank || 0))
+    .map(({ rank, ...item }) => item)
     .slice(0, 10);
-
-  return merged.length > 0 ? merged : tiktokFallbackItems();
 };
 
 const parseTwitchChannels = (env = {}) => {
@@ -339,64 +367,76 @@ const fetchTwitchItems = async (env = {}) => {
   return fetchTwitchDecapiFallback(env);
 };
 
+const parseDiscordChannelsUrl = (value = '') => {
+  const match = String(value || '').match(/discord\.com\/channels\/(\d+)\/(\d+)(?:\/(?:threads\/)?(\d+))?/i);
+  if (!match) return null;
+  return {
+    guildId: match[1],
+    channelId: match[2],
+    threadId: match[3] || '',
+    activeChannelId: match[3] || match[2],
+  };
+};
+
+const parseDiscordCommunityUrls = (env = {}) => {
+  const raw = String(
+    env?.DISCORD_COMMUNITY_URLS || env?.DISCORD_CHANNEL_URLS || env?.DISCORD_THREAD_URLS || ''
+  ).trim();
+  const envUrls = raw ? parseCommaSeparated(raw) : [];
+  return toUniqueList(
+    [...envUrls, ...FALLBACK_DISCORD_COMMUNITY_URLS].filter((url) =>
+      /^https?:\/\/(www\.)?discord\.com\/channels\//i.test(url)
+    ),
+    10
+  );
+};
+
 const fetchDiscordItems = async (env = {}) => {
-  const appId = String(env?.DISCORD_APP_ID || env?.DISCORD_APPLICATION_ID || FALLBACK_DISCORD_APP_ID || '').trim();
-  if (!appId) return [];
+  const communityUrls = parseDiscordCommunityUrls(env);
+  if (communityUrls.length === 0) return [];
 
-  const rpcResponse = await fetchWithTimeout(`https://discord.com/api/v10/applications/${appId}/rpc`, undefined, 6000);
-  if (!rpcResponse.ok) {
-    return [
-      {
-        id: `discord-app-${appId}`,
-        title: 'Discord · CodexionAI',
-        summary: 'Acompanhe e distribua o aplicativo no Discord Directory.',
-        url: `https://discord.com/application-directory/${appId}`,
+  const settled = await Promise.allSettled(
+    communityUrls.map(async (communityUrl, index) => {
+      const parsed = parseDiscordChannelsUrl(communityUrl);
+      if (!parsed) return null;
+
+      const widgetResponse = await fetchWithTimeout(
+        `https://discord.com/api/guilds/${parsed.guildId}/widget.json`,
+        {
+          headers: { accept: 'application/json' },
+        },
+        6500
+      );
+      if (!widgetResponse.ok) return null;
+
+      const payload = await widgetResponse.json();
+      const channels = Array.isArray(payload?.channels) ? payload.channels : [];
+      const channelName = safeText(
+        channels.find((channel) => String(channel?.id || '') === parsed.channelId)?.name || '',
+        90
+      );
+      const serverName = safeText(payload?.name || `Servidor ${parsed.guildId}`, 120);
+      const onlineCount = Number(payload?.presence_count || 0);
+
+      return {
+        id: `discord-community-${parsed.guildId}-${parsed.activeChannelId}-${index}`,
+        title: `Discord · ${serverName}`,
+        summary: `${onlineCount > 0 ? `${onlineCount} online agora` : 'Comunidade ativa'}${
+          channelName ? ` · #${channelName}` : ''
+        }`,
+        url: communityUrl,
         thumbnail: null,
-        tags: ['Discord', 'App', 'Comunidade'],
-        category: 'IA',
+        tags: ['Discord', 'Comunidade', 'Live'],
+        category: 'Software',
         isLive: true,
-        metricLabel: 'Atualizado agora',
-        caseLabel: 'Abrir app',
-        channel: '@discord',
-      },
-    ];
-  }
+        metricLabel: onlineCount > 0 ? `${onlineCount} membros online` : 'Atualizado agora',
+        caseLabel: 'Ver no Radar',
+        channel: channelName ? `#${channelName}` : '@discord',
+      };
+    })
+  );
 
-  const payload = await rpcResponse.json();
-  const icon = String(payload?.icon || '').trim();
-  const appName = safeText(payload?.name || 'CodexionAI', 80);
-  const installCount = Number(payload?.approximate_user_install_count || 0);
-  const description = safeText(payload?.description || 'Aplicativo de IA para Discord.', 220);
-  const iconUrl = icon ? `https://cdn.discordapp.com/app-icons/${appId}/${icon}.png?size=512` : null;
-
-  return [
-    {
-      id: `discord-app-${appId}`,
-      title: `Discord · ${appName}`,
-      summary: `${description}${installCount > 0 ? ` · ${installCount} instalações` : ''}`,
-      url: `https://discord.com/application-directory/${appId}`,
-      thumbnail: iconUrl,
-      tags: ['Discord', 'Bot', 'IA'],
-      category: 'IA',
-      isLive: true,
-      metricLabel: installCount > 0 ? `${installCount} instalações` : 'Atualizado agora',
-      caseLabel: 'Abrir app',
-      channel: '@discord',
-    },
-    {
-      id: `discord-invite-${appId}`,
-      title: 'Discord · Adicionar bot',
-      summary: 'Instalação direta do bot com escopos de comandos.',
-      url: `https://discord.com/oauth2/authorize?client_id=${appId}&scope=bot%20applications.commands`,
-      thumbnail: iconUrl,
-      tags: ['Discord Bot', 'Install', 'Automação'],
-      category: 'Software',
-      isLive: true,
-      metricLabel: 'Link oficial',
-      caseLabel: 'Adicionar bot',
-      channel: '@discord',
-    },
-  ];
+  return settled.flatMap((result) => (result.status === 'fulfilled' && result.value ? [result.value] : []));
 };
 
 const aggregateChannelFeeds = async (env = {}) => {

@@ -116,6 +116,19 @@ const buildDiscordEmbedUrl = (url: string) => {
   return `https://e.widgetbot.io/channels/${parsed.guildId}/${parsed.activeChannelId}`;
 };
 
+const isTwitchUrl = (url: string) => /twitch\.tv/i.test(url);
+
+const extractTwitchChannelFromUrl = (url: string) => {
+  try {
+    const parsed = new URL(url);
+    const parts = parsed.pathname.split('/').filter(Boolean);
+    if (!parts[0] || parts[0] === 'directory') return '';
+    return parts[0].toLowerCase();
+  } catch {
+    return '';
+  }
+};
+
 const buildInstagramEmbedUrl = (code: string, kind: string) => {
   if (!code) return '';
   const base = kind === 'reel' ? `https://www.instagram.com/p/${code}/embed/captioned/` : `https://www.instagram.com/p/${code}/embed/captioned/`;
@@ -370,13 +383,28 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
   );
   const isTikTokNews = item.kind === 'news' && (isTikTokUrl(item.url) || /tiktok/i.test(item.source));
   const isDiscordNews = item.kind === 'news' && (isDiscordChannelUrl(item.url) || /discord/i.test(item.source));
+  const isTwitchNews = item.kind === 'news' && (isTwitchUrl(item.url) || /twitch/i.test(item.source));
   const tikTokEmbedUrl = isTikTokNews ? buildTikTokEmbedUrl(item.url) : '';
   const discordEmbedUrl = isDiscordNews ? buildDiscordEmbedUrl(item.url) : '';
+  const [twitchParentHost, setTwitchParentHost] = useState('localhost');
+  const twitchChannel = isTwitchNews ? extractTwitchChannelFromUrl(item.url) : '';
+  const twitchEmbedUrl =
+    isTwitchNews && twitchChannel
+      ? `https://player.twitch.tv/?channel=${encodeURIComponent(twitchChannel)}&parent=${encodeURIComponent(
+          twitchParentHost
+        )}&autoplay=true`
+      : '';
   const readerUrl = `/api/radar-reader?url=${encodeURIComponent(item.url)}&fallbackTitle=${encodeURIComponent(
     item.title
   )}&fallbackDescription=${encodeURIComponent(item.description)}&fallbackSource=${encodeURIComponent(
     item.source
   )}`;
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location?.hostname) {
+      setTwitchParentHost(window.location.hostname);
+    }
+  }, []);
 
   useEffect(() => {
     const handleEsc = (event: KeyboardEvent) => {
@@ -637,6 +665,8 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
                     ? 'TikTok'
                     : isDiscordNews
                       ? 'Discord'
+                      : isTwitchNews
+                        ? 'Twitch'
                       : 'Notícia'
                   : item.kind === 'podcast'
                     ? 'Podcast'
@@ -690,6 +720,14 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
                   Comunidade ao vivo no Radar. Mensagens e atividade atualizadas em tempo real.
                 </p>
               </div>
+            ) : isTwitchNews && twitchEmbedUrl ? (
+              <iframe
+                src={twitchEmbedUrl}
+                title={`Twitch player - ${item.title}`}
+                allow='autoplay; fullscreen; picture-in-picture'
+                allowFullScreen
+                className='h-full min-h-[320px] w-full rounded-xl border border-white/10 bg-black sm:min-h-[460px]'
+              />
             ) : (
               <iframe
                 src={readerUrl}
@@ -832,17 +870,19 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
           )}
         </div>
 
-        <footer className='flex items-center justify-end border-t border-white/10 p-3 sm:p-4'>
-          <a
-            href={item.url}
-            target='_blank'
-            rel='noreferrer'
-            className='inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-3.5 py-2 text-xs font-semibold text-white transition hover:border-[#C6FF2E]/60 hover:text-[#C6FF2E] sm:w-auto'
-          >
-            Abrir fonte original
-            <ExternalLink className='h-3.5 w-3.5' />
-          </a>
-        </footer>
+        {item.kind === 'news' && !isTikTokNews && !isDiscordNews && !isTwitchNews ? (
+          <footer className='flex items-center justify-end border-t border-white/10 p-3 sm:p-4'>
+            <a
+              href={item.url}
+              target='_blank'
+              rel='noreferrer'
+              className='inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-3.5 py-2 text-xs font-semibold text-white transition hover:border-[#C6FF2E]/60 hover:text-[#C6FF2E] sm:w-auto'
+            >
+              Abrir fonte original
+              <ExternalLink className='h-3.5 w-3.5' />
+            </a>
+          </footer>
+        ) : null}
       </div>
     </div>
   );

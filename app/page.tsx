@@ -11,7 +11,6 @@ import {
 import { RadarIaSection } from '@/app/components/radar-ia/RadarIaSection';
 import {
   type FeaturedProject,
-  featuredProjects,
 } from '@/app/data/portfolio';
 import {
   GalleryVerticalEnd,
@@ -41,6 +40,7 @@ const portfolioLinks = [
 export default function HomePage() {
   const [open, setOpen] = useState(false);
   const [channelProjects, setChannelProjects] = useState<FeaturedProject[]>([]);
+  const [feedsLoaded, setFeedsLoaded] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -66,8 +66,8 @@ export default function HomePage() {
       category: item.category || 'Software',
       summary: item.summary,
       tags: Array.isArray(item.tags) && item.tags.length > 0 ? item.tags.slice(0, 4) : ['Feed'],
-      caseHref: item.url,
-      caseLabel: item.caseLabel || 'Abrir',
+      caseHref: '#radar-ia',
+      caseLabel: 'Ver no Radar',
       thumbnail: item.thumbnail || null,
       isLive: !!item.isLive,
       metricLabel: item.metricLabel || undefined,
@@ -108,11 +108,15 @@ export default function HomePage() {
         }>;
 
         const mapped = all.map((item, index) => mapChannelItemToProject(item, index));
-        if (!controller.signal.aborted && mapped.length > 0) {
+        if (!controller.signal.aborted) {
           setChannelProjects(mapped);
+          setFeedsLoaded(true);
         }
       } catch {
-        // Keep static fallback list when dynamic feeds fail.
+        if (!controller.signal.aborted) {
+          setChannelProjects([]);
+          setFeedsLoaded(true);
+        }
       }
     };
 
@@ -127,10 +131,7 @@ export default function HomePage() {
     };
   }, []);
 
-  const projectsToRender = useMemo(
-    () => (channelProjects.length > 0 ? channelProjects : featuredProjects),
-    [channelProjects]
-  );
+  const projectsToRender = useMemo(() => channelProjects, [channelProjects]);
 
   return (
     <main className='min-h-screen bg-[#060608] text-white'>
@@ -166,11 +167,21 @@ export default function HomePage() {
                   <p className='text-xs uppercase tracking-[0.18em] text-[#9ca3af]'>Canais em tempo real</p>
                   <h3 className='text-xl font-bold text-white md:text-2xl'>TikTok · Twitch · Discord LIVE</h3>
                 </header>
-                <div className='grid gap-4 lg:grid-cols-3'>
-                  {projectsToRender.map((project) => (
-                    <ProjectCard key={project.id} project={project} />
-                  ))}
-                </div>
+                {!feedsLoaded ? (
+                  <div className='rounded-xl border border-white/10 bg-[#0b0b0f] p-4 text-sm text-[#9ca3af]'>
+                    Atualizando canais...
+                  </div>
+                ) : projectsToRender.length === 0 ? (
+                  <div className='rounded-xl border border-white/10 bg-[#0b0b0f] p-4 text-sm text-[#9ca3af]'>
+                    Canais indisponíveis agora. Veja os vídeos e lives direto no Radar IA.
+                  </div>
+                ) : (
+                  <div className='grid gap-4 lg:grid-cols-3'>
+                    {projectsToRender.map((project) => (
+                      <ProjectCard key={project.id} project={project} />
+                    ))}
+                  </div>
+                )}
               </article>
 
             </div>
