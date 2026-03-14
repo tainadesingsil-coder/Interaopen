@@ -1063,6 +1063,26 @@ export function RadarIaSection() {
   }, [activeTab]);
 
   useEffect(() => {
+    const handleExternalOpenRequest = (event: Event) => {
+      const customEvent = event as CustomEvent<string>;
+      const openUrl = String(customEvent?.detail || '').trim();
+      if (!openUrl) return;
+      if (activeTab !== 'all') {
+        setActiveTab('all');
+      }
+      setPendingOpenUrl('');
+      requestAnimationFrame(() => {
+        setPendingOpenUrl(openUrl);
+      });
+    };
+
+    window.addEventListener('radar:open-url', handleExternalOpenRequest as EventListener);
+    return () => {
+      window.removeEventListener('radar:open-url', handleExternalOpenRequest as EventListener);
+    };
+  }, [activeTab]);
+
+  useEffect(() => {
     if (!submittedQuery) {
       return;
     }

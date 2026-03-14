@@ -16,8 +16,19 @@ const AREA_COLOR: Record<ProductOffer['area'], string> = {
   IA: 'text-lime-300',
 };
 
+const extractRadarOpenParam = (href: string) => {
+  try {
+    const parsed = new URL(href, typeof window !== 'undefined' ? window.location.origin : 'https://localhost');
+    return parsed.searchParams.get('open') || '';
+  } catch {
+    return '';
+  }
+};
+
 export function ProjectCard({ project }: { project: FeaturedProject }) {
   const isExternalLink = /^https?:\/\//i.test(project.caseHref);
+  const radarOpenUrl = extractRadarOpenParam(project.caseHref);
+  const isRadarDeepLink = !!radarOpenUrl;
 
   return (
     <article
@@ -66,14 +77,32 @@ export function ProjectCard({ project }: { project: FeaturedProject }) {
         ))}
       </div>
 
-      <Link
-        href={project.caseHref}
-        target={isExternalLink ? '_blank' : undefined}
-        rel={isExternalLink ? 'noreferrer' : undefined}
-        className='mt-5 inline-flex items-center rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-white transition hover:border-[#C6FF2E] hover:text-[#C6FF2E]'
-      >
-        {project.caseLabel || 'Ver case'}
-      </Link>
+      {isRadarDeepLink ? (
+        <button
+          type='button'
+          onClick={() => {
+            if (typeof window === 'undefined') return;
+            window.dispatchEvent(new CustomEvent('radar:open-url', { detail: radarOpenUrl }));
+            if (window.location.hash !== '#radar-ia') {
+              window.location.hash = 'radar-ia';
+            } else {
+              window.dispatchEvent(new Event('hashchange'));
+            }
+          }}
+          className='mt-5 inline-flex items-center rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-white transition hover:border-[#C6FF2E] hover:text-[#C6FF2E]'
+        >
+          {project.caseLabel || 'Ver case'}
+        </button>
+      ) : (
+        <Link
+          href={project.caseHref}
+          target={isExternalLink ? '_blank' : undefined}
+          rel={isExternalLink ? 'noreferrer' : undefined}
+          className='mt-5 inline-flex items-center rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-white transition hover:border-[#C6FF2E] hover:text-[#C6FF2E]'
+        >
+          {project.caseLabel || 'Ver case'}
+        </Link>
+      )}
     </article>
   );
 }
