@@ -70,11 +70,12 @@ const useDebouncedValue = (value: string, delay = 450) => {
 
 function SkeletonCard() {
   return (
-    <div className='animate-pulse rounded-xl border border-white/10 bg-[#0b0b0f] p-4'>
-      <div className='h-4 w-2/3 rounded bg-white/10' />
-      <div className='mt-3 h-3 w-full rounded bg-white/10' />
-      <div className='mt-2 h-3 w-5/6 rounded bg-white/10' />
-      <div className='mt-4 h-8 w-28 rounded bg-white/10' />
+    <div className='animate-pulse rounded-2xl border border-white/10 bg-[#0b0b0f] p-4 shadow-[0_10px_24px_rgba(0,0,0,0.2)] md:p-5'>
+      <div className='h-40 w-full rounded-xl border border-white/10 bg-white/[0.04]' />
+      <div className='mt-4 h-4 w-2/3 rounded bg-white/[0.08]' />
+      <div className='mt-3 h-3 w-full rounded bg-white/[0.08]' />
+      <div className='mt-2 h-3 w-5/6 rounded bg-white/[0.08]' />
+      <div className='mt-5 h-9 w-32 rounded-lg border border-white/10 bg-white/[0.05]' />
     </div>
   );
 }
@@ -90,29 +91,29 @@ function RadarCard({ item }: { item: RadarItem }) {
     );
 
   return (
-    <article className='group rounded-xl border border-white/10 bg-[#0b0b0f] p-4 transition hover:border-[#C6FF2E] hover:shadow-[0_0_0_1px_rgba(198,255,46,0.18),0_10px_28px_rgba(198,255,46,0.08)]'>
+    <article className='group flex h-full flex-col rounded-2xl border border-white/10 bg-[#0b0b0f] p-4 shadow-[0_8px_24px_rgba(0,0,0,0.22)] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:scale-[1.01] hover:border-[#C6FF2E]/60 hover:shadow-[0_0_0_1px_rgba(198,255,46,0.18),0_14px_34px_rgba(198,255,46,0.09)] md:p-5'>
       {item.thumbnail ? (
-        <div className='mb-3 overflow-hidden rounded-md border border-white/10 bg-black/20'>
+        <div className='mb-4 overflow-hidden rounded-xl border border-white/10 bg-black/20'>
           <img
             src={item.thumbnail}
             alt={item.title}
             loading='lazy'
-            className='h-40 w-full object-cover'
+            className='h-40 w-full object-cover transition-transform duration-200 ease-out group-hover:scale-[1.02]'
           />
         </div>
       ) : null}
 
-      <div className='mb-2 flex items-center justify-between gap-2'>
-        <span className='inline-flex items-center gap-1 rounded-md border border-white/10 px-2 py-1 text-[10px] uppercase tracking-[0.14em] text-[#9ca3af]'>
+      <div className='mb-3 flex items-center justify-between gap-2'>
+        <span className='inline-flex items-center gap-1 rounded-lg border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[10px] uppercase tracking-[0.14em] text-[#9ca3af]'>
           {icon}
           {TAB_LABEL[item.kind]}
         </span>
-        <span className='text-[11px] text-[#9ca3af]'>{formatDate(item.publishedAt)}</span>
+        <span className='text-[11px] tracking-wide text-[#9ca3af]'>{formatDate(item.publishedAt)}</span>
       </div>
 
-      <h4 className='line-clamp-2 text-sm font-bold text-white md:text-base'>{item.title}</h4>
-      <p className='mt-2 line-clamp-2 text-sm text-[#9ca3af]'>{item.description}</p>
-      <p className='mt-2 text-[11px] text-[#9ca3af]'>
+      <h4 className='line-clamp-2 text-[15px] font-semibold leading-snug text-white md:text-base'>{item.title}</h4>
+      <p className='mt-2 line-clamp-3 text-sm leading-relaxed text-[#9ca3af]'>{item.description}</p>
+      <p className='mt-3 text-[11px] leading-relaxed text-[#9ca3af]'>
         {item.channel ? `${item.source} · ${item.channel}` : item.source}
       </p>
 
@@ -120,7 +121,7 @@ function RadarCard({ item }: { item: RadarItem }) {
         href={item.url}
         target='_blank'
         rel='noreferrer'
-        className='mt-4 inline-flex items-center gap-1 rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-white transition hover:border-[#C6FF2E] hover:text-[#C6FF2E]'
+        className='mt-5 inline-flex w-fit items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-3.5 py-2 text-xs font-semibold text-white transition-all duration-200 ease-out hover:border-[#C6FF2E]/60 hover:text-[#C6FF2E] hover:shadow-[0_0_0_1px_rgba(198,255,46,0.14)]'
       >
         {item.ctaLabel}
         <ExternalLink className='h-3.5 w-3.5' />
@@ -216,30 +217,30 @@ export function RadarIaSection() {
   );
 
   return (
-    <article id='radar-ia' className='space-y-4'>
-      <header className='rounded-xl border border-white/10 bg-[#0b0b0f] p-5 md:p-6'>
-        <div className='mb-4 inline-flex flex-wrap gap-2 rounded-xl border border-white/10 bg-black/20 p-2'>
-          <span className='inline-flex items-center gap-1 rounded-md border border-white/10 px-2 py-1 text-[11px] text-[#9ca3af]'>
+    <article id='radar-ia' className='space-y-5'>
+      <header className='rounded-2xl border border-white/10 bg-[#0b0b0f] p-5 shadow-[0_10px_30px_rgba(0,0,0,0.2)] md:p-6'>
+        <div className='mb-5 inline-flex flex-wrap gap-2 rounded-xl border border-white/10 bg-[#060608]/70 p-2'>
+          <span className='inline-flex items-center gap-1 rounded-lg border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[11px] text-[#9ca3af]'>
             <Code2 className='h-3.5 w-3.5 text-[#C6FF2E]' />
             Software
           </span>
-          <span className='inline-flex items-center gap-1 rounded-md border border-white/10 px-2 py-1 text-[11px] text-[#9ca3af]'>
+          <span className='inline-flex items-center gap-1 rounded-lg border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[11px] text-[#9ca3af]'>
             <Megaphone className='h-3.5 w-3.5 text-[#C6FF2E]' />
             Marketing
           </span>
-          <span className='inline-flex items-center gap-1 rounded-md border border-white/10 px-2 py-1 text-[11px] text-[#9ca3af]'>
+          <span className='inline-flex items-center gap-1 rounded-lg border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[11px] text-[#9ca3af]'>
             <Bot className='h-3.5 w-3.5 text-[#C6FF2E]' />
             Agência IA
           </span>
         </div>
 
-        <p className='text-xs uppercase tracking-[0.18em] text-[#9ca3af]'>Inteligência de mercado</p>
-        <h3 className='mt-2 text-2xl font-bold text-white md:text-3xl'>Radar IA em tempo real</h3>
-        <p className='mt-2 text-sm text-[#9ca3af]'>
+        <p className='text-xs uppercase tracking-[0.18em] text-[#9ca3af]'>Acesso exclusivo</p>
+        <h3 className='mt-2 text-2xl font-extrabold leading-tight text-white md:text-3xl'>Radar IA em tempo real</h3>
+        <p className='mt-3 max-w-2xl text-sm leading-relaxed text-[#9ca3af]'>
           Pesquise um tema e veja vídeos + notícias + fontes confiáveis.
         </p>
 
-        <div className='mt-4 flex flex-col gap-3 md:flex-row'>
+        <div className='mt-5 flex flex-col gap-2.5 sm:flex-row sm:items-center'>
           <div className='relative w-full'>
             <Search className='pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9ca3af]' />
             <input
@@ -252,19 +253,19 @@ export function RadarIaSection() {
                 }
               }}
               placeholder='Ex: agentes de IA para atendimento'
-              className='w-full rounded-md border border-white/10 bg-[#060608] py-2 pl-10 pr-3 text-sm text-white outline-none transition placeholder:text-[#6b7280] focus:border-[#C6FF2E]'
+              className='h-11 w-full rounded-xl border border-white/10 bg-[#060608] py-2 pl-10 pr-3 text-sm text-white outline-none transition-all duration-200 ease-out placeholder:text-[#6b7280] focus:border-[#C6FF2E]/80 focus:ring-2 focus:ring-[#C6FF2E]/15'
             />
           </div>
           <button
             type='button'
             onClick={() => submitQuery(draftQuery)}
-            className='rounded-md border border-[#C6FF2E]/40 bg-[#C6FF2E]/10 px-4 py-2 text-sm font-semibold text-[#C6FF2E] transition hover:shadow-[0_0_18px_rgba(198,255,46,0.15)]'
+            className='h-11 rounded-xl border border-[#C6FF2E]/40 bg-[#C6FF2E]/10 px-5 text-sm font-semibold text-[#C6FF2E] transition-all duration-200 ease-out hover:border-[#C6FF2E] hover:bg-[#C6FF2E]/14 hover:shadow-[0_0_18px_rgba(198,255,46,0.14)] active:scale-[0.99]'
           >
             Pesquisar
           </button>
         </div>
 
-        <div className='mt-3 flex flex-wrap gap-2'>
+        <div className='mt-4 flex flex-wrap gap-2'>
           {QUICK_CHIPS.map((chip) => (
             <button
               key={chip}
@@ -273,7 +274,11 @@ export function RadarIaSection() {
                 setDraftQuery(chip);
                 submitQuery(chip);
               }}
-              className='rounded-md border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-[#9ca3af] transition hover:border-[#C6FF2E] hover:text-[#C6FF2E]'
+              className={`rounded-lg border px-3 py-1.5 text-xs transition-all duration-200 ease-out ${
+                sanitizeClientQuery(chip) === submittedQuery
+                  ? 'border-[#C6FF2E]/55 bg-[#C6FF2E]/12 text-[#C6FF2E]'
+                  : 'border-white/10 bg-white/[0.03] text-[#9ca3af] hover:border-[#C6FF2E]/45 hover:text-[#C6FF2E]'
+              }`}
             >
               {chip}
             </button>
@@ -281,18 +286,18 @@ export function RadarIaSection() {
         </div>
       </header>
 
-      <section className='rounded-xl border border-white/10 bg-[#0b0b0f] p-4 md:p-5'>
-        <div className='mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between'>
-          <div className='flex flex-wrap gap-2'>
+      <section className='rounded-2xl border border-white/10 bg-[#0b0b0f] p-4 shadow-[0_10px_28px_rgba(0,0,0,0.2)] md:p-5'>
+        <div className='mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between'>
+          <div className='inline-flex flex-wrap gap-2 rounded-xl border border-white/10 bg-[#060608]/80 p-1'>
             {RADAR_TYPES.map((tab) => (
               <button
                 key={tab}
                 type='button'
                 onClick={() => setActiveTab(tab)}
-                className={`rounded-md border px-3 py-1.5 text-xs font-semibold transition ${
+                className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all duration-200 ease-out ${
                   activeTab === tab
-                    ? 'border-[#C6FF2E] bg-[#C6FF2E]/10 text-[#C6FF2E]'
-                    : 'border-white/10 bg-white/5 text-[#9ca3af] hover:border-[#C6FF2E] hover:text-[#C6FF2E]'
+                    ? 'border-[#C6FF2E]/60 bg-[#C6FF2E]/12 text-[#C6FF2E] shadow-[0_0_0_1px_rgba(198,255,46,0.14)]'
+                    : 'border-white/10 bg-white/[0.03] text-[#9ca3af] hover:border-[#C6FF2E]/45 hover:text-[#C6FF2E]'
                 }`}
               >
                 {TAB_LABEL[tab]}
@@ -300,16 +305,16 @@ export function RadarIaSection() {
             ))}
           </div>
 
-          <div className='flex flex-wrap gap-2'>
+          <div className='inline-flex flex-wrap gap-2 rounded-xl border border-white/10 bg-[#060608]/80 p-1'>
             {RADAR_RANGES.map((range) => (
               <button
                 key={range}
                 type='button'
                 onClick={() => setActiveRange(range)}
-                className={`rounded-md border px-2.5 py-1 text-xs transition ${
+                className={`rounded-lg border px-2.5 py-1 text-xs transition-all duration-200 ease-out ${
                   activeRange === range
-                    ? 'border-[#C6FF2E] bg-[#C6FF2E]/10 text-[#C6FF2E]'
-                    : 'border-white/10 bg-white/5 text-[#9ca3af] hover:border-[#C6FF2E] hover:text-[#C6FF2E]'
+                    ? 'border-[#C6FF2E]/60 bg-[#C6FF2E]/12 text-[#C6FF2E] shadow-[0_0_0_1px_rgba(198,255,46,0.14)]'
+                    : 'border-white/10 bg-white/[0.03] text-[#9ca3af] hover:border-[#C6FF2E]/45 hover:text-[#C6FF2E]'
                 }`}
               >
                 {RANGE_LABEL[range]}
@@ -318,33 +323,37 @@ export function RadarIaSection() {
           </div>
         </div>
 
-        {errorMessage ? <p className='mb-3 text-sm text-[#fda4af]'>{errorMessage}</p> : null}
+        {errorMessage ? (
+          <p className='mb-4 rounded-xl border border-[#fda4af]/30 bg-[#fda4af]/10 px-3 py-2 text-sm text-[#fecdd3]'>
+            {errorMessage}
+          </p>
+        ) : null}
 
         {isLoading ? (
-          <div className='grid gap-3 md:grid-cols-2 xl:grid-cols-3'>
+          <div className='grid gap-4 md:grid-cols-2 xl:grid-cols-3'>
             {Array.from({ length: 6 }).map((_, index) => (
               <SkeletonCard key={`skeleton-${index}`} />
             ))}
           </div>
         ) : displayedItems.length === 0 ? (
-          <div className='rounded-lg border border-dashed border-white/10 bg-black/20 p-6 text-center'>
-            <p className='text-sm text-[#9ca3af]'>
+          <div className='rounded-xl border border-dashed border-white/10 bg-black/20 p-7 text-center'>
+            <p className='text-sm leading-relaxed text-[#9ca3af]'>
               Nenhum resultado encontrado para <span className='text-white'>{submittedQuery}</span>.
             </p>
           </div>
         ) : (
           <>
-            <div className='grid gap-3 md:grid-cols-2 xl:grid-cols-3'>
+            <div className='grid gap-4 md:grid-cols-2 xl:grid-cols-3'>
               {displayedItems.map((item) => (
                 <RadarCard key={item.id} item={item} />
               ))}
             </div>
             {activeItems.length > visibleCount ? (
-              <div className='mt-4 flex justify-center'>
+              <div className='mt-5 flex justify-center'>
                 <button
                   type='button'
                   onClick={() => setVisibleCount((prev) => prev + INITIAL_VISIBLE)}
-                  className='rounded-md border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold text-white transition hover:border-[#C6FF2E] hover:text-[#C6FF2E]'
+                  className='rounded-xl border border-white/10 bg-white/[0.04] px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.08em] text-white transition-all duration-200 ease-out hover:border-[#C6FF2E]/50 hover:text-[#C6FF2E]'
                 >
                   Carregar mais
                 </button>
