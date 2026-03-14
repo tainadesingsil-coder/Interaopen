@@ -27,6 +27,7 @@ const RANGE_LABEL: Record<RadarRange, string> = {
 
 const INITIAL_VISIBLE = 10;
 const LIVE_CAPTION_SECONDS_PER_LINE = 4.5;
+const LIVE_CAPTION_MAX_SECONDS_PER_LINE = 10;
 
 const formatDate = (value: string | null) => {
   if (!value) {
@@ -362,22 +363,18 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
                   if (captionLines.length === 0) return;
                   const element = event.currentTarget;
                   const duration = Number.isFinite(element.duration) ? element.duration : 0;
-                  let nextIndex = 0;
+                  const adaptiveSecondsPerLine =
+                    duration > 0
+                      ? Math.min(
+                          LIVE_CAPTION_MAX_SECONDS_PER_LINE,
+                          Math.max(LIVE_CAPTION_SECONDS_PER_LINE, duration / Math.max(captionLines.length, 1))
+                        )
+                      : LIVE_CAPTION_SECONDS_PER_LINE;
 
-                  // For very long podcasts, duration-based sync becomes too slow.
-                  // Use a "live caption pace" so the text keeps advancing naturally.
-                  if (duration > 0 && duration <= captionLines.length * 9) {
-                    const segment = duration / captionLines.length;
-                    nextIndex = Math.min(
-                      captionLines.length - 1,
-                      Math.max(0, Math.floor(element.currentTime / Math.max(segment, 0.1)))
-                    );
-                  } else {
-                    nextIndex = Math.min(
-                      captionLines.length - 1,
-                      Math.max(0, Math.floor(element.currentTime / LIVE_CAPTION_SECONDS_PER_LINE))
-                    );
-                  }
+                  // Loop lines so captions continue for the entire playback duration.
+                  const nextIndex =
+                    Math.max(0, Math.floor(element.currentTime / Math.max(adaptiveSecondsPerLine, 0.1))) %
+                    captionLines.length;
 
                   if (nextIndex !== captionLineIndex) {
                     setCaptionLineIndex(nextIndex);
