@@ -189,7 +189,13 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
         <header className='flex items-start justify-between gap-3 border-b border-white/10 p-4'>
           <div>
             <p className='text-[11px] uppercase tracking-[0.14em] text-[#9ca3af]'>
-              {item.kind === 'youtube' ? 'YouTube' : item.kind === 'news' ? 'Notícia' : 'Instagram'}
+              {item.kind === 'youtube'
+                ? 'YouTube'
+                : item.kind === 'news'
+                  ? 'Notícia'
+                  : item.kind === 'podcast'
+                    ? 'Podcast'
+                    : 'Instagram'}
             </p>
             <h4 className='mt-1 line-clamp-2 text-sm font-semibold text-white sm:text-base'>{item.title}</h4>
           </div>
@@ -379,7 +385,11 @@ export function RadarIaSection() {
           throw new Error('podcasts_fetch_failed');
         }
         const data = (await response.json()) as PodcastResponsePayload;
-        setPodcastItems(data.items || []);
+        const items = Array.isArray(data.items) ? data.items : [];
+        setPodcastItems(items);
+        if (items.length === 0 && data.errors && Object.keys(data.errors).length > 0) {
+          setPodcastError('Feeds de podcast indisponíveis no momento. Tente novamente em instantes.');
+        }
       } catch (error) {
         if (!controller.signal.aborted) {
           setPodcastError('Não foi possível atualizar podcasts agora.');

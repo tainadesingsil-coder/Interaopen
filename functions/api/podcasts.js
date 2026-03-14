@@ -1,20 +1,29 @@
 const CACHE_TTL_MS = 10 * 60 * 1000;
-const SOURCE_TIMEOUT_MS = 7000;
+const SOURCE_TIMEOUT_MS = 9000;
 const DEFAULT_LIMIT = 12;
 const MAX_LIMIT = 30;
+const RSS2JSON_ENDPOINT = 'https://api.rss2json.com/v1/api.json?rss_url=';
+const DEFAULT_USER_AGENT =
+  'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36';
 
 const PODCAST_FEEDS = [
   {
     name: 'Lex Fridman',
-    rssUrl: 'https://lexfridman.com/feed/podcast/',
+    rssCandidates: ['https://lexfridman.com/feed/podcast/'],
   },
   {
     name: 'Pizza de Dados',
-    rssUrl: 'https://feeds.simplecast.com/BqzFsWvp',
+    // User-provided URL first, then resilient alternatives.
+    rssCandidates: [
+      'https://feeds.simplecast.com/BqzFsWvp',
+      'https://podcast.pizzadedados.com/feed.xml',
+      'http://feeds.feedburner.com/PizzaDeDados',
+    ],
   },
   {
     name: 'Marketing School',
-    rssUrl: 'https://feeds.simplecast.com/lX_QnMKP',
+    // User-provided URL first, then active feed endpoint fallback.
+    rssCandidates: ['https://feeds.simplecast.com/lX_QnMKP', 'https://feeds.megaphone.fm/ESHO5419936864'],
   },
 ];
 
@@ -30,7 +39,14 @@ const fetchWithTimeout = async (url, init = {}, timeoutMs = SOURCE_TIMEOUT_MS) =
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    return await fetch(url, { ...init, signal: controller.signal });
+    return await fetch(url, {
+      ...init,
+      headers: {
+        'user-agent': DEFAULT_USER_AGENT,
+        ...(init.headers || {}),
+      },
+      signal: controller.signal,
+    });
   } finally {
     clearTimeout(timer);
   }
@@ -44,9 +60,7 @@ const htmlDecode = (value = '') =>
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
     .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number.parseInt(code, 10)))
-    .replace(/&#x([0-9a-f]+);/gi, (_, code) =>
-      String.fromCharCode(Number.parseInt(code, 16))
-    );
+    .replace(/&#x([0-9a-f]+);/gi, (_, code) => String.fromCharCode(Number.parseInt(code, 16)));
 
 const stripHtml = (value = '') =>
   htmlDecode(value.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1'))
@@ -58,6 +72,32 @@ const safeIsoDate = (value = '') => {
   const parsed = Date.parse(value);
   if (Number.isNaN(parsed)) return null;
   return new Date(parsed).toISOString();
+};
+
+const stripCdata = (value = '') => value.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1');
+const escapeRegex = (value = '') => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const readTagValue = (block, tagNames) => {
+  for (const tagName of tagNames) {
+    const escapedTag = escapeRegex(tagName);
+    const match = block.match(new RegExp(`<${escapedTag}[^>]*>([\\s\\S]*?)</${escapedTag}>`, 'i'));
+    if (match && match[1]) {
+      return stripCdata(match[1]).trim();
+    }
+  }
+  return '';
+};
+
+const readTagAttribute = (block, tagName, attributeName) => {
+  const escapedTag = escapeRegex(tagName);
+  const escapedAttr = escapeRegex(attributeName);
+  const match = block.match(
+    new RegExp(
+      `<${escapedTag}[^>]*\\s${escapedAttr}\\s*=\\s*(?:"([^"]+)"|'([^']+)'|([^\\s"'/>]+))`,
+      'i'
+    )
+  );
+  return (match && (match[1] || match[2] || match[3])) || '';
 };
 
 const parseLimit = (value) => {
@@ -73,7 +113,7 @@ const extractAudioUrl = (item) =>
   item?.enclosures?.[0]?.url ||
   null;
 
-const mapPodcastItem = (item, feedName, index) => {
+const mapPodcastItem = (item, feedName, index, sourceKey = '') => {
   const audioUrl = extractAudioUrl(item);
   if (!audioUrl) return null;
 
@@ -83,7 +123,44 @@ const mapPodcastItem = (item, feedName, index) => {
   const thumbnail = item?.thumbnail || null;
   const link = item?.link || audioUrl;
   const author = stripHtml(item?.author || '');
-  const stableIdBase = item?.guid || item?.link || audioUrl || `${feedName}-${index}`;
+  const stableIdBase = item?.guid || item?.link || audioUrl || `${feedName}-${sourceKey}-${index}`;
+
+  return {
+    id: `pod-${stableIdBase}`.replace(/\s+/g, '-').slice(0, 180),
+    kind: 'podcast',
+    title,
+    description,
+    url: link,
+    source: feedName,
+    publishedAt,
+    thumbnail,
+    channel: author || feedName,
+    score: 0,
+    ctaLabel: 'Ouvir episódio',
+    audioUrl,
+  };
+};
+
+const mapDirectRssItem = (itemBlock, feedName, sourceKey, index) => {
+  const audioUrl =
+    readTagAttribute(itemBlock, 'enclosure', 'url') ||
+    readTagAttribute(itemBlock, 'media:content', 'url') ||
+    '';
+  if (!audioUrl) return null;
+
+  const title = stripHtml(readTagValue(itemBlock, ['title']) || 'Episódio');
+  const description = stripHtml(
+    readTagValue(itemBlock, ['description', 'content:encoded', 'itunes:summary']) || ''
+  );
+  const publishedAt = safeIsoDate(readTagValue(itemBlock, ['pubDate', 'published', 'dc:date']) || '');
+  const thumbnail =
+    readTagAttribute(itemBlock, 'itunes:image', 'href') ||
+    readTagAttribute(itemBlock, 'media:thumbnail', 'url') ||
+    null;
+  const author = stripHtml(readTagValue(itemBlock, ['itunes:author', 'author', 'dc:creator']) || '');
+  const guid = readTagValue(itemBlock, ['guid']);
+  const link = readTagValue(itemBlock, ['link']) || audioUrl;
+  const stableIdBase = guid || link || audioUrl || `${feedName}-${sourceKey}-${index}`;
 
   return {
     id: `pod-${stableIdBase}`.replace(/\s+/g, '-').slice(0, 180),
@@ -108,21 +185,104 @@ const sortByDate = (items) =>
     return bTime - aTime;
   });
 
-const fetchFeedItems = async (feed) => {
-  const endpoint = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feed.rssUrl)}`;
+const parseDirectRssItems = (xml, feedName, sourceKey, maxItems = 20) => {
+  const itemRegex = /<item\b[\s\S]*?<\/item>/gi;
+  const mapped = [];
+  let match = itemRegex.exec(xml);
+  while (match && mapped.length < maxItems) {
+    const parsed = mapDirectRssItem(match[0], feedName, sourceKey, mapped.length);
+    if (parsed) mapped.push(parsed);
+    match = itemRegex.exec(xml);
+  }
+  return mapped;
+};
+
+const fetchFeedItemsFromRss2Json = async (feedName, rssUrl) => {
+  const endpoint = `${RSS2JSON_ENDPOINT}${encodeURIComponent(rssUrl)}`;
   const response = await fetchWithTimeout(endpoint);
   if (!response.ok) {
-    throw new Error(`podcast_feed_failed:${feed.name}`);
+    throw new Error(`rss2json_http_${response.status}`);
   }
 
   const payload = await response.json();
   if (payload?.status !== 'ok' || !Array.isArray(payload?.items)) {
-    throw new Error(`podcast_invalid_payload:${feed.name}`);
+    throw new Error(`rss2json_payload_${payload?.status || 'invalid'}:${payload?.message || 'unknown'}`);
   }
 
-  return payload.items
-    .map((item, index) => mapPodcastItem(item, feed.name, index))
+  const mapped = payload.items
+    .map((item, index) => mapPodcastItem(item, feedName, index, rssUrl))
     .filter(Boolean);
+  if (mapped.length === 0) {
+    throw new Error('rss2json_no_audio_items');
+  }
+
+  return mapped;
+};
+
+const fetchFeedItemsFromDirectRss = async (feedName, rssUrl) => {
+  const response = await fetchWithTimeout(
+    rssUrl,
+    {
+      headers: {
+        accept: 'application/rss+xml, application/xml, text/xml;q=0.9, */*;q=0.8',
+      },
+    },
+    12000
+  );
+
+  if (!response.ok) {
+    throw new Error(`rss_http_${response.status}`);
+  }
+
+  const xml = await response.text();
+  const mapped = parseDirectRssItems(xml, feedName, rssUrl, 20);
+  if (mapped.length === 0) {
+    throw new Error('rss_no_audio_items');
+  }
+
+  return mapped;
+};
+
+const fetchFeedItems = async (feed) => {
+  const reasons = [];
+  for (const rssUrl of feed.rssCandidates) {
+    try {
+      return await fetchFeedItemsFromRss2Json(feed.name, rssUrl);
+    } catch (error) {
+      reasons.push(`rss2json:${rssUrl}:${error instanceof Error ? error.message : 'unknown'}`);
+    }
+  }
+
+  for (const rssUrl of feed.rssCandidates) {
+    try {
+      return await fetchFeedItemsFromDirectRss(feed.name, rssUrl);
+    } catch (error) {
+      reasons.push(`rss:${rssUrl}:${error instanceof Error ? error.message : 'unknown'}`);
+    }
+  }
+
+  throw new Error(reasons.join('|').slice(0, 500));
+};
+
+const dedupeByAudioUrl = (items) => {
+  const seen = new Set();
+  return items.filter((item) => {
+    const key = String(item.audioUrl || '').trim();
+    if (!key) return false;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+};
+
+const limitPerFeed = (items, feedName, maxPerFeed = 8) => {
+  let count = 0;
+  return items.filter((item) => {
+    if (item.source !== feedName) return false;
+    if (count >= maxPerFeed) return false;
+    count += 1;
+    return true;
+  });
 };
 
 export async function onRequestGet(context) {
@@ -144,11 +304,17 @@ export async function onRequestGet(context) {
 
   const settled = await Promise.allSettled(PODCAST_FEEDS.map((feed) => fetchFeedItems(feed)));
   const errors = {};
-  const merged = settled.flatMap((result, index) => {
-    if (result.status === 'fulfilled') return result.value;
+  const groupedItems = settled.flatMap((result, index) => {
+    if (result.status === 'fulfilled') {
+      return [{ feedName: PODCAST_FEEDS[index].name, items: result.value }];
+    }
     errors[PODCAST_FEEDS[index].name] = 'Feed indisponível no momento.';
     return [];
   });
+
+  const merged = dedupeByAudioUrl(
+    groupedItems.flatMap((entry) => limitPerFeed(sortByDate(entry.items), entry.feedName, 8))
+  );
 
   const data = {
     generatedAt: new Date().toISOString(),
@@ -156,10 +322,19 @@ export async function onRequestGet(context) {
     errors,
   };
 
-  cache.set(cacheKey, {
-    data,
-    expiresAt: now + CACHE_TTL_MS,
-  });
+  if (data.items.length > 0) {
+    cache.set(cacheKey, {
+      data,
+      expiresAt: now + CACHE_TTL_MS,
+    });
+  } else if (cached?.data?.items?.length) {
+    return Response.json(cached.data, {
+      headers: {
+        'x-podcast-cache': 'stale',
+        'cache-control': 'public, max-age=180',
+      },
+    });
+  }
 
   return Response.json(data, {
     headers: {
