@@ -11,6 +11,36 @@ const NEWS_FEEDS = [
     url: 'https://news.google.com/rss/search?q=intelig%C3%AAncia+artificial&hl=pt-BR&gl=BR&ceid=BR:pt-419',
   },
 ];
+const CURATED_NEWS_ARTICLES = [
+  {
+    id: 'cnn-ia-dor-recem-nascidos',
+    title: 'IA identifica nível de dor em recém-nascidos e auxilia médicos na UTI',
+    description: 'Reportagem sobre aplicação de IA em saúde neonatal e apoio clínico.',
+    url: 'https://www.cnnbrasil.com.br/saude/ia-identifica-nivel-de-dor-em-recem-nascidos-e-auxilia-medicos-na-uti/',
+    source: 'CNN Brasil',
+  },
+  {
+    id: 'cnn-bb-visa-agente-ia',
+    title: 'Visa e Banco do Brasil fazem primeira transação com agente IA no país',
+    description: 'Notícia sobre inovação financeira com uso de agente de inteligência artificial.',
+    url: 'https://www.cnnbrasil.com.br/economia/mercado/visa-e-banco-do-brasil-fazem-primeira-transacao-com-agente-ia-do-pais/',
+    source: 'CNN Brasil',
+  },
+  {
+    id: 'canaltech-physical-ai',
+    title: 'O que é Physical AI? Tecnologia que controla robôs e fábricas',
+    description: 'Explicação sobre IA aplicada ao mundo físico, robótica e automação industrial.',
+    url: 'https://canaltech.com.br/inteligencia-artificial/o-que-e-physical-ai-conheca-a-tecnologia-que-controla-robos-e-fabricas/',
+    source: 'Canaltech',
+  },
+  {
+    id: 'canaltech-gpt-54-chatgpt',
+    title: 'GPT-5.4 chega ao ChatGPT com mais precisão e menos alucinações',
+    description: 'Cobertura sobre atualização de modelo com foco em desempenho e confiabilidade.',
+    url: 'https://canaltech.com.br/inteligencia-artificial/gpt-54-chega-ao-chatgpt-com-mais-precisao-e-menos-alucinacoes/',
+    source: 'Canaltech',
+  },
+];
 
 const ALLOWED_TYPES = ['all', 'youtube', 'news', 'instagram'];
 const ALLOWED_RANGES = ['24h', '7d', '30d'];
@@ -408,6 +438,33 @@ const dedupeById = (items) => {
   return [...map.values()];
 };
 
+const normalizeUrlForDedupe = (value = '') => {
+  try {
+    const parsed = new URL(value.trim());
+    parsed.hash = '';
+    parsed.searchParams.delete('utm_source');
+    parsed.searchParams.delete('utm_medium');
+    parsed.searchParams.delete('utm_campaign');
+    parsed.searchParams.delete('utm_content');
+    parsed.searchParams.delete('utm_term');
+    const pathname = parsed.pathname.replace(/\/+$/, '');
+    return `${parsed.origin}${pathname}`.toLowerCase();
+  } catch {
+    return value.trim().toLowerCase();
+  }
+};
+
+const dedupeByUrl = (items) => {
+  const map = new Map();
+  items.forEach((item) => {
+    const key = normalizeUrlForDedupe(item.url || item.id);
+    if (!map.has(key)) {
+      map.set(key, item);
+    }
+  });
+  return [...map.values()];
+};
+
 const takeTop = (items, count) => sortByScoreAndDate(items).slice(0, count);
 
 const buildBalancedAll = (results) => {
@@ -567,6 +624,20 @@ const fetchYoutubeItems = async (query, range, env) => {
 
 const fetchNewsItems = async (query, range) => {
   const cutoff = rangeCutoffMs(range);
+  const curatedItems = CURATED_NEWS_ARTICLES.map((article, index) => ({
+    id: `news-curated-${article.id}`,
+    kind: 'news',
+    title: article.title,
+    description: article.description,
+    url: article.url,
+    source: article.source,
+    publishedAt: null,
+    thumbnail: null,
+    channel: null,
+    score: 80 - index + computeScore(article.title, article.description, null, query),
+    ctaLabel: 'Ler matéria',
+  }));
+
   const settled = await Promise.allSettled(
     NEWS_FEEDS.map(async (feed) => {
       const response = await fetchWithTimeout(feed.url);
@@ -602,7 +673,7 @@ const fetchNewsItems = async (query, range) => {
     return parsed >= cutoff;
   });
 
-  return sortByScoreAndDate(filtered).slice(0, 30);
+  return sortByScoreAndDate(dedupeByUrl([...curatedItems, ...filtered])).slice(0, 30);
 };
 
 const fetchInstagramItems = async (query) => {
