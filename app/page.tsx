@@ -86,13 +86,13 @@ export default function HomePage() {
         const payload = (await response.json()) as {
           tiktok?: unknown[];
           twitch?: unknown[];
-          reddit?: unknown[];
+          community?: unknown[];
         };
 
         const all = [
           ...(Array.isArray(payload.tiktok) ? payload.tiktok : []),
           ...(Array.isArray(payload.twitch) ? payload.twitch : []),
-          ...(Array.isArray(payload.reddit) ? payload.reddit : []),
+          ...(Array.isArray(payload.community) ? payload.community : []),
         ] as Array<{
           id: string;
           title: string;
@@ -165,7 +165,7 @@ export default function HomePage() {
                 </span>
                 <header className='space-y-1'>
                   <p className='text-xs uppercase tracking-[0.18em] text-[#9ca3af]'>Canais em tempo real</p>
-                  <h3 className='text-xl font-bold text-white md:text-2xl'>TikTok · Twitch · Reddit LIVE</h3>
+                  <h3 className='text-xl font-bold text-white md:text-2xl'>TikTok · Twitch · Comunidade BR</h3>
                 </header>
                 {!feedsLoaded ? (
                   <div className='rounded-xl border border-white/10 bg-[#0b0b0f] p-4 text-sm text-[#9ca3af]'>

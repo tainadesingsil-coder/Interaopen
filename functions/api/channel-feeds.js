@@ -1,6 +1,12 @@
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const SOURCE_TIMEOUT_MS = 8000;
 const FALLBACK_TWITCH_CHANNELS = [
+  'lucas_montano',
+  'linuxtips',
+  'glaucia_lemos86',
+  'teomewhy',
+  'danielhe4rt',
+  'karlamag',
   'cozycoding',
   'theprimeagen',
   'tsoding',
@@ -18,13 +24,14 @@ const FALLBACK_TIKTOK_VIDEO_URLS = [
   'https://www.tiktok.com/@islamsousa/video/7613833799423528199',
   'https://www.tiktok.com/@jornadatop/video/7232292097313770757',
 ];
-const FALLBACK_REDDIT_SUBREDDITS = [
-  'MachineLearning',
-  'artificial',
-  'LocalLLaMA',
-  'programming',
-  'webdev',
+const FALLBACK_TABNEWS_KEYWORDS = [
+  'ia',
+  'inteligencia',
+  'machine',
+  'llm',
   'devops',
+  'backend',
+  'frontend',
 ];
 const TWITCH_TOPIC_QUERIES = [
   'inteligencia artificial',
@@ -215,13 +222,16 @@ const parseTwitchChannels = (env = {}) => {
         .map((item) => item.trim().toLowerCase())
         .filter(Boolean)
     : [];
-
-  const base = provided.length > 0 ? provided : FALLBACK_TWITCH_CHANNELS;
-  return base
+  const cleanedProvided = provided
     .map((channel) => channel.replace(/^@/, ''))
     .filter((channel) => /^[a-z0-9_]{2,25}$/i.test(channel))
-    .filter((channel, index, arr) => arr.indexOf(channel) === index)
-    .slice(0, 12);
+    .filter((channel, index, arr) => arr.indexOf(channel) === index);
+
+  const fallback = FALLBACK_TWITCH_CHANNELS.map((channel) => channel.replace(/^@/, ''))
+    .filter((channel) => /^[a-z0-9_]{2,25}$/i.test(channel))
+    .filter((channel, index, arr) => arr.indexOf(channel) === index);
+
+  return (cleanedProvided.length > 0 ? cleanedProvided : fallback).slice(0, 14);
 };
 
 const getTwitchCredentials = (env = {}) => {
@@ -380,35 +390,30 @@ const fetchTwitchItems = async (env = {}) => {
   return fetchTwitchDecapiFallback(env);
 };
 
-const parseRedditSubreddits = (env = {}) => {
-  const raw = String(env?.REDDIT_SUBREDDITS || env?.REDDIT_TECH_SUBREDDITS || '').trim();
-  const envSubs = raw ? parseCommaSeparated(raw).map((item) => item.replace(/^r\//i, '').trim()) : [];
-  return toUniqueList([...envSubs, ...FALLBACK_REDDIT_SUBREDDITS], 12)
-    .filter((item) => /^[a-z0-9_]+$/i.test(item))
-    .map((item) => item.replace(/^r\//i, ''));
+const parseTabNewsKeywords = (env = {}) => {
+  const raw = String(env?.TABNEWS_KEYWORDS || env?.COMMUNITY_KEYWORDS || '').trim();
+  const envKeywords = raw ? parseCommaSeparated(raw) : [];
+  return toUniqueList([...envKeywords, ...FALLBACK_TABNEWS_KEYWORDS], 14)
+    .map((item) => safeText(item, 32).toLowerCase())
+    .filter(Boolean);
 };
 
-const extractRedditThumbnail = (post = {}) => {
-  const previewUrl = post?.preview?.images?.[0]?.source?.url;
-  if (previewUrl) return String(previewUrl).replace(/&amp;/g, '&');
-  const thumb = String(post?.thumbnail || '').trim();
-  if (/^https?:\/\//i.test(thumb) && !/(self|default|nsfw|spoiler)/i.test(thumb)) {
-    return thumb;
-  }
-  return null;
+const isTabNewsRelevant = (title = '', keywords = []) => {
+  if (keywords.length === 0) return true;
+  const normalized = title.toLowerCase();
+  return keywords.some((keyword) => normalized.includes(keyword));
 };
 
-const fetchRedditItems = async (env = {}) => {
-  const subreddits = parseRedditSubreddits(env);
-  if (subreddits.length === 0) return [];
-
+const fetchTabNewsItems = async (env = {}) => {
+  const keywords = parseTabNewsKeywords(env);
+  const endpoints = [
+    'https://www.tabnews.com.br/api/v1/contents?page=1&per_page=24&strategy=relevant',
+    'https://www.tabnews.com.br/api/v1/contents?page=1&per_page=24&strategy=new',
+  ];
   const settled = await Promise.allSettled(
-    subreddits.map(async (subreddit, subredditIndex) => {
-      const endpoint = new URL(`https://www.reddit.com/r/${encodeURIComponent(subreddit)}/new.json`);
-      endpoint.searchParams.set('limit', '8');
-      endpoint.searchParams.set('raw_json', '1');
+    endpoints.map(async (endpoint, endpointIndex) => {
       const response = await fetchWithTimeout(
-        endpoint.toString(),
+        endpoint,
         {
           headers: { accept: 'application/json' },
         },
@@ -416,25 +421,27 @@ const fetchRedditItems = async (env = {}) => {
       );
       if (!response.ok) return [];
       const payload = await response.json();
-      const children = Array.isArray(payload?.data?.children) ? payload.data.children : [];
-      return children.slice(0, 2).map((child, index) => {
-        const post = child?.data || {};
-        const permalink = String(post?.permalink || '').trim();
+      const posts = Array.isArray(payload) ? payload : [];
+      return posts.slice(0, 8).map((post, index) => {
         const title = safeText(post?.title || '', 180);
-        if (!permalink || !title) return null;
-        const comments = Number(post?.num_comments || 0);
+        const owner = safeText(post?.owner_username || '', 64);
+        const slug = safeText(post?.slug || '', 140);
+        if (!title || !owner || !slug) return null;
+        if (!isTabNewsRelevant(title, keywords)) return null;
+        const comments = Number(post?.children_deep_count || 0);
         return {
-          id: `reddit-${subreddit}-${post?.id || `${subredditIndex}-${index}`}`,
-          title: `Reddit · r/${subreddit}`,
+          id: `tabnews-${post?.id || `${owner}-${slug}-${index}`}`,
+          title: 'TabNews · Comunidade BR Tech',
           summary: `${title}${comments > 0 ? ` · ${comments} comentários` : ''}`.slice(0, 260),
-          url: `https://www.reddit.com${permalink}`,
-          thumbnail: extractRedditThumbnail(post),
-          tags: ['Reddit', 'Tech', 'Discussão'],
+          url: `https://www.tabnews.com.br/${owner}/${slug}`,
+          thumbnail: null,
+          tags: ['Comunidade BR', 'Tech', 'Discussão'],
           category: 'Software',
           isLive: true,
-          metricLabel: 'Discussão em tempo real',
+          metricLabel: 'Debates em português',
           caseLabel: 'Ver no Radar',
-          channel: `r/${subreddit}`,
+          channel: `@${owner}`,
+          rank: endpointIndex * 100 + index,
         };
       });
     })
@@ -443,21 +450,23 @@ const fetchRedditItems = async (env = {}) => {
   return settled
     .flatMap((result) => (result.status === 'fulfilled' ? result.value : []))
     .filter(Boolean)
+    .sort((a, b) => Number(a.rank || 0) - Number(b.rank || 0))
+    .map(({ rank, ...item }) => item)
     .slice(0, 12);
 };
 
 const aggregateChannelFeeds = async (env = {}) => {
-  const [tiktok, twitch, reddit] = await Promise.all([
+  const [tiktok, twitch, community] = await Promise.all([
     fetchTiktokItems(env),
     fetchTwitchItems(env),
-    fetchRedditItems(env),
+    fetchTabNewsItems(env),
   ]);
 
   return {
     generatedAt: new Date().toISOString(),
     tiktok,
     twitch,
-    reddit,
+    community,
   };
 };
 

@@ -9,6 +9,12 @@ const FALLBACK_TWITTER_ACCESS_SECRET = 'EPCfx3xbrenbyIK0IT3JjROIWY3YKBJ7tpMhshQL
 const TWITTER_SEARCH_ENDPOINT = 'https://api.x.com/2/tweets/search/recent';
 const TWITTER_MAX_RESULTS = 20;
 const FALLBACK_TWITCH_CHANNELS = [
+  'lucas_montano',
+  'linuxtips',
+  'glaucia_lemos86',
+  'teomewhy',
+  'danielhe4rt',
+  'karlamag',
   'cozycoding',
   'theprimeagen',
   'tsoding',
@@ -32,14 +38,16 @@ const FALLBACK_TIKTOK_CREATOR_VIDEO_URLS = [
   'https://www.tiktok.com/@islamsousa/video/7613833799423528199',
   'https://www.tiktok.com/@jornadatop/video/7232292097313770757',
 ];
-const FALLBACK_REDDIT_SUBREDDITS = [
-  'MachineLearning',
-  'artificial',
-  'LocalLLaMA',
-  'programming',
-  'webdev',
+const FALLBACK_TABNEWS_KEYWORDS = [
+  'ia',
+  'inteligencia',
+  'machine',
+  'llm',
   'devops',
-  'startups',
+  'backend',
+  'frontend',
+  'n8n',
+  'automacao',
 ];
 
 const NEWS_FEEDS = [
@@ -700,80 +708,75 @@ const parseTiktokCreatorHandles = (env = {}) => {
   return toUniqueList([...explicitHandles, ...handlesFromUrls], 12);
 };
 
-const parseRedditSubreddits = (env = {}) => {
-  const raw = String(env?.REDDIT_SUBREDDITS || env?.REDDIT_TECH_SUBREDDITS || '').trim();
-  const fromEnv = raw
-    ? parseCommaSeparated(raw).map((name) => name.replace(/^r\//i, '').trim())
-    : [];
-  return toUniqueList([...fromEnv, ...FALLBACK_REDDIT_SUBREDDITS], 10)
-    .filter((name) => /^[a-z0-9_]+$/i.test(name))
-    .map((name) => name.replace(/^r\//i, ''));
+const parseTabNewsKeywords = (env = {}) => {
+  const raw = String(env?.TABNEWS_KEYWORDS || env?.COMMUNITY_KEYWORDS || '').trim();
+  const fromEnv = raw ? parseCommaSeparated(raw) : [];
+  return toUniqueList([...fromEnv, ...FALLBACK_TABNEWS_KEYWORDS], 12)
+    .map((value) => stripHtml(value).toLowerCase().trim())
+    .filter(Boolean);
 };
 
-const extractRedditThumbnail = (post = {}, fallbackTitle = '') => {
-  const previewUrl = post?.preview?.images?.[0]?.source?.url;
-  if (previewUrl) return String(previewUrl).replace(/&amp;/g, '&');
-  const thumb = String(post?.thumbnail || '').trim();
-  if (/^https?:\/\//i.test(thumb) && !/(self|default|nsfw|spoiler)/i.test(thumb)) {
-    return thumb;
-  }
-  return buildInstagramThumbnail(`Reddit · ${fallbackTitle}`);
+const isTabNewsRelevant = (title = '', description = '', keywords = []) => {
+  const haystack = `${title} ${description}`.toLowerCase();
+  if (keywords.length === 0) return true;
+  return keywords.some((keyword) => haystack.includes(keyword));
 };
 
-const fetchRedditItems = async (query, range, env = {}) => {
-  const subreddits = parseRedditSubreddits(env);
-  if (subreddits.length === 0) return [];
+const fetchTabNewsItems = async (query, range, env = {}) => {
+  const keywords = parseTabNewsKeywords(env);
   const cutoff = rangeCutoffMs(range);
+  const endpoints = [
+    'https://www.tabnews.com.br/api/v1/contents?page=1&per_page=24&strategy=new',
+    'https://www.tabnews.com.br/api/v1/contents?page=1&per_page=24&strategy=relevant',
+  ];
 
   const settled = await Promise.allSettled(
-    subreddits.map(async (subreddit, subredditIndex) => {
-      const endpoint = new URL(`https://www.reddit.com/r/${encodeURIComponent(subreddit)}/new.json`);
-      endpoint.searchParams.set('limit', '14');
-      endpoint.searchParams.set('raw_json', '1');
+    endpoints.map(async (endpoint, endpointIndex) => {
       const response = await fetchWithTimeout(
-        endpoint.toString(),
+        endpoint,
         {
-          headers: {
-            accept: 'application/json',
-          },
+          headers: { accept: 'application/json' },
         },
         6500
       );
       if (!response.ok) return [];
       const payload = await response.json();
-      const children = Array.isArray(payload?.data?.children) ? payload.data.children : [];
-      return children.map((child, index) => {
-        const post = child?.data || {};
-        const permalink = String(post?.permalink || '').trim();
+      const posts = Array.isArray(payload) ? payload : [];
+      return posts.map((post, index) => {
+        const owner = stripHtml(post?.owner_username || '');
+        const slug = stripHtml(post?.slug || '');
         const title = stripHtml(post?.title || '');
-        if (!permalink || !title) return null;
-        const createdUtc = Number(post?.created_utc || 0);
-        const publishedAt =
-          Number.isFinite(createdUtc) && createdUtc > 0 ? new Date(createdUtc * 1000).toISOString() : null;
+        if (!owner || !slug || !title) return null;
+
+        const publishedAt = safeIsoDate(post?.published_at || post?.created_at || '');
         if (publishedAt) {
           const timestamp = Date.parse(publishedAt);
           if (!Number.isNaN(timestamp) && timestamp < cutoff) return null;
         }
-        const description = stripHtml(post?.selftext || post?.link_flair_text || title).slice(0, 1200);
-        const channel = `r/${subreddit}`;
-        const scoreVotes = Number(post?.score || 0);
-        const comments = Number(post?.num_comments || 0);
+
+        const description = stripHtml(post?.source_url || post?.title || '').slice(0, 1200);
+        if (!isTabNewsRelevant(title, description, keywords) && !isAiRelated(`${title} ${description}`)) {
+          return null;
+        }
+
+        const tabcoins = Number(post?.tabcoins || 0);
+        const comments = Number(post?.children_deep_count || 0);
         return {
-          id: `news-reddit-${subreddit}-${post?.id || index}`,
+          id: `news-tabnews-${post?.id || `${owner}-${slug}`}`,
           kind: 'news',
           title: title.slice(0, 180),
           description: `${description}${comments > 0 ? ` · ${comments} comentários` : ''}`.slice(0, 1200),
-          url: `https://www.reddit.com${permalink}`,
-          source: 'Reddit Tech',
+          url: `https://www.tabnews.com.br/${owner}/${slug}`,
+          source: 'TabNews Brasil',
           publishedAt,
-          thumbnail: extractRedditThumbnail(post, title),
-          channel,
+          thumbnail: buildInstagramThumbnail(`TabNews · ${title}`),
+          channel: `@${owner}`,
           score:
-            72 -
-            subredditIndex -
+            74 -
+            endpointIndex -
             index +
-            Math.min(8, Math.floor(scoreVotes / 40)) +
-            computeScore(`${title} ${channel}`, description, publishedAt, query),
+            Math.min(8, Math.max(0, tabcoins)) +
+            computeScore(`${title} ${owner}`, description, publishedAt, query),
           ctaLabel: 'Ver discussão',
         };
       });
@@ -782,7 +785,7 @@ const fetchRedditItems = async (query, range, env = {}) => {
 
   return dedupeByUrl(
     settled.flatMap((result) => (result.status === 'fulfilled' ? result.value : [])).filter(Boolean)
-  ).slice(0, 20);
+  ).slice(0, 22);
 };
 
 const extractInstagramHandleFromProfileUrl = (value = '') => {
@@ -1208,13 +1211,16 @@ const parseTwitchChannels = (env = {}) => {
         .map((item) => item.trim().toLowerCase())
         .filter(Boolean)
     : [];
-
-  const base = provided.length > 0 ? provided : FALLBACK_TWITCH_CHANNELS;
-  return base
+  const cleanedProvided = provided
     .map((channel) => channel.replace(/^@/, ''))
     .filter((channel) => /^[a-z0-9_]{2,25}$/i.test(channel))
-    .filter((channel, index, arr) => arr.indexOf(channel) === index)
-    .slice(0, 8);
+    .filter((channel, index, arr) => arr.indexOf(channel) === index);
+
+  const fallback = FALLBACK_TWITCH_CHANNELS.map((channel) => channel.replace(/^@/, ''))
+    .filter((channel) => /^[a-z0-9_]{2,25}$/i.test(channel))
+    .filter((channel, index, arr) => arr.indexOf(channel) === index);
+
+  return (cleanedProvided.length > 0 ? cleanedProvided : fallback).slice(0, 12);
 };
 
 const fetchTwitchLiveItems = async (query, env = {}) => {
@@ -1406,11 +1412,15 @@ const buildBalancedAll = (results) => {
     results.news.filter((item) => /twitch/i.test(String(item?.source || '')) || /twitch\.tv/i.test(String(item?.url || ''))),
     1
   );
-  const redditNews = takeTop(
-    results.news.filter((item) => /reddit/i.test(String(item?.source || '')) || /reddit\.com/i.test(String(item?.url || ''))),
+  const communityNews = takeTop(
+    results.news.filter(
+      (item) =>
+        /tabnews|comunidade brasil|comunidade br/i.test(String(item?.source || '')) ||
+        /tabnews\.com\.br/i.test(String(item?.url || ''))
+    ),
     1
   );
-  const pickedSocial = dedupeByUrl([...tiktokNews, ...twitchNews, ...redditNews]).slice(0, 4);
+  const pickedSocial = dedupeByUrl([...tiktokNews, ...twitchNews, ...communityNews]).slice(0, 4);
   const editorialNews = takeTop(
     results.news.filter(
       (item) =>
@@ -1615,14 +1625,14 @@ const fetchNewsItems = async (query, range, env = {}) => {
   const twitterPromise = fetchTwitterNewsItems(query, range, env);
   const twitchPromise = fetchTwitchLiveItems(query, env);
   const tiktokPromise = fetchTiktokCreatorItems(query, range, env);
-  const redditPromise = fetchRedditItems(query, range, env);
+  const tabNewsPromise = fetchTabNewsItems(query, range, env);
 
-  const [settled, twitterItems, twitchItems, tiktokItems, redditItems] = await Promise.all([
+  const [settled, twitterItems, twitchItems, tiktokItems, tabNewsItems] = await Promise.all([
     rssSettledPromise,
     twitterPromise,
     twitchPromise,
     tiktokPromise,
-    redditPromise,
+    tabNewsPromise,
   ]);
   const items = settled.flatMap((result) => (result.status === 'fulfilled' ? result.value : []));
   const filtered = items.filter((item) => {
@@ -1636,7 +1646,7 @@ const fetchNewsItems = async (query, range, env = {}) => {
   });
 
   return sortByScoreAndDate(
-    dedupeByUrl([...curatedItems, ...filtered, ...twitterItems, ...twitchItems, ...tiktokItems, ...redditItems])
+    dedupeByUrl([...curatedItems, ...filtered, ...twitterItems, ...twitchItems, ...tiktokItems, ...tabNewsItems])
   ).slice(0, 36);
 };
 

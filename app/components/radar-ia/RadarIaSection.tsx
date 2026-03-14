@@ -105,7 +105,6 @@ const buildTikTokEmbedUrl = (url: string) => {
 };
 
 const isTwitchUrl = (url: string) => /twitch\.tv/i.test(url);
-const isRedditUrl = (url: string) => /reddit\.com/i.test(url);
 
 const extractTwitchChannelFromUrl = (url: string) => {
   try {
@@ -391,7 +390,6 @@ function RadarViewer({
   );
   const isTikTokNews = item.kind === 'news' && (isTikTokUrl(item.url) || /tiktok/i.test(item.source));
   const isTwitchNews = item.kind === 'news' && (isTwitchUrl(item.url) || /twitch/i.test(item.source));
-  const isRedditNews = item.kind === 'news' && (isRedditUrl(item.url) || /reddit/i.test(item.source));
   const tikTokEmbedUrl = isTikTokNews ? buildTikTokEmbedUrl(item.url) : '';
   const [twitchParentHost, setTwitchParentHost] = useState('localhost');
   const twitchChannel = isTwitchNews ? extractTwitchChannelFromUrl(item.url) : '';
@@ -696,9 +694,7 @@ function RadarViewer({
                     ? 'TikTok'
                     : isTwitchNews
                       ? 'Twitch'
-                      : isRedditNews
-                        ? 'Reddit'
-                        : 'Notícia'
+                      : 'Notícia'
                   : item.kind === 'podcast'
                     ? 'Podcast'
                     : 'Instagram'}
@@ -923,7 +919,7 @@ function RadarViewer({
           )}
         </div>
 
-        {item.kind === 'news' && !isTikTokNews && !isTwitchNews && !isRedditNews ? (
+        {item.kind === 'news' && !isTikTokNews && !isTwitchNews ? (
           <footer className='flex items-center justify-end border-t border-white/10 p-3 sm:p-4'>
             <a
               href={item.url}
