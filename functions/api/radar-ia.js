@@ -8,6 +8,7 @@ const FALLBACK_TWITTER_ACCESS_TOKEN = '2032831349879627776-y91ml7P3XjUWQgrkgKH4c
 const FALLBACK_TWITTER_ACCESS_SECRET = 'EPCfx3xbrenbyIK0IT3JjROIWY3YKBJ7tpMhshQLgmyCr';
 const TWITTER_SEARCH_ENDPOINT = 'https://api.x.com/2/tweets/search/recent';
 const TWITTER_MAX_RESULTS = 20;
+const FALLBACK_TWITCH_CHANNELS = ['cozycoding', 'theprimeagen', 'tsoding'];
 const FALLBACK_INSTAGRAM_USER_ID = '61565928037346';
 const INSTAGRAM_GRAPH_VERSION = 'v20.0';
 const INSTAGRAM_GRAPH_LIMIT = 18;
@@ -624,6 +625,12 @@ const fetchWithTimeout = async (url, init = {}, timeoutMs = SOURCE_TIMEOUT_MS) =
   }
 };
 
+const fetchTextWithTimeout = async (url, init = {}, timeoutMs = SOURCE_TIMEOUT_MS) => {
+  const response = await fetchWithTimeout(url, init, timeoutMs);
+  if (!response.ok) return '';
+  return (await response.text()).trim();
+};
+
 const oauthPercentEncode = (value = '') =>
   encodeURIComponent(String(value))
     .replace(/[!'()*]/g, (char) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`);
@@ -819,6 +826,71 @@ const fetchTwitterNewsItems = async (query, range, env = {}) => {
   } catch {
     return [];
   }
+};
+
+const parseTwitchChannels = (env = {}) => {
+  const raw = String(env?.TWITCH_CHANNELS || env?.TWITCH_CHANNEL || '').trim();
+  const provided = raw
+    ? raw
+        .split(/[,\n; ]/)
+        .map((item) => item.trim().toLowerCase())
+        .filter(Boolean)
+    : [];
+
+  const base = provided.length > 0 ? provided : FALLBACK_TWITCH_CHANNELS;
+  return base
+    .map((channel) => channel.replace(/^@/, ''))
+    .filter((channel) => /^[a-z0-9_]{2,25}$/i.test(channel))
+    .filter((channel, index, arr) => arr.indexOf(channel) === index)
+    .slice(0, 8);
+};
+
+const fetchTwitchLiveItems = async (query, env = {}) => {
+  const channels = parseTwitchChannels(env);
+  if (channels.length === 0) return [];
+
+  const nowIso = new Date().toISOString();
+  const settled = await Promise.allSettled(
+    channels.map(async (channel, index) => {
+      const base = 'https://decapi.me/twitch';
+      const [uptime, title, game, viewers] = await Promise.all([
+        fetchTextWithTimeout(`${base}/uptime/${channel}`, undefined, 5500),
+        fetchTextWithTimeout(`${base}/title/${channel}`, undefined, 5500),
+        fetchTextWithTimeout(`${base}/game/${channel}`, undefined, 5500),
+        fetchTextWithTimeout(`${base}/viewercount/${channel}`, undefined, 5500),
+      ]);
+
+      const isLive = !!uptime && !/offline/i.test(uptime);
+      const cleanTitle = stripHtml(title || `Canal ${channel} na Twitch`);
+      const cleanGame = stripHtml(game || '');
+      const viewerLabel = viewers && !/offline/i.test(viewers) ? `${viewers} espectadores` : '';
+      const liveOrOfflineLabel = isLive ? `Ao vivo há ${uptime}` : 'Offline agora';
+      const descriptionParts = [cleanTitle, cleanGame && cleanGame !== 'No game' ? cleanGame : '', viewerLabel, liveOrOfflineLabel]
+        .filter(Boolean);
+      const description = descriptionParts.join(' · ').slice(0, 1200);
+
+      return {
+        id: `news-twitch-${channel}`,
+        kind: 'news',
+        title: cleanTitle.slice(0, 180),
+        description,
+        url: `https://www.twitch.tv/${channel}`,
+        source: isLive ? 'Twitch Live' : 'Twitch Monitor',
+        publishedAt: isLive ? nowIso : null,
+        thumbnail: `https://static-cdn.jtvnw.net/previews-ttv/live_user_${channel}-640x360.jpg?t=${Date.now()}`,
+        channel: `@${channel}`,
+        score:
+          (isLive ? 85 : 35) -
+          index +
+          computeScore(cleanTitle, description, isLive ? nowIso : null, query),
+        ctaLabel: isLive ? 'Assistir live' : 'Ver canal',
+      };
+    })
+  );
+
+  return settled
+    .flatMap((result) => (result.status === 'fulfilled' && result.value ? [result.value] : []))
+    .slice(0, 12);
 };
 
 const sortByScoreAndDate = (items) =>
@@ -1147,8 +1219,9 @@ const fetchNewsItems = async (query, range, env = {}) => {
     })
   );
   const twitterPromise = fetchTwitterNewsItems(query, range, env);
+  const twitchPromise = fetchTwitchLiveItems(query, env);
 
-  const [settled, twitterItems] = await Promise.all([rssSettledPromise, twitterPromise]);
+  const [settled, twitterItems, twitchItems] = await Promise.all([rssSettledPromise, twitterPromise, twitchPromise]);
   const items = settled.flatMap((result) => (result.status === 'fulfilled' ? result.value : []));
   const filtered = items.filter((item) => {
     if (!isLikelyPortuguese(`${item.title} ${item.description}`)) {
@@ -1160,7 +1233,7 @@ const fetchNewsItems = async (query, range, env = {}) => {
     return parsed >= cutoff;
   });
 
-  return sortByScoreAndDate(dedupeByUrl([...curatedItems, ...filtered, ...twitterItems])).slice(0, 30);
+  return sortByScoreAndDate(dedupeByUrl([...curatedItems, ...filtered, ...twitterItems, ...twitchItems])).slice(0, 30);
 };
 
 const fetchCuratedInstagramItems = async (query) => {
