@@ -2,6 +2,10 @@ const CACHE_TTL_MS = 4 * 60 * 1000;
 const SOURCE_TIMEOUT_MS = 4000;
 const MAX_QUERY_LENGTH = 80;
 const FALLBACK_YOUTUBE_DATA_API_KEY = 'AIzaSyDmRPaN4CvD2OI04Jz8Y8APqktXggkTFAw';
+const FALLBACK_INSTAGRAM_USER_ID = '61565928037346';
+const INSTAGRAM_GRAPH_VERSION = 'v20.0';
+const INSTAGRAM_GRAPH_LIMIT = 18;
+const INSTAGRAM_RSS_LIMIT = 18;
 
 const NEWS_FEEDS = [
   { name: 'Olhar Digital IA', url: 'https://olhardigital.com.br/tag/inteligencia-artificial/feed/' },
@@ -733,6 +737,27 @@ const normalizeUrlForDedupe = (value = '') => {
   }
 };
 
+const extractInstagramCodeFromUrl = (url = '') => {
+  const match = String(url).match(/\/(?:p|reel)\/([a-zA-Z0-9_-]+)/);
+  return match?.[1] || '';
+};
+
+const instagramHandle = (value = '') => {
+  const normalized = String(value || '').trim().replace(/^@+/, '');
+  if (!normalized) return null;
+  return `@${normalized}`;
+};
+
+const instagramTitleFromCaption = (caption = '') => {
+  const cleaned = stripHtml(caption || '').replace(/\s+/g, ' ').trim();
+  if (!cleaned) return 'Publicação do Instagram';
+  const parts = cleaned
+    .split(/(?<=[.!?])\s+/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+  return (parts[0] || cleaned).slice(0, 160);
+};
+
 const dedupeByUrl = (items) => {
   const map = new Map();
   items.forEach((item) => {
@@ -955,7 +980,7 @@ const fetchNewsItems = async (query, range) => {
   return sortByScoreAndDate(dedupeByUrl([...curatedItems, ...filtered])).slice(0, 30);
 };
 
-const fetchInstagramItems = async (query) => {
+const fetchCuratedInstagramItems = async (query) => {
   const settled = await Promise.allSettled(
     CURATED_INSTAGRAM_PUBLICATIONS.map(async (publication, index) => {
       let title = publication.title;
@@ -1054,6 +1079,151 @@ const fetchInstagramItems = async (query) => {
   return settled.flatMap((result) => (result.status === 'fulfilled' ? [result.value] : []));
 };
 
+const getInstagramGraphCredentials = (env = {}) => {
+  const userId =
+    String(
+      env?.INSTAGRAM_USER_ID ||
+      env?.IG_USER_ID ||
+      env?.INSTAGRAM_BUSINESS_ACCOUNT_ID ||
+      FALLBACK_INSTAGRAM_USER_ID ||
+      ''
+    ).trim();
+  const token = String(env?.INSTAGRAM_ACCESS_TOKEN || env?.IG_ACCESS_TOKEN || env?.META_ACCESS_TOKEN || '').trim();
+  return { userId, token };
+};
+
+const fetchInstagramGraphItems = async (query, env = {}) => {
+  const { userId, token } = getInstagramGraphCredentials(env);
+  if (!userId || !token) return [];
+
+  try {
+    const endpoint = new URL(`https://graph.facebook.com/${INSTAGRAM_GRAPH_VERSION}/${userId}/media`);
+    endpoint.searchParams.set(
+      'fields',
+      'id,caption,media_type,media_url,thumbnail_url,permalink,timestamp,username'
+    );
+    endpoint.searchParams.set('limit', String(INSTAGRAM_GRAPH_LIMIT));
+    endpoint.searchParams.set('access_token', token);
+
+    const response = await fetchWithTimeout(endpoint.toString(), undefined, 6500);
+    if (!response.ok) {
+      return [];
+    }
+    const payload = await response.json();
+    const items = Array.isArray(payload?.data) ? payload.data : [];
+
+    return items
+      .map((media, index) => {
+        const permalink = String(media?.permalink || '').trim();
+        if (!permalink) return null;
+
+        const caption = stripHtml(media?.caption || '');
+        const title = instagramTitleFromCaption(caption);
+        const code = extractInstagramCodeFromUrl(permalink);
+        const mediaType = String(media?.media_type || '').toUpperCase();
+        const isVideo = mediaType.includes('VIDEO') || permalink.includes('/reel/');
+        const thumbnail =
+          code
+            ? `/api/instagram-image?code=${code}${isVideo ? '&kind=reel' : ''}`
+            : media?.thumbnail_url || media?.media_url || buildInstagramThumbnail(title);
+
+        const publishedAt = safeIsoDate(media?.timestamp || '');
+        const channel = instagramHandle(media?.username || '') || null;
+
+        return {
+          id: `instagram-graph-${media?.id || code || index}`,
+          kind: 'instagram',
+          title,
+          description: caption || 'Publicação recente do Instagram sobre IA.',
+          url: permalink,
+          source: 'Instagram',
+          publishedAt,
+          thumbnail,
+          channel,
+          score: 120 - index + computeScore(`${title} ${channel || ''}`, caption, publishedAt, query),
+          ctaLabel: isVideo ? 'Ver reel' : 'Ver post',
+        };
+      })
+      .filter(Boolean);
+  } catch {
+    return [];
+  }
+};
+
+const parseInstagramRssFeeds = (env = {}) => {
+  const raw = String(env?.INSTAGRAM_RSS_FEEDS || env?.INSTAGRAM_RSS_URLS || env?.INSTAGRAM_RSS_URL || '').trim();
+  if (!raw) return [];
+  return raw
+    .split(/[,\n;]/)
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .filter((item, index, arr) => arr.indexOf(item) === index)
+    .slice(0, 3);
+};
+
+const fetchInstagramItemsFromRss = async (query, env = {}) => {
+  const feeds = parseInstagramRssFeeds(env);
+  if (feeds.length === 0) return [];
+
+  const settled = await Promise.allSettled(
+    feeds.map(async (feedUrl) => {
+      const response = await fetchWithTimeout(feedUrl, undefined, 6500);
+      if (!response.ok) {
+        throw new Error(`instagram_rss_fetch_failed:${response.status}`);
+      }
+      const xml = await response.text();
+      const parsed = parseFeedItems(xml).slice(0, INSTAGRAM_RSS_LIMIT);
+      return parsed.map((entry, index) => {
+        const code = extractInstagramCodeFromUrl(entry.link);
+        const isReel = entry.link.includes('/reel/');
+        const title = instagramTitleFromCaption(entry.title || entry.description || 'Publicação do Instagram');
+        const description = (entry.description || '').slice(0, 1200);
+        return {
+          id: `instagram-rss-${normalizeUrlForDedupe(entry.link) || index}`,
+          kind: 'instagram',
+          title,
+          description: description || title,
+          url: entry.link,
+          source: 'Instagram',
+          publishedAt: entry.publishedAt,
+          thumbnail: code
+            ? `/api/instagram-image?code=${code}${isReel ? '&kind=reel' : ''}`
+            : buildInstagramThumbnail(title),
+          channel: null,
+          score: 90 - index + computeScore(title, description, entry.publishedAt, query),
+          ctaLabel: isReel ? 'Ver reel' : 'Ver post',
+        };
+      });
+    })
+  );
+
+  return dedupeByUrl(
+    settled.flatMap((result) => (result.status === 'fulfilled' ? result.value : []))
+  );
+};
+
+const fetchInstagramItems = async (query, env = {}) => {
+  const [dynamic, rssDynamic, curated] = await Promise.all([
+    fetchInstagramGraphItems(query, env),
+    fetchInstagramItemsFromRss(query, env),
+    fetchCuratedInstagramItems(query),
+  ]);
+
+  const dynamicCombined = dedupeByUrl([...dynamic, ...rssDynamic]);
+  if (dynamicCombined.length === 0) {
+    return curated;
+  }
+
+  const curatedWithoutDuplicates = curated.filter(
+    (item) =>
+      !dynamicCombined.some(
+        (dynamicItem) => normalizeUrlForDedupe(dynamicItem.url) === normalizeUrlForDedupe(item.url)
+      )
+  );
+
+  return sortByScoreAndDate([...dynamicCombined, ...curatedWithoutDuplicates]).slice(0, 30);
+};
+
 const emptyResponse = (query, type, range) => ({
   query,
   type,
@@ -1076,7 +1246,7 @@ const aggregateRadar = async (query, type, range, env) => {
     youtube: requestedKinds.includes('youtube') ? fetchYoutubeItems(query, range, env) : Promise.resolve([]),
     news: requestedKinds.includes('news') ? fetchNewsItems(query, range) : Promise.resolve([]),
     instagram: requestedKinds.includes('instagram')
-      ? fetchInstagramItems(query)
+      ? fetchInstagramItems(query, env)
       : Promise.resolve([]),
   };
 
