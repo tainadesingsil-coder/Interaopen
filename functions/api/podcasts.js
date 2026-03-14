@@ -1,10 +1,16 @@
 const CACHE_TTL_MS = 10 * 60 * 1000;
 const SOURCE_TIMEOUT_MS = 9000;
+const TRANSLATE_TIMEOUT_MS = 6000;
 const DEFAULT_LIMIT = 12;
 const MAX_LIMIT = 30;
 const RSS2JSON_ENDPOINT = 'https://api.rss2json.com/v1/api.json?rss_url=';
+const GOOGLE_TRANSLATE_ENDPOINT =
+  'https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=pt&dt=t&q=';
 const DEFAULT_USER_AGENT =
   'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36';
+const TRANSLATE_TITLE_MAX_CHARS = 180;
+const TRANSLATE_DESCRIPTION_MAX_CHARS = 420;
+const PORTUGUESE_SOURCE_PRIORITY = ['Pizza de Dados'];
 
 const PODCAST_FEEDS = [
   {
@@ -29,6 +35,14 @@ const PODCAST_FEEDS = [
 
 const getCache = () => {
   const key = '__PODCAST_CACHE__';
+  if (!globalThis[key]) {
+    globalThis[key] = new Map();
+  }
+  return globalThis[key];
+};
+
+const getTranslateCache = () => {
+  const key = '__PODCAST_TRANSLATE_CACHE__';
   if (!globalThis[key]) {
     globalThis[key] = new Map();
   }
@@ -104,6 +118,62 @@ const parseLimit = (value) => {
   const parsed = Number.parseInt(value || '', 10);
   if (!Number.isFinite(parsed) || parsed <= 0) return DEFAULT_LIMIT;
   return Math.min(parsed, MAX_LIMIT);
+};
+
+const truncateText = (value = '', maxChars = 400) => {
+  if (!value || value.length <= maxChars) return value;
+  return `${value.slice(0, maxChars).trim()}...`;
+};
+
+const isLikelyPortuguese = (value = '') => {
+  const normalized = String(value || '').toLowerCase();
+  if (!normalized.trim()) return false;
+
+  if (/[ãõáéíóúâêôç]/i.test(normalized)) return true;
+
+  const ptMatches =
+    normalized.match(/\b(de|da|do|dos|das|para|com|sem|não|uma|que|por|sobre|episódio|dados)\b/g) || [];
+  const enMatches = normalized.match(/\b(the|and|with|for|you|your|how|what|this|that|is|are)\b/g) || [];
+  if (ptMatches.length >= 2) return true;
+  if (enMatches.length >= 3 && ptMatches.length === 0) return false;
+  return ptMatches.length > enMatches.length;
+};
+
+const parseTranslatedPayload = (payload) => {
+  if (!Array.isArray(payload) || !Array.isArray(payload[0])) return '';
+  return payload[0]
+    .map((chunk) => (Array.isArray(chunk) && typeof chunk[0] === 'string' ? chunk[0] : ''))
+    .join('')
+    .trim();
+};
+
+const translateToPortuguese = async (value = '', maxChars = TRANSLATE_DESCRIPTION_MAX_CHARS) => {
+  const input = truncateText(String(value || '').trim(), maxChars);
+  if (!input) return '';
+  if (isLikelyPortuguese(input)) return input;
+
+  const cache = getTranslateCache();
+  const cacheKey = `pt:${input}`;
+  const cached = cache.get(cacheKey);
+  if (cached) return cached;
+
+  try {
+    const response = await fetchWithTimeout(
+      `${GOOGLE_TRANSLATE_ENDPOINT}${encodeURIComponent(input)}`,
+      {},
+      TRANSLATE_TIMEOUT_MS
+    );
+    if (!response.ok) {
+      return input;
+    }
+    const payload = await response.json();
+    const translated = parseTranslatedPayload(payload);
+    const output = translated || input;
+    cache.set(cacheKey, output);
+    return output;
+  } catch {
+    return input;
+  }
 };
 
 const extractAudioUrl = (item) =>
@@ -285,6 +355,49 @@ const limitPerFeed = (items, feedName, maxPerFeed = 8) => {
   });
 };
 
+const buildBalancedItems = (groupedItems, limit) => {
+  const ordered = [...groupedItems].sort((a, b) => {
+    const aPriority = PORTUGUESE_SOURCE_PRIORITY.includes(a.feedName) ? 0 : 1;
+    const bPriority = PORTUGUESE_SOURCE_PRIORITY.includes(b.feedName) ? 0 : 1;
+    if (aPriority !== bPriority) return aPriority - bPriority;
+    return a.feedName.localeCompare(b.feedName, 'pt-BR');
+  });
+
+  const queues = ordered.map((entry) => ({
+    feedName: entry.feedName,
+    items: limitPerFeed(sortByDate(entry.items), entry.feedName, 8),
+  }));
+
+  const output = [];
+  while (output.length < limit && queues.some((queue) => queue.items.length > 0)) {
+    for (const queue of queues) {
+      if (output.length >= limit) break;
+      const next = queue.items.shift();
+      if (next) output.push(next);
+    }
+  }
+  return output;
+};
+
+const translatePodcastItems = async (items) =>
+  Promise.all(
+    items.map(async (item) => {
+      const translatedTitle = await translateToPortuguese(item.title || '', TRANSLATE_TITLE_MAX_CHARS);
+      const translatedDescription = await translateToPortuguese(
+        item.description || '',
+        TRANSLATE_DESCRIPTION_MAX_CHARS
+      );
+      const translated = translatedTitle !== item.title || translatedDescription !== item.description;
+
+      return {
+        ...item,
+        title: translatedTitle || item.title,
+        description: translatedDescription || item.description,
+        source: translated ? `${item.source} · traduzido` : item.source,
+      };
+    })
+  );
+
 export async function onRequestGet(context) {
   const requestUrl = new URL(context.request.url);
   const limit = parseLimit(requestUrl.searchParams.get('limit'));
@@ -312,13 +425,13 @@ export async function onRequestGet(context) {
     return [];
   });
 
-  const merged = dedupeByAudioUrl(
-    groupedItems.flatMap((entry) => limitPerFeed(sortByDate(entry.items), entry.feedName, 8))
-  );
+  const balanced = buildBalancedItems(groupedItems, Math.max(limit * 2, 12));
+  const translated = await translatePodcastItems(balanced);
+  const merged = dedupeByAudioUrl(translated);
 
   const data = {
     generatedAt: new Date().toISOString(),
-    items: sortByDate(merged).slice(0, limit),
+    items: merged.slice(0, limit),
     errors,
   };
 

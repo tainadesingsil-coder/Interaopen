@@ -532,6 +532,9 @@ export function RadarIaSection() {
         <header className='mb-4 space-y-1'>
           <p className='text-xs uppercase tracking-[0.18em] text-[#9ca3af]'>Conteúdo em áudio</p>
           <h4 className='text-lg font-bold text-white md:text-xl'>Podcasts</h4>
+          <p className='text-xs text-[#9ca3af]'>
+            Episódios em português e traduções automáticas para facilitar a leitura.
+          </p>
         </header>
 
         {podcastError ? (
