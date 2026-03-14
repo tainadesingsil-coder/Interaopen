@@ -86,8 +86,14 @@ const extractYoutubeId = (url: string, fallbackId = '') => {
 };
 
 const extractInstagramCode = (url: string) => {
-  const match = url.match(/\/p\/([a-zA-Z0-9_-]+)/);
+  const match = url.match(/\/(?:p|reel)\/([a-zA-Z0-9_-]+)/);
   return match?.[1] || '';
+};
+
+const extractInstagramKind = (url: string) => {
+  if (url.includes('/reel/')) return 'reel';
+  if (url.includes('/p/')) return 'post';
+  return '';
 };
 
 function SkeletonCard() {
@@ -155,6 +161,7 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
   const youtubeId =
     item.kind === 'youtube' ? extractYoutubeId(item.url, item.id.replace(/^yt-/, '').trim()) : '';
   const instagramCode = item.kind === 'instagram' ? extractInstagramCode(item.url) : '';
+  const instagramKind = item.kind === 'instagram' ? extractInstagramKind(item.url) : '';
   const readerUrl = `/api/radar-reader?url=${encodeURIComponent(item.url)}&fallbackTitle=${encodeURIComponent(
     item.title
   )}&fallbackDescription=${encodeURIComponent(item.description)}&fallbackSource=${encodeURIComponent(
@@ -220,13 +227,16 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
               <img
                 src={
                   instagramCode
-                    ? `/api/instagram-image?code=${instagramCode}`
+                    ? `/api/instagram-image?code=${instagramCode}${instagramKind ? `&kind=${instagramKind}` : ''}`
                     : item.thumbnail || '/api/instagram-image?code=DV1OIoxDvbV'
                 }
                 alt={item.title}
                 className='w-full rounded-xl border border-white/10 object-cover'
               />
-              <p className='text-sm leading-relaxed text-[#c9d1d9]'>{item.description}</p>
+              <div className='space-y-1.5'>
+                <p className='text-[11px] uppercase tracking-[0.12em] text-[#9ca3af]'>Legenda</p>
+                <p className='text-sm leading-relaxed text-[#c9d1d9]'>{item.description}</p>
+              </div>
             </div>
           )}
         </div>

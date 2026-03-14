@@ -300,6 +300,32 @@ const CURATED_INSTAGRAM_PUBLICATIONS = [
     thumbnail: '/api/instagram-image?code=DVv4XchjiOj',
     ctaLabel: 'Ver post',
   },
+  {
+    id: 'instagram-reel-dulpg23dtut',
+    title: 'GIULLYA BECKER | COMUNICADORA',
+    description: '🚨ALERTA TUTORIAL🚨 Qual outro efeito você quer aprender? 👀',
+    url: 'https://www.instagram.com/reel/DUlPg23Dtut/',
+    thumbnail: '/api/instagram-image?code=DUlPg23Dtut&kind=reel',
+    ctaLabel: 'Ver reel',
+  },
+  {
+    id: 'instagram-reel-dvf5rv1jkig',
+    title: 'Ramon Siqueira',
+    description:
+      'A extensão que faz tudo pra você. Destaque para fluxos com Claude, vibe coding e automações com IA.',
+    url: 'https://www.instagram.com/reel/DVf5Rv1jKig/',
+    thumbnail: '/api/instagram-image?code=DVf5Rv1jKig&kind=reel',
+    ctaLabel: 'Ver reel',
+  },
+  {
+    id: 'instagram-reel-dvrofstknfl',
+    title: 'Rafael Riedel | Marketing & IA',
+    description:
+      'Comente "Claw" para receber o link de configuração e acompanhe conteúdos sobre agentes de IA e automação.',
+    url: 'https://www.instagram.com/reel/DVrofSTknFL/',
+    thumbnail: '/api/instagram-image?code=DVrofSTknFL&kind=reel',
+    ctaLabel: 'Ver reel',
+  },
 ];
 
 const PT_STOPWORDS = new Set([
