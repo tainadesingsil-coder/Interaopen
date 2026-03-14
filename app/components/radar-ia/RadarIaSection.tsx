@@ -82,6 +82,40 @@ const extractInstagramKind = (url: string) => {
   return '';
 };
 
+const isTikTokUrl = (url: string) => /tiktok\.com/i.test(url);
+
+const extractTikTokVideoId = (url: string) => {
+  const match = url.match(/\/video\/(\d+)/i);
+  return match?.[1] || '';
+};
+
+const buildTikTokEmbedUrl = (url: string) => {
+  const videoId = extractTikTokVideoId(url);
+  if (!videoId) return '';
+  return `https://www.tiktok.com/player/v1/${videoId}`;
+};
+
+const isDiscordChannelUrl = (url: string) => /discord\.com\/channels\//i.test(url);
+
+const parseDiscordChannelsUrl = (url: string) => {
+  const match = url.match(/discord\.com\/channels\/(\d+)\/(\d+)(?:\/(?:threads\/)?(\d+))?/i);
+  if (!match) return null;
+  const guildId = match[1];
+  const channelId = match[2];
+  const threadId = match[3] || '';
+  return {
+    guildId,
+    channelId,
+    activeChannelId: threadId || channelId,
+  };
+};
+
+const buildDiscordEmbedUrl = (url: string) => {
+  const parsed = parseDiscordChannelsUrl(url);
+  if (!parsed) return '';
+  return `https://e.widgetbot.io/channels/${parsed.guildId}/${parsed.activeChannelId}`;
+};
+
 const buildInstagramEmbedUrl = (code: string, kind: string) => {
   if (!code) return '';
   const base = kind === 'reel' ? `https://www.instagram.com/p/${code}/embed/captioned/` : `https://www.instagram.com/p/${code}/embed/captioned/`;
@@ -334,6 +368,10 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
     () => (captionSchedule.length > 0 ? captionSchedule[captionSchedule.length - 1].end : 0),
     [captionSchedule]
   );
+  const isTikTokNews = item.kind === 'news' && (isTikTokUrl(item.url) || /tiktok/i.test(item.source));
+  const isDiscordNews = item.kind === 'news' && (isDiscordChannelUrl(item.url) || /discord/i.test(item.source));
+  const tikTokEmbedUrl = isTikTokNews ? buildTikTokEmbedUrl(item.url) : '';
+  const discordEmbedUrl = isDiscordNews ? buildDiscordEmbedUrl(item.url) : '';
   const readerUrl = `/api/radar-reader?url=${encodeURIComponent(item.url)}&fallbackTitle=${encodeURIComponent(
     item.title
   )}&fallbackDescription=${encodeURIComponent(item.description)}&fallbackSource=${encodeURIComponent(
@@ -595,7 +633,11 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
               {item.kind === 'youtube'
                 ? 'YouTube'
                 : item.kind === 'news'
-                  ? 'Notícia'
+                  ? isTikTokNews
+                    ? 'TikTok'
+                    : isDiscordNews
+                      ? 'Discord'
+                      : 'Notícia'
                   : item.kind === 'podcast'
                     ? 'Podcast'
                     : 'Instagram'}
@@ -628,11 +670,33 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
               </div>
             )
           ) : item.kind === 'news' ? (
-            <iframe
-              src={readerUrl}
-              title={`Leitura interna - ${item.title}`}
-              className='h-full min-h-[320px] w-full rounded-xl border border-white/10 bg-[#0b0b0f] sm:min-h-[460px]'
-            />
+            isTikTokNews && tikTokEmbedUrl ? (
+              <iframe
+                src={tikTokEmbedUrl}
+                title={`TikTok player - ${item.title}`}
+                allow='autoplay; encrypted-media; picture-in-picture; web-share'
+                allowFullScreen
+                className='h-full min-h-[320px] w-full rounded-xl border border-white/10 bg-black sm:min-h-[460px]'
+              />
+            ) : isDiscordNews && discordEmbedUrl ? (
+              <div className='flex h-full min-h-[320px] flex-col gap-3 rounded-xl border border-white/10 bg-[#0b0b0f] p-2 sm:min-h-[460px] sm:p-3'>
+                <iframe
+                  src={discordEmbedUrl}
+                  title={`Discord live - ${item.title}`}
+                  allow='autoplay; encrypted-media; picture-in-picture; web-share'
+                  className='h-full min-h-[250px] w-full rounded-lg border border-white/10 bg-black sm:min-h-[390px]'
+                />
+                <p className='px-1 text-xs text-[#9ca3af]'>
+                  Comunidade ao vivo no Radar. Mensagens e atividade atualizadas em tempo real.
+                </p>
+              </div>
+            ) : (
+              <iframe
+                src={readerUrl}
+                title={`Leitura interna - ${item.title}`}
+                className='h-full min-h-[320px] w-full rounded-xl border border-white/10 bg-[#0b0b0f] sm:min-h-[460px]'
+              />
+            )
           ) : item.kind === 'podcast' ? (
             <div className='flex h-full min-h-[320px] flex-col gap-3 overflow-auto rounded-xl border border-white/10 bg-[#0b0b0f] p-3 sm:min-h-[460px] sm:gap-4 sm:p-5'>
               {item.thumbnail ? (

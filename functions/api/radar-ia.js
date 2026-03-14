@@ -23,6 +23,9 @@ const FALLBACK_TIKTOK_CREATOR_VIDEO_URLS = [
   'https://www.tiktok.com/@islamsousa/video/7613833799423528199',
   'https://www.tiktok.com/@jornadatop/video/7232292097313770757',
 ];
+const FALLBACK_DISCORD_COMMUNITY_URLS = [
+  'https://discord.com/channels/327861810768117763/1181004493517758604/threads/1252303012634824865',
+];
 
 const NEWS_FEEDS = [
   { name: 'Olhar Digital IA', url: 'https://olhardigital.com.br/tag/inteligencia-artificial/feed/' },
@@ -682,6 +685,133 @@ const parseTiktokCreatorHandles = (env = {}) => {
   return toUniqueList([...explicitHandles, ...handlesFromUrls], 12);
 };
 
+const parseDiscordCommunityUrls = (env = {}) => {
+  const raw = String(
+    env?.DISCORD_COMMUNITY_URLS || env?.DISCORD_CHANNEL_URLS || env?.DISCORD_THREAD_URLS || ''
+  ).trim();
+  const envUrls = raw ? parseCommaSeparated(raw) : [];
+  return toUniqueList(
+    [...envUrls, ...FALLBACK_DISCORD_COMMUNITY_URLS].filter((url) =>
+      /^https?:\/\/(www\.)?discord\.com\/channels\//i.test(url)
+    ),
+    10
+  );
+};
+
+const parseDiscordChannelsUrl = (value = '') => {
+  const match = String(value || '').match(/discord\.com\/channels\/(\d+)\/(\d+)(?:\/(?:threads\/)?(\d+))?/i);
+  if (!match) return null;
+  const guildId = match[1];
+  const channelId = match[2];
+  const threadId = match[3] || '';
+  return {
+    guildId,
+    channelId,
+    threadId,
+    activeChannelId: threadId || channelId,
+  };
+};
+
+const buildDiscordCommunityThumbnail = ({ serverName = 'Comunidade Discord', liveCount = 0, channelLabel = '' }) => {
+  const safeServer = escapeSvgText(serverName.slice(0, 54));
+  const safeChannel = escapeSvgText(channelLabel.slice(0, 64));
+  const safeCount = escapeSvgText(`${liveCount}`);
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="720" height="405" viewBox="0 0 720 405">
+  <defs>
+    <linearGradient id="discordBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#2b2d42"/>
+      <stop offset="55%" stop-color="#5865F2"/>
+      <stop offset="100%" stop-color="#7b88ff"/>
+    </linearGradient>
+  </defs>
+  <rect width="720" height="405" fill="url(#discordBg)"/>
+  <rect x="18" y="18" width="684" height="369" rx="18" fill="rgba(6,6,8,0.55)" stroke="rgba(255,255,255,0.2)"/>
+  <text x="42" y="70" fill="#ffffff" font-size="24" font-family="Arial, sans-serif" font-weight="700">Discord LIVE</text>
+  <text x="42" y="108" fill="#d1d5db" font-size="20" font-family="Arial, sans-serif">${safeServer}</text>
+  <text x="42" y="165" fill="#C6FF2E" font-size="42" font-family="Arial, sans-serif" font-weight="700">${safeCount}</text>
+  <text x="42" y="197" fill="#d1d5db" font-size="16" font-family="Arial, sans-serif">membros online</text>
+  <text x="42" y="350" fill="#ffffff" font-size="17" font-family="Arial, sans-serif">${safeChannel}</text>
+</svg>`;
+  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+};
+
+const fetchDiscordCommunityItems = async (query, env = {}) => {
+  const urls = parseDiscordCommunityUrls(env);
+  if (urls.length === 0) return [];
+
+  const widgetByGuild = new Map();
+  const settled = await Promise.allSettled(
+    urls.map(async (url, index) => {
+      const parsed = parseDiscordChannelsUrl(url);
+      if (!parsed) return null;
+
+      let widget = widgetByGuild.get(parsed.guildId) || null;
+      if (!widget) {
+        try {
+          const widgetResponse = await fetchWithTimeout(
+            `https://discord.com/api/guilds/${parsed.guildId}/widget.json`,
+            {
+              headers: {
+                accept: 'application/json',
+              },
+            },
+            6000
+          );
+          if (widgetResponse.ok) {
+            widget = await widgetResponse.json();
+            widgetByGuild.set(parsed.guildId, widget);
+          }
+        } catch {
+          // Keep fallback values for this community link.
+        }
+      }
+
+      const serverName = stripHtml(widget?.name || `Servidor ${parsed.guildId}`);
+      const channelName = (() => {
+        const channels = Array.isArray(widget?.channels) ? widget.channels : [];
+        const channelMatch = channels.find((channel) => String(channel?.id || '') === parsed.channelId);
+        return stripHtml(channelMatch?.name || `canal ${parsed.channelId}`);
+      })();
+      const onlineCount = Number(widget?.presence_count || 0);
+      const activeMembers = Array.isArray(widget?.members) ? widget.members.slice(0, 3) : [];
+      const activeMemberNames = activeMembers
+        .map((member) => stripHtml(member?.username || ''))
+        .filter(Boolean)
+        .slice(0, 3)
+        .join(', ');
+      const shortDescription = [
+        `${onlineCount > 0 ? `${onlineCount} online agora` : 'Comunidade ativa'}`,
+        channelName ? `#${channelName}` : '',
+        activeMemberNames ? `Ativos: ${activeMemberNames}` : '',
+      ]
+        .filter(Boolean)
+        .join(' · ')
+        .slice(0, 1200);
+      const aiBoost = isAiRelated(`${serverName} ${channelName} ${shortDescription}`) ? 6 : 0;
+
+      return {
+        id: `news-discord-${parsed.guildId}-${parsed.activeChannelId}-${index}`,
+        kind: 'news',
+        title: `Discord · ${serverName}`,
+        description: shortDescription || 'Comunidade ao vivo no Discord.',
+        url,
+        source: 'Discord Comunidade Live',
+        publishedAt: new Date().toISOString(),
+        thumbnail: buildDiscordCommunityThumbnail({
+          serverName,
+          liveCount: onlineCount,
+          channelLabel: channelName ? `#${channelName}` : 'Canal da comunidade',
+        }),
+        channel: channelName ? `#${channelName}` : null,
+        score: 92 - index + aiBoost + computeScore(serverName, shortDescription, new Date().toISOString(), query),
+        ctaLabel: 'Ver comunidade',
+      };
+    })
+  );
+
+  return settled.flatMap((result) => (result.status === 'fulfilled' && result.value ? [result.value] : []));
+};
+
 const extractInstagramHandleFromProfileUrl = (value = '') => {
   const match = String(value || '').match(/instagram\.com\/([a-z0-9._]{2,40})(?:[/?#]|$)/i);
   const candidate = match?.[1]?.toLowerCase() || '';
@@ -1295,7 +1425,19 @@ const takeTop = (items, count) => sortByScoreAndDate(items).slice(0, count);
 
 const buildBalancedAll = (results) => {
   const topYoutube = takeTop(results.youtube, 3);
-  const topNews = takeTop(results.news, 3);
+  const socialNews = takeTop(
+    results.news.filter(
+      (item) => /tiktok|twitch|discord/i.test(String(item?.source || '')) || /tiktok|twitch|discord\.com/i.test(String(item?.url || ''))
+    ),
+    2
+  );
+  const editorialNews = takeTop(
+    results.news.filter(
+      (item) => !socialNews.some((socialItem) => normalizeUrlForDedupe(socialItem.url) === normalizeUrlForDedupe(item.url))
+    ),
+    3
+  );
+  const topNews = dedupeByUrl([...socialNews, ...editorialNews]).slice(0, 3);
   const topInstagram = takeTop(results.instagram, 3);
   return [...topYoutube, ...topNews, ...topInstagram];
 };
@@ -1490,12 +1632,14 @@ const fetchNewsItems = async (query, range, env = {}) => {
   const twitterPromise = fetchTwitterNewsItems(query, range, env);
   const twitchPromise = fetchTwitchLiveItems(query, env);
   const tiktokPromise = fetchTiktokCreatorItems(query, range, env);
+  const discordPromise = fetchDiscordCommunityItems(query, env);
 
-  const [settled, twitterItems, twitchItems, tiktokItems] = await Promise.all([
+  const [settled, twitterItems, twitchItems, tiktokItems, discordItems] = await Promise.all([
     rssSettledPromise,
     twitterPromise,
     twitchPromise,
     tiktokPromise,
+    discordPromise,
   ]);
   const items = settled.flatMap((result) => (result.status === 'fulfilled' ? result.value : []));
   const filtered = items.filter((item) => {
@@ -1509,7 +1653,7 @@ const fetchNewsItems = async (query, range, env = {}) => {
   });
 
   return sortByScoreAndDate(
-    dedupeByUrl([...curatedItems, ...filtered, ...twitterItems, ...twitchItems, ...tiktokItems])
+    dedupeByUrl([...curatedItems, ...filtered, ...twitterItems, ...twitchItems, ...tiktokItems, ...discordItems])
   ).slice(0, 36);
 };
 
