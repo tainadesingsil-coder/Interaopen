@@ -70,8 +70,8 @@ const useDebouncedValue = (value: string, delay = 450) => {
 
 function SkeletonCard() {
   return (
-    <div className='animate-pulse rounded-2xl border border-white/10 bg-[#0b0b0f] p-4 shadow-[0_10px_24px_rgba(0,0,0,0.2)] md:p-5'>
-      <div className='h-40 w-full rounded-xl border border-white/10 bg-white/[0.04]' />
+    <div className='animate-pulse rounded-[18px] border border-white/10 bg-[#0b0b0f] p-4 shadow-[0_10px_24px_rgba(0,0,0,0.2)] sm:rounded-2xl md:p-5'>
+      <div className='h-44 w-full rounded-xl border border-white/10 bg-white/[0.04] sm:h-40' />
       <div className='mt-4 h-4 w-2/3 rounded bg-white/[0.08]' />
       <div className='mt-3 h-3 w-full rounded bg-white/[0.08]' />
       <div className='mt-2 h-3 w-5/6 rounded bg-white/[0.08]' />
@@ -91,14 +91,14 @@ function RadarCard({ item }: { item: RadarItem }) {
     );
 
   return (
-    <article className='group flex h-full flex-col rounded-2xl border border-white/10 bg-[#0b0b0f] p-4 shadow-[0_8px_24px_rgba(0,0,0,0.22)] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:scale-[1.01] hover:border-[#C6FF2E]/60 hover:shadow-[0_0_0_1px_rgba(198,255,46,0.18),0_14px_34px_rgba(198,255,46,0.09)] md:p-5'>
+    <article className='group flex h-full flex-col rounded-[18px] border border-white/10 bg-[linear-gradient(180deg,rgba(11,11,15,1)_0%,rgba(7,7,10,1)_100%)] p-4 shadow-[0_8px_22px_rgba(0,0,0,0.24)] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:scale-[1.01] hover:border-[#C6FF2E]/60 hover:shadow-[0_0_0_1px_rgba(198,255,46,0.16),0_14px_34px_rgba(198,255,46,0.08)] sm:rounded-2xl md:p-5'>
       {item.thumbnail ? (
         <div className='mb-4 overflow-hidden rounded-xl border border-white/10 bg-black/20'>
           <img
             src={item.thumbnail}
             alt={item.title}
             loading='lazy'
-            className='h-40 w-full object-cover transition-transform duration-200 ease-out group-hover:scale-[1.02]'
+            className='h-44 w-full object-cover transition-transform duration-200 ease-out group-hover:scale-[1.02] sm:h-40'
           />
         </div>
       ) : null}
@@ -121,7 +121,7 @@ function RadarCard({ item }: { item: RadarItem }) {
         href={item.url}
         target='_blank'
         rel='noreferrer'
-        className='mt-5 inline-flex w-fit items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-3.5 py-2 text-xs font-semibold text-white transition-all duration-200 ease-out hover:border-[#C6FF2E]/60 hover:text-[#C6FF2E] hover:shadow-[0_0_0_1px_rgba(198,255,46,0.14)]'
+        className='mt-5 inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-3.5 py-2.5 text-xs font-semibold text-white transition-all duration-200 ease-out hover:border-[#C6FF2E]/60 hover:text-[#C6FF2E] hover:shadow-[0_0_0_1px_rgba(198,255,46,0.14)] sm:w-fit'
       >
         {item.ctaLabel}
         <ExternalLink className='h-3.5 w-3.5' />
@@ -217,9 +217,10 @@ export function RadarIaSection() {
   );
 
   return (
-    <article id='radar-ia' className='space-y-5'>
-      <header className='rounded-2xl border border-white/10 bg-[#0b0b0f] p-5 shadow-[0_10px_30px_rgba(0,0,0,0.2)] md:p-6'>
-        <div className='mb-5 inline-flex flex-wrap gap-2 rounded-xl border border-white/10 bg-[#060608]/70 p-2'>
+    <article id='radar-ia' className='space-y-4 sm:space-y-5'>
+      <header className='rounded-[20px] border border-white/10 bg-[#0b0b0f] p-4 shadow-[0_10px_30px_rgba(0,0,0,0.2)] sm:rounded-2xl sm:p-5 md:p-6'>
+        <div className='-mx-1 mb-4 overflow-x-auto px-1 pb-1 sm:mx-0 sm:overflow-visible sm:px-0 sm:pb-0'>
+          <div className='inline-flex min-w-max gap-2 rounded-xl border border-white/10 bg-[#060608]/70 p-2'>
           <span className='inline-flex items-center gap-1 rounded-lg border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[11px] text-[#9ca3af]'>
             <Code2 className='h-3.5 w-3.5 text-[#C6FF2E]' />
             Software
@@ -232,15 +233,16 @@ export function RadarIaSection() {
             <Bot className='h-3.5 w-3.5 text-[#C6FF2E]' />
             Agência IA
           </span>
+          </div>
         </div>
 
         <p className='text-xs uppercase tracking-[0.18em] text-[#9ca3af]'>Acesso exclusivo</p>
-        <h3 className='mt-2 text-2xl font-extrabold leading-tight text-white md:text-3xl'>Radar IA em tempo real</h3>
-        <p className='mt-3 max-w-2xl text-sm leading-relaxed text-[#9ca3af]'>
+        <h3 className='mt-2 text-xl font-extrabold leading-tight text-white sm:text-2xl md:text-3xl'>Radar IA em tempo real</h3>
+        <p className='mt-2.5 max-w-2xl text-sm leading-relaxed text-[#9ca3af]'>
           Pesquise um tema e veja vídeos + notícias + fontes confiáveis.
         </p>
 
-        <div className='mt-5 flex flex-col gap-2.5 sm:flex-row sm:items-center'>
+        <div className='mt-4 flex flex-col gap-2.5 sm:mt-5 sm:flex-row sm:items-center'>
           <div className='relative w-full'>
             <Search className='pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9ca3af]' />
             <input
@@ -253,73 +255,79 @@ export function RadarIaSection() {
                 }
               }}
               placeholder='Ex: agentes de IA para atendimento'
-              className='h-11 w-full rounded-xl border border-white/10 bg-[#060608] py-2 pl-10 pr-3 text-sm text-white outline-none transition-all duration-200 ease-out placeholder:text-[#6b7280] focus:border-[#C6FF2E]/80 focus:ring-2 focus:ring-[#C6FF2E]/15'
+              className='h-12 w-full rounded-xl border border-white/10 bg-[#060608] py-2 pl-10 pr-3 text-sm text-white outline-none transition-all duration-200 ease-out placeholder:text-[#6b7280] focus:border-[#C6FF2E]/80 focus:ring-2 focus:ring-[#C6FF2E]/15 sm:h-11'
             />
           </div>
           <button
             type='button'
             onClick={() => submitQuery(draftQuery)}
-            className='h-11 rounded-xl border border-[#C6FF2E]/40 bg-[#C6FF2E]/10 px-5 text-sm font-semibold text-[#C6FF2E] transition-all duration-200 ease-out hover:border-[#C6FF2E] hover:bg-[#C6FF2E]/14 hover:shadow-[0_0_18px_rgba(198,255,46,0.14)] active:scale-[0.99]'
+            className='h-12 w-full rounded-xl border border-[#C6FF2E]/40 bg-[#C6FF2E]/10 px-5 text-sm font-semibold text-[#C6FF2E] transition-all duration-200 ease-out hover:border-[#C6FF2E] hover:bg-[#C6FF2E]/14 hover:shadow-[0_0_18px_rgba(198,255,46,0.14)] active:scale-[0.99] sm:h-11 sm:w-auto'
           >
             Pesquisar
           </button>
         </div>
 
-        <div className='mt-4 flex flex-wrap gap-2'>
-          {QUICK_CHIPS.map((chip) => (
-            <button
-              key={chip}
-              type='button'
-              onClick={() => {
-                setDraftQuery(chip);
-                submitQuery(chip);
-              }}
-              className={`rounded-lg border px-3 py-1.5 text-xs transition-all duration-200 ease-out ${
-                sanitizeClientQuery(chip) === submittedQuery
-                  ? 'border-[#C6FF2E]/55 bg-[#C6FF2E]/12 text-[#C6FF2E]'
-                  : 'border-white/10 bg-white/[0.03] text-[#9ca3af] hover:border-[#C6FF2E]/45 hover:text-[#C6FF2E]'
-              }`}
-            >
-              {chip}
-            </button>
-          ))}
-        </div>
-      </header>
-
-      <section className='rounded-2xl border border-white/10 bg-[#0b0b0f] p-4 shadow-[0_10px_28px_rgba(0,0,0,0.2)] md:p-5'>
-        <div className='mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between'>
-          <div className='inline-flex flex-wrap gap-2 rounded-xl border border-white/10 bg-[#060608]/80 p-1'>
-            {RADAR_TYPES.map((tab) => (
+        <div className='-mx-1 mt-4 overflow-x-auto px-1 pb-1 sm:mx-0 sm:overflow-visible sm:px-0 sm:pb-0'>
+          <div className='inline-flex min-w-max gap-2 sm:flex sm:min-w-0 sm:flex-wrap'>
+            {QUICK_CHIPS.map((chip) => (
               <button
-                key={tab}
+                key={chip}
                 type='button'
-                onClick={() => setActiveTab(tab)}
-                className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all duration-200 ease-out ${
-                  activeTab === tab
-                    ? 'border-[#C6FF2E]/60 bg-[#C6FF2E]/12 text-[#C6FF2E] shadow-[0_0_0_1px_rgba(198,255,46,0.14)]'
+                onClick={() => {
+                  setDraftQuery(chip);
+                  submitQuery(chip);
+                }}
+                className={`rounded-lg border px-3 py-1.5 text-xs transition-all duration-200 ease-out ${
+                  sanitizeClientQuery(chip) === submittedQuery
+                    ? 'border-[#C6FF2E]/55 bg-[#C6FF2E]/12 text-[#C6FF2E]'
                     : 'border-white/10 bg-white/[0.03] text-[#9ca3af] hover:border-[#C6FF2E]/45 hover:text-[#C6FF2E]'
                 }`}
               >
-                {TAB_LABEL[tab]}
+                {chip}
               </button>
             ))}
           </div>
+        </div>
+      </header>
 
-          <div className='inline-flex flex-wrap gap-2 rounded-xl border border-white/10 bg-[#060608]/80 p-1'>
-            {RADAR_RANGES.map((range) => (
-              <button
-                key={range}
-                type='button'
-                onClick={() => setActiveRange(range)}
-                className={`rounded-lg border px-2.5 py-1 text-xs transition-all duration-200 ease-out ${
-                  activeRange === range
-                    ? 'border-[#C6FF2E]/60 bg-[#C6FF2E]/12 text-[#C6FF2E] shadow-[0_0_0_1px_rgba(198,255,46,0.14)]'
-                    : 'border-white/10 bg-white/[0.03] text-[#9ca3af] hover:border-[#C6FF2E]/45 hover:text-[#C6FF2E]'
-                }`}
-              >
-                {RANGE_LABEL[range]}
-              </button>
-            ))}
+      <section className='rounded-[20px] border border-white/10 bg-[#0b0b0f] p-4 shadow-[0_10px_28px_rgba(0,0,0,0.2)] sm:rounded-2xl md:p-5'>
+        <div className='mb-4 flex flex-col gap-3'>
+          <div className='-mx-1 overflow-x-auto px-1 pb-1'>
+            <div className='inline-flex min-w-max gap-2 rounded-xl border border-white/10 bg-[#060608]/80 p-1'>
+              {RADAR_TYPES.map((tab) => (
+                <button
+                  key={tab}
+                  type='button'
+                  onClick={() => setActiveTab(tab)}
+                  className={`rounded-lg border px-3 py-2 text-xs font-semibold transition-all duration-200 ease-out ${
+                    activeTab === tab
+                      ? 'border-[#C6FF2E]/60 bg-[#C6FF2E]/12 text-[#C6FF2E] shadow-[0_0_0_1px_rgba(198,255,46,0.14)]'
+                      : 'border-white/10 bg-white/[0.03] text-[#9ca3af] hover:border-[#C6FF2E]/45 hover:text-[#C6FF2E]'
+                  }`}
+                >
+                  {TAB_LABEL[tab]}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className='-mx-1 overflow-x-auto px-1 pb-1'>
+            <div className='inline-flex min-w-max gap-2 rounded-xl border border-white/10 bg-[#060608]/80 p-1'>
+              {RADAR_RANGES.map((range) => (
+                <button
+                  key={range}
+                  type='button'
+                  onClick={() => setActiveRange(range)}
+                  className={`rounded-lg border px-3 py-1.5 text-xs transition-all duration-200 ease-out ${
+                    activeRange === range
+                      ? 'border-[#C6FF2E]/60 bg-[#C6FF2E]/12 text-[#C6FF2E] shadow-[0_0_0_1px_rgba(198,255,46,0.14)]'
+                      : 'border-white/10 bg-white/[0.03] text-[#9ca3af] hover:border-[#C6FF2E]/45 hover:text-[#C6FF2E]'
+                  }`}
+                >
+                  {RANGE_LABEL[range]}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -330,20 +338,20 @@ export function RadarIaSection() {
         ) : null}
 
         {isLoading ? (
-          <div className='grid gap-4 md:grid-cols-2 xl:grid-cols-3'>
+          <div className='grid gap-3 sm:gap-4 md:grid-cols-2 xl:grid-cols-3'>
             {Array.from({ length: 6 }).map((_, index) => (
               <SkeletonCard key={`skeleton-${index}`} />
             ))}
           </div>
         ) : displayedItems.length === 0 ? (
-          <div className='rounded-xl border border-dashed border-white/10 bg-black/20 p-7 text-center'>
+          <div className='rounded-xl border border-dashed border-white/10 bg-black/20 p-6 text-center sm:p-7'>
             <p className='text-sm leading-relaxed text-[#9ca3af]'>
               Nenhum resultado encontrado para <span className='text-white'>{submittedQuery}</span>.
             </p>
           </div>
         ) : (
           <>
-            <div className='grid gap-4 md:grid-cols-2 xl:grid-cols-3'>
+            <div className='grid gap-3 sm:gap-4 md:grid-cols-2 xl:grid-cols-3'>
               {displayedItems.map((item) => (
                 <RadarCard key={item.id} item={item} />
               ))}
