@@ -117,6 +117,8 @@ function RadarCard({ item, onOpen }: { item: RadarItem; onOpen: (item: RadarItem
       <Bot className='h-4 w-4 text-[#C6FF2E]' />
     );
 
+  const isVisualSensitive = item.kind === 'instagram' || item.kind === 'podcast';
+
   return (
     <article className='group flex h-full flex-col rounded-[18px] border border-white/10 bg-[linear-gradient(180deg,rgba(11,11,15,1)_0%,rgba(7,7,10,1)_100%)] p-4 shadow-[0_8px_22px_rgba(0,0,0,0.24)] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:scale-[1.01] hover:border-[#C6FF2E]/60 hover:shadow-[0_0_0_1px_rgba(198,255,46,0.16),0_14px_34px_rgba(198,255,46,0.08)] sm:rounded-2xl md:p-5'>
       {item.thumbnail ? (
@@ -125,7 +127,9 @@ function RadarCard({ item, onOpen }: { item: RadarItem; onOpen: (item: RadarItem
             src={item.thumbnail}
             alt={item.title}
             loading='lazy'
-            className='h-44 w-full object-cover transition-transform duration-200 ease-out group-hover:scale-[1.02] sm:h-40'
+            className={`w-full transition-transform duration-200 ease-out group-hover:scale-[1.02] ${
+              isVisualSensitive ? 'h-48 object-contain bg-black/35 p-1.5 sm:h-44' : 'h-44 object-cover sm:h-40'
+            }`}
           />
         </div>
       ) : null}
@@ -261,7 +265,7 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
                 <img
                   src={item.thumbnail}
                   alt={item.title}
-                  className='h-40 w-full rounded-xl border border-white/10 object-cover sm:h-56'
+                  className='h-44 w-full rounded-xl border border-white/10 bg-black/35 object-contain p-1.5 sm:h-56'
                 />
               ) : null}
               <div className='flex flex-col gap-2 sm:flex-row'>
@@ -296,7 +300,7 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
                   setIsPlayingPodcast(false);
                   setPodcastAudioError('Falha no player interno deste episódio. Use "Abrir áudio direto".');
                 }}
-                className='w-full rounded-lg border border-white/10 bg-black/20'
+                className='block w-full min-w-0 rounded-lg border border-white/10 bg-black/20'
               />
               {podcastAudioError ? (
                 <p className='rounded-lg border border-[#fda4af]/30 bg-[#fda4af]/10 px-3 py-2 text-xs text-[#fecdd3]'>
@@ -313,13 +317,15 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
           ) : (
             <div className='flex h-full min-h-[320px] flex-col gap-4 overflow-auto rounded-xl border border-white/10 bg-[#0b0b0f] p-4 sm:min-h-[460px] sm:p-5'>
               {instagramEmbedUrl ? (
-                <iframe
-                  src={instagramEmbedUrl}
-                  title={`Instagram embed - ${item.title}`}
-                  className='h-[430px] w-full rounded-xl border border-white/10 bg-black sm:h-[520px]'
-                  allow='autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share'
-                  allowFullScreen
-                />
+                <div className='mx-auto w-full max-w-[430px]'>
+                  <iframe
+                    src={instagramEmbedUrl}
+                    title={`Instagram embed - ${item.title}`}
+                    className='h-[72vh] min-h-[420px] w-full rounded-xl border border-white/10 bg-black sm:h-[78vh] sm:min-h-[520px]'
+                    allow='autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share'
+                    allowFullScreen
+                  />
+                </div>
               ) : (
                 <img
                   src={
@@ -328,7 +334,7 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
                       : item.thumbnail || '/api/instagram-image?code=DV1OIoxDvbV'
                   }
                   alt={item.title}
-                  className='w-full rounded-xl border border-white/10 object-cover'
+                  className='max-h-[72vh] w-full rounded-xl border border-white/10 bg-black/35 object-contain p-1.5'
                 />
               )}
 
