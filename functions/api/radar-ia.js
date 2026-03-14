@@ -2,6 +2,12 @@ const CACHE_TTL_MS = 4 * 60 * 1000;
 const SOURCE_TIMEOUT_MS = 4000;
 const MAX_QUERY_LENGTH = 80;
 const FALLBACK_YOUTUBE_DATA_API_KEY = 'AIzaSyDmRPaN4CvD2OI04Jz8Y8APqktXggkTFAw';
+const FALLBACK_TWITTER_API_KEY = 'g0XdkRNw7loRAmsS4eEID6juG';
+const FALLBACK_TWITTER_API_SECRET = 'D6j0NactQyxxHUskonK5ydkJxDJH0kQHSp9SqQtG28O4Dnys2N';
+const FALLBACK_TWITTER_ACCESS_TOKEN = '2032831349879627776-y91ml7P3XjUWQgrkgKH4cSCFjBxNq9';
+const FALLBACK_TWITTER_ACCESS_SECRET = 'EPCfx3xbrenbyIK0IT3JjROIWY3YKBJ7tpMhshQLgmyCr';
+const TWITTER_SEARCH_ENDPOINT = 'https://api.x.com/2/tweets/search/recent';
+const TWITTER_MAX_RESULTS = 20;
 const FALLBACK_INSTAGRAM_USER_ID = '61565928037346';
 const INSTAGRAM_GRAPH_VERSION = 'v20.0';
 const INSTAGRAM_GRAPH_LIMIT = 18;
@@ -618,6 +624,79 @@ const fetchWithTimeout = async (url, init = {}, timeoutMs = SOURCE_TIMEOUT_MS) =
   }
 };
 
+const oauthPercentEncode = (value = '') =>
+  encodeURIComponent(String(value))
+    .replace(/[!'()*]/g, (char) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`);
+
+const buildOauthNonce = () => Math.random().toString(36).slice(2, 14);
+
+const bytesToBase64 = (bytes) => {
+  let binary = '';
+  bytes.forEach((value) => {
+    binary += String.fromCharCode(value);
+  });
+  return btoa(binary);
+};
+
+const hmacSha1Base64 = async (key, message) => {
+  const encoder = new TextEncoder();
+  const importedKey = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(key),
+    { name: 'HMAC', hash: 'SHA-1' },
+    false,
+    ['sign']
+  );
+  const signature = await crypto.subtle.sign('HMAC', importedKey, encoder.encode(message));
+  return bytesToBase64(new Uint8Array(signature));
+};
+
+const buildTwitterOauthHeader = async ({
+  method,
+  url,
+  queryParams,
+  apiKey,
+  apiSecret,
+  accessToken,
+  accessSecret,
+}) => {
+  const oauthParams = {
+    oauth_consumer_key: apiKey,
+    oauth_nonce: buildOauthNonce(),
+    oauth_signature_method: 'HMAC-SHA1',
+    oauth_timestamp: String(Math.floor(Date.now() / 1000)),
+    oauth_token: accessToken,
+    oauth_version: '1.0',
+  };
+
+  const signatureParams = [
+    ...Object.entries(queryParams || {}).map(([key, value]) => [key, String(value)]),
+    ...Object.entries(oauthParams),
+  ]
+    .map(([key, value]) => [oauthPercentEncode(key), oauthPercentEncode(value)])
+    .sort((a, b) => {
+      if (a[0] === b[0]) return a[1].localeCompare(b[1]);
+      return a[0].localeCompare(b[0]);
+    });
+
+  const normalizedParams = signatureParams.map(([key, value]) => `${key}=${value}`).join('&');
+  const signatureBaseString = [
+    method.toUpperCase(),
+    oauthPercentEncode(url),
+    oauthPercentEncode(normalizedParams),
+  ].join('&');
+  const signingKey = `${oauthPercentEncode(apiSecret)}&${oauthPercentEncode(accessSecret)}`;
+  const signature = await hmacSha1Base64(signingKey, signatureBaseString);
+  oauthParams.oauth_signature = signature;
+
+  const header = Object.entries(oauthParams)
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([key, value]) => `${oauthPercentEncode(key)}="${oauthPercentEncode(value)}"`)
+    .join(', ');
+
+  return `OAuth ${header}`;
+};
+
 const textMatchScore = (text, queryTokens) => {
   if (!queryTokens.length) return 0;
   const normalized = text.toLowerCase();
@@ -638,6 +717,108 @@ const recencyScore = (publishedAt) => {
 const computeScore = (title, description, publishedAt, query) => {
   const tokens = tokensFromQuery(query);
   return textMatchScore(title, tokens) * 5 + textMatchScore(description, tokens) * 2 + recencyScore(publishedAt);
+};
+
+const getTwitterCredentials = (env = {}) => {
+  const apiKey = String(env?.TWITTER_API_KEY || FALLBACK_TWITTER_API_KEY || '').trim();
+  const apiSecret = String(env?.TWITTER_API_SECRET || FALLBACK_TWITTER_API_SECRET || '').trim();
+  const accessToken = String(env?.TWITTER_ACCESS_TOKEN || FALLBACK_TWITTER_ACCESS_TOKEN || '').trim();
+  const accessSecret = String(env?.TWITTER_ACCESS_SECRET || FALLBACK_TWITTER_ACCESS_SECRET || '').trim();
+  return { apiKey, apiSecret, accessToken, accessSecret };
+};
+
+const normalizeTweetText = (value = '') =>
+  stripHtml(String(value || ''))
+    .replace(/https?:\/\/t\.co\/\S+/gi, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+const buildTwitterQuery = (query) =>
+  `(${query} OR "inteligência artificial" OR ia OR openai OR chatgpt OR agentes de ia) lang:pt -is:retweet -is:reply`;
+
+const fetchTwitterNewsItems = async (query, range, env = {}) => {
+  const { apiKey, apiSecret, accessToken, accessSecret } = getTwitterCredentials(env);
+  if (!apiKey || !apiSecret || !accessToken || !accessSecret) return [];
+
+  try {
+    const sinceIso = new Date(rangeCutoffMs(range)).toISOString();
+    const queryParams = {
+      query: buildTwitterQuery(query),
+      max_results: String(TWITTER_MAX_RESULTS),
+      'tweet.fields': 'created_at,lang,author_id,public_metrics',
+      expansions: 'author_id',
+      'user.fields': 'username,name',
+      start_time: sinceIso,
+    };
+
+    const url = new URL(TWITTER_SEARCH_ENDPOINT);
+    Object.entries(queryParams).forEach(([key, value]) => {
+      url.searchParams.set(key, value);
+    });
+
+    const oauthHeader = await buildTwitterOauthHeader({
+      method: 'GET',
+      url: TWITTER_SEARCH_ENDPOINT,
+      queryParams,
+      apiKey,
+      apiSecret,
+      accessToken,
+      accessSecret,
+    });
+
+    const response = await fetchWithTimeout(
+      url.toString(),
+      {
+        headers: {
+          authorization: oauthHeader,
+          accept: 'application/json',
+        },
+      },
+      7000
+    );
+
+    if (!response.ok) {
+      return [];
+    }
+
+    const payload = await response.json();
+    const tweets = Array.isArray(payload?.data) ? payload.data : [];
+    const users = Array.isArray(payload?.includes?.users) ? payload.includes.users : [];
+    const userById = new Map(users.map((user) => [String(user?.id || ''), user]));
+
+    return tweets
+      .map((tweet, index) => {
+        const tweetText = normalizeTweetText(tweet?.text || '');
+        if (!tweetText || tweetText.length < 20) return null;
+
+        const user = userById.get(String(tweet?.author_id || ''));
+        const username = String(user?.username || '').trim();
+        const channel = username ? `@${username}` : null;
+        const tweetId = String(tweet?.id || '').trim();
+        if (!tweetId) return null;
+
+        const title =
+          tweetText.length > 170 ? `${tweetText.slice(0, 167).trim()}...` : tweetText;
+        const publishedAt = safeIsoDate(tweet?.created_at || '') || null;
+
+        return {
+          id: `news-x-${tweetId}`,
+          kind: 'news',
+          title,
+          description: tweetText,
+          url: username ? `https://x.com/${username}/status/${tweetId}` : `https://x.com/i/web/status/${tweetId}`,
+          source: 'X (Twitter)',
+          publishedAt,
+          thumbnail: null,
+          channel,
+          score: 70 - index + computeScore(title, tweetText, publishedAt, query),
+          ctaLabel: 'Ver no X',
+        };
+      })
+      .filter(Boolean);
+  } catch {
+    return [];
+  }
 };
 
 const sortByScoreAndDate = (items) =>
@@ -926,7 +1107,7 @@ const fetchYoutubeItems = async (query, range, env) => {
   }
 };
 
-const fetchNewsItems = async (query, range) => {
+const fetchNewsItems = async (query, range, env = {}) => {
   const cutoff = rangeCutoffMs(range);
   const curatedItems = CURATED_NEWS_ARTICLES.map((article, index) => ({
     id: `news-curated-${article.id}`,
@@ -942,7 +1123,7 @@ const fetchNewsItems = async (query, range) => {
     ctaLabel: 'Ler matéria',
   }));
 
-  const settled = await Promise.allSettled(
+  const rssSettledPromise = Promise.allSettled(
     NEWS_FEEDS.map(async (feed) => {
       const response = await fetchWithTimeout(feed.url);
       if (!response.ok) {
@@ -965,7 +1146,9 @@ const fetchNewsItems = async (query, range) => {
       }));
     })
   );
+  const twitterPromise = fetchTwitterNewsItems(query, range, env);
 
+  const [settled, twitterItems] = await Promise.all([rssSettledPromise, twitterPromise]);
   const items = settled.flatMap((result) => (result.status === 'fulfilled' ? result.value : []));
   const filtered = items.filter((item) => {
     if (!isLikelyPortuguese(`${item.title} ${item.description}`)) {
@@ -977,7 +1160,7 @@ const fetchNewsItems = async (query, range) => {
     return parsed >= cutoff;
   });
 
-  return sortByScoreAndDate(dedupeByUrl([...curatedItems, ...filtered])).slice(0, 30);
+  return sortByScoreAndDate(dedupeByUrl([...curatedItems, ...filtered, ...twitterItems])).slice(0, 30);
 };
 
 const fetchCuratedInstagramItems = async (query) => {
@@ -1244,7 +1427,7 @@ const aggregateRadar = async (query, type, range, env) => {
 
   const tasks = {
     youtube: requestedKinds.includes('youtube') ? fetchYoutubeItems(query, range, env) : Promise.resolve([]),
-    news: requestedKinds.includes('news') ? fetchNewsItems(query, range) : Promise.resolve([]),
+    news: requestedKinds.includes('news') ? fetchNewsItems(query, range, env) : Promise.resolve([]),
     instagram: requestedKinds.includes('instagram')
       ? fetchInstagramItems(query, env)
       : Promise.resolve([]),
