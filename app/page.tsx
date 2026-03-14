@@ -19,7 +19,6 @@ import {
   Home,
   LayoutGrid,
   RadioTower,
-  Rocket,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -86,18 +85,9 @@ export default function HomePage() {
           <section className='w-full px-5 py-8 md:px-9 md:py-10'>
             <div className='mx-auto flex w-full max-w-6xl flex-col gap-8'>
               <article id='inicio' className='rounded-xl border border-white/10 bg-[#0b0b0f] p-6 md:p-8'>
-                <p className='text-xs uppercase tracking-[0.2em] text-[#9ca3af]'>Codexion Studio</p>
-                <h2 className='mt-3 text-3xl font-extrabold tracking-tight text-white md:text-5xl'>
-                  Portfólio Codexion
+                <h2 className='text-2xl font-extrabold uppercase tracking-[0.18em] text-white md:text-4xl'>
+                  CODEXION STUDIO
                 </h2>
-                <p className='mt-4 max-w-3xl text-sm leading-relaxed text-[#9ca3af] md:text-base'>
-                  Produtos digitais com estética técnica, execução sólida e foco em conversão.
-                  Interface limpa, organização clara e padrão premium para venda consultiva.
-                </p>
-                <div className='mt-5 inline-flex items-center gap-2 rounded-md border border-[#C6FF2E]/40 bg-[#C6FF2E]/10 px-3 py-1 text-xs font-semibold text-[#C6FF2E]'>
-                  <Rocket className='h-3.5 w-3.5' />
-                  Design GitHub-like com DNA Codexion
-                </div>
               </article>
 
               <article id='projetos' className='space-y-4'>
