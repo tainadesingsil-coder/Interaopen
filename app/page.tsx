@@ -18,7 +18,6 @@ import {
   GalleryVerticalEnd,
   Home,
   LayoutGrid,
-  Mail,
   RadioTower,
   Rocket,
 } from 'lucide-react';
@@ -44,11 +43,6 @@ const portfolioLinks = [
     label: 'Radar IA',
     href: '#radar-ia',
     icon: <RadioTower className='h-4 w-4 text-[#9ca3af]' />,
-  },
-  {
-    label: 'CTA',
-    href: '#contato',
-    icon: <Mail className='h-4 w-4 text-[#9ca3af]' />,
   },
 ];
 
@@ -137,30 +131,6 @@ export default function HomePage() {
 
               <RadarIaSection />
 
-              <article
-                id='contato'
-                className='rounded-xl border border-white/10 bg-gradient-to-b from-[#0b0b0f] to-[#060608] p-6'
-              >
-                <p className='text-xs uppercase tracking-[0.2em] text-[#9ca3af]'>Próximo passo</p>
-                <h3 className='mt-2 text-2xl font-bold text-white'>Vamos construir seu próximo case?</h3>
-                <p className='mt-2 max-w-2xl text-sm text-[#9ca3af]'>
-                  Estruturamos produto, design e aquisição para transformar operação em resultado.
-                </p>
-                <div className='mt-5 flex flex-wrap gap-3'>
-                  <a
-                    href='#projetos'
-                    className='inline-flex items-center rounded-md border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-white transition hover:border-[#C6FF2E] hover:text-[#C6FF2E]'
-                  >
-                    Ver portfólio completo
-                  </a>
-                  <a
-                    href='mailto:contato@codexion.com.br'
-                    className='inline-flex items-center rounded-md border border-[#C6FF2E]/45 bg-[#C6FF2E]/10 px-4 py-2 text-sm font-semibold text-[#C6FF2E] transition hover:shadow-[0_0_20px_rgba(198,255,46,0.14)]'
-                  >
-                    Falar com especialista
-                  </a>
-                </div>
-              </article>
             </div>
           </section>
         </div>
