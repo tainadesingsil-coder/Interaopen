@@ -45,33 +45,15 @@ export default function HomePage() {
       <Sidebar open={open} setOpen={setOpen} animate>
         <div className='flex min-h-screen w-full flex-col bg-[#060608] md:flex-row'>
           <SidebarBody className='overflow-hidden border-r border-white/10 bg-[#0b0b0f]'>
-            <div className='flex h-full flex-col justify-between gap-5 overflow-hidden'>
-              <div className='space-y-5 overflow-hidden'>
-                <div className='pt-3'>
-                  <p className='truncate text-[10px] uppercase tracking-[0.18em] text-[#9ca3af]'>
-                    {open ? 'Portfólio' : 'PF'}
-                  </p>
-                  <h1 className='mt-1 truncate text-base font-extrabold tracking-[0.12em] text-white'>
-                    {open ? 'CODEXION' : 'CX'}
-                  </h1>
-                </div>
-                <nav className='space-y-1'>
-                  {portfolioLinks.map((link) => (
-                    <SidebarLink
-                      key={link.label}
-                      link={link}
-                      className='rounded-md px-2 hover:border hover:border-[#C6FF2E] hover:bg-[#C6FF2E]/5'
-                    />
-                  ))}
-                </nav>
-              </div>
-              <div className='rounded-lg border border-white/10 bg-white/[0.02] p-2'>
-                <p className='text-[10px] leading-tight text-[#9ca3af]'>{open ? 'Status' : '•'}</p>
-                <p className='break-words text-[11px] font-semibold leading-tight text-white'>
-                  {open ? 'Disponível para novos projetos' : 'ON'}
-                </p>
-              </div>
-            </div>
+            <nav className='space-y-1 overflow-hidden pt-3'>
+              {portfolioLinks.map((link) => (
+                <SidebarLink
+                  key={link.label}
+                  link={link}
+                  className='rounded-md px-2 hover:border hover:border-[#C6FF2E] hover:bg-[#C6FF2E]/5'
+                />
+              ))}
+            </nav>
           </SidebarBody>
 
           <section className='w-full px-5 py-8 md:px-9 md:py-10'>
