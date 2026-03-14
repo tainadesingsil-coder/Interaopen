@@ -1420,7 +1420,14 @@ const buildBalancedAll = (results) => {
     ),
     1
   );
-  const pickedSocial = dedupeByUrl([...tiktokNews, ...twitchNews, ...communityNews]).slice(0, 4);
+  const youtubeLiveNews = takeTop(
+    results.news.filter(
+      (item) =>
+        /youtube live/i.test(String(item?.source || '')) || /youtube\.com|youtu\.be/i.test(String(item?.url || ''))
+    ),
+    1
+  );
+  const pickedSocial = dedupeByUrl([...tiktokNews, ...twitchNews, ...youtubeLiveNews, ...communityNews]).slice(0, 4);
   const editorialNews = takeTop(
     results.news.filter(
       (item) =>
@@ -1583,6 +1590,68 @@ const fetchYoutubeItems = async (query, range, env) => {
   }
 };
 
+const fetchYoutubeLiveNewsItems = async (query, range, env = {}) => {
+  const apiKey = (env?.YOUTUBE_DATA_API_KEY || FALLBACK_YOUTUBE_DATA_API_KEY || '').trim();
+  if (!apiKey) return [];
+  const publishedAfter = new Date(rangeCutoffMs(range)).toISOString();
+  const liveQueries = [
+    `${query} ao vivo brasil tecnologia`,
+    'programacao ao vivo brasil',
+    'inteligencia artificial ao vivo brasil',
+  ];
+
+  const settled = await Promise.allSettled(
+    liveQueries.map(async (liveQuery) => {
+      const endpoint = createYoutubeEndpoint(apiKey, {
+        type: 'video',
+        eventType: 'live',
+        q: liveQuery,
+        maxResults: '8',
+        order: 'viewCount',
+        relevanceLanguage: 'pt',
+        regionCode: 'BR',
+        publishedAfter,
+      });
+      const response = await fetchWithTimeout(endpoint, undefined, 6500);
+      if (!response.ok) return [];
+      const payload = await response.json();
+      const items = Array.isArray(payload?.items) ? payload.items : [];
+      return items
+        .map((item, index) => {
+          const videoId = String(item?.id?.videoId || '').trim();
+          const title = stripHtml(item?.snippet?.title || '');
+          if (!videoId || !title) return null;
+          const description = stripHtml(item?.snippet?.description || '').slice(0, 1200);
+          const channel = stripHtml(item?.snippet?.channelTitle || '') || null;
+          const publishedAt = safeIsoDate(item?.snippet?.publishedAt || '') || null;
+          const thumbnail =
+            item?.snippet?.thumbnails?.high?.url ||
+            item?.snippet?.thumbnails?.medium?.url ||
+            item?.snippet?.thumbnails?.default?.url ||
+            null;
+          return {
+            id: `news-ytlive-${videoId}`,
+            kind: 'news',
+            title: title.slice(0, 180),
+            description: description || 'Live de tecnologia e IA em andamento no YouTube.',
+            url: `https://www.youtube.com/watch?v=${videoId}`,
+            source: 'YouTube Live BR',
+            publishedAt,
+            thumbnail,
+            channel,
+            score: 86 - index + computeScore(`${title} ${channel || ''}`, description, publishedAt, query),
+            ctaLabel: 'Assistir live',
+          };
+        })
+        .filter(Boolean);
+    })
+  );
+
+  return dedupeByUrl(
+    settled.flatMap((result) => (result.status === 'fulfilled' ? result.value : []))
+  ).slice(0, 16);
+};
+
 const fetchNewsItems = async (query, range, env = {}) => {
   const cutoff = rangeCutoffMs(range);
   const curatedItems = CURATED_NEWS_ARTICLES.map((article, index) => ({
@@ -1626,13 +1695,15 @@ const fetchNewsItems = async (query, range, env = {}) => {
   const twitchPromise = fetchTwitchLiveItems(query, env);
   const tiktokPromise = fetchTiktokCreatorItems(query, range, env);
   const tabNewsPromise = fetchTabNewsItems(query, range, env);
+  const youtubeLivePromise = fetchYoutubeLiveNewsItems(query, range, env);
 
-  const [settled, twitterItems, twitchItems, tiktokItems, tabNewsItems] = await Promise.all([
+  const [settled, twitterItems, twitchItems, tiktokItems, tabNewsItems, youtubeLiveItems] = await Promise.all([
     rssSettledPromise,
     twitterPromise,
     twitchPromise,
     tiktokPromise,
     tabNewsPromise,
+    youtubeLivePromise,
   ]);
   const items = settled.flatMap((result) => (result.status === 'fulfilled' ? result.value : []));
   const filtered = items.filter((item) => {
@@ -1646,7 +1717,15 @@ const fetchNewsItems = async (query, range, env = {}) => {
   });
 
   return sortByScoreAndDate(
-    dedupeByUrl([...curatedItems, ...filtered, ...twitterItems, ...twitchItems, ...tiktokItems, ...tabNewsItems])
+    dedupeByUrl([
+      ...curatedItems,
+      ...filtered,
+      ...twitterItems,
+      ...twitchItems,
+      ...tiktokItems,
+      ...tabNewsItems,
+      ...youtubeLiveItems,
+    ])
   ).slice(0, 36);
 };
 

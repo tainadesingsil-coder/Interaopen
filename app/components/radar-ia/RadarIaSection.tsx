@@ -98,13 +98,15 @@ const extractTikTokVideoId = (url: string) => {
   return '';
 };
 
-const buildTikTokEmbedUrl = (url: string) => {
+const buildTikTokEmbedUrls = (url: string) => {
   const videoId = extractTikTokVideoId(url);
-  if (!videoId) return '';
-  return `https://www.tiktok.com/embed/v2/${videoId}`;
+  if (!videoId) return [] as string[];
+  return [...new Set([`https://www.tiktok.com/player/v1/${videoId}`, `https://www.tiktok.com/embed/v2/${videoId}`])];
 };
 
 const isTwitchUrl = (url: string) => /twitch\.tv/i.test(url);
+const isYouTubeUrl = (url: string) => /youtube\.com|youtu\.be/i.test(url);
+const isCommunityUrl = (url: string) => /tabnews\.com\.br/i.test(url);
 
 const extractTwitchChannelFromUrl = (url: string) => {
   try {
@@ -390,7 +392,10 @@ function RadarViewer({
   );
   const isTikTokNews = item.kind === 'news' && (isTikTokUrl(item.url) || /tiktok/i.test(item.source));
   const isTwitchNews = item.kind === 'news' && (isTwitchUrl(item.url) || /twitch/i.test(item.source));
-  const tikTokEmbedUrl = isTikTokNews ? buildTikTokEmbedUrl(item.url) : '';
+  const isYouTubeNews = item.kind === 'news' && (isYouTubeUrl(item.url) || /youtube live/i.test(item.source));
+  const isCommunityNews =
+    item.kind === 'news' && (isCommunityUrl(item.url) || /tabnews|comunidade br/i.test(item.source));
+  const tikTokEmbedUrls = isTikTokNews ? buildTikTokEmbedUrls(item.url) : [];
   const [twitchParentHost, setTwitchParentHost] = useState('localhost');
   const twitchChannel = isTwitchNews ? extractTwitchChannelFromUrl(item.url) : '';
   const twitchEmbedUrl =
@@ -399,7 +404,9 @@ function RadarViewer({
           twitchParentHost
         )}&autoplay=true`
       : '';
+  const youtubeNewsId = isYouTubeNews ? extractYoutubeId(item.url, '') : '';
   const [tikTokEmbedFailed, setTikTokEmbedFailed] = useState(false);
+  const [tikTokEmbedIndex, setTikTokEmbedIndex] = useState(0);
   const relatedTikTokItems = useMemo(() => {
     if (!isTikTokNews) return [] as RadarItem[];
     const creatorMatches = allItems.filter((candidate) => {
@@ -427,6 +434,7 @@ function RadarViewer({
 
   useEffect(() => {
     setTikTokEmbedFailed(false);
+    setTikTokEmbedIndex(0);
   }, [item.id]);
 
   useEffect(() => {
@@ -694,6 +702,10 @@ function RadarViewer({
                     ? 'TikTok'
                     : isTwitchNews
                       ? 'Twitch'
+                      : isYouTubeNews
+                        ? 'YouTube Live'
+                        : isCommunityNews
+                          ? 'Comunidade BR'
                       : 'Notícia'
                   : item.kind === 'podcast'
                     ? 'Podcast'
@@ -727,15 +739,21 @@ function RadarViewer({
               </div>
             )
           ) : item.kind === 'news' ? (
-            isTikTokNews && tikTokEmbedUrl ? (
+            isTikTokNews && tikTokEmbedUrls.length > 0 ? (
               <div className='flex h-full min-h-[320px] flex-col gap-3 overflow-auto rounded-xl border border-white/10 bg-[#0b0b0f] p-3 sm:min-h-[460px] sm:p-4'>
                 {!tikTokEmbedFailed ? (
                   <iframe
-                    src={tikTokEmbedUrl}
+                    src={tikTokEmbedUrls[tikTokEmbedIndex] || tikTokEmbedUrls[0]}
                     title={`TikTok player - ${item.title}`}
                     allow='autoplay; encrypted-media; picture-in-picture; web-share'
                     allowFullScreen
-                    onError={() => setTikTokEmbedFailed(true)}
+                    onError={() => {
+                      if (tikTokEmbedIndex < tikTokEmbedUrls.length - 1) {
+                        setTikTokEmbedIndex((prev) => prev + 1);
+                      } else {
+                        setTikTokEmbedFailed(true);
+                      }
+                    }}
                     className='h-[54vh] min-h-[300px] w-full rounded-xl border border-white/10 bg-black sm:h-[64vh] sm:min-h-[420px]'
                   />
                 ) : (
@@ -745,6 +763,17 @@ function RadarViewer({
                     </p>
                   </div>
                 )}
+                {!tikTokEmbedFailed && tikTokEmbedUrls.length > 1 ? (
+                  <button
+                    type='button'
+                    onClick={() => {
+                      setTikTokEmbedIndex((prev) => (prev + 1) % tikTokEmbedUrls.length);
+                    }}
+                    className='self-start rounded-lg border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs text-[#9ca3af] transition hover:border-[#C6FF2E]/45 hover:text-[#C6FF2E]'
+                  >
+                    Tentar player alternativo
+                  </button>
+                ) : null}
 
                 {relatedTikTokItems.length > 0 ? (
                   <div className='rounded-xl border border-white/10 bg-white/[0.02] p-3'>
@@ -769,6 +798,14 @@ function RadarViewer({
                   </div>
                 ) : null}
               </div>
+            ) : isYouTubeNews && youtubeNewsId ? (
+              <iframe
+                src={`https://www.youtube.com/embed/${youtubeNewsId}?autoplay=1&rel=0&modestbranding=1`}
+                title={`YouTube live - ${item.title}`}
+                allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'
+                allowFullScreen
+                className='h-full min-h-[320px] w-full rounded-xl border border-white/10 bg-black sm:min-h-[460px]'
+              />
             ) : isTwitchNews && twitchEmbedUrl ? (
               <iframe
                 src={twitchEmbedUrl}
@@ -777,6 +814,19 @@ function RadarViewer({
                 allowFullScreen
                 className='h-full min-h-[320px] w-full rounded-xl border border-white/10 bg-black sm:min-h-[460px]'
               />
+            ) : isCommunityNews ? (
+              <div className='flex h-full min-h-[320px] flex-col gap-3 overflow-auto rounded-xl border border-white/10 bg-[#0b0b0f] p-3 sm:min-h-[460px] sm:p-5'>
+                <div className='rounded-xl border border-white/10 bg-white/[0.02] p-4'>
+                  <p className='text-[11px] uppercase tracking-[0.12em] text-[#9ca3af]'>Comunidade BR de tecnologia</p>
+                  <h5 className='mt-1 text-sm font-semibold text-white sm:text-base'>{item.title}</h5>
+                  <p className='mt-2 whitespace-pre-wrap break-words text-sm leading-relaxed text-[#d1d5db]'>
+                    {item.description}
+                  </p>
+                  <p className='mt-3 text-xs text-[#9ca3af]'>
+                    Conteúdo em português atualizado via comunidade brasileira.
+                  </p>
+                </div>
+              </div>
             ) : (
               <iframe
                 src={readerUrl}
@@ -919,7 +969,7 @@ function RadarViewer({
           )}
         </div>
 
-        {item.kind === 'news' && !isTikTokNews && !isTwitchNews ? (
+        {item.kind === 'news' && !isTikTokNews && !isTwitchNews && !isYouTubeNews && !isCommunityNews ? (
           <footer className='flex items-center justify-end border-t border-white/10 p-3 sm:p-4'>
             <a
               href={item.url}

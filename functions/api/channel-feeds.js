@@ -24,14 +24,11 @@ const FALLBACK_TIKTOK_VIDEO_URLS = [
   'https://www.tiktok.com/@islamsousa/video/7613833799423528199',
   'https://www.tiktok.com/@jornadatop/video/7232292097313770757',
 ];
-const FALLBACK_TABNEWS_KEYWORDS = [
-  'ia',
-  'inteligencia',
-  'machine',
-  'llm',
-  'devops',
-  'backend',
-  'frontend',
+const FALLBACK_YOUTUBE_DATA_API_KEY = 'AIzaSyDmRPaN4CvD2OI04Jz8Y8APqktXggkTFAw';
+const FALLBACK_YOUTUBE_LIVE_IDS = [
+  '5qap5aO4i9A',
+  'jfKfPfyJRdk',
+  'lTRiuFIWV54',
 ];
 const TWITCH_TOPIC_QUERIES = [
   'inteligencia artificial',
@@ -390,83 +387,107 @@ const fetchTwitchItems = async (env = {}) => {
   return fetchTwitchDecapiFallback(env);
 };
 
-const parseTabNewsKeywords = (env = {}) => {
-  const raw = String(env?.TABNEWS_KEYWORDS || env?.COMMUNITY_KEYWORDS || '').trim();
-  const envKeywords = raw ? parseCommaSeparated(raw) : [];
-  return toUniqueList([...envKeywords, ...FALLBACK_TABNEWS_KEYWORDS], 14)
-    .map((item) => safeText(item, 32).toLowerCase())
-    .filter(Boolean);
-};
+const fetchYoutubeLiveItems = async (env = {}) => {
+  const apiKey = String(env?.YOUTUBE_DATA_API_KEY || FALLBACK_YOUTUBE_DATA_API_KEY || '').trim();
+  if (!apiKey) {
+    return FALLBACK_YOUTUBE_LIVE_IDS.map((videoId, index) => ({
+      id: `youtube-live-fallback-${videoId}`,
+      title: 'YouTube · Live em destaque',
+      summary: 'Transmissão ao vivo de tecnologia.',
+      url: `https://www.youtube.com/watch?v=${videoId}`,
+      thumbnail: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
+      tags: ['YouTube', 'Live', 'Tech'],
+      category: 'Software',
+      isLive: true,
+      metricLabel: 'Ao vivo',
+      caseLabel: 'Ver no Radar',
+      channel: '@youtube',
+      rank: index,
+    }));
+  }
 
-const isTabNewsRelevant = (title = '', keywords = []) => {
-  if (keywords.length === 0) return true;
-  const normalized = title.toLowerCase();
-  return keywords.some((keyword) => normalized.includes(keyword));
-};
-
-const fetchTabNewsItems = async (env = {}) => {
-  const keywords = parseTabNewsKeywords(env);
-  const endpoints = [
-    'https://www.tabnews.com.br/api/v1/contents?page=1&per_page=24&strategy=relevant',
-    'https://www.tabnews.com.br/api/v1/contents?page=1&per_page=24&strategy=new',
-  ];
+  const queries = ['programação ao vivo brasil', 'ia ao vivo brasil', 'tecnologia ao vivo'];
   const settled = await Promise.allSettled(
-    endpoints.map(async (endpoint, endpointIndex) => {
-      const response = await fetchWithTimeout(
-        endpoint,
-        {
-          headers: { accept: 'application/json' },
-        },
-        6500
-      );
+    queries.map(async (query, queryIndex) => {
+      const endpoint = new URL('https://www.googleapis.com/youtube/v3/search');
+      endpoint.searchParams.set('part', 'snippet');
+      endpoint.searchParams.set('key', apiKey);
+      endpoint.searchParams.set('type', 'video');
+      endpoint.searchParams.set('eventType', 'live');
+      endpoint.searchParams.set('maxResults', '6');
+      endpoint.searchParams.set('q', query);
+      endpoint.searchParams.set('regionCode', 'BR');
+      endpoint.searchParams.set('relevanceLanguage', 'pt');
+      const response = await fetchWithTimeout(endpoint.toString(), undefined, 7000);
       if (!response.ok) return [];
       const payload = await response.json();
-      const posts = Array.isArray(payload) ? payload : [];
-      return posts.slice(0, 8).map((post, index) => {
-        const title = safeText(post?.title || '', 180);
-        const owner = safeText(post?.owner_username || '', 64);
-        const slug = safeText(post?.slug || '', 140);
-        if (!title || !owner || !slug) return null;
-        if (!isTabNewsRelevant(title, keywords)) return null;
-        const comments = Number(post?.children_deep_count || 0);
+      const items = Array.isArray(payload?.items) ? payload.items : [];
+      return items.map((item, index) => {
+        const videoId = String(item?.id?.videoId || '').trim();
+        const title = safeText(item?.snippet?.title || '', 180);
+        if (!videoId || !title) return null;
+        const channel = safeText(item?.snippet?.channelTitle || '', 80) || '@youtube';
         return {
-          id: `tabnews-${post?.id || `${owner}-${slug}-${index}`}`,
-          title: 'TabNews · Comunidade BR Tech',
-          summary: `${title}${comments > 0 ? ` · ${comments} comentários` : ''}`.slice(0, 260),
-          url: `https://www.tabnews.com.br/${owner}/${slug}`,
-          thumbnail: null,
-          tags: ['Comunidade BR', 'Tech', 'Discussão'],
+          id: `youtube-live-${videoId}`,
+          title: 'YouTube · Live em destaque',
+          summary: title,
+          url: `https://www.youtube.com/watch?v=${videoId}`,
+          thumbnail:
+            item?.snippet?.thumbnails?.high?.url ||
+            item?.snippet?.thumbnails?.medium?.url ||
+            item?.snippet?.thumbnails?.default?.url ||
+            `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
+          tags: ['YouTube', 'Live', 'Tech'],
           category: 'Software',
           isLive: true,
-          metricLabel: 'Debates em português',
+          metricLabel: 'Ao vivo agora',
           caseLabel: 'Ver no Radar',
-          channel: `@${owner}`,
-          rank: endpointIndex * 100 + index,
+          channel,
+          rank: queryIndex * 100 + index,
         };
       });
     })
   );
 
-  return settled
+  const dynamic = settled
     .flatMap((result) => (result.status === 'fulfilled' ? result.value : []))
-    .filter(Boolean)
+    .filter(Boolean);
+
+  if (dynamic.length === 0) {
+    return FALLBACK_YOUTUBE_LIVE_IDS.map((videoId, index) => ({
+      id: `youtube-live-fallback-${videoId}`,
+      title: 'YouTube · Live em destaque',
+      summary: 'Transmissão ao vivo de tecnologia.',
+      url: `https://www.youtube.com/watch?v=${videoId}`,
+      thumbnail: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
+      tags: ['YouTube', 'Live', 'Tech'],
+      category: 'Software',
+      isLive: true,
+      metricLabel: 'Ao vivo',
+      caseLabel: 'Ver no Radar',
+      channel: '@youtube',
+      rank: index,
+    }));
+  }
+
+  return dynamic
     .sort((a, b) => Number(a.rank || 0) - Number(b.rank || 0))
     .map(({ rank, ...item }) => item)
     .slice(0, 12);
 };
 
 const aggregateChannelFeeds = async (env = {}) => {
-  const [tiktok, twitch, community] = await Promise.all([
+  const [tiktok, twitch, youtubeLive] = await Promise.all([
     fetchTiktokItems(env),
     fetchTwitchItems(env),
-    fetchTabNewsItems(env),
+    fetchYoutubeLiveItems(env),
   ]);
 
   return {
     generatedAt: new Date().toISOString(),
     tiktok,
     twitch,
-    community,
+    youtubeLive,
   };
 };
 
