@@ -4,8 +4,10 @@ const TRANSLATE_TIMEOUT_MS = 6000;
 const DEFAULT_LIMIT = 12;
 const MAX_LIMIT = 30;
 const RSS2JSON_ENDPOINT = 'https://api.rss2json.com/v1/api.json?rss_url=';
+const GOOGLE_TRANSLATE_V2_ENDPOINT = 'https://translation.googleapis.com/language/translate/v2';
 const GOOGLE_TRANSLATE_ENDPOINT =
   'https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=pt&dt=t&q=';
+const FALLBACK_GOOGLE_TRANSLATE_API_KEY = 'AIzaSyBt6t2SLaW1ocfGesy925MLBWVb-I0uDW0';
 const DEFAULT_USER_AGENT =
   'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36';
 const TRANSLATE_TITLE_MAX_CHARS = 180;
@@ -147,32 +149,101 @@ const parseTranslatedPayload = (payload) => {
     .trim();
 };
 
-const translateToPortuguese = async (value = '', maxChars = TRANSLATE_DESCRIPTION_MAX_CHARS) => {
+const getTranslateApiKey = (env = {}) =>
+  (
+    env?.GOOGLE_TRANSLATE_API_KEY ||
+    env?.GOOGLE_TRANSLATOR_API_KEY ||
+    FALLBACK_GOOGLE_TRANSLATE_API_KEY ||
+    ''
+  ).trim();
+
+const translateViaPublicEndpoint = async (text) => {
+  const response = await fetchWithTimeout(
+    `${GOOGLE_TRANSLATE_ENDPOINT}${encodeURIComponent(text)}`,
+    {},
+    TRANSLATE_TIMEOUT_MS
+  );
+  if (!response.ok) {
+    throw new Error(`translate_public_http_${response.status}`);
+  }
+  const payload = await response.json();
+  const translatedText = parseTranslatedPayload(payload);
+  if (!translatedText) {
+    throw new Error('translate_public_empty_text');
+  }
+  return {
+    text: translatedText,
+    detectedLanguage: null,
+  };
+};
+
+const translateToPortuguese = async (value = '', maxChars = TRANSLATE_DESCRIPTION_MAX_CHARS, env = {}) => {
   const input = truncateText(String(value || '').trim(), maxChars);
   if (!input) return '';
-  if (isLikelyPortuguese(input)) return input;
+  if (isLikelyPortuguese(input)) {
+    return {
+      text: input,
+      translated: false,
+      detectedLanguage: 'pt',
+    };
+  }
 
   const cache = getTranslateCache();
   const cacheKey = `pt:${input}`;
   const cached = cache.get(cacheKey);
-  if (cached) return cached;
+  if (cached && typeof cached === 'object' && typeof cached.text === 'string') return cached;
 
   try {
-    const response = await fetchWithTimeout(
-      `${GOOGLE_TRANSLATE_ENDPOINT}${encodeURIComponent(input)}`,
-      {},
-      TRANSLATE_TIMEOUT_MS
-    );
-    if (!response.ok) {
-      return input;
+    const apiKey = getTranslateApiKey(env);
+    if (apiKey) {
+      const endpointWithKey = `${GOOGLE_TRANSLATE_V2_ENDPOINT}?key=${encodeURIComponent(apiKey)}`;
+      const response = await fetchWithTimeout(
+        endpointWithKey,
+        {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+          },
+          body: JSON.stringify({
+            q: input,
+            target: 'pt',
+            format: 'text',
+          }),
+        },
+        TRANSLATE_TIMEOUT_MS
+      );
+      if (response.ok) {
+        const payload = await response.json();
+        const translation = payload?.data?.translations?.[0];
+        const translatedText = htmlDecode(String(translation?.translatedText || '')).trim();
+        const detectedLanguage =
+          String(translation?.detectedSourceLanguage || '').trim().toLowerCase() || null;
+        if (translatedText) {
+          const output = {
+            text: translatedText,
+            translated: translatedText !== input,
+            detectedLanguage,
+          };
+          cache.set(cacheKey, output);
+          return output;
+        }
+      }
     }
-    const payload = await response.json();
-    const translated = parseTranslatedPayload(payload);
-    const output = translated || input;
+
+    const fallbackTranslation = await translateViaPublicEndpoint(input);
+    const output = {
+      text: fallbackTranslation.text || input,
+      translated: (fallbackTranslation.text || input) !== input,
+      detectedLanguage: fallbackTranslation.detectedLanguage,
+    };
     cache.set(cacheKey, output);
     return output;
   } catch {
-    return input;
+    return {
+      text: input,
+      translated: false,
+      detectedLanguage: null,
+    };
   }
 };
 
@@ -379,21 +450,29 @@ const buildBalancedItems = (groupedItems, limit) => {
   return output;
 };
 
-const translatePodcastItems = async (items) =>
+const translatePodcastItems = async (items, env = {}) =>
   Promise.all(
     items.map(async (item) => {
-      const translatedTitle = await translateToPortuguese(item.title || '', TRANSLATE_TITLE_MAX_CHARS);
+      const translatedTitle = await translateToPortuguese(item.title || '', TRANSLATE_TITLE_MAX_CHARS, env);
       const translatedDescription = await translateToPortuguese(
         item.description || '',
-        TRANSLATE_DESCRIPTION_MAX_CHARS
+        TRANSLATE_DESCRIPTION_MAX_CHARS,
+        env
       );
-      const translated = translatedTitle !== item.title || translatedDescription !== item.description;
+      const translated = translatedTitle.translated || translatedDescription.translated;
+      const englishLike =
+        (translatedDescription.detectedLanguage || translatedTitle.detectedLanguage || '').startsWith('en') ||
+        (!isLikelyPortuguese(item.title || '') && !isLikelyPortuguese(item.description || ''));
 
       return {
         ...item,
-        title: translatedTitle || item.title,
-        description: translatedDescription || item.description,
-        source: translated ? `${item.source} · traduzido` : item.source,
+        title: translated && translatedTitle.text ? translatedTitle.text : item.title,
+        description: item.description,
+        originalTitle: translated ? item.title : null,
+        originalDescription: translated ? item.description : null,
+        translatedDescription: translated && englishLike ? translatedDescription.text : null,
+        translatedLanguage: translatedDescription.detectedLanguage || translatedTitle.detectedLanguage || null,
+        source: translated ? `${item.source} · tradução Google` : item.source,
       };
     })
   );
@@ -426,7 +505,7 @@ export async function onRequestGet(context) {
   });
 
   const balanced = buildBalancedItems(groupedItems, Math.max(limit * 2, 12));
-  const translated = await translatePodcastItems(balanced);
+  const translated = await translatePodcastItems(balanced, context.env || {});
   const merged = dedupeByAudioUrl(translated);
 
   const data = {

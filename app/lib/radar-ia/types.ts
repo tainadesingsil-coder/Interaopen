@@ -18,6 +18,10 @@ export interface RadarItem {
   score: number;
   ctaLabel: string;
   audioUrl?: string | null;
+  originalTitle?: string | null;
+  originalDescription?: string | null;
+  translatedDescription?: string | null;
+  translatedLanguage?: string | null;
 }
 
 export interface RadarResponsePayload {

@@ -149,6 +149,11 @@ function RadarCard({ item, onOpen }: { item: RadarItem; onOpen: (item: RadarItem
 
       <h4 className='line-clamp-2 text-[15px] font-semibold leading-snug text-white md:text-base'>{item.title}</h4>
       <p className='mt-2 line-clamp-3 text-sm leading-relaxed text-[#9ca3af]'>{item.description}</p>
+      {item.kind === 'podcast' && item.translatedDescription ? (
+        <p className='mt-1 line-clamp-2 text-xs leading-relaxed text-[#C6FF2E]/85'>
+          Legenda PT-BR: {item.translatedDescription}
+        </p>
+      ) : null}
       <p className='mt-3 line-clamp-1 text-[11px] leading-relaxed text-[#9ca3af]'>
         {item.channel ? `${item.source} · ${item.channel}` : item.source}
       </p>
@@ -310,6 +315,14 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
                 <p className='mt-2 whitespace-pre-wrap break-words text-sm leading-relaxed text-[#d1d5db] sm:text-[15px]'>
                   {item.description}
                 </p>
+                {item.translatedDescription ? (
+                  <div className='mt-3 rounded-lg border border-[#C6FF2E]/25 bg-[#C6FF2E]/[0.06] p-3'>
+                    <p className='text-[10px] uppercase tracking-[0.11em] text-[#C6FF2E]'>Legenda traduzida (PT-BR)</p>
+                    <p className='mt-1.5 whitespace-pre-wrap break-words text-sm leading-relaxed text-[#d1d5db]'>
+                      {item.translatedDescription}
+                    </p>
+                  </div>
+                ) : null}
               </div>
             </div>
           ) : (
