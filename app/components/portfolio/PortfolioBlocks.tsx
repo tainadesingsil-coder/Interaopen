@@ -1,3 +1,5 @@
+'use client';
+
 import { cn } from '@/app/lib/utils';
 import type {
   FeaturedProject,
@@ -5,6 +7,8 @@ import type {
   ProjectScreen,
 } from '@/app/data/portfolio';
 import Link from 'next/link';
+import { Bot } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 
 const AREA_COLOR: Record<ProductOffer['area'], string> = {
   Software: 'text-sky-300',
@@ -48,6 +52,99 @@ export function ProjectCard({ project }: { project: FeaturedProject }) {
 }
 
 export function ProductCard({ offer }: { offer: ProductOffer }) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [fullAnswer, setFullAnswer] = useState('');
+  const [typedAnswer, setTypedAnswer] = useState('');
+  const typingTimerRef = useRef<number | null>(null);
+
+  const clearTypingTimer = () => {
+    if (typingTimerRef.current && typeof window !== 'undefined') {
+      window.clearInterval(typingTimerRef.current);
+      typingTimerRef.current = null;
+    }
+  };
+
+  useEffect(() => {
+    if (!isExpanded || !fullAnswer) {
+      return;
+    }
+
+    clearTypingTimer();
+    setTypedAnswer('');
+    typingTimerRef.current = window.setInterval(() => {
+      setTypedAnswer((prev) => {
+        const next = fullAnswer.slice(0, prev.length + 2);
+        if (next.length >= fullAnswer.length) {
+          clearTypingTimer();
+        }
+        return next;
+      });
+    }, 18);
+
+    return () => {
+      clearTypingTimer();
+    };
+  }, [fullAnswer, isExpanded]);
+
+  useEffect(() => {
+    return () => {
+      clearTypingTimer();
+    };
+  }, []);
+
+  const explainOffer = async () => {
+    if (isLoading) {
+      return;
+    }
+
+    if (isExpanded) {
+      setIsExpanded(false);
+      return;
+    }
+
+    setIsExpanded(true);
+    setErrorMessage('');
+
+    if (fullAnswer) {
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/service-advisor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mode: 'explain',
+          service: offer,
+          question: `Explique ${offer.title} de forma comercial para o cliente entender valor e escopo.`,
+          history: [],
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('service_advisor_request_failed');
+      }
+
+      const payload = (await response.json()) as { answer?: string };
+      const answer = (payload.answer ?? '').replace(/\s+/g, ' ').trim();
+      if (!answer) {
+        throw new Error('empty_answer');
+      }
+
+      setFullAnswer(answer);
+    } catch {
+      setErrorMessage('Não consegui explicar agora. Tente novamente em instantes.');
+      setFullAnswer(
+        `${offer.title}: ${offer.description} Podemos detalhar escopo, prazo e impacto para sua operação.`
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <article className='rounded-xl border border-white/10 bg-[#0b0b0f] p-4 transition hover:border-[#C6FF2E] hover:shadow-[0_0_18px_rgba(198,255,46,0.08)]'>
       <p
@@ -60,6 +157,25 @@ export function ProductCard({ offer }: { offer: ProductOffer }) {
       </p>
       <h4 className='mt-2 text-sm font-bold text-white md:text-base'>{offer.title}</h4>
       <p className='mt-2 text-sm leading-relaxed text-[#9ca3af]'>{offer.description}</p>
+      <button
+        type='button'
+        onClick={() => void explainOffer()}
+        className='mt-3 inline-flex items-center gap-1 rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-white transition hover:border-[#C6FF2E] hover:text-[#C6FF2E]'
+      >
+        <Bot className='h-3.5 w-3.5' />
+        {isExpanded ? 'Ocultar explicação IA' : 'Explicar com IA'}
+      </button>
+
+      {isExpanded ? (
+        <div className='mt-3 rounded-md border border-[#C6FF2E]/30 bg-[#C6FF2E]/8 p-3'>
+          {isLoading ? (
+            <p className='text-xs text-[#c9d1d9]'>IA escrevendo explicação...</p>
+          ) : (
+            <p className='text-sm leading-relaxed text-[#d9ff8a]'>{typedAnswer || fullAnswer}</p>
+          )}
+          {errorMessage ? <p className='mt-2 text-xs text-[#fda4af]'>{errorMessage}</p> : null}
+        </div>
+      ) : null}
     </article>
   );
 }

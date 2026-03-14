@@ -9,7 +9,6 @@ import {
   ProductCard,
   ProjectCard,
 } from '@/app/components/portfolio/PortfolioBlocks';
-import { ServiceAdvisor } from '@/app/components/portfolio/ServiceAdvisor';
 import { RadarIaSection } from '@/app/components/radar-ia/RadarIaSection';
 import {
   featuredProjects,
@@ -119,8 +118,6 @@ export default function HomePage() {
                   ))}
                 </div>
               </article>
-
-              <ServiceAdvisor offers={productOffers} />
 
               <RadarIaSection />
 
