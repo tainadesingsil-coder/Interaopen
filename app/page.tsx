@@ -66,7 +66,7 @@ export default function HomePage() {
       category: item.category || 'Software',
       summary: item.summary,
       tags: Array.isArray(item.tags) && item.tags.length > 0 ? item.tags.slice(0, 4) : ['Feed'],
-      caseHref: '#radar-ia',
+      caseHref: item.url ? `#radar-ia?open=${encodeURIComponent(item.url)}` : '#radar-ia',
       caseLabel: 'Ver no Radar',
       thumbnail: item.thumbnail || null,
       isLive: !!item.isLive,

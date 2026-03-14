@@ -275,6 +275,35 @@ const dedupeViewerItems = (items: RadarItem[]) => {
   return [...map.values()];
 };
 
+const normalizeUrlForViewerMatch = (value: string) => {
+  if (!value) return '';
+  try {
+    const parsed = new URL(value);
+    parsed.hash = '';
+    if (/tiktok\.com/i.test(parsed.hostname) || /twitch\.tv/i.test(parsed.hostname)) {
+      return `${parsed.origin}${parsed.pathname}`.replace(/\/+$/, '').toLowerCase();
+    }
+    if (/youtube\.com|youtu\.be/i.test(parsed.hostname)) {
+      const id =
+        parsed.searchParams.get('v') ||
+        parsed.pathname.split('/').filter(Boolean).pop() ||
+        '';
+      return id ? `youtube:${id}` : `${parsed.origin}${parsed.pathname}`.toLowerCase();
+    }
+    return `${parsed.origin}${parsed.pathname}`.replace(/\/+$/, '').toLowerCase();
+  } catch {
+    return value.trim().toLowerCase();
+  }
+};
+
+const extractOpenUrlFromHash = (hashValue: string) => {
+  if (!hashValue.startsWith('#radar-ia')) return '';
+  const [, queryString = ''] = hashValue.split('?');
+  if (!queryString) return '';
+  const params = new URLSearchParams(queryString);
+  return params.get('open') || '';
+};
+
 function SkeletonCard() {
   return (
     <div className='animate-pulse rounded-[18px] border border-white/10 bg-[#0b0b0f] p-4 shadow-[0_10px_24px_rgba(0,0,0,0.2)] sm:rounded-2xl md:p-5'>
@@ -996,6 +1025,7 @@ export function RadarIaSection() {
   const [errorMessage, setErrorMessage] = useState('');
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE);
   const [viewerItem, setViewerItem] = useState<RadarItem | null>(null);
+  const [pendingOpenUrl, setPendingOpenUrl] = useState('');
   const [podcastItems, setPodcastItems] = useState<RadarItem[]>([]);
   const [isLoadingPodcasts, setIsLoadingPodcasts] = useState(false);
   const [podcastError, setPodcastError] = useState('');
@@ -1004,6 +1034,21 @@ export function RadarIaSection() {
     setVisibleCount(INITIAL_VISIBLE);
     setViewerItem(null);
   }, [activeTab, submittedQuery, activeRange]);
+
+  useEffect(() => {
+    const syncFromHash = () => {
+      const openUrl = extractOpenUrlFromHash(window.location.hash || '');
+      if (!openUrl) return;
+      setPendingOpenUrl(openUrl);
+      if (activeTab !== 'all') {
+        setActiveTab('all');
+      }
+    };
+
+    syncFromHash();
+    window.addEventListener('hashchange', syncFromHash);
+    return () => window.removeEventListener('hashchange', syncFromHash);
+  }, [activeTab]);
 
   useEffect(() => {
     if (!submittedQuery) {
@@ -1093,7 +1138,55 @@ export function RadarIaSection() {
     () => activeItems.slice(0, visibleCount),
     [activeItems, visibleCount]
   );
-  const viewerItems = useMemo(() => dedupeViewerItems([...activeItems, ...podcastItems]), [activeItems, podcastItems]);
+  const viewerItems = useMemo(() => {
+    if (!payload) return dedupeViewerItems([...podcastItems]);
+    return dedupeViewerItems([
+      ...payload.all,
+      ...payload.results.youtube,
+      ...payload.results.news,
+      ...payload.results.instagram,
+      ...podcastItems,
+    ]);
+  }, [payload, podcastItems]);
+
+  useEffect(() => {
+    if (!pendingOpenUrl || viewerItems.length === 0) return;
+    const pendingKey = normalizeUrlForViewerMatch(pendingOpenUrl);
+    const match = viewerItems.find(
+      (candidate) =>
+        normalizeUrlForViewerMatch(candidate.url) === pendingKey ||
+        candidate.url === pendingOpenUrl
+    );
+    if (match) {
+      setViewerItem(match);
+    } else {
+      const source = /tiktok\.com/i.test(pendingOpenUrl)
+        ? 'TikTok Creator Base'
+        : /twitch\.tv/i.test(pendingOpenUrl)
+          ? 'Twitch Monitor'
+          : /youtube\.com|youtu\.be/i.test(pendingOpenUrl)
+            ? 'YouTube Live BR'
+            : 'Radar IA';
+      setViewerItem({
+        id: `open-${pendingKey}`,
+        kind: 'news',
+        title: source === 'TikTok Creator Base' ? 'TikTok · Conteúdo selecionado' : 'Conteúdo selecionado',
+        description: 'Conteúdo aberto a partir da seção de canais em tempo real.',
+        url: pendingOpenUrl,
+        source,
+        publishedAt: null,
+        thumbnail: null,
+        channel: null,
+        score: 0,
+        ctaLabel: 'Abrir',
+      });
+    }
+
+    setPendingOpenUrl('');
+    if (typeof window !== 'undefined' && window.location.hash.includes('?open=')) {
+      window.history.replaceState(null, '', '#radar-ia');
+    }
+  }, [pendingOpenUrl, viewerItems]);
 
   return (
     <article id='radar-ia' className='space-y-4 sm:space-y-5'>
