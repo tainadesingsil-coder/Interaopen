@@ -80,25 +80,36 @@ const CURATED_YOUTUBE_VIDEOS = [
 ];
 const CURATED_INSTAGRAM_PUBLICATIONS = [
   {
-    id: 'instagram-hollyfield-ia-posts',
-    title: 'Publicações do perfil hollyfield.ia',
-    description: 'Acesse as publicações recentes do perfil recomendado de IA.',
-    url: 'https://www.instagram.com/hollyfield.ia?igsh=MWJxYWczbmdmYm02aw==',
-    ctaLabel: 'Ver posts',
+    id: 'instagram-post-dv1oioxdvbv',
+    title: 'Resumo semanal do mercado de IA',
+    description: 'Post com panorama rápido das principais movimentações da semana em IA.',
+    url: 'https://www.instagram.com/p/DV1OIoxDvbV/',
+    thumbnail: 'https://www.instagram.com/p/DV1OIoxDvbV/media/?size=l',
+    ctaLabel: 'Ver post',
   },
   {
-    id: 'instagram-hollyfield-ia-reels',
-    title: 'Reels de IA do hollyfield.ia',
-    description: 'Veja vídeos curtos e insights práticos sobre inteligência artificial.',
-    url: 'https://www.instagram.com/hollyfield.ia/reels/',
-    ctaLabel: 'Ver reels',
+    id: 'instagram-post-dv0pwgrlfay',
+    title: 'OpenAI, Anthropic e engenharia de prompts',
+    description: 'Post com contexto e análise prática sobre prompts e modelos atuais.',
+    url: 'https://www.instagram.com/p/DV0pWgrlfaY/',
+    thumbnail: 'https://www.instagram.com/p/DV0pWgrlfaY/media/?size=l',
+    ctaLabel: 'Ver post',
   },
   {
-    id: 'instagram-hollyfield-ia-tagged',
-    title: 'Conteúdos em destaque de hollyfield.ia',
-    description: 'Explore conteúdos e menções do perfil dentro do Instagram.',
-    url: 'https://www.instagram.com/hollyfield.ia/tagged/',
-    ctaLabel: 'Ver publicação',
+    id: 'instagram-post-dvtoyvkksxm',
+    title: 'China, Seedance 2.0 e impactos no ecossistema',
+    description: 'Post com leitura de mercado sobre tendências globais e novas plataformas.',
+    url: 'https://www.instagram.com/p/DVtoYvkkSxm/',
+    thumbnail: 'https://www.instagram.com/p/DVtoYvkkSxm/media/?size=l',
+    ctaLabel: 'Ver post',
+  },
+  {
+    id: 'instagram-post-dvv4xchjioj',
+    title: 'Atualização rápida de IA no Instagram',
+    description: 'Post recente com destaque do mercado de IA.',
+    url: 'https://www.instagram.com/p/DVv4XchjiOj/',
+    thumbnail: 'https://www.instagram.com/p/DVv4XchjiOj/media/?size=l',
+    ctaLabel: 'Ver post',
   },
 ];
 
@@ -567,7 +578,7 @@ const fetchInstagramItems = async (query) => {
     url: publication.url,
     source: 'Instagram',
     publishedAt: null,
-    thumbnail: buildInstagramThumbnail(publication.title),
+    thumbnail: publication.thumbnail || buildInstagramThumbnail(publication.title),
     channel: '@hollyfield.ia',
     score:
       50 - index + computeScore(`${publication.title} hollyfield ia instagram`, publication.description, null, query),
@@ -607,8 +618,10 @@ const aggregateRadar = async (query, type, range, env) => {
     tasks.instagram,
   ]);
 
-  if (youtubeResult.status === 'fulfilled') data.results.youtube = youtubeResult.value;
-  else if (requestedKinds.includes('youtube')) {
+  if (youtubeResult.status === 'fulfilled' && requestedKinds.includes('youtube')) {
+    data.results.youtube =
+      youtubeResult.value?.length > 0 ? youtubeResult.value : buildCuratedYoutubeItems(query, range);
+  } else if (requestedKinds.includes('youtube')) {
     data.errors.youtube = 'Fonte YouTube indisponível no momento.';
     data.results.youtube = buildCuratedYoutubeItems(query, range);
   }
