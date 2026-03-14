@@ -8,7 +8,6 @@ import {
 import {
   ProductCard,
   ProjectCard,
-  ScreenshotMockup,
 } from '@/app/components/portfolio/PortfolioBlocks';
 import { RadarIaSection } from '@/app/components/radar-ia/RadarIaSection';
 import {
@@ -19,7 +18,6 @@ import {
   GalleryVerticalEnd,
   Home,
   LayoutGrid,
-  Layers3,
   Mail,
   RadioTower,
   Rocket,
@@ -46,11 +44,6 @@ const portfolioLinks = [
     label: 'Radar IA',
     href: '#radar-ia',
     icon: <RadioTower className='h-4 w-4 text-[#9ca3af]' />,
-  },
-  {
-    label: 'Telas',
-    href: '#telas',
-    icon: <Layers3 className='h-4 w-4 text-[#9ca3af]' />,
   },
   {
     label: 'CTA',
@@ -143,40 +136,6 @@ export default function HomePage() {
               </article>
 
               <RadarIaSection />
-
-              <article id='telas' className='space-y-4'>
-                <span id='diferenciais' className='sr-only'>
-                  diferenciais
-                </span>
-                <header className='space-y-1'>
-                  <p className='text-xs uppercase tracking-[0.18em] text-[#9ca3af]'>Visual de produto</p>
-                  <h3 className='text-xl font-bold text-white md:text-2xl'>Telas dos produtos</h3>
-                </header>
-
-                <div className='space-y-5'>
-                  {featuredProjects.map((project) => (
-                    <section
-                      key={project.id}
-                      id={`case-${project.id}`}
-                      className='rounded-xl border border-white/10 bg-[#0b0b0f] p-5'
-                    >
-                      <div className='mb-4 border-b border-white/10 pb-4'>
-                        <h4 className='text-lg font-semibold text-white'>{project.title}</h4>
-                        <p className='mt-1 text-sm text-[#9ca3af]'>{project.summary}</p>
-                      </div>
-                      <div className='grid gap-4 xl:grid-cols-2'>
-                        {project.screens.map((screen) => (
-                          <ScreenshotMockup
-                            key={screen.id}
-                            projectTitle={project.title}
-                            screen={screen}
-                          />
-                        ))}
-                      </div>
-                    </section>
-                  ))}
-                </div>
-              </article>
 
               <article
                 id='contato'
