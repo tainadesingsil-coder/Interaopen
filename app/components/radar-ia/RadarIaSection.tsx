@@ -165,6 +165,45 @@ const buildCaptionSchedule = (lines: string[]) => {
   });
 };
 
+const normalizeCaptionText = (value: string) =>
+  value
+    .toLowerCase()
+    .replace(/[^\wÀ-ÿ\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+const captionTokenSet = (value: string) =>
+  new Set(
+    normalizeCaptionText(value)
+      .split(' ')
+      .map((part) => part.trim())
+      .filter((part) => part.length >= 3)
+  );
+
+const captionSimilarity = (a: string, b: string) => {
+  const setA = captionTokenSet(a);
+  const setB = captionTokenSet(b);
+  if (setA.size === 0 || setB.size === 0) return 0;
+
+  let intersection = 0;
+  for (const token of setA) {
+    if (setB.has(token)) intersection += 1;
+  }
+  const union = setA.size + setB.size - intersection;
+  return union > 0 ? intersection / union : 0;
+};
+
+const hasEnoughNewWords = (previous: string, next: string, minNewWords = 3) => {
+  const prev = captionTokenSet(previous);
+  const nxt = captionTokenSet(next);
+  let newWords = 0;
+  for (const token of nxt) {
+    if (!prev.has(token)) newWords += 1;
+    if (newWords >= minNewWords) return true;
+  }
+  return false;
+};
+
 const blobToBase64 = (blob: Blob) =>
   new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
@@ -403,9 +442,23 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
       };
       const translated = String(payload?.translatedText || '').trim();
       if (translated) {
-        const normalized = translated.toLowerCase().replace(/[^\wÀ-ÿ\s]/g, ' ').replace(/\s+/g, ' ').trim();
+        const normalized = normalizeCaptionText(translated);
         if (!normalized || normalized.length < 10) return;
-        if (normalized === lastLiveCaptionRef.current) return;
+
+        const previous = lastLiveCaptionRef.current;
+        if (previous) {
+          if (normalized === previous) return;
+
+          const looksContained =
+            previous.includes(normalized) ||
+            normalized.includes(previous) ||
+            captionSimilarity(previous, normalized) > 0.9;
+
+          if (looksContained && !hasEnoughNewWords(previous, normalized, 3)) {
+            return;
+          }
+        }
+
         lastLiveCaptionRef.current = normalized;
         setLiveCaptionText(translated);
         setLiveCaptionError('');
