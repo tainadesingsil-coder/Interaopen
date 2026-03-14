@@ -170,36 +170,40 @@ const CURATED_YOUTUBE_VIDEOS = [
 ];
 const CURATED_INSTAGRAM_PUBLICATIONS = [
   {
-    id: 'instagram-post-dv1oioxdvbv',
-    title: 'Resumo semanal do mercado de IA',
-    description: 'Post com panorama rápido das principais movimentações da semana em IA.',
-    url: 'https://www.instagram.com/p/DV1OIoxDvbV/',
-    thumbnail: '/api/instagram-image?code=DV1OIoxDvbV',
+    id: 'instagram-post-dvyqbtpjmyj',
+    title: 'BotConversa',
+    description:
+      'COMENTE "A358" e eu te mando o link para ativar o seu agora. O WhatsApp acabou de se conectar com o novo GPT e agora responde mensagens sozinho, sem programação e sem equipe extra.',
+    url: 'https://www.instagram.com/p/DVyQBtpjmYj/',
+    thumbnail: '/api/instagram-image?code=DVyQBtpjmYj',
     ctaLabel: 'Ver post',
   },
   {
-    id: 'instagram-post-dv0pwgrlfay',
-    title: 'OpenAI, Anthropic e engenharia de prompts',
-    description: 'Post com contexto e análise prática sobre prompts e modelos atuais.',
-    url: 'https://www.instagram.com/p/DV0pWgrlfaY/',
-    thumbnail: '/api/instagram-image?code=DV0pWgrlfaY',
+    id: 'instagram-post-dvwdlnwf1lj',
+    title: 'Adriano Couto | Gestão com IA',
+    description:
+      'Se você pensou que já existia ChatGPT no Excel, a novidade é que agora a integração oficial gera fórmulas nativas, entende conexões entre abas e traz fluxo mais confiável para gestão com IA.',
+    url: 'https://www.instagram.com/p/DVwdlnwF1Lj/',
+    thumbnail: '/api/instagram-image?code=DVwdlnwF1Lj',
     ctaLabel: 'Ver post',
   },
   {
-    id: 'instagram-post-dvtoyvkksxm',
-    title: 'China, Seedance 2.0 e impactos no ecossistema',
-    description: 'Post com leitura de mercado sobre tendências globais e novas plataformas.',
-    url: 'https://www.instagram.com/p/DVtoYvkkSxm/',
-    thumbnail: '/api/instagram-image?code=DVtoYvkkSxm',
+    id: 'instagram-post-dvbb0ahmwkz',
+    title: 'Renato Asse | Sem Codar',
+    description:
+      'Eu amo o Supabase, mas o limite de 2 projetos no plano free trava quem cria muito. Nesse post, ele apresenta o Neon como alternativa para vibe coding com até 100 projetos no plano gratuito.',
+    url: 'https://www.instagram.com/p/DVbb0AHmWKZ/',
+    thumbnail: '/api/instagram-image?code=DVbb0AHmWKZ',
     ctaLabel: 'Ver post',
   },
   {
-    id: 'instagram-post-dvv4xchjioj',
-    title: 'Atualização rápida de IA no Instagram',
-    description: 'Post recente com destaque do mercado de IA.',
-    url: 'https://www.instagram.com/p/DVv4XchjiOj/',
-    thumbnail: '/api/instagram-image?code=DVv4XchjiOj',
-    ctaLabel: 'Ver post',
+    id: 'instagram-reel-dsmeb7ikebx',
+    title: 'Lucas Rocha | IA e Criação de Conteúdo',
+    description:
+      '⚠️ Essa tecnologia está avançando rápido demais. O vídeo mostra uso de IA com motion control e reforça o alerta sobre deepfakes, especialmente em contexto eleitoral, para educar quem acredita em tudo que vê online.',
+    url: 'https://www.instagram.com/reel/DSmeB7ikeBX/',
+    thumbnail: '/api/instagram-image?code=DSmeB7ikeBX',
+    ctaLabel: 'Ver reel',
   },
 ];
 
@@ -276,6 +280,46 @@ const htmlDecode = (value) =>
     .replace(/&#x([0-9a-f]+);/gi, (_, code) =>
       String.fromCharCode(Number.parseInt(code, 16))
     );
+
+const extractMetaContent = (html, key) => {
+  const patterns = [
+    new RegExp(`<meta[^>]+property=["']${key}["'][^>]+content=["']([^"']+)["'][^>]*>`, 'i'),
+    new RegExp(`<meta[^>]+content=["']([^"']+)["'][^>]+property=["']${key}["'][^>]*>`, 'i'),
+    new RegExp(`<meta[^>]+name=["']${key}["'][^>]+content=["']([^"']+)["'][^>]*>`, 'i'),
+    new RegExp(`<meta[^>]+content=["']([^"']+)["'][^>]+name=["']${key}["'][^>]*>`, 'i'),
+  ];
+  for (const pattern of patterns) {
+    const match = html.match(pattern);
+    if (match && match[1]) return htmlDecode(match[1]).trim();
+  }
+  return '';
+};
+
+const cleanInstagramTitle = (value = '') =>
+  (() => {
+    const normalized = value.replace(/\s+/g, ' ').trim();
+    const marker = normalized.toLowerCase().indexOf(' on instagram');
+    if (marker > 0) {
+      return normalized.slice(0, marker).trim();
+    }
+    return normalized.replace(/^Instagram:\s*/i, '').trim();
+  })();
+
+const extractInstagramCaption = (value = '') => {
+  const normalized = value.replace(/\s+/g, ' ').trim();
+  if (!normalized) return '';
+
+  const colonIndex = normalized.indexOf(':');
+  let candidate = colonIndex >= 0 ? normalized.slice(colonIndex + 1).trim() : normalized;
+  candidate = candidate.replace(/^[“"]+/, '').replace(/[”"]+$/, '').trim();
+  if (candidate.length >= 12) {
+    return candidate.slice(0, 1200);
+  }
+
+  const quoted = normalized.match(/[“"]([^”"]{12,})[”"]/);
+  if (quoted && quoted[1]) return quoted[1].trim().slice(0, 1200);
+  return normalized.replace(/^Instagram:\s*/i, '').trim().slice(0, 1200);
+};
 
 const escapeSvgText = (value = '') =>
   value
@@ -705,14 +749,16 @@ const fetchInstagramItems = async (query) => {
     id: publication.id,
     kind: 'instagram',
     title: publication.title,
-    description: `${publication.description} ${query ? `Tema buscado: ${query}.` : ''}`.trim(),
+    description: publication.description,
     url: publication.url,
     source: 'Instagram',
     publishedAt: null,
     thumbnail: publication.thumbnail || buildInstagramThumbnail(publication.title),
     channel: '@hollyfield.ia',
     score:
-      50 - index + computeScore(`${publication.title} hollyfield ia instagram`, publication.description, null, query),
+      50 -
+      index +
+      computeScore(`${publication.title} hollyfield ia instagram`, publication.description, null, query),
     ctaLabel: publication.ctaLabel,
   }));
 };
