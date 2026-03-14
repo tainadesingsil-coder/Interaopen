@@ -1,7 +1,15 @@
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const SOURCE_TIMEOUT_MS = 8000;
-const FALLBACK_DISCORD_APP_ID = '1482397432993026088';
-const FALLBACK_TWITCH_CHANNELS = ['cozycoding', 'theprimeagen', 'tsoding'];
+const FALLBACK_TWITCH_CHANNELS = [
+  'cozycoding',
+  'theprimeagen',
+  'tsoding',
+  'piratesoftware',
+  'j_blow',
+  'georgehotz',
+  'codeaesthetic',
+  'lowlevellearning',
+];
 const FALLBACK_TIKTOK_VIDEO_URLS = [
   'https://www.tiktok.com/@gabrieladamuchi/video/7601907452212235540',
   'https://www.tiktok.com/@izabela.anholett/video/7611634628490710293',
@@ -10,8 +18,13 @@ const FALLBACK_TIKTOK_VIDEO_URLS = [
   'https://www.tiktok.com/@islamsousa/video/7613833799423528199',
   'https://www.tiktok.com/@jornadatop/video/7232292097313770757',
 ];
-const FALLBACK_DISCORD_COMMUNITY_URLS = [
-  'https://discord.com/channels/327861810768117763/1181004493517758604/threads/1252303012634824865',
+const FALLBACK_REDDIT_SUBREDDITS = [
+  'MachineLearning',
+  'artificial',
+  'LocalLLaMA',
+  'programming',
+  'webdev',
+  'devops',
 ];
 const TWITCH_TOPIC_QUERIES = [
   'inteligencia artificial',
@@ -367,90 +380,84 @@ const fetchTwitchItems = async (env = {}) => {
   return fetchTwitchDecapiFallback(env);
 };
 
-const parseDiscordChannelsUrl = (value = '') => {
-  const match = String(value || '').match(/discord\.com\/channels\/(\d+)\/(\d+)(?:\/(?:threads\/)?(\d+))?/i);
-  if (!match) return null;
-  return {
-    guildId: match[1],
-    channelId: match[2],
-    threadId: match[3] || '',
-    activeChannelId: match[3] || match[2],
-  };
+const parseRedditSubreddits = (env = {}) => {
+  const raw = String(env?.REDDIT_SUBREDDITS || env?.REDDIT_TECH_SUBREDDITS || '').trim();
+  const envSubs = raw ? parseCommaSeparated(raw).map((item) => item.replace(/^r\//i, '').trim()) : [];
+  return toUniqueList([...envSubs, ...FALLBACK_REDDIT_SUBREDDITS], 12)
+    .filter((item) => /^[a-z0-9_]+$/i.test(item))
+    .map((item) => item.replace(/^r\//i, ''));
 };
 
-const parseDiscordCommunityUrls = (env = {}) => {
-  const raw = String(
-    env?.DISCORD_COMMUNITY_URLS || env?.DISCORD_CHANNEL_URLS || env?.DISCORD_THREAD_URLS || ''
-  ).trim();
-  const envUrls = raw ? parseCommaSeparated(raw) : [];
-  return toUniqueList(
-    [...envUrls, ...FALLBACK_DISCORD_COMMUNITY_URLS].filter((url) =>
-      /^https?:\/\/(www\.)?discord\.com\/channels\//i.test(url)
-    ),
-    10
-  );
+const extractRedditThumbnail = (post = {}) => {
+  const previewUrl = post?.preview?.images?.[0]?.source?.url;
+  if (previewUrl) return String(previewUrl).replace(/&amp;/g, '&');
+  const thumb = String(post?.thumbnail || '').trim();
+  if (/^https?:\/\//i.test(thumb) && !/(self|default|nsfw|spoiler)/i.test(thumb)) {
+    return thumb;
+  }
+  return null;
 };
 
-const fetchDiscordItems = async (env = {}) => {
-  const communityUrls = parseDiscordCommunityUrls(env);
-  if (communityUrls.length === 0) return [];
+const fetchRedditItems = async (env = {}) => {
+  const subreddits = parseRedditSubreddits(env);
+  if (subreddits.length === 0) return [];
 
   const settled = await Promise.allSettled(
-    communityUrls.map(async (communityUrl, index) => {
-      const parsed = parseDiscordChannelsUrl(communityUrl);
-      if (!parsed) return null;
-
-      const widgetResponse = await fetchWithTimeout(
-        `https://discord.com/api/guilds/${parsed.guildId}/widget.json`,
+    subreddits.map(async (subreddit, subredditIndex) => {
+      const endpoint = new URL(`https://www.reddit.com/r/${encodeURIComponent(subreddit)}/new.json`);
+      endpoint.searchParams.set('limit', '8');
+      endpoint.searchParams.set('raw_json', '1');
+      const response = await fetchWithTimeout(
+        endpoint.toString(),
         {
           headers: { accept: 'application/json' },
         },
         6500
       );
-      if (!widgetResponse.ok) return null;
-
-      const payload = await widgetResponse.json();
-      const channels = Array.isArray(payload?.channels) ? payload.channels : [];
-      const channelName = safeText(
-        channels.find((channel) => String(channel?.id || '') === parsed.channelId)?.name || '',
-        90
-      );
-      const serverName = safeText(payload?.name || `Servidor ${parsed.guildId}`, 120);
-      const onlineCount = Number(payload?.presence_count || 0);
-
-      return {
-        id: `discord-community-${parsed.guildId}-${parsed.activeChannelId}-${index}`,
-        title: `Discord · ${serverName}`,
-        summary: `${onlineCount > 0 ? `${onlineCount} online agora` : 'Comunidade ativa'}${
-          channelName ? ` · #${channelName}` : ''
-        }`,
-        url: communityUrl,
-        thumbnail: null,
-        tags: ['Discord', 'Comunidade', 'Live'],
-        category: 'Software',
-        isLive: true,
-        metricLabel: onlineCount > 0 ? `${onlineCount} membros online` : 'Atualizado agora',
-        caseLabel: 'Ver no Radar',
-        channel: channelName ? `#${channelName}` : '@discord',
-      };
+      if (!response.ok) return [];
+      const payload = await response.json();
+      const children = Array.isArray(payload?.data?.children) ? payload.data.children : [];
+      return children.slice(0, 2).map((child, index) => {
+        const post = child?.data || {};
+        const permalink = String(post?.permalink || '').trim();
+        const title = safeText(post?.title || '', 180);
+        if (!permalink || !title) return null;
+        const comments = Number(post?.num_comments || 0);
+        return {
+          id: `reddit-${subreddit}-${post?.id || `${subredditIndex}-${index}`}`,
+          title: `Reddit · r/${subreddit}`,
+          summary: `${title}${comments > 0 ? ` · ${comments} comentários` : ''}`.slice(0, 260),
+          url: `https://www.reddit.com${permalink}`,
+          thumbnail: extractRedditThumbnail(post),
+          tags: ['Reddit', 'Tech', 'Discussão'],
+          category: 'Software',
+          isLive: true,
+          metricLabel: 'Discussão em tempo real',
+          caseLabel: 'Ver no Radar',
+          channel: `r/${subreddit}`,
+        };
+      });
     })
   );
 
-  return settled.flatMap((result) => (result.status === 'fulfilled' && result.value ? [result.value] : []));
+  return settled
+    .flatMap((result) => (result.status === 'fulfilled' ? result.value : []))
+    .filter(Boolean)
+    .slice(0, 12);
 };
 
 const aggregateChannelFeeds = async (env = {}) => {
-  const [tiktok, twitch, discord] = await Promise.all([
+  const [tiktok, twitch, reddit] = await Promise.all([
     fetchTiktokItems(env),
     fetchTwitchItems(env),
-    fetchDiscordItems(env),
+    fetchRedditItems(env),
   ]);
 
   return {
     generatedAt: new Date().toISOString(),
     tiktok,
     twitch,
-    discord,
+    reddit,
   };
 };
 
