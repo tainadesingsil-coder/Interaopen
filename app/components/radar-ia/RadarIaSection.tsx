@@ -110,12 +110,6 @@ const parseDiscordChannelsUrl = (url: string) => {
   };
 };
 
-const buildDiscordEmbedUrl = (url: string) => {
-  const parsed = parseDiscordChannelsUrl(url);
-  if (!parsed) return '';
-  return `https://e.widgetbot.io/channels/${parsed.guildId}/${parsed.activeChannelId}`;
-};
-
 const isTwitchUrl = (url: string) => /twitch\.tv/i.test(url);
 
 const extractTwitchChannelFromUrl = (url: string) => {
@@ -385,7 +379,7 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
   const isDiscordNews = item.kind === 'news' && (isDiscordChannelUrl(item.url) || /discord/i.test(item.source));
   const isTwitchNews = item.kind === 'news' && (isTwitchUrl(item.url) || /twitch/i.test(item.source));
   const tikTokEmbedUrl = isTikTokNews ? buildTikTokEmbedUrl(item.url) : '';
-  const discordEmbedUrl = isDiscordNews ? buildDiscordEmbedUrl(item.url) : '';
+  const discordRef = isDiscordNews ? parseDiscordChannelsUrl(item.url) : null;
   const [twitchParentHost, setTwitchParentHost] = useState('localhost');
   const twitchChannel = isTwitchNews ? extractTwitchChannelFromUrl(item.url) : '';
   const twitchEmbedUrl =
@@ -708,16 +702,39 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
                 allowFullScreen
                 className='h-full min-h-[320px] w-full rounded-xl border border-white/10 bg-black sm:min-h-[460px]'
               />
-            ) : isDiscordNews && discordEmbedUrl ? (
-              <div className='flex h-full min-h-[320px] flex-col gap-3 rounded-xl border border-white/10 bg-[#0b0b0f] p-2 sm:min-h-[460px] sm:p-3'>
-                <iframe
-                  src={discordEmbedUrl}
-                  title={`Discord live - ${item.title}`}
-                  allow='autoplay; encrypted-media; picture-in-picture; web-share'
-                  className='h-full min-h-[250px] w-full rounded-lg border border-white/10 bg-black sm:min-h-[390px]'
-                />
-                <p className='px-1 text-xs text-[#9ca3af]'>
-                  Comunidade ao vivo no Radar. Mensagens e atividade atualizadas em tempo real.
+            ) : isDiscordNews ? (
+              <div className='flex h-full min-h-[320px] flex-col gap-3 overflow-auto rounded-xl border border-white/10 bg-[#0b0b0f] p-3 sm:min-h-[460px] sm:p-5'>
+                {item.thumbnail ? (
+                  <img
+                    src={item.thumbnail}
+                    alt={item.title}
+                    className='h-44 w-full rounded-xl border border-white/10 bg-black/30 object-cover sm:h-52'
+                  />
+                ) : null}
+                <div className='rounded-xl border border-white/10 bg-white/[0.02] p-4'>
+                  <p className='text-[11px] uppercase tracking-[0.12em] text-[#9ca3af]'>Comunidade ao vivo</p>
+                  <h5 className='mt-1 text-sm font-semibold text-white sm:text-base'>{item.title}</h5>
+                  <p className='mt-2 whitespace-pre-wrap break-words text-sm leading-relaxed text-[#d1d5db]'>
+                    {item.description}
+                  </p>
+                  <div className='mt-3 flex flex-wrap gap-2'>
+                    <span className='rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[11px] text-[#9ca3af]'>
+                      Atualização interna no Radar
+                    </span>
+                    {item.channel ? (
+                      <span className='rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[11px] text-[#9ca3af]'>
+                        {item.channel}
+                      </span>
+                    ) : null}
+                    {discordRef?.guildId ? (
+                      <span className='rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[11px] text-[#9ca3af]'>
+                        guild {discordRef.guildId}
+                      </span>
+                    ) : null}
+                  </div>
+                </div>
+                <p className='text-xs text-[#9ca3af]'>
+                  O Discord pode bloquear embeds em alguns servidores. Para evitar erro, o Radar mostra status e atividade da comunidade internamente.
                 </p>
               </div>
             ) : isTwitchNews && twitchEmbedUrl ? (
