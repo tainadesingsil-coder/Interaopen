@@ -26,8 +26,8 @@ const portfolioLinks = [
     icon: <Home className='h-4 w-4 text-[#9ca3af]' />,
   },
   {
-    label: 'Destaques',
-    href: '#projetos',
+    label: 'Portfólio',
+    href: '#portfolio',
     icon: <GalleryVerticalEnd className='h-4 w-4 text-[#9ca3af]' />,
   },
   {
@@ -82,10 +82,13 @@ export default function HomePage() {
                 </h2>
               </article>
 
-              <article id='projetos' className='space-y-4'>
+              <article id='portfolio' className='space-y-4'>
+                <span id='projetos' className='sr-only'>
+                  projetos
+                </span>
                 <header className='space-y-1'>
                   <p className='text-xs uppercase tracking-[0.18em] text-[#9ca3af]'>Cases comerciais</p>
-                  <h3 className='text-xl font-bold text-white md:text-2xl'>Projetos em destaque</h3>
+                  <h3 className='text-xl font-bold text-white md:text-2xl'>Portfólio</h3>
                 </header>
                 <div className='grid gap-4 lg:grid-cols-3'>
                   {featuredProjects.map((project) => (
