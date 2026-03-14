@@ -84,6 +84,11 @@ const buildInstagramEmbedUrl = (code: string, kind: string) => {
   return base;
 };
 
+const buildPodcastAudioProxyUrl = (url: string) => {
+  if (!url) return '';
+  return `/api/podcast-audio?url=${encodeURIComponent(url)}`;
+};
+
 const extractEngagement = (description: string) => {
   const match = description.match(/([\d.,]+[KMB]?)\s+likes?,\s+([\d.,]+[KMB]?)\s+comments?/i);
   if (!match) return null;
@@ -168,7 +173,8 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
   const instagramEmbedUrl =
     item.kind === 'instagram' ? buildInstagramEmbedUrl(instagramCode, instagramKind) : '';
   const engagement = item.kind === 'instagram' ? extractEngagement(item.description) : null;
-  const podcastAudioUrl = item.kind === 'podcast' ? item.audioUrl || item.url : '';
+  const podcastAudioUrl =
+    item.kind === 'podcast' ? buildPodcastAudioProxyUrl(item.audioUrl || item.url) : '';
   const readerUrl = `/api/radar-reader?url=${encodeURIComponent(item.url)}&fallbackTitle=${encodeURIComponent(
     item.title
   )}&fallbackDescription=${encodeURIComponent(item.description)}&fallbackSource=${encodeURIComponent(
