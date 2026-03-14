@@ -13,6 +13,16 @@ const FALLBACK_INSTAGRAM_USER_ID = '61565928037346';
 const INSTAGRAM_GRAPH_VERSION = 'v20.0';
 const INSTAGRAM_GRAPH_LIMIT = 18;
 const INSTAGRAM_RSS_LIMIT = 18;
+const TIKTOK_CREATOR_ITEMS_PER_PROFILE = 3;
+const INSTAGRAM_CREATOR_ITEMS_PER_PROFILE = 3;
+const FALLBACK_TIKTOK_CREATOR_VIDEO_URLS = [
+  'https://www.tiktok.com/@gabrieladamuchi/video/7601907452212235540',
+  'https://www.tiktok.com/@izabela.anholett/video/7611634628490710293',
+  'https://www.tiktok.com/@jotalinharesdesign/video/7513681439955684664',
+  'https://www.tiktok.com/@jefdicastech/video/7601248981095550226',
+  'https://www.tiktok.com/@islamsousa/video/7613833799423528199',
+  'https://www.tiktok.com/@jornadatop/video/7232292097313770757',
+];
 
 const NEWS_FEEDS = [
   { name: 'Olhar Digital IA', url: 'https://olhardigital.com.br/tag/inteligencia-artificial/feed/' },
@@ -631,6 +641,265 @@ const fetchTextWithTimeout = async (url, init = {}, timeoutMs = SOURCE_TIMEOUT_M
   return (await response.text()).trim();
 };
 
+const toUniqueList = (items = [], max = 20) =>
+  [...new Set(items.map((item) => String(item || '').trim()).filter(Boolean))].slice(0, max);
+
+const parseCommaSeparated = (value = '') =>
+  String(value || '')
+    .split(/[,\n;]/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+const extractTiktokHandleFromUrl = (value = '') => {
+  const match = String(value || '').match(/tiktok\.com\/@([a-z0-9._]{2,40})/i);
+  return match?.[1]?.toLowerCase() || '';
+};
+
+const parseTiktokSeedUrls = (env = {}) => {
+  const raw = String(
+    env?.TIKTOK_CREATOR_URLS || env?.TIKTOK_SEED_URLS || env?.TIKTOK_PROFILE_URLS || ''
+  ).trim();
+  const envUrls = raw ? parseCommaSeparated(raw) : [];
+  const all = [...envUrls, ...FALLBACK_TIKTOK_CREATOR_VIDEO_URLS];
+  return toUniqueList(
+    all.filter((url) => /^https?:\/\/(www\.)?tiktok\.com\/@/i.test(url)),
+    24
+  );
+};
+
+const parseTiktokCreatorHandles = (env = {}) => {
+  const raw = String(env?.TIKTOK_CREATOR_HANDLES || env?.TIKTOK_CREATORS || '').trim();
+  const explicitHandles = raw
+    ? parseCommaSeparated(raw)
+        .map((value) => value.replace(/^@+/, '').toLowerCase())
+        .filter((value) => /^[a-z0-9._]{2,40}$/i.test(value))
+    : [];
+
+  const handlesFromUrls = parseTiktokSeedUrls(env)
+    .map((url) => extractTiktokHandleFromUrl(url))
+    .filter(Boolean);
+
+  return toUniqueList([...explicitHandles, ...handlesFromUrls], 12);
+};
+
+const extractInstagramHandleFromProfileUrl = (value = '') => {
+  const match = String(value || '').match(/instagram\.com\/([a-z0-9._]{2,40})(?:[/?#]|$)/i);
+  const candidate = match?.[1]?.toLowerCase() || '';
+  if (!candidate || ['p', 'reel', 'reels', 'stories', 'explore', 'tv'].includes(candidate)) {
+    return '';
+  }
+  return candidate;
+};
+
+const parseInstagramSeedUrls = (env = {}) => {
+  const raw = String(env?.INSTAGRAM_SEED_URLS || env?.INSTAGRAM_CREATOR_URLS || '').trim();
+  const envUrls = raw ? parseCommaSeparated(raw) : [];
+  const curatedUrls = CURATED_INSTAGRAM_PUBLICATIONS.map((item) => item.url);
+  return toUniqueList(
+    [...envUrls, ...curatedUrls].filter((url) => /^https?:\/\/(www\.)?instagram\.com\//i.test(url)),
+    30
+  );
+};
+
+const parseInstagramCreatorHandles = (env = {}) => {
+  const raw = String(env?.INSTAGRAM_CREATOR_HANDLES || env?.INSTAGRAM_CREATORS || '').trim();
+  if (!raw) return [];
+  return toUniqueList(
+    parseCommaSeparated(raw)
+      .map((value) => value.replace(/^@+/, '').toLowerCase())
+      .filter((value) => /^[a-z0-9._]{2,40}$/i.test(value)),
+    12
+  );
+};
+
+const resolveInstagramHandleFromSeedUrl = async (seedUrl = '') => {
+  try {
+    const oEmbedUrl = `https://www.instagram.com/api/v1/oembed/?url=${encodeURIComponent(seedUrl)}`;
+    const response = await fetchWithTimeout(
+      oEmbedUrl,
+      {
+        headers: {
+          'user-agent':
+            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36',
+          accept: 'application/json',
+        },
+      },
+      4500
+    );
+    if (response.ok) {
+      const payload = await response.json();
+      const fromName = normalizeInstagramHandle(payload?.author_name || '');
+      if (fromName) return fromName.replace(/^@/, '').toLowerCase();
+      const fromUrl = extractInstagramHandleFromProfileUrl(String(payload?.author_url || ''));
+      if (fromUrl) return fromUrl.toLowerCase();
+    }
+  } catch {
+    // Fallback below.
+  }
+
+  return extractInstagramHandleFromProfileUrl(seedUrl);
+};
+
+const resolveTiktokOEmbed = async (videoUrl = '') => {
+  try {
+    const endpoint = new URL('https://www.tiktok.com/oembed');
+    endpoint.searchParams.set('url', videoUrl);
+    const response = await fetchWithTimeout(
+      endpoint.toString(),
+      {
+        headers: {
+          'user-agent':
+            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36',
+          accept: 'application/json',
+        },
+      },
+      4500
+    );
+    if (!response.ok) return null;
+    const payload = await response.json();
+    const authorHandle =
+      extractTiktokHandleFromUrl(String(payload?.author_url || '')) || extractTiktokHandleFromUrl(videoUrl);
+    return {
+      title: stripHtml(payload?.title || ''),
+      thumbnail: String(payload?.thumbnail_url || '').trim() || null,
+      channel: authorHandle ? `@${authorHandle}` : null,
+      authorName: stripHtml(payload?.author_name || ''),
+    };
+  } catch {
+    return null;
+  }
+};
+
+const fetchTiktokCreatorFeedEntries = async (handle = '') => {
+  const cleanHandle = String(handle || '').replace(/^@+/, '').trim().toLowerCase();
+  if (!cleanHandle) return [];
+  const candidates = [
+    `https://rsshub.app/tiktok/user/${encodeURIComponent(cleanHandle)}`,
+    `https://rsshub.app/tiktok/user/${encodeURIComponent(cleanHandle)}/video`,
+  ];
+
+  for (const endpoint of candidates) {
+    try {
+      const response = await fetchWithTimeout(endpoint, undefined, 5500);
+      if (!response.ok) continue;
+      const xml = await response.text();
+      const parsed = parseFeedItems(xml);
+      if (parsed.length > 0) {
+        return parsed;
+      }
+    } catch {
+      // Try next endpoint candidate.
+    }
+  }
+
+  return [];
+};
+
+const buildTiktokFallbackSeedItems = async (query, env = {}) => {
+  const seedUrls = parseTiktokSeedUrls(env);
+  const settled = await Promise.allSettled(
+    seedUrls.slice(0, 12).map(async (url, index) => {
+      const oEmbed = await resolveTiktokOEmbed(url);
+      const channel = oEmbed?.channel || (() => {
+        const handle = extractTiktokHandleFromUrl(url);
+        return handle ? `@${handle}` : null;
+      })();
+      const title = oEmbed?.title || `Vídeo recente de ${channel || 'criador no TikTok'}`;
+      const description = (oEmbed?.title || 'Atualização recente da sua base de criadores do TikTok.').slice(0, 240);
+      return {
+        id: `news-tiktok-seed-${normalizeUrlForDedupe(url) || index}`,
+        kind: 'news',
+        title: title.slice(0, 180),
+        description,
+        url,
+        source: 'TikTok Creator Base',
+        publishedAt: null,
+        thumbnail: oEmbed?.thumbnail || null,
+        channel,
+        score: 56 - index + computeScore(title, description, null, query),
+        ctaLabel: 'Assistir no TikTok',
+      };
+    })
+  );
+
+  return settled.flatMap((result) => (result.status === 'fulfilled' ? [result.value] : []));
+};
+
+const fetchTiktokCreatorItems = async (query, range, env = {}) => {
+  const handles = parseTiktokCreatorHandles(env);
+  if (handles.length === 0) {
+    return buildTiktokFallbackSeedItems(query, env);
+  }
+
+  const cutoff = rangeCutoffMs(range);
+  const settled = await Promise.allSettled(
+    handles.map(async (handle, creatorIndex) => {
+      const parsed = await fetchTiktokCreatorFeedEntries(handle);
+      return parsed.slice(0, TIKTOK_CREATOR_ITEMS_PER_PROFILE).map((entry, entryIndex) => {
+        const cleanUrl = String(entry?.link || '').trim();
+        if (!cleanUrl) return null;
+        const publishedAt = safeIsoDate(entry?.publishedAt || '');
+        if (publishedAt) {
+          const parsedTime = Date.parse(publishedAt);
+          if (!Number.isNaN(parsedTime) && parsedTime < cutoff) {
+            return null;
+          }
+        }
+        return { handle, creatorIndex, entryIndex, cleanUrl, publishedAt, entry };
+      });
+    })
+  );
+
+  const candidates = settled
+    .flatMap((result) => (result.status === 'fulfilled' ? result.value : []))
+    .filter(Boolean);
+
+  const withMetadata = await Promise.allSettled(
+    candidates.map(async (candidate, index) => {
+      const oEmbed = await resolveTiktokOEmbed(candidate.cleanUrl);
+      const titleFromFeed = stripHtml(candidate.entry?.title || '');
+      const descriptionFromFeed = stripHtml(candidate.entry?.description || '');
+      const title =
+        oEmbed?.title ||
+        titleFromFeed ||
+        `Novo vídeo de @${candidate.handle} no TikTok`;
+      const description =
+        descriptionFromFeed ||
+        oEmbed?.title ||
+        'Novo conteúdo do criador na sua base TikTok.';
+      const publishedAt = candidate.publishedAt || null;
+      const aiBoost = isAiRelated(`${title} ${description}`) ? 6 : 0;
+
+      return {
+        id: `news-tiktok-${candidate.handle}-${normalizeUrlForDedupe(candidate.cleanUrl) || index}`,
+        kind: 'news',
+        title: title.slice(0, 180),
+        description: description.slice(0, 1200),
+        url: candidate.cleanUrl,
+        source: 'TikTok Creators',
+        publishedAt,
+        thumbnail: oEmbed?.thumbnail || null,
+        channel: oEmbed?.channel || `@${candidate.handle}`,
+        score:
+          72 -
+          candidate.creatorIndex -
+          candidate.entryIndex +
+          aiBoost +
+          computeScore(title, description, publishedAt, query),
+        ctaLabel: 'Assistir no TikTok',
+      };
+    })
+  );
+
+  const dynamicItems = withMetadata.flatMap((result) => (result.status === 'fulfilled' ? [result.value] : []));
+  if (dynamicItems.length === 0) {
+    return buildTiktokFallbackSeedItems(query, env);
+  }
+
+  const fallbackItems = await buildTiktokFallbackSeedItems(query, env);
+  return sortByScoreAndDate(dedupeByUrl([...dynamicItems, ...fallbackItems])).slice(0, 18);
+};
+
 const oauthPercentEncode = (value = '') =>
   encodeURIComponent(String(value))
     .replace(/[!'()*]/g, (char) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`);
@@ -1220,8 +1489,14 @@ const fetchNewsItems = async (query, range, env = {}) => {
   );
   const twitterPromise = fetchTwitterNewsItems(query, range, env);
   const twitchPromise = fetchTwitchLiveItems(query, env);
+  const tiktokPromise = fetchTiktokCreatorItems(query, range, env);
 
-  const [settled, twitterItems, twitchItems] = await Promise.all([rssSettledPromise, twitterPromise, twitchPromise]);
+  const [settled, twitterItems, twitchItems, tiktokItems] = await Promise.all([
+    rssSettledPromise,
+    twitterPromise,
+    twitchPromise,
+    tiktokPromise,
+  ]);
   const items = settled.flatMap((result) => (result.status === 'fulfilled' ? result.value : []));
   const filtered = items.filter((item) => {
     if (!isLikelyPortuguese(`${item.title} ${item.description}`)) {
@@ -1233,7 +1508,9 @@ const fetchNewsItems = async (query, range, env = {}) => {
     return parsed >= cutoff;
   });
 
-  return sortByScoreAndDate(dedupeByUrl([...curatedItems, ...filtered, ...twitterItems, ...twitchItems])).slice(0, 30);
+  return sortByScoreAndDate(
+    dedupeByUrl([...curatedItems, ...filtered, ...twitterItems, ...twitchItems, ...tiktokItems])
+  ).slice(0, 36);
 };
 
 const fetchCuratedInstagramItems = async (query) => {
@@ -1458,14 +1735,82 @@ const fetchInstagramItemsFromRss = async (query, env = {}) => {
   );
 };
 
+const fetchInstagramItemsFromCreatorProfiles = async (query, env = {}) => {
+  const explicitHandles = parseInstagramCreatorHandles(env);
+  const seedUrls = parseInstagramSeedUrls(env);
+  const settledHandles = await Promise.allSettled(
+    seedUrls.slice(0, 10).map((url) => resolveInstagramHandleFromSeedUrl(url))
+  );
+  const discoveredHandles = settledHandles.flatMap((result) =>
+    result.status === 'fulfilled' && result.value ? [result.value] : []
+  );
+  const handles = toUniqueList([...explicitHandles, ...discoveredHandles], 10);
+  if (handles.length === 0) return [];
+
+  const settled = await Promise.allSettled(
+    handles.map(async (handle) => {
+      const feedCandidates = [
+        `https://rsshub.app/instagram/user/${encodeURIComponent(handle)}`,
+        `https://rsshub.app/instagram/u/${encodeURIComponent(handle)}`,
+      ];
+
+      let parsed = [];
+      for (const feedUrl of feedCandidates) {
+        try {
+          const response = await fetchWithTimeout(feedUrl, undefined, 6000);
+          if (!response.ok) continue;
+          const xml = await response.text();
+          const entries = parseFeedItems(xml);
+          if (entries.length > 0) {
+            parsed = entries;
+            break;
+          }
+        } catch {
+          // Try next RSS candidate.
+        }
+      }
+
+      return parsed.slice(0, INSTAGRAM_CREATOR_ITEMS_PER_PROFILE).map((entry, index) => {
+        const code = extractInstagramCodeFromUrl(entry.link);
+        const isReel = entry.link.includes('/reel/');
+        const title = instagramTitleFromCaption(entry.title || entry.description || `Atualização de @${handle}`);
+        const description = (entry.description || title).slice(0, 1200);
+        const publishedAt = safeIsoDate(entry.publishedAt || '');
+        const aiBoost = isAiRelated(`${title} ${description}`) ? 5 : 0;
+
+        return {
+          id: `instagram-creator-${handle}-${normalizeUrlForDedupe(entry.link) || index}`,
+          kind: 'instagram',
+          title,
+          description,
+          url: entry.link,
+          source: 'Instagram Creators',
+          publishedAt,
+          thumbnail: code
+            ? `/api/instagram-image?code=${code}${isReel ? '&kind=reel' : ''}`
+            : buildInstagramThumbnail(title),
+          channel: `@${handle}`,
+          score: 112 - index + aiBoost + computeScore(`${title} @${handle}`, description, publishedAt, query),
+          ctaLabel: isReel ? 'Ver reel' : 'Ver post',
+        };
+      });
+    })
+  );
+
+  return dedupeByUrl(
+    settled.flatMap((result) => (result.status === 'fulfilled' ? result.value : []))
+  );
+};
+
 const fetchInstagramItems = async (query, env = {}) => {
-  const [dynamic, rssDynamic, curated] = await Promise.all([
+  const [dynamic, rssDynamic, creatorDynamic, curated] = await Promise.all([
     fetchInstagramGraphItems(query, env),
     fetchInstagramItemsFromRss(query, env),
+    fetchInstagramItemsFromCreatorProfiles(query, env),
     fetchCuratedInstagramItems(query),
   ]);
 
-  const dynamicCombined = dedupeByUrl([...dynamic, ...rssDynamic]);
+  const dynamicCombined = dedupeByUrl([...dynamic, ...rssDynamic, ...creatorDynamic]);
   if (dynamicCombined.length === 0) {
     return curated;
   }
