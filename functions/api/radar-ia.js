@@ -77,6 +77,42 @@ const CURATED_YOUTUBE_VIDEOS = [
     channel: 'Canal de Marketing e IA',
     url: 'https://www.youtube.com/watch?v=7Gg7CrayIE0',
   },
+  {
+    id: 'uYLlxdwJ1BA',
+    title: 'Conteúdo recomendado de IA #11',
+    channel: 'Canal recomendado',
+    url: 'https://www.youtube.com/watch?v=uYLlxdwJ1BA',
+  },
+  {
+    id: '8CSj0n5NGQk',
+    title: 'Conteúdo recomendado de IA #12',
+    channel: 'Canal recomendado',
+    url: 'https://www.youtube.com/watch?v=8CSj0n5NGQk',
+  },
+  {
+    id: 'C38xlWnkezQ',
+    title: 'Conteúdo recomendado de IA #13',
+    channel: 'Canal recomendado',
+    url: 'https://www.youtube.com/watch?v=C38xlWnkezQ',
+  },
+  {
+    id: 'UhA_ZgI-otM',
+    title: 'Conteúdo recomendado de IA #14',
+    channel: 'Canal recomendado',
+    url: 'https://www.youtube.com/watch?v=UhA_ZgI-otM',
+  },
+  {
+    id: 'NSA7j3ADgeg',
+    title: 'Conteúdo recomendado de IA #15',
+    channel: 'Canal recomendado',
+    url: 'https://www.youtube.com/watch?v=NSA7j3ADgeg',
+  },
+  {
+    id: 'CNjaG4-UxAo',
+    title: 'Conteúdo recomendado de IA #16',
+    channel: 'Canal recomendado',
+    url: 'https://www.youtube.com/watch?v=CNjaG4-UxAo',
+  },
 ];
 const CURATED_INSTAGRAM_PUBLICATIONS = [
   {
