@@ -24,13 +24,36 @@ export function ProjectCard({ project }: { project: FeaturedProject }) {
       className='group rounded-xl border border-white/10 bg-[#0b0b0f] p-5 transition duration-200 hover:border-[#C6FF2E] hover:shadow-[0_0_0_1px_rgba(198,255,46,0.18),0_8px_22px_rgba(198,255,46,0.09)]'
       id={project.id}
     >
+      {project.thumbnail ? (
+        <div className='mb-4 overflow-hidden rounded-xl border border-white/10 bg-black/20'>
+          <img
+            src={project.thumbnail}
+            alt={project.title}
+            loading='lazy'
+            className='h-44 w-full object-cover transition-transform duration-200 ease-out group-hover:scale-[1.02]'
+          />
+        </div>
+      ) : null}
+
       <div className='flex items-start justify-between gap-3'>
         <h3 className='text-base font-bold text-white md:text-lg'>{project.title}</h3>
-        <span className='rounded-md border border-white/10 bg-white/5 px-2 py-1 text-[10px] uppercase tracking-[0.16em] text-[#9ca3af]'>
-          {project.category}
-        </span>
+        <div className='flex flex-col items-end gap-1'>
+          {project.isLive ? (
+            <span className='rounded-md border border-red-500/45 bg-red-500/15 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-red-300'>
+              Live
+            </span>
+          ) : null}
+          <span className='rounded-md border border-white/10 bg-white/5 px-2 py-1 text-[10px] uppercase tracking-[0.16em] text-[#9ca3af]'>
+            {project.category}
+          </span>
+        </div>
       </div>
       <p className='mt-3 text-sm leading-relaxed text-[#9ca3af]'>{project.summary}</p>
+      {project.channel || project.metricLabel ? (
+        <p className='mt-2 text-xs text-[#9ca3af]'>
+          {[project.channel, project.metricLabel].filter(Boolean).join(' · ')}
+        </p>
+      ) : null}
 
       <div className='mt-4 flex flex-wrap gap-2'>
         {project.tags.map((tag) => (

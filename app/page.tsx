@@ -10,6 +10,7 @@ import {
 } from '@/app/components/portfolio/PortfolioBlocks';
 import { RadarIaSection } from '@/app/components/radar-ia/RadarIaSection';
 import {
+  type FeaturedProject,
   featuredProjects,
 } from '@/app/data/portfolio';
 import {
@@ -17,7 +18,7 @@ import {
   Home,
   RadioTower,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 const portfolioLinks = [
   {
@@ -39,6 +40,97 @@ const portfolioLinks = [
 
 export default function HomePage() {
   const [open, setOpen] = useState(false);
+  const [channelProjects, setChannelProjects] = useState<FeaturedProject[]>([]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const mapChannelItemToProject = (
+      item: {
+        id: string;
+        title: string;
+        summary: string;
+        url: string;
+        thumbnail?: string | null;
+        tags?: string[];
+        category?: 'IA' | 'Marketing' | 'Software';
+        isLive?: boolean;
+        metricLabel?: string;
+        caseLabel?: string;
+        channel?: string | null;
+      },
+      index: number
+    ): FeaturedProject => ({
+      id: `channel-${item.id || index}`,
+      title: item.title,
+      category: item.category || 'Software',
+      summary: item.summary,
+      tags: Array.isArray(item.tags) && item.tags.length > 0 ? item.tags.slice(0, 4) : ['Feed'],
+      caseHref: item.url,
+      caseLabel: item.caseLabel || 'Abrir',
+      thumbnail: item.thumbnail || null,
+      isLive: !!item.isLive,
+      metricLabel: item.metricLabel || undefined,
+      channel: item.channel || null,
+      screens: [],
+    });
+
+    const loadFeeds = async () => {
+      try {
+        const response = await fetch('/api/channel-feeds', {
+          method: 'GET',
+          signal: controller.signal,
+        });
+        if (!response.ok) return;
+
+        const payload = (await response.json()) as {
+          tiktok?: unknown[];
+          twitch?: unknown[];
+          discord?: unknown[];
+        };
+
+        const all = [
+          ...(Array.isArray(payload.tiktok) ? payload.tiktok : []),
+          ...(Array.isArray(payload.twitch) ? payload.twitch : []),
+          ...(Array.isArray(payload.discord) ? payload.discord : []),
+        ] as Array<{
+          id: string;
+          title: string;
+          summary: string;
+          url: string;
+          thumbnail?: string | null;
+          tags?: string[];
+          category?: 'IA' | 'Marketing' | 'Software';
+          isLive?: boolean;
+          metricLabel?: string;
+          caseLabel?: string;
+          channel?: string | null;
+        }>;
+
+        const mapped = all.map((item, index) => mapChannelItemToProject(item, index));
+        if (!controller.signal.aborted && mapped.length > 0) {
+          setChannelProjects(mapped);
+        }
+      } catch {
+        // Keep static fallback list when dynamic feeds fail.
+      }
+    };
+
+    void loadFeeds();
+    const timer = window.setInterval(() => {
+      void loadFeeds();
+    }, 5 * 60 * 1000);
+
+    return () => {
+      controller.abort();
+      window.clearInterval(timer);
+    };
+  }, []);
+
+  const projectsToRender = useMemo(
+    () => (channelProjects.length > 0 ? channelProjects : featuredProjects),
+    [channelProjects]
+  );
 
   return (
     <main className='min-h-screen bg-[#060608] text-white'>
@@ -71,11 +163,11 @@ export default function HomePage() {
                   projetos
                 </span>
                 <header className='space-y-1'>
-                  <p className='text-xs uppercase tracking-[0.18em] text-[#9ca3af]'>Modelos de canais</p>
-                  <h3 className='text-xl font-bold text-white md:text-2xl'>TikTok · Twitch · Discord</h3>
+                  <p className='text-xs uppercase tracking-[0.18em] text-[#9ca3af]'>Canais em tempo real</p>
+                  <h3 className='text-xl font-bold text-white md:text-2xl'>TikTok · Twitch · Discord LIVE</h3>
                 </header>
                 <div className='grid gap-4 lg:grid-cols-3'>
-                  {featuredProjects.map((project) => (
+                  {projectsToRender.map((project) => (
                     <ProjectCard key={project.id} project={project} />
                   ))}
                 </div>

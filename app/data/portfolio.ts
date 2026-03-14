@@ -16,6 +16,10 @@ export interface FeaturedProject {
   tags: string[];
   caseHref: string;
   caseLabel?: string;
+  thumbnail?: string | null;
+  isLive?: boolean;
+  metricLabel?: string;
+  channel?: string | null;
   screens: ProjectScreen[];
 }
 
