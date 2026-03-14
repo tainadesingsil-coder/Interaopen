@@ -233,6 +233,30 @@ const CURATED_YOUTUBE_VIDEOS = [
 ];
 const CURATED_INSTAGRAM_PUBLICATIONS = [
   {
+    id: 'instagram-post-dv1oioxdvbv',
+    title: 'Resumo semanal do mercado de IA',
+    description: 'Post com panorama rápido das principais movimentações da semana em IA.',
+    url: 'https://www.instagram.com/p/DV1OIoxDvbV/',
+    thumbnail: '/api/instagram-image?code=DV1OIoxDvbV',
+    ctaLabel: 'Ver post',
+  },
+  {
+    id: 'instagram-post-dv0pwgrlfay',
+    title: 'OpenAI, Anthropic e engenharia de prompts',
+    description: 'Post com contexto e análise prática sobre prompts e modelos atuais.',
+    url: 'https://www.instagram.com/p/DV0pWgrlfaY/',
+    thumbnail: '/api/instagram-image?code=DV0pWgrlfaY',
+    ctaLabel: 'Ver post',
+  },
+  {
+    id: 'instagram-post-dvtoyvkksxm',
+    title: 'China, Seedance 2.0 e impactos no ecossistema',
+    description: 'Post com leitura de mercado sobre tendências globais e novas plataformas.',
+    url: 'https://www.instagram.com/p/DVtoYvkkSxm/',
+    thumbnail: '/api/instagram-image?code=DVtoYvkkSxm',
+    ctaLabel: 'Ver post',
+  },
+  {
     id: 'instagram-post-dvyqbtpjmyj',
     title: 'BotConversa',
     description:
@@ -267,6 +291,14 @@ const CURATED_INSTAGRAM_PUBLICATIONS = [
     url: 'https://www.instagram.com/reel/DSmeB7ikeBX/',
     thumbnail: '/api/instagram-image?code=DSmeB7ikeBX',
     ctaLabel: 'Ver reel',
+  },
+  {
+    id: 'instagram-post-dvv4xchjioj',
+    title: 'Atualização rápida de IA no Instagram',
+    description: 'Post recente com destaque do mercado de IA.',
+    url: 'https://www.instagram.com/p/DVv4XchjiOj/',
+    thumbnail: '/api/instagram-image?code=DVv4XchjiOj',
+    ctaLabel: 'Ver post',
   },
 ];
 
