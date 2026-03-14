@@ -71,6 +71,21 @@ const extractInstagramKind = (url: string) => {
   return '';
 };
 
+const buildInstagramEmbedUrl = (code: string, kind: string) => {
+  if (!code) return '';
+  const base = kind === 'reel' ? `https://www.instagram.com/reel/${code}/embed` : `https://www.instagram.com/p/${code}/embed`;
+  return `${base}?utm_source=ig_embed&utm_campaign=loading`;
+};
+
+const extractEngagement = (description: string) => {
+  const match = description.match(/([\d.,]+[KMB]?)\s+likes?,\s+([\d.,]+[KMB]?)\s+comments?/i);
+  if (!match) return null;
+  return {
+    likes: match[1],
+    comments: match[2],
+  };
+};
+
 function SkeletonCard() {
   return (
     <div className='animate-pulse rounded-[18px] border border-white/10 bg-[#0b0b0f] p-4 shadow-[0_10px_24px_rgba(0,0,0,0.2)] sm:rounded-2xl md:p-5'>
@@ -137,6 +152,9 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
     item.kind === 'youtube' ? extractYoutubeId(item.url, item.id.replace(/^yt-/, '').trim()) : '';
   const instagramCode = item.kind === 'instagram' ? extractInstagramCode(item.url) : '';
   const instagramKind = item.kind === 'instagram' ? extractInstagramKind(item.url) : '';
+  const instagramEmbedUrl =
+    item.kind === 'instagram' ? buildInstagramEmbedUrl(instagramCode, instagramKind) : '';
+  const engagement = item.kind === 'instagram' ? extractEngagement(item.description) : null;
   const readerUrl = `/api/radar-reader?url=${encodeURIComponent(item.url)}&fallbackTitle=${encodeURIComponent(
     item.title
   )}&fallbackDescription=${encodeURIComponent(item.description)}&fallbackSource=${encodeURIComponent(
@@ -199,18 +217,42 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
             />
           ) : (
             <div className='flex h-full min-h-[320px] flex-col gap-4 overflow-auto rounded-xl border border-white/10 bg-[#0b0b0f] p-4 sm:min-h-[460px] sm:p-5'>
-              <img
-                src={
-                  instagramCode
-                    ? `/api/instagram-image?code=${instagramCode}${instagramKind ? `&kind=${instagramKind}` : ''}`
-                    : item.thumbnail || '/api/instagram-image?code=DV1OIoxDvbV'
-                }
-                alt={item.title}
-                className='w-full rounded-xl border border-white/10 object-cover'
-              />
-              <div className='space-y-1.5'>
+              {instagramEmbedUrl ? (
+                <iframe
+                  src={instagramEmbedUrl}
+                  title={`Instagram embed - ${item.title}`}
+                  className='h-[430px] w-full rounded-xl border border-white/10 bg-black sm:h-[520px]'
+                  allow='autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share'
+                />
+              ) : (
+                <img
+                  src={
+                    instagramCode
+                      ? `/api/instagram-image?code=${instagramCode}${instagramKind ? `&kind=${instagramKind}` : ''}`
+                      : item.thumbnail || '/api/instagram-image?code=DV1OIoxDvbV'
+                  }
+                  alt={item.title}
+                  className='w-full rounded-xl border border-white/10 object-cover'
+                />
+              )}
+
+              <div className='rounded-xl border border-white/10 bg-white/[0.02] p-4'>
                 <p className='text-[11px] uppercase tracking-[0.12em] text-[#9ca3af]'>Legenda</p>
-                <p className='text-sm leading-relaxed text-[#c9d1d9]'>{item.description}</p>
+                <p className='mt-2 whitespace-pre-wrap break-words text-[15px] leading-relaxed text-[#d1d5db]'>
+                  {item.description}
+                </p>
+                {engagement ? (
+                  <div className='mt-3 flex flex-wrap gap-2'>
+                    <span className='rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[11px] text-[#9ca3af]'>
+                      👍 {engagement.likes} curtidas
+                    </span>
+                    <span className='rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[11px] text-[#9ca3af]'>
+                      💬 {engagement.comments} comentários
+                    </span>
+                  </div>
+                ) : (
+                  <p className='mt-3 text-xs text-[#9ca3af]'>Comentários detalhados não disponíveis neste conteúdo.</p>
+                )}
               </div>
             </div>
           )}
