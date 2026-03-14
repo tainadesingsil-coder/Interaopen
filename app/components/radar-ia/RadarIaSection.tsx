@@ -9,7 +9,7 @@ import {
   type RadarType,
 } from '@/app/lib/radar-ia/types';
 import { Bot, Code2, ExternalLink, Megaphone, Mic2, Newspaper, PlayCircle, X } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 const KIND_LABEL: Record<RadarType | 'podcast', string> = {
   all: 'Tudo',
@@ -140,7 +140,7 @@ function RadarCard({ item, onOpen }: { item: RadarItem; onOpen: (item: RadarItem
 
       <h4 className='line-clamp-2 text-[15px] font-semibold leading-snug text-white md:text-base'>{item.title}</h4>
       <p className='mt-2 line-clamp-3 text-sm leading-relaxed text-[#9ca3af]'>{item.description}</p>
-      <p className='mt-3 text-[11px] leading-relaxed text-[#9ca3af]'>
+      <p className='mt-3 line-clamp-1 text-[11px] leading-relaxed text-[#9ca3af]'>
         {item.channel ? `${item.source} · ${item.channel}` : item.source}
       </p>
 
@@ -164,6 +164,10 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
   const instagramEmbedUrl =
     item.kind === 'instagram' ? buildInstagramEmbedUrl(instagramCode, instagramKind) : '';
   const engagement = item.kind === 'instagram' ? extractEngagement(item.description) : null;
+  const podcastAudioRef = useRef<HTMLAudioElement | null>(null);
+  const [isPlayingPodcast, setIsPlayingPodcast] = useState(false);
+  const [podcastAudioError, setPodcastAudioError] = useState('');
+  const podcastAudioUrl = item.kind === 'podcast' ? item.audioUrl || item.url : '';
   const readerUrl = `/api/radar-reader?url=${encodeURIComponent(item.url)}&fallbackTitle=${encodeURIComponent(
     item.title
   )}&fallbackDescription=${encodeURIComponent(item.description)}&fallbackSource=${encodeURIComponent(
@@ -183,10 +187,31 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
     };
   }, [onClose]);
 
+  useEffect(() => {
+    setIsPlayingPodcast(false);
+    setPodcastAudioError('');
+  }, [item.id, item.kind]);
+
+  const togglePodcastPlayback = async () => {
+    const audioElement = podcastAudioRef.current;
+    if (!audioElement) return;
+
+    try {
+      if (audioElement.paused) {
+        await audioElement.play();
+        setPodcastAudioError('');
+      } else {
+        audioElement.pause();
+      }
+    } catch {
+      setPodcastAudioError('Não foi possível iniciar no player interno. Use "Abrir áudio direto".');
+    }
+  };
+
   return (
-    <div className='fixed inset-0 z-50 bg-black/80 p-3 backdrop-blur-[2px] sm:p-5'>
+    <div className='fixed inset-0 z-50 bg-black/80 p-2 backdrop-blur-[2px] sm:p-5'>
       <div className='mx-auto flex h-full w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#060608]'>
-        <header className='flex items-start justify-between gap-3 border-b border-white/10 p-4'>
+        <header className='flex items-start justify-between gap-3 border-b border-white/10 p-3 sm:p-4'>
           <div>
             <p className='text-[11px] uppercase tracking-[0.14em] text-[#9ca3af]'>
               {item.kind === 'youtube'
@@ -231,24 +256,56 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
               className='h-full min-h-[320px] w-full rounded-xl border border-white/10 bg-[#0b0b0f] sm:min-h-[460px]'
             />
           ) : item.kind === 'podcast' ? (
-            <div className='flex h-full min-h-[320px] flex-col gap-4 overflow-auto rounded-xl border border-white/10 bg-[#0b0b0f] p-4 sm:min-h-[460px] sm:p-5'>
+            <div className='flex h-full min-h-[320px] flex-col gap-3 overflow-auto rounded-xl border border-white/10 bg-[#0b0b0f] p-3 sm:min-h-[460px] sm:gap-4 sm:p-5'>
               {item.thumbnail ? (
                 <img
                   src={item.thumbnail}
                   alt={item.title}
-                  className='h-52 w-full rounded-xl border border-white/10 object-cover sm:h-56'
+                  className='h-40 w-full rounded-xl border border-white/10 object-cover sm:h-56'
                 />
               ) : null}
+              <div className='flex flex-col gap-2 sm:flex-row'>
+                <button
+                  type='button'
+                  onClick={() => {
+                    void togglePodcastPlayback();
+                  }}
+                  className='inline-flex w-full items-center justify-center rounded-lg border border-[#C6FF2E]/60 bg-[#C6FF2E]/12 px-3.5 py-2 text-xs font-semibold text-[#C6FF2E] transition hover:bg-[#C6FF2E]/18 sm:w-auto'
+                >
+                  {isPlayingPodcast ? 'Pausar áudio' : 'Ouvir agora'}
+                </button>
+                <a
+                  href={podcastAudioUrl}
+                  target='_blank'
+                  rel='noreferrer'
+                  className='inline-flex w-full items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] px-3.5 py-2 text-xs font-semibold text-white transition hover:border-[#C6FF2E]/50 hover:text-[#C6FF2E] sm:w-auto'
+                >
+                  Abrir áudio direto
+                </a>
+              </div>
               <audio
+                ref={podcastAudioRef}
                 controls
-                preload='metadata'
-                autoPlay
-                src={item.audioUrl || item.url}
+                preload='none'
+                playsInline
+                src={podcastAudioUrl}
+                onPlay={() => setIsPlayingPodcast(true)}
+                onPause={() => setIsPlayingPodcast(false)}
+                onEnded={() => setIsPlayingPodcast(false)}
+                onError={() => {
+                  setIsPlayingPodcast(false);
+                  setPodcastAudioError('Falha no player interno deste episódio. Use "Abrir áudio direto".');
+                }}
                 className='w-full rounded-lg border border-white/10 bg-black/20'
               />
+              {podcastAudioError ? (
+                <p className='rounded-lg border border-[#fda4af]/30 bg-[#fda4af]/10 px-3 py-2 text-xs text-[#fecdd3]'>
+                  {podcastAudioError}
+                </p>
+              ) : null}
               <div className='rounded-xl border border-white/10 bg-white/[0.02] p-4'>
                 <p className='text-[11px] uppercase tracking-[0.12em] text-[#9ca3af]'>Descrição do episódio</p>
-                <p className='mt-2 whitespace-pre-wrap break-words text-[15px] leading-relaxed text-[#d1d5db]'>
+                <p className='mt-2 whitespace-pre-wrap break-words text-sm leading-relaxed text-[#d1d5db] sm:text-[15px]'>
                   {item.description}
                 </p>
               </div>
@@ -302,7 +359,7 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
             href={item.url}
             target='_blank'
             rel='noreferrer'
-            className='inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-3.5 py-2 text-xs font-semibold text-white transition hover:border-[#C6FF2E]/60 hover:text-[#C6FF2E]'
+            className='inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-3.5 py-2 text-xs font-semibold text-white transition hover:border-[#C6FF2E]/60 hover:text-[#C6FF2E] sm:w-auto'
           >
             Abrir fonte original
             <ExternalLink className='h-3.5 w-3.5' />
@@ -528,7 +585,7 @@ export function RadarIaSection() {
         )}
       </section>
 
-      <section className='rounded-[20px] border border-white/10 bg-[#0b0b0f] p-4 shadow-[0_10px_28px_rgba(0,0,0,0.2)] sm:rounded-2xl md:p-5'>
+      <section className='rounded-[20px] border border-white/10 bg-[#0b0b0f] p-3 shadow-[0_10px_28px_rgba(0,0,0,0.2)] sm:rounded-2xl sm:p-4 md:p-5'>
         <header className='mb-4 space-y-1'>
           <p className='text-xs uppercase tracking-[0.18em] text-[#9ca3af]'>Conteúdo em áudio</p>
           <h4 className='text-lg font-bold text-white md:text-xl'>Podcasts</h4>
@@ -544,7 +601,7 @@ export function RadarIaSection() {
         ) : null}
 
         {isLoadingPodcasts ? (
-          <div className='grid gap-3 sm:gap-4 md:grid-cols-2 xl:grid-cols-3'>
+          <div className='grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2 xl:grid-cols-3'>
             {Array.from({ length: 3 }).map((_, index) => (
               <SkeletonCard key={`podcast-skeleton-${index}`} />
             ))}
@@ -554,7 +611,7 @@ export function RadarIaSection() {
             <p className='text-sm leading-relaxed text-[#9ca3af]'>Nenhum episódio de podcast disponível no momento.</p>
           </div>
         ) : (
-          <div className='grid gap-3 sm:gap-4 md:grid-cols-2 xl:grid-cols-3'>
+          <div className='grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2 xl:grid-cols-3'>
             {podcastItems.map((item) => (
               <RadarCard key={item.id} item={item} onOpen={setViewerItem} />
             ))}
