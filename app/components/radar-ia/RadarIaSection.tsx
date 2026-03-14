@@ -8,16 +8,8 @@ import {
   type RadarResponsePayload,
   type RadarType,
 } from '@/app/lib/radar-ia/types';
-import { Bot, Code2, ExternalLink, Megaphone, Newspaper, PlayCircle, Search, X } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-
-const QUICK_CHIPS = [
-  'Agentes de IA',
-  'Automação com n8n',
-  'Chatbots para WhatsApp',
-  'Novidades OpenAI',
-  'IA para marketing',
-];
+import { Bot, Code2, ExternalLink, Megaphone, Newspaper, PlayCircle, X } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 
 const TAB_LABEL: Record<RadarType, string> = {
   all: 'Tudo',
@@ -32,15 +24,7 @@ const RANGE_LABEL: Record<RadarRange, string> = {
   '30d': '30d',
 };
 
-const MAX_QUERY_LENGTH = 80;
 const INITIAL_VISIBLE = 10;
-
-const sanitizeClientQuery = (value: string) =>
-  value
-    .replace(/[^\p{L}\p{N}\s\-_.:]/gu, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .slice(0, MAX_QUERY_LENGTH);
 
 const formatDate = (value: string | null) => {
   if (!value) {
@@ -57,16 +41,7 @@ const formatDate = (value: string | null) => {
   });
 };
 
-const useDebouncedValue = (value: string, delay = 450) => {
-  const [debounced, setDebounced] = useState(value);
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => setDebounced(value), delay);
-    return () => window.clearTimeout(timer);
-  }, [value, delay]);
-
-  return debounced;
-};
+const DEFAULT_QUERY = 'agentes de IA';
 
 const extractYoutubeId = (url: string, fallbackId = '') => {
   try {
@@ -258,8 +233,7 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
 }
 
 export function RadarIaSection() {
-  const [draftQuery, setDraftQuery] = useState('agentes de IA');
-  const [submittedQuery, setSubmittedQuery] = useState('agentes de IA');
+  const submittedQuery = DEFAULT_QUERY;
   const [activeTab, setActiveTab] = useState<RadarType>('all');
   const [activeRange, setActiveRange] = useState<RadarRange>('7d');
   const [payload, setPayload] = useState<RadarResponsePayload | null>(null);
@@ -267,23 +241,6 @@ export function RadarIaSection() {
   const [errorMessage, setErrorMessage] = useState('');
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE);
   const [viewerItem, setViewerItem] = useState<RadarItem | null>(null);
-
-  const debouncedDraft = useDebouncedValue(draftQuery, 500);
-
-  const submitQuery = useCallback((value: string) => {
-    const sanitized = sanitizeClientQuery(value);
-    if (!sanitized) {
-      return;
-    }
-    setSubmittedQuery(sanitized);
-  }, []);
-
-  useEffect(() => {
-    const sanitized = sanitizeClientQuery(debouncedDraft);
-    if (sanitized.length >= 3 && sanitized !== submittedQuery) {
-      setSubmittedQuery(sanitized);
-    }
-  }, [debouncedDraft, submittedQuery]);
 
   useEffect(() => {
     setVisibleCount(INITIAL_VISIBLE);
@@ -368,55 +325,8 @@ export function RadarIaSection() {
         <p className='text-xs uppercase tracking-[0.18em] text-[#9ca3af]'>Acesso exclusivo</p>
         <h3 className='mt-2 text-xl font-extrabold leading-tight text-white sm:text-2xl md:text-3xl'>Radar IA em tempo real</h3>
         <p className='mt-2.5 max-w-2xl text-sm leading-relaxed text-[#9ca3af]'>
-          Pesquise um tema e veja vídeos + notícias + fontes confiáveis.
+          Atualização contínua de vídeos, notícias e fontes confiáveis de IA.
         </p>
-
-        <div className='mt-4 flex flex-col gap-2.5 sm:mt-5 sm:flex-row sm:items-center'>
-          <div className='relative w-full'>
-            <Search className='pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9ca3af]' />
-            <input
-              value={draftQuery}
-              maxLength={MAX_QUERY_LENGTH}
-              onChange={(event) => setDraftQuery(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter') {
-                  submitQuery(draftQuery);
-                }
-              }}
-              placeholder='Ex: agentes de IA para atendimento'
-              className='h-12 w-full rounded-xl border border-white/10 bg-[#060608] py-2 pl-10 pr-3 text-sm text-white outline-none transition-all duration-200 ease-out placeholder:text-[#6b7280] focus:border-[#C6FF2E]/80 focus:ring-2 focus:ring-[#C6FF2E]/15 sm:h-11'
-            />
-          </div>
-          <button
-            type='button'
-            onClick={() => submitQuery(draftQuery)}
-            className='h-12 w-full rounded-xl border border-[#C6FF2E]/40 bg-[#C6FF2E]/10 px-5 text-sm font-semibold text-[#C6FF2E] transition-all duration-200 ease-out hover:border-[#C6FF2E] hover:bg-[#C6FF2E]/14 hover:shadow-[0_0_18px_rgba(198,255,46,0.14)] active:scale-[0.99] sm:h-11 sm:w-auto'
-          >
-            Pesquisar
-          </button>
-        </div>
-
-        <div className='-mx-1 mt-4 overflow-x-auto px-1 pb-1 sm:mx-0 sm:overflow-visible sm:px-0 sm:pb-0'>
-          <div className='inline-flex min-w-max gap-2 sm:flex sm:min-w-0 sm:flex-wrap'>
-            {QUICK_CHIPS.map((chip) => (
-              <button
-                key={chip}
-                type='button'
-                onClick={() => {
-                  setDraftQuery(chip);
-                  submitQuery(chip);
-                }}
-                className={`rounded-lg border px-3 py-1.5 text-xs transition-all duration-200 ease-out ${
-                  sanitizeClientQuery(chip) === submittedQuery
-                    ? 'border-[#C6FF2E]/55 bg-[#C6FF2E]/12 text-[#C6FF2E]'
-                    : 'border-white/10 bg-white/[0.03] text-[#9ca3af] hover:border-[#C6FF2E]/45 hover:text-[#C6FF2E]'
-                }`}
-              >
-                {chip}
-              </button>
-            ))}
-          </div>
-        </div>
       </header>
 
       <section className='rounded-[20px] border border-white/10 bg-[#0b0b0f] p-4 shadow-[0_10px_28px_rgba(0,0,0,0.2)] sm:rounded-2xl md:p-5'>
