@@ -460,6 +460,38 @@ const extractInstagramCaption = (value = '') => {
   return normalized.replace(/^Instagram:\s*/i, '').trim().slice(0, 1200);
 };
 
+const extractInstagramHandle = (value = '') => {
+  const normalized = value.replace(/\s+/g, ' ').trim();
+  if (!normalized) return null;
+
+  const directAt = normalized.match(/@([a-z0-9._]{2,40})/i);
+  if (directAt && directAt[1]) return `@${directAt[1]}`;
+
+  const inParentheses = normalized.match(/\(@([a-z0-9._]{2,40})\)/i);
+  if (inParentheses && inParentheses[1]) return `@${inParentheses[1]}`;
+
+  return null;
+};
+
+const normalizeInstagramHandle = (value = '') => {
+  const normalized = String(value || '').trim().replace(/^@+/, '').replace(/\s+/g, '');
+  if (!normalized) return null;
+  if (!/^[a-z0-9._]{2,40}$/i.test(normalized)) return null;
+  return `@${normalized}`;
+};
+
+const looksLikeGenericInstagramText = (value = '') => {
+  const normalized = value.toLowerCase().trim();
+  if (!normalized) return true;
+  return (
+    normalized === 'instagram' ||
+    normalized.includes('see instagram photos') ||
+    normalized.includes('photos and videos') ||
+    normalized.includes('on instagram') ||
+    normalized.length < 4
+  );
+};
+
 const escapeSvgText = (value = '') =>
   value
     .replace(/&/g, '&amp;')
@@ -884,22 +916,102 @@ const fetchNewsItems = async (query, range) => {
 };
 
 const fetchInstagramItems = async (query) => {
-  return CURATED_INSTAGRAM_PUBLICATIONS.map((publication, index) => ({
-    id: publication.id,
-    kind: 'instagram',
-    title: publication.title,
-    description: publication.description,
-    url: publication.url,
-    source: 'Instagram',
-    publishedAt: null,
-    thumbnail: publication.thumbnail || buildInstagramThumbnail(publication.title),
-    channel: '@hollyfield.ia',
-    score:
-      50 -
-      index +
-      computeScore(`${publication.title} hollyfield ia instagram`, publication.description, null, query),
-    ctaLabel: publication.ctaLabel,
-  }));
+  const settled = await Promise.allSettled(
+    CURATED_INSTAGRAM_PUBLICATIONS.map(async (publication, index) => {
+      let title = publication.title;
+      let description = publication.description;
+      let channel = publication.channel || null;
+      let resolvedFromOEmbed = false;
+
+      try {
+        const oEmbedUrl = `https://www.instagram.com/api/v1/oembed/?url=${encodeURIComponent(publication.url)}`;
+        const oEmbedResponse = await fetchWithTimeout(
+          oEmbedUrl,
+          {
+            headers: {
+              'user-agent':
+                'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36',
+              accept: 'application/json',
+            },
+          },
+          4500
+        );
+        if (oEmbedResponse.ok) {
+          const oEmbed = await oEmbedResponse.json();
+          const embeddedTitle = stripHtml(oEmbed?.title || '').slice(0, 1200);
+          const embeddedAuthorHandle =
+            normalizeInstagramHandle(oEmbed?.author_name || '') ||
+            extractInstagramHandle(String(oEmbed?.author_url || ''));
+
+          if (embeddedTitle && !looksLikeGenericInstagramText(embeddedTitle) && embeddedTitle.length >= 8) {
+            title = embeddedTitle.slice(0, 180);
+            description = embeddedTitle;
+            resolvedFromOEmbed = true;
+          }
+          if (embeddedAuthorHandle) {
+            channel = embeddedAuthorHandle;
+          }
+        }
+      } catch (error) {
+        // Continue with HTML meta fallback below.
+      }
+
+      if (!resolvedFromOEmbed) {
+        try {
+          const response = await fetchWithTimeout(
+            publication.url,
+            {
+              headers: {
+                'user-agent':
+                  'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36',
+                accept: 'text/html,application/xhtml+xml',
+              },
+            },
+            5500
+          );
+
+          if (response.ok) {
+            const html = await response.text();
+            const ogTitle = cleanInstagramTitle(extractMetaContent(html, 'og:title'));
+            const ogDescription = extractMetaContent(html, 'og:description');
+            const caption = extractInstagramCaption(ogDescription);
+            const discoveredHandle = extractInstagramHandle(`${ogTitle} ${ogDescription}`);
+
+            if (ogTitle && !looksLikeGenericInstagramText(ogTitle) && ogTitle.length <= 180) {
+              title = ogTitle;
+            }
+            if (caption && !looksLikeGenericInstagramText(caption) && caption.length >= 12) {
+              description = caption;
+            }
+            if (discoveredHandle) {
+              channel = discoveredHandle;
+            }
+          }
+        } catch (error) {
+          // Keep curated fallback when Instagram blocks metadata fetch.
+        }
+      }
+
+      return {
+        id: publication.id,
+        kind: 'instagram',
+        title,
+        description,
+        url: publication.url,
+        source: 'Instagram',
+        publishedAt: null,
+        thumbnail: publication.thumbnail || buildInstagramThumbnail(title),
+        channel,
+        score:
+          50 -
+          index +
+          computeScore(`${title} ${channel || ''} instagram`, description, null, query),
+        ctaLabel: publication.ctaLabel,
+      };
+    })
+  );
+
+  return settled.flatMap((result) => (result.status === 'fulfilled' ? [result.value] : []));
 };
 
 const emptyResponse = (query, type, range) => ({
