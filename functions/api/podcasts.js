@@ -14,7 +14,36 @@ const TRANSLATE_TITLE_MAX_CHARS = 180;
 const TRANSLATE_DESCRIPTION_MAX_CHARS = 420;
 const PODCAST_SUMMARY_MAX_CHARS = 320;
 const PODCAST_CAPTION_MAX_CHARS = 1100;
-const PORTUGUESE_SOURCE_PRIORITY = ['Pizza de Dados'];
+const PORTUGUESE_SOURCE_PRIORITY = ['Pizza de Dados', 'Hipsters Ponto Tech'];
+const TOPIC_KEYWORDS = [
+  'ia',
+  'ai',
+  'inteligência artificial',
+  'inteligencia artificial',
+  'machine learning',
+  'aprendizado de máquina',
+  'dados',
+  'data',
+  'programação',
+  'programacao',
+  'software',
+  'tecnologia',
+  'digital',
+  'automação',
+  'automacao',
+  'openai',
+  'chatgpt',
+  'gpt',
+  'claude',
+  'llm',
+  'api',
+  'startup',
+  'seo',
+  'marketing',
+  'analytics',
+];
+const OFF_TOPIC_PATTERN =
+  /\b(guitarr(?:a|ista|ists?)|guitar|music|m[uú]sica|album|singer|songwriter|drummer|band)\b/i;
 
 const PODCAST_FEEDS = [
   {
@@ -29,6 +58,10 @@ const PODCAST_FEEDS = [
       'https://podcast.pizzadedados.com/feed.xml',
       'http://feeds.feedburner.com/PizzaDeDados',
     ],
+  },
+  {
+    name: 'Hipsters Ponto Tech',
+    rssCandidates: ['https://hipsters.tech/feed/podcast/', 'https://www.hipsters.tech/feed/podcast/'],
   },
   {
     name: 'Marketing School',
@@ -190,6 +223,39 @@ const buildShortSummary = (value = '', maxChars = PODCAST_SUMMARY_MAX_CHARS) => 
 
 const buildCaptionText = (value = '', maxChars = PODCAST_CAPTION_MAX_CHARS) =>
   truncateText(cleanPodcastDescription(value), maxChars);
+
+const topicKeywordScore = (value = '') => {
+  const normalized = String(value || '').toLowerCase();
+  if (!normalized.trim()) return 0;
+  return TOPIC_KEYWORDS.reduce((score, keyword) => (normalized.includes(keyword) ? score + 1 : score), 0);
+};
+
+const isTechRelevantEpisode = (item) => {
+  const text = `${item.title || ''} ${item.description || ''}`.toLowerCase();
+  if (!text.trim()) return false;
+  if (OFF_TOPIC_PATTERN.test(text)) return false;
+
+  const score = topicKeywordScore(text);
+  const source = String(item.source || '').toLowerCase();
+
+  if (source.includes('lex fridman')) {
+    // Lex covers many subjects; keep only clearly tech/AI-focused episodes.
+    return score >= 2;
+  }
+
+  if (source.includes('marketing school')) {
+    return score >= 1;
+  }
+
+  // Brazilian tech feeds should be prioritized, but still keep topical relevance.
+  return score >= 1 || source.includes('pizza de dados') || source.includes('hipsters ponto tech');
+};
+
+const filterRelevantPodcastItems = (items = []) => {
+  const relevant = items.filter((item) => isTechRelevantEpisode(item));
+  if (relevant.length > 0) return relevant;
+  return items.filter((item) => !OFF_TOPIC_PATTERN.test(`${item.title || ''} ${item.description || ''}`));
+};
 
 const isLikelyPortuguese = (value = '') => {
   const normalized = String(value || '').toLowerCase();
@@ -580,7 +646,8 @@ export async function onRequestGet(context) {
   });
 
   const balanced = buildBalancedItems(groupedItems, Math.max(limit * 2, 12));
-  const translated = await translatePodcastItems(balanced, context.env || {});
+  const relevantBalanced = filterRelevantPodcastItems(balanced);
+  const translated = await translatePodcastItems(relevantBalanced, context.env || {});
   const merged = dedupeByAudioUrl(translated);
 
   const data = {
