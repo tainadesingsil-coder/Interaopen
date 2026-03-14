@@ -1,6 +1,7 @@
 const CACHE_TTL_MS = 12 * 60 * 1000;
 const SOURCE_TIMEOUT_MS = 4000;
 const MAX_QUERY_LENGTH = 80;
+const FALLBACK_YOUTUBE_DATA_API_KEY = 'AIzaSyDmRPaN4CvD2OI04Jz8Y8APqktXggkTFAw';
 
 const NEWS_FEEDS = [
   { name: 'Olhar Digital IA', url: 'https://olhardigital.com.br/tag/inteligencia-artificial/feed/' },
@@ -371,7 +372,7 @@ const buildCuratedYoutubeItems = (query, range) => {
 };
 
 const fetchYoutubeItems = async (query, range, env) => {
-  const apiKey = (env.YOUTUBE_DATA_API_KEY || '').trim();
+  const apiKey = (env.YOUTUBE_DATA_API_KEY || FALLBACK_YOUTUBE_DATA_API_KEY || '').trim();
   const curatedItems = buildCuratedYoutubeItems(query, range);
   if (!apiKey) return curatedItems;
 
