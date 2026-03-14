@@ -26,6 +26,7 @@ const RANGE_LABEL: Record<RadarRange, string> = {
 };
 
 const INITIAL_VISIBLE = 10;
+const LIVE_CAPTION_SECONDS_PER_LINE = 4.5;
 
 const formatDate = (value: string | null) => {
   if (!value) {
@@ -363,17 +364,18 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
                   const duration = Number.isFinite(element.duration) ? element.duration : 0;
                   let nextIndex = 0;
 
-                  if (duration > 0) {
+                  // For very long podcasts, duration-based sync becomes too slow.
+                  // Use a "live caption pace" so the text keeps advancing naturally.
+                  if (duration > 0 && duration <= captionLines.length * 9) {
                     const segment = duration / captionLines.length;
                     nextIndex = Math.min(
                       captionLines.length - 1,
                       Math.max(0, Math.floor(element.currentTime / Math.max(segment, 0.1)))
                     );
                   } else {
-                    // Fallback for streams that don't expose duration consistently.
                     nextIndex = Math.min(
                       captionLines.length - 1,
-                      Math.max(0, Math.floor(element.currentTime / 6))
+                      Math.max(0, Math.floor(element.currentTime / LIVE_CAPTION_SECONDS_PER_LINE))
                     );
                   }
 
