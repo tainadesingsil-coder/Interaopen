@@ -681,6 +681,22 @@ const extractTiktokHandleFromUrl = (value = '') => {
   return match?.[1]?.toLowerCase() || '';
 };
 
+const extractTiktokVideoIdFromUrl = (value = '') => {
+  const match = String(value || '').match(/\/video\/(\d+)/i);
+  return match?.[1] || '';
+};
+
+const normalizeTikTokVideoUrl = (value = '') => {
+  try {
+    const parsed = new URL(String(value || '').trim());
+    parsed.search = '';
+    parsed.hash = '';
+    return `${parsed.origin}${parsed.pathname}`.replace(/\/+$/, '');
+  } catch {
+    return String(value || '').trim();
+  }
+};
+
 const parseTiktokSeedUrls = (env = {}) => {
   const raw = String(
     env?.TIKTOK_CREATOR_URLS || env?.TIKTOK_SEED_URLS || env?.TIKTOK_PROFILE_URLS || ''
@@ -688,7 +704,13 @@ const parseTiktokSeedUrls = (env = {}) => {
   const envUrls = raw ? parseCommaSeparated(raw) : [];
   const all = [...envUrls, ...FALLBACK_TIKTOK_CREATOR_VIDEO_URLS];
   return toUniqueList(
-    all.filter((url) => /^https?:\/\/(www\.)?tiktok\.com\/@/i.test(url)),
+    all
+      .map((url) => normalizeTikTokVideoUrl(url))
+      .filter(
+        (url) =>
+          /^https?:\/\/(www\.)?tiktok\.com\/@/i.test(url) &&
+          extractTiktokVideoIdFromUrl(url)
+      ),
     24
   );
 };
@@ -905,19 +927,22 @@ const buildTiktokFallbackSeedItems = async (query, env = {}) => {
   const seedUrls = parseTiktokSeedUrls(env);
   const settled = await Promise.allSettled(
     seedUrls.slice(0, 12).map(async (url, index) => {
-      const oEmbed = await resolveTiktokOEmbed(url);
+      const normalizedUrl = normalizeTikTokVideoUrl(url);
+      const videoId = extractTiktokVideoIdFromUrl(normalizedUrl);
+      if (!videoId) return null;
+      const oEmbed = await resolveTiktokOEmbed(normalizedUrl);
       const channel = oEmbed?.channel || (() => {
-        const handle = extractTiktokHandleFromUrl(url);
+        const handle = extractTiktokHandleFromUrl(normalizedUrl);
         return handle ? `@${handle}` : null;
       })();
       const title = oEmbed?.title || `Vídeo recente de ${channel || 'criador no TikTok'}`;
       const description = (oEmbed?.title || 'Atualização recente da sua base de criadores do TikTok.').slice(0, 240);
       return {
-        id: `news-tiktok-seed-${normalizeUrlForDedupe(url) || index}`,
+        id: `news-tiktok-seed-${videoId || index}`,
         kind: 'news',
         title: title.slice(0, 180),
         description,
-        url,
+        url: normalizedUrl,
         source: 'TikTok Creator Base',
         publishedAt: null,
         thumbnail: oEmbed?.thumbnail || null,
@@ -928,7 +953,7 @@ const buildTiktokFallbackSeedItems = async (query, env = {}) => {
     })
   );
 
-  return settled.flatMap((result) => (result.status === 'fulfilled' ? [result.value] : []));
+  return settled.flatMap((result) => (result.status === 'fulfilled' && result.value ? [result.value] : []));
 };
 
 const fetchTiktokCreatorItems = async (query, range, env = {}) => {
@@ -942,8 +967,10 @@ const fetchTiktokCreatorItems = async (query, range, env = {}) => {
     handles.map(async (handle, creatorIndex) => {
       const parsed = await fetchTiktokCreatorFeedEntries(handle);
       return parsed.slice(0, TIKTOK_CREATOR_ITEMS_PER_PROFILE).map((entry, entryIndex) => {
-        const cleanUrl = String(entry?.link || '').trim();
+        const cleanUrl = normalizeTikTokVideoUrl(String(entry?.link || '').trim());
         if (!cleanUrl) return null;
+        const videoId = extractTiktokVideoIdFromUrl(cleanUrl);
+        if (!videoId) return null;
         const publishedAt = safeIsoDate(entry?.publishedAt || '');
         if (publishedAt) {
           const parsedTime = Date.parse(publishedAt);
@@ -951,7 +978,7 @@ const fetchTiktokCreatorItems = async (query, range, env = {}) => {
             return null;
           }
         }
-        return { handle, creatorIndex, entryIndex, cleanUrl, publishedAt, entry };
+        return { handle, creatorIndex, entryIndex, cleanUrl, videoId, publishedAt, entry };
       });
     })
   );
@@ -977,7 +1004,7 @@ const fetchTiktokCreatorItems = async (query, range, env = {}) => {
       const aiBoost = isAiRelated(`${title} ${description}`) ? 6 : 0;
 
       return {
-        id: `news-tiktok-${candidate.handle}-${normalizeUrlForDedupe(candidate.cleanUrl) || index}`,
+        id: `news-tiktok-${candidate.handle}-${candidate.videoId || index}`,
         kind: 'news',
         title: title.slice(0, 180),
         description: description.slice(0, 1200),
@@ -1266,9 +1293,27 @@ const fetchTwitchLiveItems = async (query, env = {}) => {
     })
   );
 
-  return settled
+  const resolved = settled
     .flatMap((result) => (result.status === 'fulfilled' && result.value ? [result.value] : []))
     .slice(0, 12);
+
+  if (resolved.length > 0) {
+    return resolved;
+  }
+
+  return channels.slice(0, 4).map((channel, index) => ({
+    id: `news-twitch-fallback-${channel}`,
+    kind: 'news',
+    title: `Twitch · ${channel}`,
+    description: 'Canal monitorado no Radar para detectar live em tempo real.',
+    url: `https://www.twitch.tv/${channel}`,
+    source: 'Twitch Monitor',
+    publishedAt: null,
+    thumbnail: `https://static-cdn.jtvnw.net/previews-ttv/live_user_${channel}-640x360.jpg?t=${Date.now()}`,
+    channel: `@${channel}`,
+    score: 52 - index + computeScore(channel, 'twitch monitor', null, query),
+    ctaLabel: 'Abrir canal',
+  }));
 };
 
 const sortByScoreAndDate = (items) =>
@@ -1412,14 +1457,6 @@ const buildBalancedAll = (results) => {
     results.news.filter((item) => /twitch/i.test(String(item?.source || '')) || /twitch\.tv/i.test(String(item?.url || ''))),
     1
   );
-  const communityNews = takeTop(
-    results.news.filter(
-      (item) =>
-        /tabnews|comunidade brasil|comunidade br/i.test(String(item?.source || '')) ||
-        /tabnews\.com\.br/i.test(String(item?.url || ''))
-    ),
-    1
-  );
   const youtubeLiveNews = takeTop(
     results.news.filter(
       (item) =>
@@ -1427,7 +1464,7 @@ const buildBalancedAll = (results) => {
     ),
     1
   );
-  const pickedSocial = dedupeByUrl([...tiktokNews, ...twitchNews, ...youtubeLiveNews, ...communityNews]).slice(0, 4);
+  const pickedSocial = dedupeByUrl([...tiktokNews, ...twitchNews, ...youtubeLiveNews]).slice(0, 4);
   const editorialNews = takeTop(
     results.news.filter(
       (item) =>
@@ -1694,15 +1731,13 @@ const fetchNewsItems = async (query, range, env = {}) => {
   const twitterPromise = fetchTwitterNewsItems(query, range, env);
   const twitchPromise = fetchTwitchLiveItems(query, env);
   const tiktokPromise = fetchTiktokCreatorItems(query, range, env);
-  const tabNewsPromise = fetchTabNewsItems(query, range, env);
   const youtubeLivePromise = fetchYoutubeLiveNewsItems(query, range, env);
 
-  const [settled, twitterItems, twitchItems, tiktokItems, tabNewsItems, youtubeLiveItems] = await Promise.all([
+  const [settled, twitterItems, twitchItems, tiktokItems, youtubeLiveItems] = await Promise.all([
     rssSettledPromise,
     twitterPromise,
     twitchPromise,
     tiktokPromise,
-    tabNewsPromise,
     youtubeLivePromise,
   ]);
   const items = settled.flatMap((result) => (result.status === 'fulfilled' ? result.value : []));
@@ -1723,7 +1758,6 @@ const fetchNewsItems = async (query, range, env = {}) => {
       ...twitterItems,
       ...twitchItems,
       ...tiktokItems,
-      ...tabNewsItems,
       ...youtubeLiveItems,
     ])
   ).slice(0, 36);
@@ -2113,7 +2147,7 @@ export async function onRequestGet(context) {
   }
 
   const cache = getCache();
-  const cacheKey = `${type}:${range}:${query.toLowerCase()}`;
+  const cacheKey = `v2:${type}:${range}:${query.toLowerCase()}`;
   const now = Date.now();
   const cached = cache.get(cacheKey);
 

@@ -493,7 +493,7 @@ const aggregateChannelFeeds = async (env = {}) => {
 
 export async function onRequestGet(context) {
   const cache = getCache();
-  const cacheKey = 'channel-feeds:v1';
+  const cacheKey = 'channel-feeds:v2';
   const now = Date.now();
   const cached = cache.get(cacheKey);
 
