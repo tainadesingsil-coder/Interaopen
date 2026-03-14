@@ -98,22 +98,48 @@ const extractEngagement = (description: string) => {
   };
 };
 
-const buildCaptionLines = (value: string, maxLines = 18) => {
+const chunkWords = (text: string, maxCharsPerLine = 110, maxLines = 24) => {
+  const words = text.split(/\s+/).filter(Boolean);
+  const lines: string[] = [];
+  let current = '';
+
+  for (const word of words) {
+    const next = current ? `${current} ${word}` : word;
+    if (next.length > maxCharsPerLine && current) {
+      lines.push(current.trim());
+      current = word;
+      if (lines.length >= maxLines) break;
+    } else {
+      current = next;
+    }
+  }
+
+  if (current.trim() && lines.length < maxLines) {
+    lines.push(current.trim());
+  }
+
+  return lines;
+};
+
+const buildCaptionLines = (value: string, maxLines = 22) => {
   if (!value) return [] as string[];
   const base = value.replace(/\s+/g, ' ').trim();
   if (!base) return [] as string[];
 
-  const sentences = base
+  const sentenceBlocks = base
     .split(/(?<=[.!?])\s+/)
     .map((part) => part.trim())
     .filter((part) => part.length >= 10);
 
-  const lines = (sentences.length > 0 ? sentences : [base])
-    .map((line) => line.slice(0, 220).trim())
-    .filter(Boolean)
+  const rawBlocks = sentenceBlocks.length > 0 ? sentenceBlocks : [base];
+  const lines = rawBlocks
+    .flatMap((line) => chunkWords(line, 110, 3))
+    .map((line) => line.trim())
+    .filter((line) => line.length >= 12)
     .slice(0, maxLines);
 
-  return lines;
+  if (lines.length >= 2) return lines;
+  return chunkWords(base, 95, maxLines).filter((line) => line.length >= 12);
 };
 
 function SkeletonCard() {
@@ -335,12 +361,22 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
                   if (captionLines.length === 0) return;
                   const element = event.currentTarget;
                   const duration = Number.isFinite(element.duration) ? element.duration : 0;
-                  if (duration <= 0) return;
-                  const segment = duration / captionLines.length;
-                  const nextIndex = Math.min(
-                    captionLines.length - 1,
-                    Math.max(0, Math.floor(element.currentTime / Math.max(segment, 0.1)))
-                  );
+                  let nextIndex = 0;
+
+                  if (duration > 0) {
+                    const segment = duration / captionLines.length;
+                    nextIndex = Math.min(
+                      captionLines.length - 1,
+                      Math.max(0, Math.floor(element.currentTime / Math.max(segment, 0.1)))
+                    );
+                  } else {
+                    // Fallback for streams that don't expose duration consistently.
+                    nextIndex = Math.min(
+                      captionLines.length - 1,
+                      Math.max(0, Math.floor(element.currentTime / 6))
+                    );
+                  }
+
                   if (nextIndex !== captionLineIndex) {
                     setCaptionLineIndex(nextIndex);
                   }
