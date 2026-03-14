@@ -9,7 +9,7 @@ import {
   type RadarType,
 } from '@/app/lib/radar-ia/types';
 import { Bot, Code2, ExternalLink, Megaphone, Mic2, Newspaper, PlayCircle, X } from 'lucide-react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 const KIND_LABEL: Record<RadarType | 'podcast', string> = {
   all: 'Tudo',
@@ -168,9 +168,6 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
   const instagramEmbedUrl =
     item.kind === 'instagram' ? buildInstagramEmbedUrl(instagramCode, instagramKind) : '';
   const engagement = item.kind === 'instagram' ? extractEngagement(item.description) : null;
-  const podcastAudioRef = useRef<HTMLAudioElement | null>(null);
-  const [isPlayingPodcast, setIsPlayingPodcast] = useState(false);
-  const [podcastAudioError, setPodcastAudioError] = useState('');
   const podcastAudioUrl = item.kind === 'podcast' ? item.audioUrl || item.url : '';
   const readerUrl = `/api/radar-reader?url=${encodeURIComponent(item.url)}&fallbackTitle=${encodeURIComponent(
     item.title
@@ -190,27 +187,6 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
       window.removeEventListener('keydown', handleEsc);
     };
   }, [onClose]);
-
-  useEffect(() => {
-    setIsPlayingPodcast(false);
-    setPodcastAudioError('');
-  }, [item.id, item.kind]);
-
-  const togglePodcastPlayback = async () => {
-    const audioElement = podcastAudioRef.current;
-    if (!audioElement) return;
-
-    try {
-      if (audioElement.paused) {
-        await audioElement.play();
-        setPodcastAudioError('');
-      } else {
-        audioElement.pause();
-      }
-    } catch {
-      setPodcastAudioError('Não foi possível iniciar no player interno. Use "Abrir áudio direto".');
-    }
-  };
 
   return (
     <div className='fixed inset-0 z-50 bg-black/80 p-2 backdrop-blur-[2px] sm:p-5'>
@@ -268,45 +244,13 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
                   className='h-44 w-full rounded-xl border border-white/10 bg-black/35 object-contain p-1.5 sm:h-56'
                 />
               ) : null}
-              <div className='flex flex-col gap-2 sm:flex-row'>
-                <button
-                  type='button'
-                  onClick={() => {
-                    void togglePodcastPlayback();
-                  }}
-                  className='inline-flex w-full items-center justify-center rounded-lg border border-[#C6FF2E]/60 bg-[#C6FF2E]/12 px-3.5 py-2 text-xs font-semibold text-[#C6FF2E] transition hover:bg-[#C6FF2E]/18 sm:w-auto'
-                >
-                  {isPlayingPodcast ? 'Pausar áudio' : 'Ouvir agora'}
-                </button>
-                <a
-                  href={podcastAudioUrl}
-                  target='_blank'
-                  rel='noreferrer'
-                  className='inline-flex w-full items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] px-3.5 py-2 text-xs font-semibold text-white transition hover:border-[#C6FF2E]/50 hover:text-[#C6FF2E] sm:w-auto'
-                >
-                  Abrir áudio direto
-                </a>
-              </div>
               <audio
-                ref={podcastAudioRef}
                 controls
                 preload='none'
                 playsInline
                 src={podcastAudioUrl}
-                onPlay={() => setIsPlayingPodcast(true)}
-                onPause={() => setIsPlayingPodcast(false)}
-                onEnded={() => setIsPlayingPodcast(false)}
-                onError={() => {
-                  setIsPlayingPodcast(false);
-                  setPodcastAudioError('Falha no player interno deste episódio. Use "Abrir áudio direto".');
-                }}
                 className='block w-full min-w-0 rounded-lg border border-white/10 bg-black/20'
               />
-              {podcastAudioError ? (
-                <p className='rounded-lg border border-[#fda4af]/30 bg-[#fda4af]/10 px-3 py-2 text-xs text-[#fecdd3]'>
-                  {podcastAudioError}
-                </p>
-              ) : null}
               <div className='rounded-xl border border-white/10 bg-white/[0.02] p-4'>
                 <p className='text-[11px] uppercase tracking-[0.12em] text-[#9ca3af]'>Descrição do episódio</p>
                 <p className='mt-2 whitespace-pre-wrap break-words text-sm leading-relaxed text-[#d1d5db] sm:text-[15px]'>
