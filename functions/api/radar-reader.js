@@ -61,9 +61,24 @@ const pickParagraphs = (html) => {
   return matches;
 };
 
-const buildReaderHtml = ({ title, sourceUrl, description, paragraphs }) => {
+const normalizeSourceLabel = (sourceUrl, fallbackSource = '') => {
+  const fromFallback = (fallbackSource || '').trim();
+  if (fromFallback) return fromFallback;
+  try {
+    const parsed = new URL(sourceUrl);
+    if (parsed.hostname.includes('news.google.com')) {
+      return 'Google Notícias';
+    }
+    return parsed.hostname.replace(/^www\./, '');
+  } catch {
+    return sourceUrl;
+  }
+};
+
+const buildReaderHtml = ({ title, sourceUrl, sourceLabel, description, paragraphs }) => {
   const titleSafe = escapeHtml(title || 'Leitura interna');
   const sourceSafe = escapeHtml(sourceUrl);
+  const sourceLabelSafe = escapeHtml(sourceLabel || sourceUrl);
   const descriptionSafe = escapeHtml(description || '');
   const body =
     paragraphs.length > 0
@@ -127,7 +142,7 @@ const buildReaderHtml = ({ title, sourceUrl, description, paragraphs }) => {
   <main class="wrap">
     <div class="eyebrow">Leitura interna · Radar IA</div>
     <h1>${titleSafe}</h1>
-    <div class="meta">Fonte: <a href="${sourceSafe}" target="_blank" rel="noreferrer">${sourceSafe}</a></div>
+    <div class="meta">Fonte: <a href="${sourceSafe}" target="_blank" rel="noreferrer">${sourceLabelSafe}</a></div>
     <article class="card">
       ${body}
     </article>
@@ -136,17 +151,23 @@ const buildReaderHtml = ({ title, sourceUrl, description, paragraphs }) => {
 </html>`;
 };
 
-const buildFallbackHtml = (sourceUrl) =>
+const buildFallbackHtml = (sourceUrl, fallbackTitle = '', fallbackDescription = '', fallbackSource = '') =>
   buildReaderHtml({
-    title: 'Visualização indisponível',
+    title: fallbackTitle || 'Visualização indisponível',
     sourceUrl,
-    description: 'Não foi possível abrir esta página internamente agora.',
+    sourceLabel: normalizeSourceLabel(sourceUrl, fallbackSource),
+    description:
+      fallbackDescription ||
+      'Não foi possível abrir esta página internamente agora. Você ainda pode abrir a fonte original.',
     paragraphs: [],
   });
 
 export async function onRequestGet(context) {
   const requestUrl = new URL(context.request.url);
   const source = requestUrl.searchParams.get('url') || '';
+  const fallbackTitle = stripHtml(requestUrl.searchParams.get('fallbackTitle') || '');
+  const fallbackDescription = stripHtml(requestUrl.searchParams.get('fallbackDescription') || '');
+  const fallbackSource = stripHtml(requestUrl.searchParams.get('fallbackSource') || '');
 
   if (!source) {
     return new Response('missing_url', {
@@ -175,28 +196,37 @@ export async function onRequestGet(context) {
   try {
     const response = await fetchWithTimeout(parsed.toString());
     if (!response.ok) {
-      return new Response(buildFallbackHtml(parsed.toString()), {
-        headers: {
-          'content-type': 'text/html; charset=utf-8',
-          'cache-control': 'public, max-age=120',
-        },
-      });
+      return new Response(
+        buildFallbackHtml(parsed.toString(), fallbackTitle, fallbackDescription, fallbackSource),
+        {
+          headers: {
+            'content-type': 'text/html; charset=utf-8',
+            'cache-control': 'public, max-age=120',
+          },
+        }
+      );
     }
 
     const html = await response.text();
+    const extractedTitle =
+      extractMeta(html, 'og:title') || stripHtml(html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1] || '');
     const title =
-      extractMeta(html, 'og:title') ||
-      stripHtml(html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1] || '') ||
-      'Leitura interna';
+      extractedTitle && extractedTitle.toLowerCase() !== 'google news'
+        ? extractedTitle
+        : fallbackTitle || extractedTitle || 'Leitura interna';
     const description = extractMeta(html, 'og:description') || extractMeta(html, 'description');
     const paragraphs = pickParagraphs(html);
+
+    const finalParagraphs = paragraphs.length > 0 ? paragraphs : fallbackDescription ? [fallbackDescription] : [];
+    const finalDescription = description || fallbackDescription;
 
     return new Response(
       buildReaderHtml({
         title,
         sourceUrl: parsed.toString(),
-        description,
-        paragraphs,
+        sourceLabel: normalizeSourceLabel(parsed.toString(), fallbackSource),
+        description: finalDescription,
+        paragraphs: finalParagraphs,
       }),
       {
         headers: {
@@ -206,11 +236,14 @@ export async function onRequestGet(context) {
       }
     );
   } catch {
-    return new Response(buildFallbackHtml(parsed.toString()), {
+    return new Response(
+      buildFallbackHtml(parsed.toString(), fallbackTitle, fallbackDescription, fallbackSource),
+      {
       headers: {
         'content-type': 'text/html; charset=utf-8',
         'cache-control': 'public, max-age=120',
       },
-    });
+      }
+    );
   }
 }

@@ -68,15 +68,20 @@ const useDebouncedValue = (value: string, delay = 450) => {
   return debounced;
 };
 
-const extractYoutubeId = (url: string) => {
+const extractYoutubeId = (url: string, fallbackId = '') => {
   try {
     const parsed = new URL(url);
     if (parsed.hostname.includes('youtu.be')) {
       return parsed.pathname.replace('/', '').trim();
     }
-    return parsed.searchParams.get('v') || '';
+    const queryId = parsed.searchParams.get('v');
+    if (queryId) return queryId;
+    const pathParts = parsed.pathname.split('/').filter(Boolean);
+    if (pathParts[0] === 'shorts' && pathParts[1]) return pathParts[1];
+    if (pathParts[0] === 'embed' && pathParts[1]) return pathParts[1];
+    return fallbackId;
   } catch {
-    return '';
+    return fallbackId;
   }
 };
 
@@ -147,9 +152,14 @@ function RadarCard({ item, onOpen }: { item: RadarItem; onOpen: (item: RadarItem
 }
 
 function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }) {
-  const youtubeId = item.kind === 'youtube' ? extractYoutubeId(item.url) : '';
+  const youtubeId =
+    item.kind === 'youtube' ? extractYoutubeId(item.url, item.id.replace(/^yt-/, '').trim()) : '';
   const instagramCode = item.kind === 'instagram' ? extractInstagramCode(item.url) : '';
-  const readerUrl = `/api/radar-reader?url=${encodeURIComponent(item.url)}`;
+  const readerUrl = `/api/radar-reader?url=${encodeURIComponent(item.url)}&fallbackTitle=${encodeURIComponent(
+    item.title
+  )}&fallbackDescription=${encodeURIComponent(item.description)}&fallbackSource=${encodeURIComponent(
+    item.source
+  )}`;
 
   useEffect(() => {
     const handleEsc = (event: KeyboardEvent) => {
@@ -185,14 +195,20 @@ function RadarViewer({ item, onClose }: { item: RadarItem; onClose: () => void }
         </header>
 
         <div className='min-h-0 flex-1 p-3 sm:p-4'>
-          {item.kind === 'youtube' && youtubeId ? (
-            <iframe
-              src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1&rel=0&modestbranding=1`}
-              title={item.title}
-              allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'
-              allowFullScreen
-              className='h-full min-h-[280px] w-full rounded-xl border border-white/10 bg-black sm:min-h-[420px]'
-            />
+          {item.kind === 'youtube' ? (
+            youtubeId ? (
+              <iframe
+                src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1&rel=0&modestbranding=1`}
+                title={item.title}
+                allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'
+                allowFullScreen
+                className='h-full min-h-[280px] w-full rounded-xl border border-white/10 bg-black sm:min-h-[420px]'
+              />
+            ) : (
+              <div className='flex h-full min-h-[320px] flex-col items-center justify-center rounded-xl border border-white/10 bg-[#0b0b0f] p-5 text-center sm:min-h-[460px]'>
+                <p className='text-sm text-[#c9d1d9]'>Não foi possível montar o player interno deste vídeo.</p>
+              </div>
+            )
           ) : item.kind === 'news' ? (
             <iframe
               src={readerUrl}
