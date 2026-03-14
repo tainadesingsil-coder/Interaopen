@@ -7,7 +7,7 @@ const RSS2JSON_ENDPOINT = 'https://api.rss2json.com/v1/api.json?rss_url=';
 const GOOGLE_TRANSLATE_V2_ENDPOINT = 'https://translation.googleapis.com/language/translate/v2';
 const GOOGLE_TRANSLATE_ENDPOINT =
   'https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=pt&dt=t&q=';
-const FALLBACK_GOOGLE_TRANSLATE_API_KEY = 'AIzaSyBt6t2SLaW1ocfGesy925MLBWVb-I0uDW0';
+const FALLBACK_GOOGLE_TRANSLATE_API_KEY = 'AIzaSyCeX1cIN_MQdjE6GMN32jzfxi5ha7V21NA';
 const DEFAULT_USER_AGENT =
   'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36';
 const TRANSLATE_TITLE_MAX_CHARS = 180;
