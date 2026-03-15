@@ -164,11 +164,25 @@ const deriveTwitchParentHosts = () => {
     }
   }
 
+  const searchParams = new URLSearchParams(window.location.search || '');
+  const explicitParents = [
+    ...searchParams.getAll('parent'),
+    ...searchParams.getAll('embed_parent'),
+    ...searchParams.getAll('twitch_parent'),
+  ].map((value) => normalizeHostCandidate(value));
+
   const envHosts = ENV_TWITCH_PARENT_HOSTS
     ? ENV_TWITCH_PARENT_HOSTS.split(/[,\n; ]/).map((part) => normalizeHostCandidate(part))
     : [];
 
-  const baseHosts = [...locationHosts, referrerHost, ...ancestorHosts, ...envHosts, ...DEFAULT_TWITCH_PARENT_HOSTS]
+  const baseHosts = [
+    ...locationHosts,
+    referrerHost,
+    ...ancestorHosts,
+    ...explicitParents,
+    ...envHosts,
+    ...DEFAULT_TWITCH_PARENT_HOSTS,
+  ]
     .map((value) => normalizeHostCandidate(value || ''))
     .filter(Boolean);
 
@@ -190,7 +204,8 @@ const buildTwitchEmbedUrls = (channel: string, parents: string[]) => {
   const createUrl = (subset: string[]) => {
     const url = new URL('https://player.twitch.tv/');
     url.searchParams.set('channel', channel);
-    url.searchParams.set('autoplay', 'true');
+    // Mobile browsers frequently block autoplay inside embedded contexts.
+    url.searchParams.set('autoplay', 'false');
     url.searchParams.set('muted', 'true');
     subset.forEach((parent) => {
       url.searchParams.append('parent', parent);
@@ -499,6 +514,7 @@ function RadarViewer({
   const lastLiveCaptionRef = useRef('');
   const liveCaptionWatchdogRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const twitchLoadWatchdogRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const twitchIframeRef = useRef<HTMLIFrameElement | null>(null);
   const [isPodcastPlaying, setIsPodcastPlaying] = useState(false);
   const [captionLineIndex, setCaptionLineIndex] = useState(0);
   const [liveCaptionText, setLiveCaptionText] = useState('');
@@ -571,6 +587,28 @@ function RadarViewer({
       return prev;
     });
   }, [twitchEmbedUrls.length]);
+
+  const handleTwitchIframeLoad = useCallback(() => {
+    const frame = twitchIframeRef.current;
+    if (frame) {
+      try {
+        const href = String(frame.contentWindow?.location?.href || '').toLowerCase();
+        // If browser blocked the remote frame, it often stays in local blank/error URL.
+        if (!href || href === 'about:blank' || href.startsWith('chrome-error://') || href.startsWith('about:srcdoc')) {
+          tryNextTwitchEmbed();
+          return;
+        }
+      } catch {
+        // Cross-origin access error usually means Twitch actually loaded.
+      }
+    }
+
+    setTwitchEmbedLoaded(true);
+    if (twitchLoadWatchdogRef.current) {
+      clearTimeout(twitchLoadWatchdogRef.current);
+      twitchLoadWatchdogRef.current = null;
+    }
+  }, [tryNextTwitchEmbed]);
 
   useEffect(() => {
     setTikTokEmbedFailed(false);
@@ -1012,17 +1050,12 @@ function RadarViewer({
               <div className='flex h-full min-h-[320px] flex-col gap-3 overflow-auto rounded-xl border border-white/10 bg-[#0b0b0f] p-3 sm:min-h-[460px] sm:p-4'>
                 {!twitchEmbedFailed && twitchEmbedUrl ? (
                   <iframe
+                    ref={twitchIframeRef}
                     src={twitchEmbedUrl}
                     title={`Twitch player - ${item.title}`}
                     allow='autoplay; fullscreen; picture-in-picture'
                     allowFullScreen
-                    onLoad={() => {
-                      setTwitchEmbedLoaded(true);
-                      if (twitchLoadWatchdogRef.current) {
-                        clearTimeout(twitchLoadWatchdogRef.current);
-                        twitchLoadWatchdogRef.current = null;
-                      }
-                    }}
+                    onLoad={handleTwitchIframeLoad}
                     onError={() => {
                       tryNextTwitchEmbed();
                     }}
