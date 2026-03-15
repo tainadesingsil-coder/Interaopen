@@ -48,15 +48,7 @@ const formatDate = (value: string | null) => {
 
 const DEFAULT_QUERY = 'agentes de IA';
 const RADAR_REFRESH_MS = 60 * 1000;
-const RADAR_ROTATION_MS = 9 * 1000;
 const PODCAST_REFRESH_MS = 2 * 60 * 1000;
-
-const rotateItems = <T,>(items: T[], steps: number) => {
-  if (items.length <= 1) return items;
-  const offset = ((steps % items.length) + items.length) % items.length;
-  if (offset === 0) return items;
-  return [...items.slice(offset), ...items.slice(0, offset)];
-};
 
 interface PodcastResponsePayload {
   generatedAt: string;
@@ -1250,7 +1242,6 @@ export function RadarIaSection() {
   const [isLoadingPodcasts, setIsLoadingPodcasts] = useState(false);
   const [podcastError, setPodcastError] = useState('');
   const [radarRefreshTick, setRadarRefreshTick] = useState(0);
-  const [radarRotationTick, setRadarRotationTick] = useState(0);
   const [podcastRefreshTick, setPodcastRefreshTick] = useState(0);
   const [lastRadarUpdateAt, setLastRadarUpdateAt] = useState('');
 
@@ -1263,16 +1254,12 @@ export function RadarIaSection() {
     const refreshTimer = window.setInterval(() => {
       setRadarRefreshTick((prev) => prev + 1);
     }, RADAR_REFRESH_MS);
-    const rotationTimer = window.setInterval(() => {
-      setRadarRotationTick((prev) => prev + 1);
-    }, RADAR_ROTATION_MS);
     const podcastTimer = window.setInterval(() => {
       setPodcastRefreshTick((prev) => prev + 1);
     }, PODCAST_REFRESH_MS);
 
     return () => {
       window.clearInterval(refreshTimer);
-      window.clearInterval(rotationTimer);
       window.clearInterval(podcastTimer);
     };
   }, []);
@@ -1403,17 +1390,9 @@ export function RadarIaSection() {
     return payload.results[activeTab];
   }, [payload, activeTab]);
 
-  const dynamicActiveItems = useMemo(() => {
-    return rotateItems(activeItems, radarRotationTick);
-  }, [activeItems, radarRotationTick]);
-
   const displayedItems = useMemo(
-    () => dynamicActiveItems.slice(0, visibleCount),
-    [dynamicActiveItems, visibleCount]
-  );
-  const dynamicPodcastItems = useMemo(
-    () => rotateItems(podcastItems, radarRotationTick),
-    [podcastItems, radarRotationTick]
+    () => activeItems.slice(0, visibleCount),
+    [activeItems, visibleCount]
   );
   const viewerItems = useMemo(() => {
     if (!payload) return dedupeViewerItems([...podcastItems]);
@@ -1610,7 +1589,7 @@ export function RadarIaSection() {
           </div>
         ) : (
           <div className='grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2 xl:grid-cols-3'>
-            {dynamicPodcastItems.map((item) => (
+            {podcastItems.map((item) => (
               <RadarCard key={item.id} item={item} onOpen={setViewerItem} />
             ))}
           </div>
