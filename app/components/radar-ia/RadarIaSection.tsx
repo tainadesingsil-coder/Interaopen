@@ -1424,7 +1424,7 @@ function RadarViewer({
 export function RadarIaSection() {
   const submittedQuery = DEFAULT_QUERY;
   const [activeTab, setActiveTab] = useState<RadarType>('all');
-  const [activeRange, setActiveRange] = useState<RadarRange>('7d');
+  const [activeRange, setActiveRange] = useState<RadarRange>('24h');
   const [payload, setPayload] = useState<RadarResponsePayload | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');

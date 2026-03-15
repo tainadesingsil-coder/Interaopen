@@ -1,5 +1,6 @@
 const CACHE_TTL_MS = 60 * 1000;
 const CREATOR_BASE_TTL_MS = 24 * 60 * 60 * 1000;
+const CONTENT_ROTATION_MS = 20 * 60 * 1000;
 const SOURCE_TIMEOUT_MS = 4000;
 const MAX_QUERY_LENGTH = 80;
 const FALLBACK_YOUTUBE_DATA_API_KEY = 'AIzaSyAcowUDrgcz6eLNa3Tf0k7vp1VNWVkLhJE';
@@ -713,6 +714,27 @@ const fetchTextWithTimeout = async (url, init = {}, timeoutMs = SOURCE_TIMEOUT_M
 const toUniqueList = (items = [], max = 20) =>
   [...new Set(items.map((item) => String(item || '').trim()).filter(Boolean))].slice(0, max);
 
+const tinyHash = (value = '') => {
+  let hash = 17;
+  for (let index = 0; index < value.length; index += 1) {
+    hash = (hash * 31 + value.charCodeAt(index)) >>> 0;
+  }
+  return hash;
+};
+
+const getRotationOffset = (size, salt = 0) => {
+  if (!Number.isFinite(size) || size <= 1) return 0;
+  const bucket = Math.floor(Date.now() / CONTENT_ROTATION_MS);
+  return Math.abs((bucket + Number(salt || 0)) % size);
+};
+
+const rotateList = (items = [], offset = 0) => {
+  if (!Array.isArray(items) || items.length <= 1) return Array.isArray(items) ? [...items] : [];
+  const normalizedOffset = Math.abs(Number(offset || 0)) % items.length;
+  if (normalizedOffset === 0) return [...items];
+  return items.map((_, index) => items[(index + normalizedOffset) % items.length]);
+};
+
 const parseCommaSeparated = (value = '') =>
   String(value || '')
     .split(/[,\n;]/)
@@ -969,8 +991,10 @@ const fetchTiktokCreatorFeedEntries = async (handle = '') => {
 
 const buildTiktokFallbackSeedItems = async (query, env = {}) => {
   const seedUrls = parseTiktokSeedUrls(env);
+  const rotationOffset = getRotationOffset(seedUrls.length, tinyHash(`tiktok:${query}`));
+  const rotatedSeedUrls = rotateList(seedUrls, rotationOffset);
   const settled = await Promise.allSettled(
-    seedUrls.slice(0, 12).map(async (url, index) => {
+    rotatedSeedUrls.slice(0, 12).map(async (url, index) => {
       const normalizedUrl = normalizeTikTokVideoUrl(url);
       const videoId = extractTiktokVideoIdFromUrl(normalizedUrl);
       if (!videoId) return null;
@@ -1671,10 +1695,12 @@ const buildCuratedYoutubeItems = (query, range) => {
     '7d': 0,
     '30d': 6,
   };
-  const offset = offsetByRange[range] || 0;
-  const rotated = CURATED_YOUTUBE_VIDEOS.map(
-    (_, index) => CURATED_YOUTUBE_VIDEOS[(index + offset) % CURATED_YOUTUBE_VIDEOS.length]
+  const baseOffset = offsetByRange[range] || 0;
+  const timeOffset = getRotationOffset(
+    CURATED_YOUTUBE_VIDEOS.length,
+    tinyHash(`youtube:${query}:${range}`)
   );
+  const rotated = rotateList(CURATED_YOUTUBE_VIDEOS, baseOffset + timeOffset);
 
   return rotated.map((video, index) => {
     const description = `Sugestão da sua base para aprender IA, automação e aplicações em negócios.`;
@@ -1960,8 +1986,12 @@ const fetchNewsItems = async (query, range, env = {}) => {
 };
 
 const fetchCuratedInstagramItems = async (query) => {
+  const rotatedPublications = rotateList(
+    CURATED_INSTAGRAM_PUBLICATIONS,
+    getRotationOffset(CURATED_INSTAGRAM_PUBLICATIONS.length, tinyHash(`instagram:${query}`))
+  );
   const settled = await Promise.allSettled(
-    CURATED_INSTAGRAM_PUBLICATIONS.map(async (publication, index) => {
+    rotatedPublications.map(async (publication, index) => {
       let title = publication.title;
       let description = publication.description;
       let channel = publication.channel || null;
