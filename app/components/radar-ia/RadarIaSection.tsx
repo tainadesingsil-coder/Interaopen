@@ -504,6 +504,7 @@ function RadarViewer({
   onClose: () => void;
   onSelectItem: (next: RadarItem) => void;
 }) {
+  const YOUTUBE_TARGET_QUALITY = 'hd1080';
   const youtubeId =
     item.kind === 'youtube' ? extractYoutubeId(item.url, item.id.replace(/^yt-/, '').trim()) : '';
   const instagramCode = item.kind === 'instagram' ? extractInstagramCode(item.url) : '';
@@ -524,6 +525,9 @@ function RadarViewer({
   const isPodcastPlayingRef = useRef(false);
   const lastLiveCaptionRef = useRef('');
   const liveCaptionWatchdogRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const youtubeQualityIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const youtubeIframeRef = useRef<HTMLIFrameElement | null>(null);
+  const youtubeLiveIframeRef = useRef<HTMLIFrameElement | null>(null);
   const tikTokLoadWatchdogRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const tikTokIframeRef = useRef<HTMLIFrameElement | null>(null);
   const twitchLoadWatchdogRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -561,6 +565,15 @@ function RadarViewer({
   const twitchEmbedUrls = isTwitchNews ? buildTwitchEmbedUrls(twitchChannel, twitchParentHosts) : [];
   const twitchEmbedUrl = twitchEmbedUrls[twitchEmbedIndex] || '';
   const youtubeNewsId = isYouTubeNews ? extractYoutubeId(item.url, '') : '';
+  const youtubeOrigin =
+    typeof window !== 'undefined' && window.location?.origin ? window.location.origin : 'https://codexionai.pages.dev';
+  const buildYoutubeEmbedSrc = useCallback(
+    (videoId: string) =>
+      `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&vq=${YOUTUBE_TARGET_QUALITY}&origin=${encodeURIComponent(
+        youtubeOrigin
+      )}`,
+    [youtubeOrigin]
+  );
   const [tikTokEmbedFailed, setTikTokEmbedFailed] = useState(false);
   const [tikTokEmbedIndex, setTikTokEmbedIndex] = useState(0);
   const tikTokEmbedUrl = tikTokEmbedUrls[tikTokEmbedIndex] || tikTokEmbedUrls[0] || '';
@@ -668,6 +681,40 @@ function RadarViewer({
     }
   }, [tryNextTwitchEmbed]);
 
+  const requestYouTubeQualityBoost = useCallback((frame: HTMLIFrameElement | null) => {
+    const win = frame?.contentWindow;
+    if (!win) return;
+    const commands = [YOUTUBE_TARGET_QUALITY, 'hd720'];
+    commands.forEach((quality) => {
+      win.postMessage(
+        JSON.stringify({
+          event: 'command',
+          func: 'setPlaybackQuality',
+          args: [quality],
+        }),
+        '*'
+      );
+    });
+  }, []);
+
+  const handleYouTubeIframeLoad = useCallback((frame: HTMLIFrameElement | null) => {
+    if (youtubeQualityIntervalRef.current) {
+      clearInterval(youtubeQualityIntervalRef.current);
+      youtubeQualityIntervalRef.current = null;
+    }
+
+    let attempts = 0;
+    requestYouTubeQualityBoost(frame);
+    youtubeQualityIntervalRef.current = setInterval(() => {
+      attempts += 1;
+      requestYouTubeQualityBoost(frame);
+      if (attempts >= 6 && youtubeQualityIntervalRef.current) {
+        clearInterval(youtubeQualityIntervalRef.current);
+        youtubeQualityIntervalRef.current = null;
+      }
+    }, 900);
+  }, [requestYouTubeQualityBoost]);
+
   useEffect(() => {
     setTikTokEmbedFailed(false);
     setTikTokEmbedIndex(0);
@@ -684,6 +731,10 @@ function RadarViewer({
     if (twitchLoadWatchdogRef.current) {
       clearTimeout(twitchLoadWatchdogRef.current);
       twitchLoadWatchdogRef.current = null;
+    }
+    if (youtubeQualityIntervalRef.current) {
+      clearInterval(youtubeQualityIntervalRef.current);
+      youtubeQualityIntervalRef.current = null;
     }
   }, [item.id]);
 
@@ -846,6 +897,10 @@ function RadarViewer({
       if (twitchLoadWatchdogRef.current) {
         clearTimeout(twitchLoadWatchdogRef.current);
         twitchLoadWatchdogRef.current = null;
+      }
+      if (youtubeQualityIntervalRef.current) {
+        clearInterval(youtubeQualityIntervalRef.current);
+        youtubeQualityIntervalRef.current = null;
       }
       destroySpeechGraph();
     };
@@ -1065,10 +1120,12 @@ function RadarViewer({
           {item.kind === 'youtube' ? (
             youtubeId ? (
               <iframe
-                src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1&rel=0&modestbranding=1`}
+                ref={youtubeIframeRef}
+                src={buildYoutubeEmbedSrc(youtubeId)}
                 title={item.title}
                 allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'
                 allowFullScreen
+                onLoad={() => handleYouTubeIframeLoad(youtubeIframeRef.current)}
                 className='h-full min-h-[280px] w-full rounded-xl border border-white/10 bg-black sm:min-h-[420px]'
               />
             ) : (
@@ -1145,10 +1202,12 @@ function RadarViewer({
               </div>
             ) : isYouTubeNews && youtubeNewsId ? (
               <iframe
-                src={`https://www.youtube.com/embed/${youtubeNewsId}?autoplay=1&rel=0&modestbranding=1`}
+                ref={youtubeLiveIframeRef}
+                src={buildYoutubeEmbedSrc(youtubeNewsId)}
                 title={`YouTube live - ${item.title}`}
                 allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'
                 allowFullScreen
+                onLoad={() => handleYouTubeIframeLoad(youtubeLiveIframeRef.current)}
                 className='h-full min-h-[320px] w-full rounded-xl border border-white/10 bg-black sm:min-h-[460px]'
               />
             ) : isTwitchNews ? (
