@@ -86,6 +86,12 @@ const extractInstagramKind = (url: string) => {
 
 const isTikTokUrl = (url: string) => /tiktok\.com/i.test(url);
 
+const isLikelyMobileDevice = () => {
+  if (typeof navigator === 'undefined') return false;
+  const ua = String(navigator.userAgent || '').toLowerCase();
+  return /android|iphone|ipad|ipod|mobile|webview|wv/.test(ua);
+};
+
 const extractTikTokVideoId = (url: string) => {
   const normalized = String(url || '');
   const direct = normalized.match(/\/video\/(\d+)/i);
@@ -100,10 +106,13 @@ const extractTikTokVideoId = (url: string) => {
   return '';
 };
 
-const buildTikTokEmbedUrls = (url: string) => {
+const buildTikTokEmbedUrls = (url: string, preferMobileOrder = false) => {
   const videoId = extractTikTokVideoId(url);
   if (!videoId) return [] as string[];
-  return [...new Set([`https://www.tiktok.com/player/v1/${videoId}`, `https://www.tiktok.com/embed/v2/${videoId}`])];
+  const v2 = `https://www.tiktok.com/embed/v2/${videoId}`;
+  const v1 = `https://www.tiktok.com/player/v1/${videoId}`;
+  const ordered = preferMobileOrder ? [v2, v1] : [v1, v2];
+  return [...new Set(ordered)];
 };
 
 const isTwitchUrl = (url: string) => /twitch\.tv/i.test(url);
@@ -513,6 +522,8 @@ function RadarViewer({
   const isPodcastPlayingRef = useRef(false);
   const lastLiveCaptionRef = useRef('');
   const liveCaptionWatchdogRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const tikTokLoadWatchdogRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const tikTokIframeRef = useRef<HTMLIFrameElement | null>(null);
   const twitchLoadWatchdogRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const twitchIframeRef = useRef<HTMLIFrameElement | null>(null);
   const [isPodcastPlaying, setIsPodcastPlaying] = useState(false);
@@ -537,7 +548,8 @@ function RadarViewer({
   const isYouTubeNews = item.kind === 'news' && (isYouTubeUrl(item.url) || /youtube live/i.test(item.source));
   const isCommunityNews =
     item.kind === 'news' && (isCommunityUrl(item.url) || /tabnews|comunidade br/i.test(item.source));
-  const tikTokEmbedUrls = isTikTokNews ? buildTikTokEmbedUrls(item.url) : [];
+  const prefersMobileTikTokPlayer = useMemo(() => isLikelyMobileDevice(), []);
+  const tikTokEmbedUrls = isTikTokNews ? buildTikTokEmbedUrls(item.url, prefersMobileTikTokPlayer) : [];
   const [twitchParentHosts, setTwitchParentHosts] = useState<string[]>(['localhost']);
   const [twitchEmbedIndex, setTwitchEmbedIndex] = useState(0);
   const [twitchEmbedFailed, setTwitchEmbedFailed] = useState(false);
@@ -548,6 +560,8 @@ function RadarViewer({
   const youtubeNewsId = isYouTubeNews ? extractYoutubeId(item.url, '') : '';
   const [tikTokEmbedFailed, setTikTokEmbedFailed] = useState(false);
   const [tikTokEmbedIndex, setTikTokEmbedIndex] = useState(0);
+  const tikTokEmbedUrl = tikTokEmbedUrls[tikTokEmbedIndex] || tikTokEmbedUrls[0] || '';
+  const [tikTokEmbedLoaded, setTikTokEmbedLoaded] = useState(false);
   const [autoFallbackDone, setAutoFallbackDone] = useState(false);
   const relatedTikTokItems = useMemo(() => {
     if (!isTikTokNews) return [] as RadarItem[];
@@ -577,6 +591,36 @@ function RadarViewer({
   )}&fallbackDescription=${encodeURIComponent(item.description)}&fallbackSource=${encodeURIComponent(
     item.source
   )}`;
+
+  const tryNextTikTokEmbed = useCallback(() => {
+    setTikTokEmbedLoaded(false);
+    setTikTokEmbedIndex((prev) => {
+      const next = prev + 1;
+      if (next < tikTokEmbedUrls.length) return next;
+      setTikTokEmbedFailed(true);
+      return prev;
+    });
+  }, [tikTokEmbedUrls.length]);
+
+  const handleTikTokIframeLoad = useCallback(() => {
+    const frame = tikTokIframeRef.current;
+    if (frame) {
+      try {
+        const href = String(frame.contentWindow?.location?.href || '').toLowerCase();
+        if (!href || href === 'about:blank' || href.startsWith('chrome-error://') || href.startsWith('about:srcdoc')) {
+          tryNextTikTokEmbed();
+          return;
+        }
+      } catch {
+        // Cross-origin access error usually means TikTok loaded.
+      }
+    }
+    setTikTokEmbedLoaded(true);
+    if (tikTokLoadWatchdogRef.current) {
+      clearTimeout(tikTokLoadWatchdogRef.current);
+      tikTokLoadWatchdogRef.current = null;
+    }
+  }, [tryNextTikTokEmbed]);
 
   const tryNextTwitchEmbed = useCallback(() => {
     setTwitchEmbedLoaded(false);
@@ -613,10 +657,15 @@ function RadarViewer({
   useEffect(() => {
     setTikTokEmbedFailed(false);
     setTikTokEmbedIndex(0);
+    setTikTokEmbedLoaded(false);
     setAutoFallbackDone(false);
     setTwitchEmbedFailed(false);
     setTwitchEmbedLoaded(false);
     setTwitchEmbedIndex(0);
+    if (tikTokLoadWatchdogRef.current) {
+      clearTimeout(tikTokLoadWatchdogRef.current);
+      tikTokLoadWatchdogRef.current = null;
+    }
     if (twitchLoadWatchdogRef.current) {
       clearTimeout(twitchLoadWatchdogRef.current);
       twitchLoadWatchdogRef.current = null;
@@ -637,6 +686,34 @@ function RadarViewer({
     onSelectItem,
     tikTokEmbedUrls.length,
   ]);
+
+  useEffect(() => {
+    if (!isTikTokNews || !tikTokEmbedFailed) return;
+    if (autoFallbackDone) return;
+    if (!firstPlayableRelatedTikTokItem) return;
+    setAutoFallbackDone(true);
+    onSelectItem(firstPlayableRelatedTikTokItem);
+  }, [autoFallbackDone, firstPlayableRelatedTikTokItem, isTikTokNews, onSelectItem, tikTokEmbedFailed]);
+
+  useEffect(() => {
+    if (!isTikTokNews || tikTokEmbedFailed || tikTokEmbedUrls.length === 0) return;
+    if (tikTokLoadWatchdogRef.current) {
+      clearTimeout(tikTokLoadWatchdogRef.current);
+      tikTokLoadWatchdogRef.current = null;
+    }
+    tikTokLoadWatchdogRef.current = setTimeout(() => {
+      if (!tikTokEmbedLoaded) {
+        tryNextTikTokEmbed();
+      }
+    }, 6500);
+
+    return () => {
+      if (tikTokLoadWatchdogRef.current) {
+        clearTimeout(tikTokLoadWatchdogRef.current);
+        tikTokLoadWatchdogRef.current = null;
+      }
+    };
+  }, [isTikTokNews, tikTokEmbedFailed, tikTokEmbedLoaded, tikTokEmbedUrl, tryNextTikTokEmbed]);
 
   useEffect(() => {
     setTwitchParentHosts(deriveTwitchParentHosts());
@@ -747,6 +824,10 @@ function RadarViewer({
 
   useEffect(() => {
     return () => {
+      if (tikTokLoadWatchdogRef.current) {
+        clearTimeout(tikTokLoadWatchdogRef.current);
+        tikTokLoadWatchdogRef.current = null;
+      }
       if (twitchLoadWatchdogRef.current) {
         clearTimeout(twitchLoadWatchdogRef.current);
         twitchLoadWatchdogRef.current = null;
@@ -986,24 +1067,33 @@ function RadarViewer({
                 {tikTokEmbedUrls.length > 0 ? (
                   !tikTokEmbedFailed ? (
                     <iframe
-                      src={tikTokEmbedUrls[tikTokEmbedIndex] || tikTokEmbedUrls[0]}
+                      key={tikTokEmbedUrl}
+                      ref={tikTokIframeRef}
+                      src={tikTokEmbedUrl}
                       title={`TikTok player - ${item.title}`}
                       allow='autoplay; encrypted-media; picture-in-picture; web-share'
                       allowFullScreen
+                      onLoad={handleTikTokIframeLoad}
                       onError={() => {
-                        if (tikTokEmbedIndex < tikTokEmbedUrls.length - 1) {
-                          setTikTokEmbedIndex((prev) => prev + 1);
-                        } else {
-                          setTikTokEmbedFailed(true);
-                        }
+                        tryNextTikTokEmbed();
                       }}
                       className='h-[54vh] min-h-[300px] w-full rounded-xl border border-white/10 bg-black sm:h-[64vh] sm:min-h-[420px]'
                     />
                   ) : (
                     <div className='flex min-h-[300px] items-center justify-center rounded-xl border border-white/10 bg-black/30 p-5 text-center sm:min-h-[420px]'>
-                      <p className='text-sm text-[#c9d1d9]'>
-                        Este vídeo não abriu no player interno. Clique em outro vídeo do criador abaixo.
-                      </p>
+                      <div>
+                        <p className='text-sm text-[#c9d1d9]'>
+                          Este vídeo travou no player interno do TikTok. Clique em outro vídeo do criador abaixo.
+                        </p>
+                        <a
+                          href={item.url}
+                          target='_blank'
+                          rel='noopener noreferrer'
+                          className='mt-3 inline-flex items-center rounded-lg border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs font-semibold text-[#c9d1d9] transition hover:border-[#C6FF2E]/45 hover:text-[#C6FF2E]'
+                        >
+                          Abrir no TikTok
+                        </a>
+                      </div>
                     </div>
                   )
                 ) : (
