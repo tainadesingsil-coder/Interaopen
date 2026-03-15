@@ -628,11 +628,30 @@ function RadarViewer({
     const handleEsc = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onClose();
     };
+    const scrollY = window.scrollY || window.pageYOffset || 0;
     const previousOverflow = document.body.style.overflow;
+    const previousPosition = document.body.style.position;
+    const previousTop = document.body.style.top;
+    const previousWidth = document.body.style.width;
+    const previousLeft = document.body.style.left;
+    const previousRight = document.body.style.right;
+
     document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.left = '0';
+    document.body.style.right = '0';
+    document.body.style.width = '100%';
+
     window.addEventListener('keydown', handleEsc);
     return () => {
       document.body.style.overflow = previousOverflow;
+      document.body.style.position = previousPosition;
+      document.body.style.top = previousTop;
+      document.body.style.width = previousWidth;
+      document.body.style.left = previousLeft;
+      document.body.style.right = previousRight;
+      window.scrollTo(0, scrollY);
       window.removeEventListener('keydown', handleEsc);
     };
   }, [onClose]);
@@ -1220,6 +1239,9 @@ export function RadarIaSection() {
   const [radarRefreshTick, setRadarRefreshTick] = useState(0);
   const [podcastRefreshTick, setPodcastRefreshTick] = useState(0);
   const [lastRadarUpdateAt, setLastRadarUpdateAt] = useState('');
+  const handleCloseViewer = useCallback(() => {
+    setViewerItem(null);
+  }, []);
 
   useEffect(() => {
     setVisibleCount(INITIAL_VISIBLE);
@@ -1575,7 +1597,7 @@ export function RadarIaSection() {
         <RadarViewer
           item={viewerItem}
           allItems={viewerItems}
-          onClose={() => setViewerItem(null)}
+          onClose={handleCloseViewer}
           onSelectItem={setViewerItem}
         />
       ) : null}
