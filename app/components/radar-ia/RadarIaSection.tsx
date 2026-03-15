@@ -228,12 +228,7 @@ const buildTwitchEmbedUrls = (channel: string, parents: string[]) => {
   };
 
   const primary = parentList[0];
-  const extras = parentList.slice(1);
-  const variants = [
-    createUrl(parentList),
-    createUrl([primary]),
-    ...extras.slice(0, 3).map((extra) => createUrl([primary, extra])),
-  ];
+  const variants = [createUrl(parentList), createUrl([primary])];
 
   return [...new Set(variants)];
 };
@@ -655,8 +650,8 @@ function RadarViewer({
     if (frame) {
       try {
         const href = String(frame.contentWindow?.location?.href || '').toLowerCase();
-        // If browser blocked the remote frame, it often stays in local blank/error URL.
-        if (!href || href === 'about:blank' || href.startsWith('chrome-error://') || href.startsWith('about:srcdoc')) {
+        // Be conservative: only treat explicit browser error as hard failure.
+        if (href.startsWith('chrome-error://')) {
           tryNextTwitchEmbed();
           return;
         }
@@ -749,7 +744,7 @@ function RadarViewer({
       if (!twitchEmbedLoaded) {
         tryNextTwitchEmbed();
       }
-    }, 7000);
+    }, 12000);
 
     return () => {
       if (twitchLoadWatchdogRef.current) {
