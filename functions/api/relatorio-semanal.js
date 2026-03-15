@@ -45,6 +45,10 @@ function getResendConfig(context) {
       env.RESEND_FROM_EMAIL ??
       processEnv.RESEND_FROM_EMAIL ??
       "Codexion <onboarding@resend.dev>",
+    resendReplyTo:
+      env.RESEND_REPLY_TO ??
+      processEnv.RESEND_REPLY_TO ??
+      "",
   };
 }
 
@@ -473,9 +477,19 @@ function buildEmailTemplate({
 }
 
 async function sendEmailByResend(context, toEmail, subject, html) {
-  const { resendApiKey, resendFromEmail } = getResendConfig(context);
+  const { resendApiKey, resendFromEmail, resendReplyTo } = getResendConfig(context);
   if (!resendApiKey) {
     throw new Error("RESEND_API_KEY não configurada.");
+  }
+
+  const payload = {
+    from: resendFromEmail,
+    to: [toEmail],
+    subject,
+    html,
+  };
+  if (resendReplyTo) {
+    payload.reply_to = resendReplyTo;
   }
 
   const response = await fetch("https://api.resend.com/emails", {
@@ -484,12 +498,7 @@ async function sendEmailByResend(context, toEmail, subject, html) {
       Authorization: `Bearer ${resendApiKey}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      from: resendFromEmail,
-      to: [toEmail],
-      subject,
-      html,
-    }),
+    body: JSON.stringify(payload),
   });
 
   if (!response.ok) {
