@@ -1381,6 +1381,18 @@ export function RadarIaSection() {
   }, []);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    window.dispatchEvent(new CustomEvent('radar:viewer-state', { detail: !!viewerItem }));
+  }, [viewerItem]);
+
+  useEffect(() => {
+    return () => {
+      if (typeof window === 'undefined') return;
+      window.dispatchEvent(new CustomEvent('radar:viewer-state', { detail: false }));
+    };
+  }, []);
+
+  useEffect(() => {
     setVisibleCount(INITIAL_VISIBLE);
     setViewerItem(null);
   }, [activeTab, submittedQuery, activeRange]);
