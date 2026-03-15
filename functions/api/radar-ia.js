@@ -1,4 +1,5 @@
 const CACHE_TTL_MS = 60 * 1000;
+const CREATOR_BASE_TTL_MS = 24 * 60 * 60 * 1000;
 const SOURCE_TIMEOUT_MS = 4000;
 const MAX_QUERY_LENGTH = 80;
 const FALLBACK_YOUTUBE_DATA_API_KEY = 'AIzaSyAcowUDrgcz6eLNa3Tf0k7vp1VNWVkLhJE';
@@ -31,8 +32,8 @@ const FALLBACK_INSTAGRAM_USER_ID = '61565928037346';
 const INSTAGRAM_GRAPH_VERSION = 'v20.0';
 const INSTAGRAM_GRAPH_LIMIT = 18;
 const INSTAGRAM_RSS_LIMIT = 18;
-const TIKTOK_CREATOR_ITEMS_PER_PROFILE = 3;
-const INSTAGRAM_CREATOR_ITEMS_PER_PROFILE = 3;
+const TIKTOK_CREATOR_ITEMS_PER_PROFILE = 5;
+const INSTAGRAM_CREATOR_ITEMS_PER_PROFILE = 5;
 const FALLBACK_TIKTOK_CREATOR_VIDEO_URLS = [
   'https://www.tiktok.com/@gabrieladamuchi/video/7601907452212235540',
   'https://www.tiktok.com/@izabela.anholett/video/7611634628490710293',
@@ -159,7 +160,7 @@ const ALLOWED_TYPES = ['all', 'youtube', 'news', 'instagram'];
 const ALLOWED_RANGES = ['24h', '7d', '30d'];
 const YOUTUBE_CHANNEL_LIMIT = 5;
 const YOUTUBE_VIDEOS_PER_CHANNEL = 4;
-const YOUTUBE_CREATOR_ITEMS_PER_CHANNEL = 3;
+const YOUTUBE_CREATOR_ITEMS_PER_CHANNEL = 5;
 const CURATED_YOUTUBE_VIDEOS = [
   {
     id: 'flIPXJljv5g',
@@ -473,6 +474,44 @@ const getCache = () => {
   return globalThis[key];
 };
 
+const getCreatorBaseCache = () => {
+  const key = '__RADAR_CREATOR_BASE_CACHE__';
+  if (!globalThis[key]) {
+    globalThis[key] = new Map();
+  }
+  return globalThis[key];
+};
+
+const readCreatorBase = (bucket) => {
+  const cache = getCreatorBaseCache();
+  const entry = cache.get(bucket);
+  if (!entry) return [];
+  if (Number(entry?.expiresAt || 0) < Date.now()) {
+    cache.delete(bucket);
+    return [];
+  }
+  return Array.isArray(entry?.items) ? entry.items : [];
+};
+
+const mergeCreatorBase = (bucket, items = [], max = 80) => {
+  const normalized = toUniqueList(
+    items
+      .map((item) => String(item || '').trim())
+      .filter(Boolean),
+    max
+  );
+  if (normalized.length === 0) return [];
+
+  const existing = readCreatorBase(bucket);
+  const merged = toUniqueList([...normalized, ...existing], max);
+  const cache = getCreatorBaseCache();
+  cache.set(bucket, {
+    items: merged,
+    expiresAt: Date.now() + CREATOR_BASE_TTL_MS,
+  });
+  return merged;
+};
+
 const sanitizeQuery = (value = '') =>
   value
     .replace(/[^\w\sÀ-ÿ\-_.:]/g, ' ')
@@ -731,7 +770,8 @@ const parseTiktokCreatorHandles = (env = {}) => {
     .map((url) => extractTiktokHandleFromUrl(url))
     .filter(Boolean);
 
-  return toUniqueList([...explicitHandles, ...handlesFromUrls], 12);
+  const fromBase = readCreatorBase('tiktok_handles');
+  return toUniqueList([...explicitHandles, ...handlesFromUrls, ...fromBase], 20);
 };
 
 const parseTabNewsKeywords = (env = {}) => {
@@ -835,13 +875,13 @@ const parseInstagramSeedUrls = (env = {}) => {
 
 const parseInstagramCreatorHandles = (env = {}) => {
   const raw = String(env?.INSTAGRAM_CREATOR_HANDLES || env?.INSTAGRAM_CREATORS || '').trim();
-  if (!raw) return [];
-  return toUniqueList(
-    parseCommaSeparated(raw)
-      .map((value) => value.replace(/^@+/, '').toLowerCase())
-      .filter((value) => /^[a-z0-9._]{2,40}$/i.test(value)),
-    12
-  );
+  const fromEnv = raw
+    ? parseCommaSeparated(raw)
+        .map((value) => value.replace(/^@+/, '').toLowerCase())
+        .filter((value) => /^[a-z0-9._]{2,40}$/i.test(value))
+    : [];
+  const fromBase = readCreatorBase('instagram_handles');
+  return toUniqueList([...fromEnv, ...fromBase], 20);
 };
 
 const resolveInstagramHandleFromSeedUrl = async (seedUrl = '') => {
@@ -962,6 +1002,7 @@ const buildTiktokFallbackSeedItems = async (query, env = {}) => {
 
 const fetchTiktokCreatorItems = async (query, range, env = {}) => {
   const handles = parseTiktokCreatorHandles(env);
+  mergeCreatorBase('tiktok_handles', handles, 40);
   if (handles.length === 0) {
     return buildTiktokFallbackSeedItems(query, env);
   }
@@ -1029,6 +1070,10 @@ const fetchTiktokCreatorItems = async (query, range, env = {}) => {
   );
 
   const dynamicItems = withMetadata.flatMap((result) => (result.status === 'fulfilled' ? [result.value] : []));
+  const discoveredHandles = dynamicItems
+    .map((item) => String(item?.channel || '').replace(/^@+/, '').toLowerCase())
+    .filter((value) => /^[a-z0-9._]{2,40}$/i.test(value));
+  mergeCreatorBase('tiktok_handles', discoveredHandles, 40);
   if (dynamicItems.length === 0) {
     return buildTiktokFallbackSeedItems(query, env);
   }
@@ -1252,12 +1297,14 @@ const parseTwitchChannels = (env = {}) => {
         .filter(Boolean)
     : [];
   const cleanedProvided = provided.map(extractTwitchChannelCandidate).filter(Boolean);
+  const fromBase = readCreatorBase('twitch_channels').map(extractTwitchChannelCandidate).filter(Boolean);
   const fallback = FALLBACK_TWITCH_CHANNELS.map(extractTwitchChannelCandidate).filter(Boolean);
-  return toUniqueList([...cleanedProvided, ...fallback], 12);
+  return toUniqueList([...cleanedProvided, ...fromBase, ...fallback], 16);
 };
 
 const fetchTwitchLiveItems = async (query, env = {}) => {
   const channels = parseTwitchChannels(env);
+  mergeCreatorBase('twitch_channels', channels, 30);
   if (channels.length === 0) return [];
 
   const nowIso = new Date().toISOString();
@@ -1389,16 +1436,17 @@ const parseYoutubeSeedVideoIds = (env = {}) =>
 const parseYoutubeCreatorChannelIds = (env = {}) => {
   const raw = String(env?.YOUTUBE_CHANNEL_IDS || env?.YOUTUBE_CREATOR_CHANNEL_IDS || '').trim();
   const values = raw ? parseCommaSeparated(raw) : [];
-  return toUniqueList(
-    values
-      .map((value) => String(value || '').trim())
-      .map((value) => {
-        const match = value.match(/(UC[a-zA-Z0-9_-]{10,})/);
-        return match?.[1] || value;
-      })
-      .filter((value) => /^UC[a-zA-Z0-9_-]{10,}$/i.test(value)),
-    24
+  const fromEnv = values
+    .map((value) => String(value || '').trim())
+    .map((value) => {
+      const match = value.match(/(UC[a-zA-Z0-9_-]{10,})/);
+      return match?.[1] || value;
+    })
+    .filter((value) => /^UC[a-zA-Z0-9_-]{10,}$/i.test(value));
+  const fromBase = readCreatorBase('youtube_channel_ids').filter((value) =>
+    /^UC[a-zA-Z0-9_-]{10,}$/i.test(String(value || ''))
   );
+  return toUniqueList([...fromEnv, ...fromBase], 24);
 };
 
 const fetchYoutubeVideoDetailsByIds = async (apiKey, videoIds = []) => {
@@ -1488,6 +1536,7 @@ const fetchYoutubeCreatorBaseItems = async (query, range, env = {}, apiKey = '')
     .slice(0, 24);
 
   const creatorChannelIds = toUniqueList([...explicitChannelIds, ...seedChannelIds], 24);
+  mergeCreatorBase('youtube_channel_ids', creatorChannelIds, 60);
   if (creatorChannelIds.length === 0) return [];
 
   const publishedAfter = new Date(rangeCutoffMs(range)).toISOString();
@@ -1679,6 +1728,7 @@ const fetchYoutubeItems = async (query, range, env) => {
         )
           .map((item) => item.id)
           .slice(0, YOUTUBE_CHANNEL_LIMIT);
+        mergeCreatorBase('youtube_channel_ids', channelIds, 60);
 
         const channelVideoRequests =
           channelIds.length > 0
@@ -1747,6 +1797,13 @@ const fetchYoutubeItems = async (query, range, env) => {
         videoItems = fallbackPayload?.items || [];
       }
     }
+
+    const discoveredChannelIds = dedupeById(
+      videoItems
+        .map((item) => ({ id: String(item?.snippet?.channelId || '').trim() }))
+        .filter((item) => item.id)
+    ).map((item) => item.id);
+    mergeCreatorBase('youtube_channel_ids', discoveredChannelIds, 60);
 
     const dynamicItems = sortByScoreAndDate(
       dedupeById(videoItems.map((item) => normalizeYoutubeItem(item, query)).filter(Boolean))
@@ -1841,7 +1898,7 @@ const fetchNewsItems = async (query, range, env = {}) => {
     publishedAt: null,
     thumbnail: null,
     channel: null,
-    score: 80 - index + computeScore(article.title, article.description, null, query),
+    score: 24 - index + computeScore(article.title, article.description, null, query),
     ctaLabel: 'Ler matéria',
   }));
 
@@ -1872,13 +1929,15 @@ const fetchNewsItems = async (query, range, env = {}) => {
   const twitchPromise = fetchTwitchLiveItems(query, env);
   const tiktokPromise = fetchTiktokCreatorItems(query, range, env);
   const youtubeLivePromise = fetchYoutubeLiveNewsItems(query, range, env);
+  const tabNewsPromise = fetchTabNewsItems(query, range, env);
 
-  const [settled, twitterItems, twitchItems, tiktokItems, youtubeLiveItems] = await Promise.all([
+  const [settled, twitterItems, twitchItems, tiktokItems, youtubeLiveItems, tabNewsItems] = await Promise.all([
     rssSettledPromise,
     twitterPromise,
     twitchPromise,
     tiktokPromise,
     youtubeLivePromise,
+    tabNewsPromise,
   ]);
   const items = settled.flatMap((result) => (result.status === 'fulfilled' ? result.value : []));
   const filtered = items.filter((item) => {
@@ -1891,16 +1950,13 @@ const fetchNewsItems = async (query, range, env = {}) => {
     return parsed >= cutoff;
   });
 
-  return sortByScoreAndDate(
-    dedupeByUrl([
-      ...curatedItems,
-      ...filtered,
-      ...twitterItems,
-      ...twitchItems,
-      ...tiktokItems,
-      ...youtubeLiveItems,
-    ])
-  ).slice(0, 36);
+  const dynamicItems = sortByScoreAndDate(
+    dedupeByUrl([...filtered, ...twitterItems, ...twitchItems, ...tiktokItems, ...youtubeLiveItems, ...tabNewsItems])
+  );
+  const dynamicUrls = new Set(dynamicItems.map((item) => normalizeUrlForDedupe(item.url)));
+  const curatedRemainder = curatedItems.filter((item) => !dynamicUrls.has(normalizeUrlForDedupe(item.url)));
+
+  return [...dynamicItems, ...curatedRemainder].slice(0, 36);
 };
 
 const fetchCuratedInstagramItems = async (query) => {
@@ -2034,6 +2090,11 @@ const fetchInstagramGraphItems = async (query, env = {}) => {
     }
     const payload = await response.json();
     const items = Array.isArray(payload?.data) ? payload.data : [];
+    const discoveredHandles = items
+      .map((media) => instagramHandle(media?.username || '') || '')
+      .map((value) => String(value).replace(/^@+/, '').toLowerCase())
+      .filter(Boolean);
+    mergeCreatorBase('instagram_handles', discoveredHandles, 40);
 
     return items
       .map((media, index) => {
@@ -2135,6 +2196,7 @@ const fetchInstagramItemsFromCreatorProfiles = async (query, env = {}) => {
     result.status === 'fulfilled' && result.value ? [result.value] : []
   );
   const handles = toUniqueList([...explicitHandles, ...discoveredHandles], 10);
+  mergeCreatorBase('instagram_handles', handles, 40);
   if (handles.length === 0) return [];
 
   const settled = await Promise.allSettled(
@@ -2287,7 +2349,7 @@ export async function onRequestGet(context) {
   }
 
   const cache = getCache();
-  const cacheKey = `v4:${type}:${range}:${query.toLowerCase()}`;
+  const cacheKey = `v5:${type}:${range}:${query.toLowerCase()}`;
   const now = Date.now();
   const cached = cache.get(cacheKey);
 
