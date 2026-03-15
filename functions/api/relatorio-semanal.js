@@ -2,20 +2,29 @@ const GEMINI_SYSTEM_PROMPT = [
   "Você é o estrategista de aprendizado da Codexion.",
   "Escreva em português-BR com tom humano, claro e objetivo.",
   "NUNCA repita frases ou ideias.",
+  "Detecte perfil do usuário com base no consumo: GAMER, TECH, EMPREENDEDOR ou HÍBRIDO.",
+  "Definições de perfil:",
+  "- GAMER: consumo majoritário de lives/jogos/esports sem foco relevante em negócios/tech aplicada.",
+  "- TECH: consumo majoritário de IA, tecnologia, startups e inovação.",
+  "- EMPREENDEDOR: consumo majoritário de marketing, negócios, vendas e gestão.",
+  "- HÍBRIDO: consumo equilibrado entre jogos e tecnologia/negócios.",
   "Se houver dados de criadores do Radar IA, cite nomes exatos e diferencie criadores vistos vs não vistos.",
   "Os insights precisam ser práticos e conectados ao conteúdo realmente consumido pelo cliente.",
+  "Se perfil for GAMER, NÃO force conexão com negócios; foco em jogo, live, técnicas e gameplay.",
+  "Se perfil for HÍBRIDO, separar explicitamente seção Gamer e seção Tech/Negócio.",
   "A seção de evolução deve identificar claramente quando for o primeiro relatório do cliente.",
   "Os próximos passos devem ser adaptativos por perfil (iniciante, foco em live, foco em vídeo/notícia, alta consistência).",
   "Monte exatamente nesta estrutura:",
   "1) Saudação curta com nome.",
-  "2) Resumo do consumo por categoria e tipo.",
+  "2) Perfil detectado + resumo do consumo por categoria/tipo.",
   "3) Criadores do Radar: vistos x ainda não vistos.",
-  "4) 3 insights acionáveis para o negócio do cliente.",
-  "5) Conexões inteligentes cruzando 2+ conteúdos consumidos.",
-  "6) Evolução versus semana anterior (se não houver base, diga que é o primeiro relatório).",
-  "7) Plano da próxima semana em 3 passos numerados e adaptados ao perfil.",
-  "8) Pergunta da semana provocadora e prática.",
-  "9) Encerramento motivacional de até 2 frases.",
+  "4) Resumo específico dos conteúdos consumidos (OpenAI/Google/DeepMind/História IA/lives).",
+  "5) 3 insights acionáveis adaptados ao perfil detectado.",
+  "6) Conexões inteligentes cruzando 2+ conteúdos consumidos.",
+  "7) Evolução versus semana anterior (se não houver base, diga que é o primeiro relatório).",
+  "8) Plano da próxima semana em passos adaptados ao perfil.",
+  "9) Pergunta da semana provocadora e prática (no HÍBRIDO: opção gamer + opção tech).",
+  "10) Encerramento motivacional de até 2 frases.",
   "Use frases curtas, sem jargão técnico desnecessário.",
 ].join(" ");
 
@@ -168,6 +177,272 @@ function normalizeForCompare(value) {
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .trim();
+}
+
+const GAMER_KEYWORDS = [
+  "gaules",
+  "alanzoka",
+  "esports",
+  "twitch",
+  "cs",
+  "cs2",
+  "counter-strike",
+  "valorant",
+  "league of legends",
+  "lol",
+  "dota",
+  "fortnite",
+  "free fire",
+  "pubg",
+  "rank",
+  "clutch",
+  "x1",
+  "ace",
+  "md3",
+  "mapa",
+  "crosshair",
+];
+
+const TECH_KEYWORDS = [
+  "openai",
+  "google ai",
+  "deepmind",
+  "ia",
+  "ai",
+  "gpt",
+  "gemini",
+  "modelo",
+  "agent",
+  "agente",
+  "api",
+  "startup",
+  "inovacao",
+  "inovação",
+  "llm",
+  "research",
+  "multimodal",
+  "automacao",
+  "automação",
+];
+
+const BUSINESS_KEYWORDS = [
+  "marketing",
+  "negocio",
+  "negócio",
+  "vendas",
+  "gestao",
+  "gestão",
+  "growth",
+  "seo",
+  "lead",
+  "funil",
+  "conversao",
+  "conversão",
+  "receita",
+  "ticket",
+  "crm",
+  "oferta",
+  "copys",
+  "anuncio",
+  "anúncio",
+];
+
+function countKeywordHits(text, keywords) {
+  const normalized = normalizeForCompare(text);
+  if (!normalized) return 0;
+  return (keywords || []).reduce((acc, keyword) => {
+    const key = normalizeForCompare(keyword);
+    return acc + (key && normalized.includes(key) ? 1 : 0);
+  }, 0);
+}
+
+function detectUserProfile(consumedNames, local, byCategory, byType) {
+  const corpus = [
+    ...(consumedNames || []),
+    local?.categorias || "",
+    local?.timeline || "",
+    local?.conteudos || "",
+  ].join(" | ");
+
+  const gamerScore =
+    countKeywordHits(corpus, GAMER_KEYWORDS) +
+    Number(byType?.live_play || 0) +
+    Number(byCategory?.live || 0);
+  const techScore =
+    countKeywordHits(corpus, TECH_KEYWORDS) +
+    Number(byCategory?.video || 0) * 0.4 +
+    Number(byCategory?.noticia || 0) * 0.7;
+  const empreendedorScore =
+    countKeywordHits(corpus, BUSINESS_KEYWORDS) +
+    Number(byCategory?.marketing || 0) +
+    Number(byCategory?.negocios || 0) +
+    Number(byCategory?.vendas || 0);
+
+  const nonGamer = techScore + empreendedorScore;
+  const hasBalancedHybrid =
+    gamerScore >= 2 &&
+    nonGamer >= 2 &&
+    Math.abs(gamerScore - nonGamer) <= Math.max(2, Math.round((gamerScore + nonGamer) * 0.45));
+
+  let profile = "TECH";
+  if (hasBalancedHybrid) {
+    profile = "HÍBRIDO";
+  } else if (gamerScore >= techScore && gamerScore >= empreendedorScore) {
+    profile = nonGamer <= Math.max(1, gamerScore * 0.55) ? "GAMER" : "HÍBRIDO";
+  } else if (empreendedorScore > techScore) {
+    profile = "EMPREENDEDOR";
+  } else {
+    profile = "TECH";
+  }
+
+  return {
+    profile,
+    gamerScore,
+    techScore,
+    empreendedorScore,
+  };
+}
+
+function inferMainGame(consumedNames, timeline) {
+  const text = normalizeForCompare(
+    `${(consumedNames || []).join(" | ")} | ${timeline || ""}`
+  );
+  const gameMatchers = [
+    { name: "CS2", keys: ["cs2", "counter-strike", "cs "] },
+    { name: "Valorant", keys: ["valorant"] },
+    { name: "League of Legends", keys: ["league of legends", " lol", "lol "] },
+    { name: "Free Fire", keys: ["free fire"] },
+    { name: "Fortnite", keys: ["fortnite"] },
+    { name: "PUBG", keys: ["pubg"] },
+    { name: "Dota 2", keys: ["dota 2", "dota2", "dota "] },
+  ];
+
+  for (const game of gameMatchers) {
+    if (game.keys.some((key) => text.includes(normalizeForCompare(key)))) {
+      return game.name;
+    }
+  }
+  return "Jogo não identificado com precisão";
+}
+
+function inferLiveMoment(timeline, gameName) {
+  const list = splitMultilineList(timeline || "");
+  const intenseTokens = ["clutch", "virada", "overtime", "x1", "ace", "final"];
+  const intense = list.find((line) =>
+    intenseTokens.some((token) => normalizeForCompare(line).includes(token))
+  );
+  if (intense) {
+    return `Momento mais intenso detectado: ${intense}.`;
+  }
+  const firstLive = list.find((line) =>
+    normalizeForCompare(line).includes("live")
+  );
+  if (firstLive) {
+    return `Trecho principal da live (${gameName}): ${firstLive}.`;
+  }
+  return `Live de ${gameName}: não houve detalhe textual de clipe, mas o consumo foi consistente ao longo da sessão.`;
+}
+
+function inferGameplayTechniques(gameName) {
+  const map = {
+    CS2: [
+      "controle de economia por round",
+      "uso de utilitários antes da entrada",
+      "trade e reposicionamento após eliminação",
+    ],
+    Valorant: [
+      "sincronização de utilitários por função",
+      "timing de entrada e pós-plant",
+      "troca rápida de posição para negação de informação",
+    ],
+    "League of Legends": [
+      "controle de visão e tempo de objetivo",
+      "gestão de wave para pressionar mapa",
+      "execução disciplinada em teamfights",
+    ],
+    "Free Fire": [
+      "rotação inteligente por cobertura",
+      "controle de altura e zona",
+      "tomada de duelo só com vantagem de posição",
+    ],
+    Fortnite: [
+      "timing de construção/edição sob pressão",
+      "rotação com leitura de safe zone",
+      "controle de recurso para endgame",
+    ],
+    PUBG: [
+      "rotação antecipada de zona",
+      "uso de utilitário para negar visão",
+      "disciplina de posicionamento em fight longa",
+    ],
+    "Dota 2": [
+      "controle de tempo de rota e runas",
+      "sincronização de ultimate por objetivo",
+      "visão para pickoff e controle de mapa",
+    ],
+  };
+  return (
+    map[gameName] || [
+      "disciplina de posicionamento",
+      "timing de tomada de decisão",
+      "consistência mecânica sob pressão",
+    ]
+  );
+}
+
+function classifyTechLaunchFromContent(name) {
+  const norm = normalizeForCompare(name);
+  if (norm.includes("agente") || norm.includes("agent")) {
+    return {
+      launch: "novo agente/autonomia assistida",
+      does: "executa tarefas em etapas com menor intervenção manual",
+      matters: "reduz tempo operacional e aumenta escala de execução",
+    };
+  }
+  if (norm.includes("modelo") || norm.includes("gpt") || norm.includes("gemini")) {
+    return {
+      launch: "atualização de modelo de IA",
+      does: "melhora raciocínio, contexto e qualidade de respostas",
+      matters: "eleva produtividade em criação, análise e atendimento",
+    };
+  }
+  if (norm.includes("research") || norm.includes("deepmind")) {
+    return {
+      launch: "avanço de pesquisa aplicada",
+      does: "apresenta novas capacidades e métodos de IA",
+      matters: "antecipa oportunidades de adoção competitiva",
+    };
+  }
+  return {
+    launch: "atualização de tecnologia/IA",
+    does: "introduz recurso com potencial de automação e aceleração",
+    matters: "permite executar mais com menos custo operacional",
+  };
+}
+
+function buildSpecificContentSummaries(consumedNames) {
+  const lines = [];
+  const unique = uniqueIgnoreCase(consumedNames || []).slice(0, 10);
+  for (const item of unique) {
+    const norm = normalizeForCompare(item);
+    if (norm.includes("openai") || norm.includes("google ai") || norm.includes("deepmind")) {
+      const tech = classifyTechLaunchFromContent(item);
+      lines.push(`- ${item}`);
+      lines.push(`  • O que foi discutido: ${tech.launch}.`);
+      lines.push(`  • O que isso faz: ${tech.does}.`);
+      lines.push(`  • Por que importa agora: ${tech.matters}.`);
+      continue;
+    }
+    if (norm.includes("historia da ia") || norm.includes("historia ia")) {
+      lines.push(`- ${item}`);
+      lines.push("  • Ponto central: evolução da IA em ciclos rápidos de adoção.");
+      lines.push("  • Aprendizado-chave: quem operacionaliza cedo ganha vantagem.");
+      lines.push("  • Oportunidade atual: transformar conhecimento em rotina de execução.");
+      continue;
+    }
+    lines.push(`- ${item}`);
+  }
+  return lines.length ? lines : ["- Sem conteúdo específico identificado."];
 }
 
 function parseContentList(text) {
@@ -348,128 +623,131 @@ function normalizeResumoLocal(resumoLocal) {
 }
 
 function buildContextualInsights(signals, context) {
+  const profile = context.profile || "TECH";
   const insights = [];
-  const creatorsLabel = context.creatorsSeen.slice(0, 3).join(", ");
-  const launchLabel = context.launchHints.length
-    ? context.launchHints.slice(0, 2).join(" | ")
-    : "novas automações, agentes e fluxos multimodais";
 
-  if (signals.hasGaules || signals.hasAlanzoka) {
-    const creatorNames = [];
-    if (signals.hasGaules) creatorNames.push("gaules");
-    if (signals.hasAlanzoka) creatorNames.push("alanzoka");
+  if (profile === "GAMER") {
     insights.push(
-      `Você consumiu ${creatorNames.join(
-        " e "
-      )}. O diferencial desses criadores é disciplina diária + gestão de comunidade em tempo real; replique isso criando um calendário fixo (mínimo 5 dias/semana) com quadro recorrente e CTA claro para o seu negócio.`
+      `${context.liveMoment} O foco aqui é leitura de situação e tomada de decisão sob pressão em ${context.gameName}.`
     );
+    insights.push(
+      `Técnicas observadas no gameplay: ${context.gameTechniques
+        .slice(0, 3)
+        .join(", ")}. Treine isso em blocos curtos e repetíveis para ganhar consistência.`
+    );
+    insights.push(
+      `Dica prática de jogo: escolha 1 fundamento de ${context.gameName} para dominar esta semana e mantenha rotina diária de revisão de partidas.`
+    );
+    return insights;
   }
 
-  if (signals.hasOpenAI || signals.hasGoogleAI || signals.hasDeepMind) {
-    const aiSources = [];
-    if (signals.hasOpenAI) aiSources.push("OpenAI");
-    if (signals.hasGoogleAI) aiSources.push("Google AI");
-    if (signals.hasDeepMind) aiSources.push("Google DeepMind");
+  if (profile === "TECH") {
     insights.push(
-      `Você acompanhou ${aiSources.join(
-        ", "
-      )}. O sinal tecnológico da semana aponta para ${launchLabel}; aplique isso automatizando 1 processo crítico (ex.: qualificação de leads, suporte inicial ou produção de conteúdo) com meta de reduzir tempo operacional já nesta semana.`
+      `Tecnologias destacadas hoje: ${context.techSources.length ? context.techSources.join(", ") : "fontes de IA"}. Priorize um único caso de uso para implementar imediatamente.`
     );
+    insights.push(
+      `Sinal técnico detectado: ${context.launchHints.length ? context.launchHints.slice(0, 2).join(" | ") : "novos agentes/modelos e automação prática"}. Isso reduz fricção operacional se aplicado com processo claro.`
+    );
+    insights.push(
+      "Aplicação agora: selecione uma tarefa repetitiva, conecte IA + checklist humano e meça ganho de tempo já nos próximos 7 dias."
+    );
+    return insights;
   }
 
-  if (signals.hasHistoryAI) {
+  if (profile === "EMPREENDEDOR") {
     insights.push(
-      "Ao revisar História da IA, o padrão fica claro: quem transforma mudança tecnológica em rotina operacional vence. Traduza isso hoje em um playbook simples de 1 página para seu time executar IA no dia a dia."
+      `Seu consumo está orientado a crescimento/negócios. Converta o conteúdo em uma alavanca principal (aquisição, conversão ou retenção) e execute com foco semanal.`
     );
+    insights.push(
+      "Estratégia prática: documente uma oferta clara, um canal prioritário e um CTA único para evitar dispersão."
+    );
+    insights.push(
+      "Métrica de execução: acompanhe diariamente um KPI (leads, reuniões, conversão ou ticket) para ajustar rápido."
+    );
+    return insights;
   }
 
-  if (context.currentTotal >= 14) {
-    insights.push(
-      `Seu volume de interação (${context.currentTotal}) mostra consistência acima da média. O próximo nível agora é execução orientada a KPI: escolha 1 métrica principal e conecte cada conteúdo consumido a uma decisão prática.`
-    );
-  } else if (context.currentTotal > 0) {
-    insights.push(
-      `Você já iniciou bem (${context.currentTotal} ações), mas ainda falta densidade para máxima precisão. Foque em sessões mais profundas (30–40 min) e finalize cada sessão com 1 ação executável.`
-    );
-  }
-
-  while (insights.length < 3) {
-    insights.push(
-      "Use o conteúdo consumido como matéria-prima de execução: uma decisão por sessão, uma ação por dia, uma revisão por semana."
-    );
-  }
-
-  return insights.slice(0, 3);
+  // HÍBRIDO
+  insights.push(
+    `Bloco Gamer: ${context.liveMoment} Em ${context.gameName}, as técnicas mais úteis foram ${context.gameTechniques
+      .slice(0, 2)
+      .join(" e ")}.`
+  );
+  insights.push(
+    `Bloco Tech/Negócio: ${context.techSources.length ? context.techSources.join(", ") : "fontes de IA"} apontam para ${context.launchHints.length ? context.launchHints[0] : "automação imediata"}; aplique isso no fluxo de conteúdo e operação.`
+  );
+  insights.push(
+    "Integração híbrida: use consistência gamer (rotina disciplinada) + automação de IA para publicar melhor e executar mais com menos desgaste."
+  );
+  return insights;
 }
 
 function buildIntelligentConnections(signals, context) {
+  const profile = context.profile || "TECH";
   const connections = [];
-  const hasCreatorPerformance = signals.hasGaules || signals.hasAlanzoka;
-  const hasAiTech = signals.hasOpenAI || signals.hasGoogleAI || signals.hasDeepMind;
 
-  if (hasCreatorPerformance && hasAiTech) {
-    const creator = signals.hasGaules
-      ? "gaules"
-      : signals.hasAlanzoka
-      ? "alanzoka"
-      : "criadores de alta performance";
-    const aiSource = signals.hasOpenAI
-      ? "OpenAI"
-      : signals.hasGoogleAI
-      ? "Google AI"
-      : "Google DeepMind";
+  if (profile === "GAMER") {
     connections.push(
-      `${creator} aplica consistência extrema + ${aiSource} acelera automação = oportunidade de escalar frequência de conteúdo sem perder qualidade.`
+      `${context.gameName} + consistência dos streamers = evolução de rank por repetição inteligente de fundamentos.`
     );
+    connections.push(
+      `Leitura de momento intenso + treino focado = menos erro sob pressão nas partidas decisivas.`
+    );
+    return connections;
   }
 
-  if (signals.hasHistoryAI && hasAiTech) {
+  if (profile === "TECH") {
     connections.push(
-      `História da IA mostra ciclos de adoção rápidos + tecnologias atuais indicam janela de vantagem competitiva agora; quem operacionalizar primeiro captura atenção e mercado.`
+      `${context.techSources.length ? context.techSources[0] : "OpenAI/Google"} + automação de rotina = ganho imediato de velocidade de execução técnica.`
     );
+    connections.push(
+      `Lançamentos de IA + aplicação semanal orientada a KPI = adoção real (não só consumo de notícia).`
+    );
+    return connections;
   }
 
-  if (context.pendingCreators.length > 0 && context.creatorsSeen.length > 0) {
+  if (profile === "EMPREENDEDOR") {
     connections.push(
-      `Você já validou ${context.creatorsSeen.slice(
-        0,
-        2
-      ).join(", ")}; ao adicionar ${context.pendingCreators
-        .slice(0, 2)
-        .join(", ")} você amplia repertório sem perder foco.`
+      "Conteúdo de estratégia + execução comercial diária = previsibilidade de crescimento."
     );
+    connections.push(
+      "Marketing com métrica única + revisão semanal = aumento de eficiência sem dispersão."
+    );
+    return connections;
   }
 
-  if (!connections.length) {
-    connections.push(
-      "Conectar conteúdo + execução é o multiplicador principal: para cada tema consumido, defina imediatamente uma aplicação prática no funil do negócio."
-    );
-  }
-
-  return connections.slice(0, 2);
+  // HÍBRIDO
+  connections.push(
+    `${context.primaryStreamer || "criador gamer"} usa consistência extrema + ${
+      context.techSources[0] || "IA atual"
+    } oferece automação = oportunidade de automatizar consistência de conteúdo.`
+  );
+  connections.push(
+    `Técnicas de gameplay (disciplina, timing, leitura) + processos de negócio (KPI, funil, execução) = vantagem competitiva sustentável.`
+  );
+  return connections;
 }
 
 function buildWeekQuestion(signals, context) {
-  const hasCreatorPerformance = signals.hasGaules || signals.hasAlanzoka;
-  const hasAiTech = signals.hasOpenAI || signals.hasGoogleAI || signals.hasDeepMind;
+  const profile = context.profile || "TECH";
 
-  if (context.isFirstReport) {
-    return "Qual processo do seu negócio mais drena tempo hoje e poderia ser o primeiro a ser automatizado com IA ainda esta semana?";
+  if (profile === "GAMER") {
+    return `No ${context.gameName}, qual fundamento você vai dominar primeiro para subir de nível/rank nesta semana: posicionamento, timing ou tomada de decisão?`;
   }
 
-  if (hasCreatorPerformance && hasAiTech) {
-    return "Se você tivesse que unir a consistência dos criadores do Radar com uma automação de IA em um único plano de 7 dias, qual rotina começaria amanhã às 9h?";
+  if (profile === "TECH") {
+    return `Qual tecnologia que você consumiu hoje (${context.launchHints[0] || "automação por IA"}) vai virar um piloto real no seu fluxo já nas próximas 48h?`;
   }
 
-  if (signals.hasHistoryAI) {
-    return "Qual decisão você está adiando por medo de mudança tecnológica, mesmo sabendo que a janela de vantagem acontece agora?";
+  if (profile === "EMPREENDEDOR") {
+    return "Qual próximo passo único no seu negócio você vai executar amanhã para gerar resultado mensurável em 7 dias?";
   }
 
-  if (context.pendingCreators.length > 0) {
-    return `Qual criador pendente (${context.pendingCreators[0]}) pode destravar um insight novo para seu negócio nesta semana?`;
-  }
-
-  return "Qual ação concreta você vai executar nas próximas 24h para transformar este relatório em resultado real?";
+  // HÍBRIDO
+  return [
+    `Opção Gamer: no ${context.gameName}, qual ajuste você vai testar para evoluir desempenho já na próxima sessão?`,
+    `Opção Tech/Negócio: qual automação baseada em ${context.techSources[0] || "IA"} você vai ativar esta semana para ganhar escala?`,
+  ].join(" || ");
 }
 
 function buildDeterministicReport(nome, atual, anterior, resumoLocal) {
@@ -505,6 +783,27 @@ function buildDeterministicReport(nome, atual, anterior, resumoLocal) {
   const consumedNames = collectConsumedContentNames(atual, local);
   const signals = detectRadarSignals(consumedNames);
   const launchHints = uniqueIgnoreCase(signals.launchMentions);
+  const profileData = detectUserProfile(consumedNames, local, byCategory, byType);
+  const profile = profileData.profile;
+  const gameName = inferMainGame(consumedNames, local.timeline);
+  const liveMoment = inferLiveMoment(local.timeline, gameName);
+  const gameTechniques = inferGameplayTechniques(gameName);
+  const contentSummaries = buildSpecificContentSummaries(consumedNames);
+  const techSources = uniqueIgnoreCase(
+    consumedNames.filter((item) => {
+      const norm = normalizeForCompare(item);
+      return (
+        norm.includes("openai") ||
+        norm.includes("google ai") ||
+        norm.includes("deepmind")
+      );
+    })
+  );
+  const primaryStreamer =
+    creatorsSeen.find((name) => {
+      const norm = normalizeForCompare(name);
+      return norm.includes("gaules") || norm.includes("alanzoka");
+    }) || "";
   const dominantType =
     Object.entries(byType).sort((a, b) => b[1] - a[1])[0]?.[0] ||
     (liveCount > videoCount ? "live_play" : "video_play");
@@ -534,64 +833,80 @@ function buildDeterministicReport(nome, atual, anterior, resumoLocal) {
   const timeline = local.timeline || local.ultimos;
   const conteudosEspecificos = local.conteudos;
   const insights = buildContextualInsights(signals, {
+    profile,
     creatorsSeen,
     launchHints,
     currentTotal,
     liveCount,
     videoCount,
+    gameName,
+    liveMoment,
+    gameTechniques,
+    techSources,
   });
   const intelligentConnections = buildIntelligentConnections(signals, {
+    profile,
     creatorsSeen,
     pendingCreators,
+    gameName,
+    techSources,
+    primaryStreamer,
   });
   const weekQuestion = buildWeekQuestion(signals, {
+    profile,
     isFirstReport,
     pendingCreators,
+    gameName,
+    launchHints,
+    techSources,
   });
 
   const nextSteps = [];
-  if (isFirstReport) {
+  if (profile === "GAMER") {
     nextSteps.push(
-      "1) Defina 2 criadores do Radar para acompanhar de forma intencional nesta semana."
+      `1) Em ${gameName}, treine 20-30 min por dia focando em ${gameTechniques[0]}.`
     );
     nextSteps.push(
-      "2) Assista 1 live + 1 vídeo e registre 3 decisões de negócio baseadas no conteúdo."
+      `2) Revise uma partida e anote 3 decisões críticas (boa, ruim, corrigível).`
     );
     nextSteps.push(
-      "3) Volte amanhã para gerar base comparativa e ativar evolução semanal personalizada."
+      "3) Teste uma nova estratégia de rank (posição, ritmo ou escolha de personagem/função) e compare desempenho."
     );
-  } else if (
-    (signals.hasGaules || signals.hasAlanzoka) &&
-    (signals.hasOpenAI || signals.hasGoogleAI || signals.hasDeepMind)
-  ) {
+  } else if (profile === "TECH") {
     nextSteps.push(
-      "1) Escolha um formato recorrente inspirado nos criadores que você viu e padronize uma rotina semanal de publicação."
+      `1) Escolha uma tecnologia consumida hoje (${launchHints[0] || "IA aplicada"}) e defina um piloto de 7 dias.`
     );
     nextSteps.push(
-      "2) Automatize a etapa mais repetitiva desse formato com IA (roteiro, clipping, distribuição ou atendimento)."
+      "2) Implemente em um fluxo real com dono, prazo e métrica de sucesso."
     );
     nextSteps.push(
-      "3) Mensure impacto em audiência ou conversão e ajuste no próximo relatório com base nos números."
+      "3) Documente resultado e decida: escalar, ajustar ou descartar no próximo ciclo."
     );
-  } else if (dominantType.includes("live")) {
+  } else if (profile === "EMPREENDEDOR") {
     nextSteps.push(
-      "1) Escolha a live com maior aderência ao seu negócio e extraia 2 oportunidades acionáveis."
-    );
-    nextSteps.push(
-      "2) Teste uma ação nas próximas 24h (oferta, criativo ou abordagem comercial)."
+      "1) Defina a prioridade da semana no negócio (aquisição, conversão ou retenção)."
     );
     nextSteps.push(
-      "3) Compare resultado no próximo relatório para validar evolução real."
+      "2) Execute uma ação de maior impacto em até 24h e acompanhe KPI diário."
+    );
+    nextSteps.push(
+      "3) Faça revisão semanal objetiva e ajuste com base em números, não em opinião."
     );
   } else {
     nextSteps.push(
-      "1) Selecione um conteúdo prioritário e transforme em um plano com início/fim nesta semana."
+      `1) Bloco Gamer: escolha 1 fundamento de ${gameName} para evoluir (treino diário curto + review).`
     );
     nextSteps.push(
-      "2) Defina métrica de sucesso simples (leads, reuniões, conversão ou retenção)."
+      `2) Bloco Tech/Negócio: pilote uma automação baseada em ${techSources[0] || "IA"} no seu fluxo real.`
     );
     nextSteps.push(
-      "3) Reavalie no próximo relatório e ajuste com base no que funcionou."
+      "3) Integre os dois blocos: transforme disciplina de gameplay em rotina operacional com KPI semanal."
+    );
+  }
+
+  if (isFirstReport) {
+    nextSteps.push(
+      "4) Como este é o primeiro relatório, mantenha consistência diária para liberar comparação evolutiva já no próximo ciclo."
     );
   }
 
@@ -599,6 +914,7 @@ function buildDeterministicReport(nome, atual, anterior, resumoLocal) {
     `Olá, ${nome}!`,
     ``,
     `Resumo do seu dia na Área Exclusiva:`,
+    `- Perfil detectado: ${profile}`,
     `- Total de ações: ${currentTotal}`,
     `- Lives assistidas: ${liveCount || 0}`,
     `- Vídeos assistidos: ${videoCount || 0}`,
@@ -616,12 +932,15 @@ function buildDeterministicReport(nome, atual, anterior, resumoLocal) {
     `Conteúdos específicos identificados:`,
     conteudosEspecificos || "- Sem conteúdo nominal identificado ainda.",
     ``,
+    `Resumo dos conteúdos (objetivo e aplicável):`,
+    ...contentSummaries,
+    ``,
     `Ações recentes:`,
     recentes || timeline || "- Sem ações recentes registradas.",
     ``,
     `Insights práticos:`,
-    `- ${insights[0]}`,
-    `- ${insights[1]}`,
+    profile === "HÍBRIDO" ? `- Seção Gamer: ${insights[0]}` : `- ${insights[0]}`,
+    profile === "HÍBRIDO" ? `- Seção Tech/Negócio: ${insights[1]}` : `- ${insights[1]}`,
     `- ${insights[2]}`,
     ``,
     `Conexões inteligentes:`,
@@ -634,7 +953,9 @@ function buildDeterministicReport(nome, atual, anterior, resumoLocal) {
     ...nextSteps,
     ``,
     `Pergunta da semana:`,
-    `- ${weekQuestion}`,
+    ...(profile === "HÍBRIDO"
+      ? weekQuestion.split("||").map((part) => `- ${part.trim()}`)
+      : [`- ${weekQuestion}`]),
     ``,
     `Mensagem final: você já está construindo ritmo. A consistência semanal é o que transforma conteúdo em resultado real.`,
   ].join("\n");
@@ -665,6 +986,11 @@ function buildGeminiInput(nome, atual, anterior, resumoLocal) {
   const categoriasAtual = aggregateByCategory(atual);
   const tiposAtual = aggregateByType(atual);
   const categoriasAnterior = aggregateByCategory(anterior);
+  const consumedNames = collectConsumedContentNames(atual, local);
+  const profileData = detectUserProfile(consumedNames, local, categoriasAtual, tiposAtual);
+  const gameName = inferMainGame(consumedNames, local.timeline);
+  const liveMoment = inferLiveMoment(local.timeline, gameName);
+  const gameTechniques = inferGameplayTechniques(gameName);
 
   const recentes = atual.slice(0, 12).map((item) => ({
     tipo: item.tipo_conteudo,
@@ -679,6 +1005,8 @@ function buildGeminiInput(nome, atual, anterior, resumoLocal) {
     `Consumo últimos 7 dias (total): ${atual.length}`,
     `Consumo semana anterior (total): ${anterior.length}`,
     `Primeiro relatório do cliente?: ${anterior.length === 0 ? "sim" : "não"}`,
+    `Perfil detectado pelo motor local: ${profileData.profile}`,
+    `Pontuação de perfil local: gamer=${profileData.gamerScore}, tech=${profileData.techScore}, empreendedor=${profileData.empreendedorScore}`,
     `Categorias semana atual: ${JSON.stringify(categoriasAtual)}`,
     `Categorias semana anterior: ${JSON.stringify(categoriasAnterior)}`,
     `Tipos semana atual: ${JSON.stringify(tiposAtual)}`,
@@ -688,6 +1016,9 @@ function buildGeminiInput(nome, atual, anterior, resumoLocal) {
     `Criadores monitorados no Radar (local): ${JSON.stringify(local.radarCreators)}`,
     `Conteúdos específicos (local): ${local.conteudos || "não informado"}`,
     `Timeline local: ${local.timeline || "não informado"}`,
+    `Jogo principal detectado (local): ${gameName}`,
+    `Momento intenso detectado da live (local): ${liveMoment}`,
+    `Técnicas de gameplay detectadas (local): ${JSON.stringify(gameTechniques)}`,
     "Regra de interpretação contextual:",
     "- gaules/alanzoka => extrair mentalidade de alta performance, gestão de comunidade, crescimento de audiência, disciplina e consistência aplicável ao negócio do cliente.",
     "- OpenAI/Google AI/Google DeepMind => identificar tecnologia discutida/lançada e sugerir aplicação específica no contexto do cliente.",
@@ -705,6 +1036,29 @@ function extractGeminiText(payload) {
     .map((part) => part?.text ?? "")
     .join("")
     .trim();
+}
+
+function isAdvancedReportValid(text) {
+  const normalized = normalizeForCompare(text);
+  const requiredTokens = [
+    "perfil detectado",
+    "insights praticos",
+    "conexoes inteligentes",
+    "pergunta da semana",
+    "proximos passos",
+  ];
+  if (!requiredTokens.every((token) => normalized.includes(token))) {
+    return false;
+  }
+  const genericSignals = [
+    "escolha o tema mais recorrente",
+    "execute uma acao ainda hoje",
+    "transformar aprendizado em crescimento",
+  ];
+  const genericHits = genericSignals.filter((signal) =>
+    normalized.includes(normalizeForCompare(signal))
+  ).length;
+  return genericHits < 3;
 }
 
 async function generateReportWithGemini(
@@ -751,6 +1105,9 @@ async function generateReportWithGemini(
   const generatedText = extractGeminiText(data);
   if (!generatedText) {
     throw new Error("Gemini não retornou texto para o relatório.");
+  }
+  if (!isAdvancedReportValid(generatedText)) {
+    throw new Error("Gemini retornou relatório genérico/fora do formato avançado.");
   }
 
   return generatedText;
