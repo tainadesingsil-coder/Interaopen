@@ -1,55 +1,50 @@
-import { NextRequest, NextResponse } from "next/server";
-
 const GEMINI_SYSTEM_PROMPT =
   "Você é o assistente de aprendizado da Codexion. Analise o conteúdo consumido pelo cliente e gere um relatório semanal personalizado em português com: saudação com o nome do cliente, resumo do que ele consumiu por categoria, 3 insights práticos aplicáveis ao negócio dele, evolução comparada à semana anterior, recomendação de conteúdo para a próxima semana e um parágrafo motivacional final. Seja direto, caloroso e 100% personalizado.";
 
-type InteracaoConteudo = {
-  user_id: string;
-  tipo_conteudo: string;
-  titulo_conteudo: string;
-  url_conteudo: string;
-  categoria: string;
-  assistido_em: string;
-};
+function getEnv(context) {
+  return context?.env ?? {};
+}
 
-type RelatorioSemanalBody = {
-  user_id?: string;
-  nome?: string;
-  email?: string;
-};
-
-type UsuarioPerfil = {
-  nome: string;
-  email: string;
-};
-
-function getSupabaseConfig() {
+function getSupabaseConfig(context) {
+  const env = getEnv(context);
   const supabaseUrl =
-    process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
+    env.SUPABASE_URL ??
+    env.NEXT_PUBLIC_SUPABASE_URL ??
+    process.env.SUPABASE_URL ??
+    process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey =
+    env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY;
   return { supabaseUrl, supabaseKey };
 }
 
-function getResendConfig() {
+function getResendConfig(context) {
+  const env = getEnv(context);
   return {
-    resendApiKey: process.env.RESEND_API_KEY,
-    resendFromEmail: process.env.RESEND_FROM_EMAIL ?? "Codexion <onboarding@resend.dev>",
+    resendApiKey: env.RESEND_API_KEY ?? process.env.RESEND_API_KEY,
+    resendFromEmail:
+      env.RESEND_FROM_EMAIL ??
+      process.env.RESEND_FROM_EMAIL ??
+      "Codexion <onboarding@resend.dev>",
   };
 }
 
-function formatDateIsoDaysAgo(daysAgo: number): string {
+function getGeminiApiKey(context) {
+  const env = getEnv(context);
+  return env.GEMINI_API_KEY ?? process.env.GEMINI_API_KEY;
+}
+
+function formatDateIsoDaysAgo(daysAgo) {
   const date = new Date();
   date.setUTCDate(date.getUTCDate() - daysAgo);
   return date.toISOString();
 }
 
 async function fetchInteracoesIntervalo(
-  supabaseUrl: string,
-  supabaseKey: string,
-  userId: string,
-  fromIso: string,
-  toIso: string,
+  supabaseUrl,
+  supabaseKey,
+  userId,
+  fromIso,
+  toIso
 ) {
   const params = new URLSearchParams({
     select:
@@ -68,7 +63,7 @@ async function fetchInteracoesIntervalo(
         Authorization: `Bearer ${supabaseKey}`,
       },
       cache: "no-store",
-    },
+    }
   );
 
   if (!response.ok) {
@@ -76,30 +71,26 @@ async function fetchInteracoesIntervalo(
     throw new Error(`Falha ao buscar interações: ${errorText}`);
   }
 
-  return (await response.json()) as InteracaoConteudo[];
+  return await response.json();
 }
 
-function aggregateByCategory(interacoes: InteracaoConteudo[]) {
-  return interacoes.reduce<Record<string, number>>((acc, item) => {
-    const key = item.categoria || "Sem categoria";
+function aggregateByCategory(interacoes) {
+  return interacoes.reduce((acc, item) => {
+    const key = item?.categoria || "Sem categoria";
     acc[key] = (acc[key] ?? 0) + 1;
     return acc;
   }, {});
 }
 
-function aggregateByType(interacoes: InteracaoConteudo[]) {
-  return interacoes.reduce<Record<string, number>>((acc, item) => {
-    const key = item.tipo_conteudo || "desconhecido";
+function aggregateByType(interacoes) {
+  return interacoes.reduce((acc, item) => {
+    const key = item?.tipo_conteudo || "desconhecido";
     acc[key] = (acc[key] ?? 0) + 1;
     return acc;
   }, {});
 }
 
-function buildGeminiInput(
-  nome: string,
-  atual: InteracaoConteudo[],
-  anterior: InteracaoConteudo[],
-) {
+function buildGeminiInput(nome, atual, anterior) {
   const categoriasAtual = aggregateByCategory(atual);
   const tiposAtual = aggregateByType(atual);
   const categoriasAnterior = aggregateByCategory(anterior);
@@ -124,26 +115,16 @@ function buildGeminiInput(
   ].join("\n");
 }
 
-function extractGeminiText(payload: unknown): string {
-  const response = payload as {
-    candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
-  };
-
-  const parts = response.candidates?.[0]?.content?.parts ?? [];
-  const text = parts
-    .map((part) => part.text ?? "")
+function extractGeminiText(payload) {
+  const parts = payload?.candidates?.[0]?.content?.parts ?? [];
+  return parts
+    .map((part) => part?.text ?? "")
     .join("")
     .trim();
-
-  return text;
 }
 
-async function generateReportWithGemini(
-  nome: string,
-  atual: InteracaoConteudo[],
-  anterior: InteracaoConteudo[],
-) {
-  const geminiApiKey = process.env.GEMINI_API_KEY;
+async function generateReportWithGemini(context, nome, atual, anterior) {
+  const geminiApiKey = getGeminiApiKey(context);
   if (!geminiApiKey) {
     throw new Error("GEMINI_API_KEY não configurada.");
   }
@@ -168,7 +149,7 @@ async function generateReportWithGemini(
           maxOutputTokens: 1500,
         },
       }),
-    },
+    }
   );
 
   if (!response.ok) {
@@ -176,7 +157,7 @@ async function generateReportWithGemini(
     throw new Error(`Falha no Gemini: ${errorText}`);
   }
 
-  const data = (await response.json()) as unknown;
+  const data = await response.json();
   const generatedText = extractGeminiText(data);
   if (!generatedText) {
     throw new Error("Gemini não retornou texto para o relatório.");
@@ -185,12 +166,7 @@ async function generateReportWithGemini(
   return generatedText;
 }
 
-async function fetchFirstUserFromTable(
-  supabaseUrl: string,
-  supabaseKey: string,
-  table: string,
-  userId: string,
-): Promise<UsuarioPerfil | null> {
+async function fetchFirstUserFromTable(supabaseUrl, supabaseKey, table, userId) {
   const params = new URLSearchParams({
     select: "id,user_id,nome,name,full_name,email",
     or: `(id.eq.${userId},user_id.eq.${userId})`,
@@ -206,10 +182,10 @@ async function fetchFirstUserFromTable(
   });
 
   if (!response.ok) return null;
-  const data = (await response.json()) as Array<Record<string, string>>;
-  if (!data.length) return null;
+  const data = await response.json();
+  if (!Array.isArray(data) || data.length === 0) return null;
 
-  const first = data[0];
+  const first = data[0] ?? {};
   const nome =
     first.nome ?? first.name ?? first.full_name ?? first.user_id ?? first.id;
   const email = first.email;
@@ -219,11 +195,11 @@ async function fetchFirstUserFromTable(
 }
 
 async function resolveUserProfile(
-  supabaseUrl: string,
-  supabaseKey: string,
-  userId: string,
-  nome?: string,
-  email?: string,
+  supabaseUrl,
+  supabaseKey,
+  userId,
+  nome,
+  email
 ) {
   if (nome && email) return { nome, email };
 
@@ -233,7 +209,7 @@ async function resolveUserProfile(
       supabaseUrl,
       supabaseKey,
       table,
-      userId,
+      userId
     );
     if (profile) {
       return {
@@ -249,12 +225,15 @@ async function resolveUserProfile(
   };
 }
 
-function buildEmailTemplate(nome: string, relatorioTexto: string) {
+function buildEmailTemplate(nome, relatorioTexto) {
   const safeText = relatorioTexto
     .split("\n")
     .map((line) => line.trim())
     .filter(Boolean)
-    .map((line) => `<p style="margin:0 0 10px 0;line-height:1.6;color:#d1d5db;">${line}</p>`)
+    .map(
+      (line) =>
+        `<p style="margin:0 0 10px 0;line-height:1.6;color:#d1d5db;">${line}</p>`
+    )
     .join("");
 
   return `
@@ -287,16 +266,11 @@ function buildEmailTemplate(nome: string, relatorioTexto: string) {
       </tr>
     </table>
   </body>
-</html>
-`;
+</html>`;
 }
 
-async function sendEmailByResend(
-  nome: string,
-  email: string,
-  relatorioTexto: string,
-) {
-  const { resendApiKey, resendFromEmail } = getResendConfig();
+async function sendEmailByResend(context, nome, email, relatorioTexto) {
+  const { resendApiKey, resendFromEmail } = getResendConfig(context);
   if (!resendApiKey) {
     throw new Error("RESEND_API_KEY não configurada.");
   }
@@ -321,33 +295,33 @@ async function sendEmailByResend(
   }
 }
 
-export async function POST(request: NextRequest) {
-  const { supabaseUrl, supabaseKey } = getSupabaseConfig();
+export async function onRequestPost(context) {
+  const { supabaseUrl, supabaseKey } = getSupabaseConfig(context);
   if (!supabaseUrl || !supabaseKey) {
-    return NextResponse.json(
+    return Response.json(
       {
         error:
           "SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY são obrigatórias para esta rota.",
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 
-  let body: RelatorioSemanalBody;
+  let body;
   try {
-    body = (await request.json()) as RelatorioSemanalBody;
+    body = await context.request.json();
   } catch {
-    return NextResponse.json(
+    return Response.json(
       { error: "Corpo da requisição inválido." },
-      { status: 400 },
+      { status: 400 }
     );
   }
 
-  const userId = body.user_id?.trim();
+  const userId = typeof body?.user_id === "string" ? body.user_id.trim() : "";
   if (!userId) {
-    return NextResponse.json(
+    return Response.json(
       { error: "Campo obrigatório ausente: user_id." },
-      { status: 400 },
+      { status: 400 }
     );
   }
 
@@ -356,52 +330,52 @@ export async function POST(request: NextRequest) {
     const last7DaysIso = formatDateIsoDaysAgo(7);
     const last14DaysIso = formatDateIsoDaysAgo(14);
 
-    const [interacoesSemanaAtual, interacoesSemanaAnterior] =
-      await Promise.all([
-        fetchInteracoesIntervalo(
-          supabaseUrl,
-          supabaseKey,
-          userId,
-          last7DaysIso,
-          nowIso,
-        ),
-        fetchInteracoesIntervalo(
-          supabaseUrl,
-          supabaseKey,
-          userId,
-          last14DaysIso,
-          last7DaysIso,
-        ),
-      ]);
+    const [interacoesSemanaAtual, interacoesSemanaAnterior] = await Promise.all([
+      fetchInteracoesIntervalo(
+        supabaseUrl,
+        supabaseKey,
+        userId,
+        last7DaysIso,
+        nowIso
+      ),
+      fetchInteracoesIntervalo(
+        supabaseUrl,
+        supabaseKey,
+        userId,
+        last14DaysIso,
+        last7DaysIso
+      ),
+    ]);
 
     const perfil = await resolveUserProfile(
       supabaseUrl,
       supabaseKey,
       userId,
-      body.nome?.trim(),
-      body.email?.trim(),
+      typeof body?.nome === "string" ? body.nome.trim() : undefined,
+      typeof body?.email === "string" ? body.email.trim() : undefined
     );
 
     const nomeCliente = perfil.nome || "Cliente";
     if (!perfil.email) {
-      return NextResponse.json(
+      return Response.json(
         {
           error:
             "Não foi possível identificar e-mail do cliente para envio do relatório.",
         },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
     const relatorio = await generateReportWithGemini(
+      context,
       nomeCliente,
       interacoesSemanaAtual,
-      interacoesSemanaAnterior,
+      interacoesSemanaAnterior
     );
 
-    await sendEmailByResend(nomeCliente, perfil.email, relatorio);
+    await sendEmailByResend(context, nomeCliente, perfil.email, relatorio);
 
-    return NextResponse.json({
+    return Response.json({
       ok: true,
       user_id: userId,
       email_enviado_para: perfil.email,
@@ -410,6 +384,6 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Erro inesperado ao gerar relatório.";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return Response.json({ error: message }, { status: 500 });
   }
 }
