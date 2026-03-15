@@ -1,4 +1,4 @@
-const CACHE_TTL_MS = 10 * 60 * 1000;
+const CACHE_TTL_MS = 2 * 60 * 1000;
 const SOURCE_TIMEOUT_MS = 9000;
 const TRANSLATE_TIMEOUT_MS = 6000;
 const DEFAULT_LIMIT = 12;
@@ -622,7 +622,7 @@ export async function onRequestGet(context) {
   const requestUrl = new URL(context.request.url);
   const limit = parseLimit(requestUrl.searchParams.get('limit'));
   const cache = getCache();
-  const cacheKey = `podcasts:${limit}`;
+  const cacheKey = `v2:podcasts:${limit}`;
   const now = Date.now();
   const cached = cache.get(cacheKey);
 
@@ -630,7 +630,7 @@ export async function onRequestGet(context) {
     return Response.json(cached.data, {
       headers: {
         'x-podcast-cache': 'hit',
-        'cache-control': 'public, max-age=300',
+        'cache-control': 'public, max-age=60',
       },
     });
   }
@@ -665,7 +665,7 @@ export async function onRequestGet(context) {
     return Response.json(cached.data, {
       headers: {
         'x-podcast-cache': 'stale',
-        'cache-control': 'public, max-age=180',
+        'cache-control': 'public, max-age=60',
       },
     });
   }
@@ -673,7 +673,7 @@ export async function onRequestGet(context) {
   return Response.json(data, {
     headers: {
       'x-podcast-cache': 'miss',
-      'cache-control': 'public, max-age=300',
+      'cache-control': 'public, max-age=60',
     },
   });
 }

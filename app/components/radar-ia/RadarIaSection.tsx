@@ -47,9 +47,9 @@ const formatDate = (value: string | null) => {
 };
 
 const DEFAULT_QUERY = 'agentes de IA';
-const RADAR_REFRESH_MS = 90 * 1000;
-const RADAR_ROTATION_MS = 26 * 1000;
-const PODCAST_REFRESH_MS = 4 * 60 * 1000;
+const RADAR_REFRESH_MS = 60 * 1000;
+const RADAR_ROTATION_MS = 9 * 1000;
+const PODCAST_REFRESH_MS = 2 * 60 * 1000;
 
 const rotateItems = <T,>(items: T[], steps: number) => {
   if (items.length <= 1) return items;
@@ -1229,6 +1229,7 @@ export function RadarIaSection() {
         const response = await fetch(`/api/radar-ia?${params.toString()}`, {
           method: 'GET',
           signal: controller.signal,
+          cache: 'no-store',
         });
         if (!response.ok) {
           throw new Error('radar_fetch_failed');
@@ -1260,6 +1261,7 @@ export function RadarIaSection() {
         const response = await fetch('/api/podcasts?limit=12', {
           method: 'GET',
           signal: controller.signal,
+          cache: 'no-store',
         });
         if (!response.ok) {
           throw new Error('podcasts_fetch_failed');
@@ -1296,14 +1298,16 @@ export function RadarIaSection() {
   }, [payload, activeTab]);
 
   const dynamicActiveItems = useMemo(() => {
-    const topPinned = activeItems.slice(0, 1);
-    const rotating = activeItems.slice(1);
-    return [...topPinned, ...rotateItems(rotating, radarRotationTick)];
+    return rotateItems(activeItems, radarRotationTick);
   }, [activeItems, radarRotationTick]);
 
   const displayedItems = useMemo(
     () => dynamicActiveItems.slice(0, visibleCount),
     [dynamicActiveItems, visibleCount]
+  );
+  const dynamicPodcastItems = useMemo(
+    () => rotateItems(podcastItems, radarRotationTick),
+    [podcastItems, radarRotationTick]
   );
   const viewerItems = useMemo(() => {
     if (!payload) return dedupeViewerItems([...podcastItems]);
@@ -1500,7 +1504,7 @@ export function RadarIaSection() {
           </div>
         ) : (
           <div className='grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2 xl:grid-cols-3'>
-            {podcastItems.map((item) => (
+            {dynamicPodcastItems.map((item) => (
               <RadarCard key={item.id} item={item} onOpen={setViewerItem} />
             ))}
           </div>

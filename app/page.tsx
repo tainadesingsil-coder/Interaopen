@@ -37,15 +37,20 @@ const portfolioLinks = [
   },
 ];
 
-const CHANNEL_FEEDS_REFRESH_MS = 2 * 60 * 1000;
-const CHANNEL_ROTATION_MS = 22 * 1000;
-const CHANNEL_VISIBLE_LIMIT = 9;
+const CHANNEL_FEEDS_REFRESH_MS = 60 * 1000;
+const CHANNEL_ROTATION_MS = 10 * 1000;
+const CHANNEL_VISIBLE_LIMIT = 8;
 
 const rotateItems = <T,>(items: T[], steps: number) => {
   if (items.length <= 1) return items;
   const offset = ((steps % items.length) + items.length) % items.length;
   if (offset === 0) return items;
   return [...items.slice(offset), ...items.slice(0, offset)];
+};
+
+const takeWindow = <T,>(items: T[], size: number) => {
+  if (size <= 0) return [] as T[];
+  return items.slice(0, Math.min(size, items.length));
 };
 
 const isTwitchProject = (project: FeaturedProject) => /twitch\.tv/i.test(project.caseHref);
@@ -96,6 +101,7 @@ export default function HomePage() {
         const response = await fetch('/api/channel-feeds', {
           method: 'GET',
           signal: controller.signal,
+          cache: 'no-store',
         });
         if (!response.ok) return;
 
@@ -159,9 +165,14 @@ export default function HomePage() {
     const tiktok = channelProjects.filter(isTikTokProject);
     const twitch = channelProjects.filter(isTwitchProject);
     const others = channelProjects.filter((project) => !isTikTokProject(project) && !isTwitchProject(project));
+
     const rotatedTikTok = rotateItems(tiktok, channelRotationTick);
     const rotatedTwitch = rotateItems(twitch, channelRotationTick);
-    return [...rotatedTikTok, ...rotatedTwitch, ...others].slice(0, CHANNEL_VISIBLE_LIMIT);
+    const visibleTikTok = takeWindow(rotatedTikTok, 4);
+    const visibleTwitch = takeWindow(rotatedTwitch, 3);
+    const visibleOthers = takeWindow(others, 2);
+
+    return [...visibleTikTok, ...visibleTwitch, ...visibleOthers].slice(0, CHANNEL_VISIBLE_LIMIT);
   }, [channelProjects, channelRotationTick]);
 
   return (

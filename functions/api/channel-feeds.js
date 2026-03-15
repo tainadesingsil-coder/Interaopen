@@ -1,4 +1,4 @@
-const CACHE_TTL_MS = 5 * 60 * 1000;
+const CACHE_TTL_MS = 60 * 1000;
 const SOURCE_TIMEOUT_MS = 8000;
 const FALLBACK_TWITCH_CHANNELS = [
   'bisteconee',
@@ -443,7 +443,7 @@ const aggregateChannelFeeds = async (env = {}) => {
 
 export async function onRequestGet(context) {
   const cache = getCache();
-  const cacheKey = 'channel-feeds:v4';
+  const cacheKey = 'channel-feeds:v5';
   const now = Date.now();
   const cached = cache.get(cacheKey);
 
@@ -451,7 +451,7 @@ export async function onRequestGet(context) {
     return Response.json(cached.data, {
       headers: {
         'x-channel-cache': 'hit',
-        'cache-control': 'public, max-age=180',
+        'cache-control': 'public, max-age=30',
       },
     });
   }
@@ -465,7 +465,7 @@ export async function onRequestGet(context) {
   return Response.json(data, {
     headers: {
       'x-channel-cache': 'miss',
-      'cache-control': 'public, max-age=180',
+      'cache-control': 'public, max-age=30',
     },
   });
 }

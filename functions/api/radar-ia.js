@@ -1,4 +1,4 @@
-const CACHE_TTL_MS = 4 * 60 * 1000;
+const CACHE_TTL_MS = 60 * 1000;
 const SOURCE_TIMEOUT_MS = 4000;
 const MAX_QUERY_LENGTH = 80;
 const FALLBACK_YOUTUBE_DATA_API_KEY = 'AIzaSyDmRPaN4CvD2OI04Jz8Y8APqktXggkTFAw';
@@ -2152,7 +2152,7 @@ export async function onRequestGet(context) {
   }
 
   const cache = getCache();
-  const cacheKey = `v2:${type}:${range}:${query.toLowerCase()}`;
+  const cacheKey = `v3:${type}:${range}:${query.toLowerCase()}`;
   const now = Date.now();
   const cached = cache.get(cacheKey);
 
@@ -2160,7 +2160,7 @@ export async function onRequestGet(context) {
     return Response.json(cached.data, {
       headers: {
         'x-radar-cache': 'hit',
-        'cache-control': 'public, max-age=120',
+        'cache-control': 'public, max-age=30',
       },
     });
   }
@@ -2174,7 +2174,7 @@ export async function onRequestGet(context) {
   return Response.json(data, {
     headers: {
       'x-radar-cache': 'miss',
-      'cache-control': 'public, max-age=120',
+      'cache-control': 'public, max-age=30',
     },
   });
 }
