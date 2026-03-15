@@ -1,7 +1,7 @@
 const CACHE_TTL_MS = 60 * 1000;
 const SOURCE_TIMEOUT_MS = 4000;
 const MAX_QUERY_LENGTH = 80;
-const FALLBACK_YOUTUBE_DATA_API_KEY = 'AIzaSyDmRPaN4CvD2OI04Jz8Y8APqktXggkTFAw';
+const FALLBACK_YOUTUBE_DATA_API_KEY = 'AIzaSyAcowUDrgcz6eLNa3Tf0k7vp1VNWVkLhJE';
 const FALLBACK_TWITTER_API_KEY = 'g0XdkRNw7loRAmsS4eEID6juG';
 const FALLBACK_TWITTER_API_SECRET = 'D6j0NactQyxxHUskonK5ydkJxDJH0kQHSp9SqQtG28O4Dnys2N';
 const FALLBACK_TWITTER_ACCESS_TOKEN = '2032831349879627776-y91ml7P3XjUWQgrkgKH4cSCFjBxNq9';
@@ -159,6 +159,7 @@ const ALLOWED_TYPES = ['all', 'youtube', 'news', 'instagram'];
 const ALLOWED_RANGES = ['24h', '7d', '30d'];
 const YOUTUBE_CHANNEL_LIMIT = 5;
 const YOUTUBE_VIDEOS_PER_CHANNEL = 4;
+const YOUTUBE_CREATOR_ITEMS_PER_CHANNEL = 3;
 const CURATED_YOUTUBE_VIDEOS = [
   {
     id: 'flIPXJljv5g',
@@ -1345,6 +1346,86 @@ const parseFeedItems = (xml) =>
     })
     .filter((item) => item.title && item.link);
 
+const extractYoutubeVideoIdFromUrl = (value = '') => {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+  try {
+    const parsed = new URL(raw);
+    if (/youtu\.be/i.test(parsed.hostname)) {
+      return parsed.pathname.replace('/', '').trim();
+    }
+    const fromQuery = parsed.searchParams.get('v');
+    if (fromQuery) return fromQuery.trim();
+    const pathParts = parsed.pathname.split('/').filter(Boolean);
+    if (pathParts[0] === 'shorts' && pathParts[1]) return pathParts[1].trim();
+    if (pathParts[0] === 'embed' && pathParts[1]) return pathParts[1].trim();
+    return '';
+  } catch {
+    const fallback = raw.match(/(?:v=|\/shorts\/|\/embed\/|youtu\.be\/)([a-zA-Z0-9_-]{8,20})/);
+    return fallback?.[1] || '';
+  }
+};
+
+const parseYoutubeSeedUrls = (env = {}) => {
+  const raw = String(
+    env?.YOUTUBE_SEED_URLS || env?.YOUTUBE_CREATOR_URLS || env?.YOUTUBE_VIDEO_URLS || ''
+  ).trim();
+  const fromEnv = raw ? parseCommaSeparated(raw) : [];
+  const curated = CURATED_YOUTUBE_VIDEOS.map((item) => item.url);
+  return toUniqueList(
+    [...fromEnv, ...curated].filter((url) => /youtu\.be|youtube\.com/i.test(String(url || ''))),
+    80
+  );
+};
+
+const parseYoutubeSeedVideoIds = (env = {}) =>
+  toUniqueList(
+    parseYoutubeSeedUrls(env)
+      .map((url) => extractYoutubeVideoIdFromUrl(url))
+      .filter(Boolean),
+    80
+  );
+
+const parseYoutubeCreatorChannelIds = (env = {}) => {
+  const raw = String(env?.YOUTUBE_CHANNEL_IDS || env?.YOUTUBE_CREATOR_CHANNEL_IDS || '').trim();
+  const values = raw ? parseCommaSeparated(raw) : [];
+  return toUniqueList(
+    values
+      .map((value) => String(value || '').trim())
+      .map((value) => {
+        const match = value.match(/(UC[a-zA-Z0-9_-]{10,})/);
+        return match?.[1] || value;
+      })
+      .filter((value) => /^UC[a-zA-Z0-9_-]{10,}$/i.test(value)),
+    24
+  );
+};
+
+const fetchYoutubeVideoDetailsByIds = async (apiKey, videoIds = []) => {
+  const ids = toUniqueList(videoIds, 100);
+  if (!apiKey || ids.length === 0) return [];
+
+  const chunks = [];
+  for (let index = 0; index < ids.length; index += 50) {
+    chunks.push(ids.slice(index, index + 50));
+  }
+
+  const settled = await Promise.allSettled(
+    chunks.map(async (chunk) => {
+      const endpoint = new URL('https://www.googleapis.com/youtube/v3/videos');
+      endpoint.searchParams.set('part', 'snippet');
+      endpoint.searchParams.set('id', chunk.join(','));
+      endpoint.searchParams.set('key', apiKey);
+      const response = await fetchWithTimeout(endpoint.toString(), undefined, 6500);
+      if (!response.ok) return [];
+      const payload = await response.json();
+      return Array.isArray(payload?.items) ? payload.items : [];
+    })
+  );
+
+  return settled.flatMap((result) => (result.status === 'fulfilled' ? result.value : []));
+};
+
 const createYoutubeEndpoint = (apiKey, options) => {
   const endpoint = new URL('https://www.googleapis.com/youtube/v3/search');
   endpoint.searchParams.set('part', 'snippet');
@@ -1390,6 +1471,57 @@ const normalizeYoutubeItem = (item, query) => {
     score: computeScore(title, description, publishedAt, query) + aiChannelBoost + aiTopicBoost,
     ctaLabel: 'Assistir',
   };
+};
+
+const fetchYoutubeCreatorBaseItems = async (query, range, env = {}, apiKey = '') => {
+  if (!apiKey) return [];
+
+  const explicitChannelIds = parseYoutubeCreatorChannelIds(env);
+  const seedVideoIds = parseYoutubeSeedVideoIds(env);
+  const seedVideoDetails = await fetchYoutubeVideoDetailsByIds(apiKey, seedVideoIds);
+  const seedChannelIds = dedupeById(
+    seedVideoDetails
+      .map((item) => ({ id: String(item?.snippet?.channelId || '').trim() }))
+      .filter((item) => item.id)
+  )
+    .map((item) => item.id)
+    .slice(0, 24);
+
+  const creatorChannelIds = toUniqueList([...explicitChannelIds, ...seedChannelIds], 24);
+  if (creatorChannelIds.length === 0) return [];
+
+  const publishedAfter = new Date(rangeCutoffMs(range)).toISOString();
+  const settled = await Promise.allSettled(
+    creatorChannelIds.slice(0, 10).map(async (channelId) => {
+      const endpoint = createYoutubeEndpoint(apiKey, {
+        type: 'video',
+        channelId,
+        maxResults: String(YOUTUBE_CREATOR_ITEMS_PER_CHANNEL),
+        order: 'date',
+        publishedAfter,
+        relevanceLanguage: 'pt',
+        regionCode: 'BR',
+      });
+      const response = await fetchWithTimeout(endpoint, undefined, 6500);
+      if (!response.ok) return [];
+      const payload = await response.json();
+      const items = Array.isArray(payload?.items) ? payload.items : [];
+      return items
+        .map((item) => normalizeYoutubeItem(item, query))
+        .filter(Boolean)
+        .map((item) => ({
+          ...item,
+          source: 'YouTube Creators Base',
+          score: Number(item.score || 0) + 8,
+        }));
+    })
+  );
+
+  return sortByScoreAndDate(
+    dedupeById(
+      settled.flatMap((result) => (result.status === 'fulfilled' ? result.value : []))
+    )
+  ).slice(0, 30);
 };
 
 const dedupeById = (items) => {
@@ -1522,6 +1654,7 @@ const fetchYoutubeItems = async (query, range, env) => {
   try {
     const publishedAfter = new Date(rangeCutoffMs(range)).toISOString();
     const aiQuery = `${query} inteligência artificial`;
+    const creatorBasePromise = fetchYoutubeCreatorBaseItems(query, range, env, apiKey).catch(() => []);
     let videoItems = [];
 
     try {
@@ -1618,15 +1751,17 @@ const fetchYoutubeItems = async (query, range, env) => {
     const dynamicItems = sortByScoreAndDate(
       dedupeById(videoItems.map((item) => normalizeYoutubeItem(item, query)).filter(Boolean))
     );
+    const creatorBaseItems = await creatorBasePromise;
+    const combinedDynamic = sortByScoreAndDate(dedupeById([...creatorBaseItems, ...dynamicItems]));
 
-    if (dynamicItems.length === 0) {
+    if (combinedDynamic.length === 0) {
       return sortByScoreAndDate(curatedItems).slice(0, 30);
     }
 
-    const dynamicIds = new Set(dynamicItems.map((item) => item.id));
+    const dynamicIds = new Set(combinedDynamic.map((item) => item.id));
     const curatedRemainder = curatedItems.filter((item) => !dynamicIds.has(item.id));
-    // Prioritize fresh API videos and keep curated list as a safety net at the end.
-    return [...dynamicItems, ...curatedRemainder].slice(0, 30);
+    // Prioritize creator-base + fresh API videos and keep curated fallback at the end.
+    return [...combinedDynamic, ...curatedRemainder].slice(0, 36);
   } catch (error) {
     return sortByScoreAndDate(curatedItems).slice(0, 30);
   }
@@ -2152,7 +2287,7 @@ export async function onRequestGet(context) {
   }
 
   const cache = getCache();
-  const cacheKey = `v3:${type}:${range}:${query.toLowerCase()}`;
+  const cacheKey = `v4:${type}:${range}:${query.toLowerCase()}`;
   const now = Date.now();
   const cached = cache.get(cacheKey);
 
