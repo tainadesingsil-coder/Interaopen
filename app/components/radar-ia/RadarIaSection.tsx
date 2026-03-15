@@ -163,15 +163,6 @@ const deriveTwitchParentHosts = () => {
       .trim()
       .split(':')[0],
   ];
-  const referrerHost = normalizeHostCandidate(document.referrer || '');
-  const ancestorHosts: string[] = [];
-  const ancestors = window.location.ancestorOrigins;
-  if (ancestors && typeof ancestors.length === 'number') {
-    for (let i = 0; i < ancestors.length; i += 1) {
-      const host = normalizeHostCandidate(ancestors[i] || '');
-      if (host) ancestorHosts.push(host);
-    }
-  }
 
   const searchParams = new URLSearchParams(window.location.search || '');
   const explicitParents = [
@@ -186,8 +177,6 @@ const deriveTwitchParentHosts = () => {
 
   const baseHosts = [
     ...locationHosts,
-    referrerHost,
-    ...ancestorHosts,
     ...explicitParents,
     ...envHosts,
     ...DEFAULT_TWITCH_PARENT_HOSTS,
@@ -224,7 +213,7 @@ const buildTwitchEmbedUrls = (channel: string, parents: string[]) => {
 
   const variants = [
     createUrl(parentList),
-    ...parentList.slice(0, 8).map((parent) => createUrl([parent])),
+    ...parentList.slice(0, 3).map((parent) => createUrl([parent])),
     ...(parentList.length > 1 ? [createUrl(parentList.slice(0, 2))] : []),
   ];
 
