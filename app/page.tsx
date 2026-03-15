@@ -37,10 +37,26 @@ const portfolioLinks = [
   },
 ];
 
+const CHANNEL_FEEDS_REFRESH_MS = 2 * 60 * 1000;
+const CHANNEL_ROTATION_MS = 22 * 1000;
+const CHANNEL_VISIBLE_LIMIT = 9;
+
+const rotateItems = <T,>(items: T[], steps: number) => {
+  if (items.length <= 1) return items;
+  const offset = ((steps % items.length) + items.length) % items.length;
+  if (offset === 0) return items;
+  return [...items.slice(offset), ...items.slice(0, offset)];
+};
+
+const isTwitchProject = (project: FeaturedProject) => /twitch\.tv/i.test(project.caseHref);
+const isTikTokProject = (project: FeaturedProject) => /tiktok\.com/i.test(project.caseHref);
+
 export default function HomePage() {
   const [open, setOpen] = useState(false);
   const [channelProjects, setChannelProjects] = useState<FeaturedProject[]>([]);
   const [feedsLoaded, setFeedsLoaded] = useState(false);
+  const [channelRotationTick, setChannelRotationTick] = useState(0);
+  const [lastChannelsUpdateAt, setLastChannelsUpdateAt] = useState('');
 
   useEffect(() => {
     const controller = new AbortController();
@@ -109,6 +125,7 @@ export default function HomePage() {
         if (!controller.signal.aborted) {
           setChannelProjects(mapped);
           setFeedsLoaded(true);
+          setLastChannelsUpdateAt(new Date().toISOString());
         }
       } catch {
         if (!controller.signal.aborted) {
@@ -121,7 +138,7 @@ export default function HomePage() {
     void loadFeeds();
     const timer = window.setInterval(() => {
       void loadFeeds();
-    }, 5 * 60 * 1000);
+    }, CHANNEL_FEEDS_REFRESH_MS);
 
     return () => {
       controller.abort();
@@ -129,7 +146,23 @@ export default function HomePage() {
     };
   }, []);
 
-  const projectsToRender = useMemo(() => channelProjects, [channelProjects]);
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setChannelRotationTick((prev) => prev + 1);
+    }, CHANNEL_ROTATION_MS);
+    return () => {
+      window.clearInterval(timer);
+    };
+  }, []);
+
+  const projectsToRender = useMemo(() => {
+    const tiktok = channelProjects.filter(isTikTokProject);
+    const twitch = channelProjects.filter(isTwitchProject);
+    const others = channelProjects.filter((project) => !isTikTokProject(project) && !isTwitchProject(project));
+    const rotatedTikTok = rotateItems(tiktok, channelRotationTick);
+    const rotatedTwitch = rotateItems(twitch, channelRotationTick);
+    return [...rotatedTikTok, ...rotatedTwitch, ...others].slice(0, CHANNEL_VISIBLE_LIMIT);
+  }, [channelProjects, channelRotationTick]);
 
   return (
     <main className='min-h-screen bg-[#060608] text-white'>
@@ -164,6 +197,15 @@ export default function HomePage() {
                 <header className='space-y-1'>
                   <p className='text-xs uppercase tracking-[0.18em] text-[#9ca3af]'>Canais em tempo real</p>
                   <h3 className='text-xl font-bold text-white md:text-2xl'>Twitch · TikTok</h3>
+                  <p className='text-xs text-[#9ca3af]'>
+                    Recomendações rotativas automáticas · última atualização{' '}
+                    {lastChannelsUpdateAt
+                      ? new Date(lastChannelsUpdateAt).toLocaleTimeString('pt-BR', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })
+                      : '--:--'}
+                  </p>
                 </header>
                 {!feedsLoaded ? (
                   <div className='rounded-xl border border-white/10 bg-[#0b0b0f] p-4 text-sm text-[#9ca3af]'>
