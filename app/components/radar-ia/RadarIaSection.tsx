@@ -130,7 +130,7 @@ const extractTwitchChannelFromUrl = (url: string) => {
   }
 };
 
-const DEFAULT_TWITCH_PARENT_HOSTS = ['codexionai.pages.dev', 'www.codexionai.pages.dev', 'localhost'];
+const DEFAULT_TWITCH_PARENT_HOSTS = ['codexionai.pages.dev', 'www.codexionai.pages.dev'];
 const ENV_TWITCH_PARENT_HOSTS = String(process.env.NEXT_PUBLIC_TWITCH_EMBED_PARENTS || '').trim();
 
 const normalizeHostCandidate = (value: string) => {
@@ -157,12 +157,23 @@ const normalizeHostCandidate = (value: string) => {
 const deriveTwitchParentHosts = () => {
   if (typeof window === 'undefined') return DEFAULT_TWITCH_PARENT_HOSTS;
 
-  const locationHosts = [
-    window.location.hostname,
+  const locationHost = normalizeHostCandidate(window.location.hostname || '');
+  const locationHostNoPort = normalizeHostCandidate(
     String(window.location.host || '')
       .trim()
-      .split(':')[0],
-  ];
+      .split(':')[0]
+  );
+  const locationHosts = [locationHost, locationHostNoPort].filter(Boolean);
+
+  const referrerHost = normalizeHostCandidate(document.referrer || '');
+  const ancestorHosts: string[] = [];
+  const ancestors = window.location.ancestorOrigins;
+  if (ancestors && typeof ancestors.length === 'number') {
+    for (let i = 0; i < ancestors.length; i += 1) {
+      const host = normalizeHostCandidate(ancestors[i] || '');
+      if (host) ancestorHosts.push(host);
+    }
+  }
 
   const searchParams = new URLSearchParams(window.location.search || '');
   const explicitParents = [
@@ -177,6 +188,8 @@ const deriveTwitchParentHosts = () => {
 
   const baseHosts = [
     ...locationHosts,
+    referrerHost,
+    ...ancestorHosts,
     ...explicitParents,
     ...envHosts,
     ...DEFAULT_TWITCH_PARENT_HOSTS,
@@ -191,7 +204,12 @@ const deriveTwitchParentHosts = () => {
     return [host, `www.${host}`];
   });
 
-  return [...new Set(expanded)].slice(0, 12);
+  const unique = [...new Set(expanded)];
+  const primary = normalizeHostCandidate(window.location.hostname || '');
+  if (!primary) return unique.slice(0, 12);
+
+  const prioritized = [primary, ...unique.filter((host) => host !== primary)];
+  return prioritized.slice(0, 12);
 };
 
 const buildTwitchEmbedUrls = (channel: string, parents: string[]) => {
@@ -211,10 +229,13 @@ const buildTwitchEmbedUrls = (channel: string, parents: string[]) => {
     return url.toString();
   };
 
+  const primary = parentList[0];
+  const extras = parentList.slice(1);
+
   const variants = [
     createUrl(parentList),
-    ...parentList.slice(0, 3).map((parent) => createUrl([parent])),
-    ...(parentList.length > 1 ? [createUrl(parentList.slice(0, 2))] : []),
+    ...extras.slice(0, 3).map((extra) => createUrl([primary, extra])),
+    createUrl([primary]),
   ];
 
   return [...new Set(variants)];
