@@ -458,7 +458,7 @@ function collectConsumedContentNames(interacoes, local) {
     .split(/\r?\n/)
     .map((line) =>
       line
-        .replace(/^\d{1,2}:\d{2}\s*[·\-\u2013]\s*/u, "")
+        .replace(/^[\s\-•]*\d{1,2}:\d{2}\s*[·\-\u2013]\s*/u, "")
         .replace(/^(live_play|video_play|abriu_conteudo)\s*:\s*/i, "")
         .trim()
     )
