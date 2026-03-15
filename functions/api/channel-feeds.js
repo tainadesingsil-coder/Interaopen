@@ -27,16 +27,6 @@ const FALLBACK_TIKTOK_VIDEO_URLS = [
   'https://www.tiktok.com/@islamsousa/video/7613833799423528199',
   'https://www.tiktok.com/@jornadatop/video/7232292097313770757',
 ];
-const FALLBACK_TIKTOK_LIVE_URLS = [
-  'https://www.tiktok.com/live/gaming/Elden_Ring:_Nightreign',
-  'https://www.tiktok.com/@julianaalexandria/live',
-];
-const TIKTOK_LIVE_VIDEO_FALLBACK = {
-  'https://www.tiktok.com/live/gaming/elden_ring:_nightreign':
-    'https://www.tiktok.com/@jornadatop/video/7232292097313770757',
-  'https://www.tiktok.com/@julianaalexandria/live':
-    'https://www.tiktok.com/@izabela.anholett/video/7611634628490710293',
-};
 const TWITCH_TOPIC_QUERIES = [
   'inteligencia artificial',
   'marketing digital',
@@ -412,79 +402,22 @@ const fetchTwitchItems = async (env = {}) => {
     .slice(0, 12);
 };
 
-const parseTikTokLiveUrls = (env = {}) => {
-  const raw = String(env?.TIKTOK_LIVE_URLS || env?.TIKTOK_LIVES || '').trim();
-  const envUrls = raw ? parseCommaSeparated(raw) : [];
-  return toUniqueList(
-    [...envUrls, ...FALLBACK_TIKTOK_LIVE_URLS]
-      .map((url) => normalizeTikTokUrl(url))
-      .filter((url) => /^https?:\/\/(www\.)?tiktok\.com\/.+/i.test(url)),
-    8
-  );
-};
-
-const buildTikTokLiveTitle = (url = '') => {
-  if (/\/live\/gaming\//i.test(url)) return 'TikTok Live · Gaming em alta';
-  if (/\/@julianaalexandria\/live/i.test(url)) return 'TikTok Live · Vendas e TikTok Shop';
-  if (/\/@([a-z0-9._]+)\/live/i.test(url)) {
-    const handle = url.match(/\/@([a-z0-9._]+)\/live/i)?.[1] || 'creator';
-    return `TikTok Live · @${handle}`;
-  }
-  return 'TikTok Live · Ao vivo';
-};
-
-const buildTikTokLiveSummary = (url = '') => {
-  if (/\/live\/gaming\//i.test(url)) {
-    return 'Hub de lives de game no TikTok para acompanhar canais em alta.';
-  }
-  if (/\/@julianaalexandria\/live/i.test(url)) {
-    return 'Live de vendas para conhecer estratégias práticas no TikTok Shop.';
-  }
-  return 'Live ao vivo no TikTok com atualização contínua.';
-};
-
-const fetchTikTokLiveItems = async (env = {}) => {
-  const liveUrls = parseTikTokLiveUrls(env);
-  return liveUrls.map((url, index) => {
-    const normalized = normalizeTikTokUrl(url);
-    const mappedPlayableUrl = TIKTOK_LIVE_VIDEO_FALLBACK[normalized.toLowerCase()] || normalized;
-    const handleMatch = url.match(/\/@([a-z0-9._]+)\/live/i);
-    const channel = handleMatch?.[1] ? `@${handleMatch[1].toLowerCase()}` : '@tiktoklive';
-    return {
-      id: `tiktok-live-${normalized}`.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 90),
-      title: buildTikTokLiveTitle(url),
-      summary: buildTikTokLiveSummary(url),
-      url: mappedPlayableUrl,
-      thumbnail: null,
-      tags: ['TikTok', 'Live', /shop|vendas/i.test(url) ? 'Shop' : 'Gaming'],
-      category: /shop|vendas/i.test(url) ? 'Marketing' : 'IA',
-      isLive: true,
-      metricLabel: /shop|vendas/i.test(url) ? 'Live de vendas' : 'Live de games',
-      caseLabel: 'Ver no Radar',
-      channel,
-      rank: index,
-    };
-  });
-};
-
 const aggregateChannelFeeds = async (env = {}) => {
-  const [tiktok, twitch, tiktokLive] = await Promise.all([
+  const [tiktok, twitch] = await Promise.all([
     fetchTiktokItems(env),
     fetchTwitchItems(env),
-    fetchTikTokLiveItems(env),
   ]);
 
   return {
     generatedAt: new Date().toISOString(),
     tiktok,
     twitch,
-    tiktokLive,
   };
 };
 
 export async function onRequestGet(context) {
   const cache = getCache();
-  const cacheKey = 'channel-feeds:v3';
+  const cacheKey = 'channel-feeds:v4';
   const now = Date.now();
   const cached = cache.get(cacheKey);
 
