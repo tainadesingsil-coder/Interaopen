@@ -1,10 +1,9 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  buildTwitchEmbedUrl,
+  buildTwitchEmbedVariants,
   getTwitchParentHosts,
-  rotateHosts,
 } from '@/app/lib/twitchEmbed';
 
 type RadarLink = {
@@ -28,7 +27,7 @@ type RadarIaSectionProps = {
 
 type RadarTab = 'twitch' | 'youtube' | 'tiktok' | 'news';
 
-const EMBED_TIMEOUT_MS = 6500;
+const EMBED_TIMEOUT_MS = 7000;
 
 const DEFAULT_STREAMS: TwitchStream[] = [
   { channel: 'gaules', title: 'Gaules (ao vivo)' },
@@ -65,6 +64,49 @@ function isDev() {
   return process.env.NODE_ENV !== 'production';
 }
 
+function isLikelyMobileOrWebView() {
+  if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+    return false;
+  }
+
+  const ua = navigator.userAgent || '';
+  const isMobileUa = /Android|iPhone|iPad|iPod|Mobile/i.test(ua);
+  const isTouch =
+    window.matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
+  const isStandalone =
+    window.matchMedia('(display-mode: standalone)').matches ||
+    (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
+
+  const androidWebView =
+    /Android/i.test(ua) &&
+    (/\bwv\b/i.test(ua) ||
+      (/Version\/[\d.]+/i.test(ua) && /Chrome\/[\d.]+/i.test(ua)));
+
+  const iosWebView =
+    /(iPhone|iPad|iPod)/i.test(ua) &&
+    /AppleWebKit/i.test(ua) &&
+    !/Safari/i.test(ua);
+
+  const genericWebViewSignals =
+    /; wv\)|\bwv\b|FBAN|FBAV|Instagram|Line\/|MiuiBrowser|Electron|Crosswalk/i.test(
+      ua
+    );
+
+  return isStandalone || androidWebView || iosWebView || genericWebViewSignals || (isMobileUa && isTouch);
+}
+
+function isInvalidIframeDocumentUrl(value: string): boolean {
+  const normalized = value.trim().toLowerCase();
+  if (!normalized) return false;
+  return (
+    normalized.startsWith('about:blank') ||
+    normalized.startsWith('about:srcdoc') ||
+    normalized.startsWith('chrome-error://') ||
+    normalized.startsWith('edge-error://') ||
+    normalized.startsWith('data:text/html')
+  );
+}
+
 export function RadarIaSection({
   streams = DEFAULT_STREAMS,
   youtubeLinks = DEFAULT_YOUTUBE,
@@ -75,59 +117,85 @@ export function RadarIaSection({
 }: RadarIaSectionProps) {
   const [activeTab, setActiveTab] = useState<RadarTab>('twitch');
   const [activeStreamIndex, setActiveStreamIndex] = useState(0);
-  const [embedAttempt, setEmbedAttempt] = useState(0);
   const [iframeLoaded, setIframeLoaded] = useState(false);
   const [showTwitchFallback, setShowTwitchFallback] = useState(false);
+  const [embedVariantIndex, setEmbedVariantIndex] = useState(0);
+  const [copyFeedback, setCopyFeedback] = useState('');
+  const iframeRef = useRef<HTMLIFrameElement | null>(null);
+
+  const isMobileOrWebView = useMemo(() => isLikelyMobileOrWebView(), []);
 
   const parentHosts = useMemo(() => getTwitchParentHosts(), []);
   const activeStream =
     streams[activeStreamIndex] ?? streams[0] ?? DEFAULT_STREAMS[0];
 
-  const parentHostsForAttempt = useMemo(
-    () => rotateHosts(parentHosts, embedAttempt),
-    [parentHosts, embedAttempt]
+  const twitchEmbedVariants = useMemo(
+    () =>
+      activeStream
+        ? buildTwitchEmbedVariants({
+            channel: activeStream.channel,
+            parentHosts,
+            autoplay: !isMobileOrWebView,
+            muted: true,
+          })
+        : [],
+    [activeStream, parentHosts, isMobileOrWebView]
   );
 
-  const twitchEmbedUrl = useMemo(() => {
-    if (!activeStream || !parentHostsForAttempt.length) return '';
-    return buildTwitchEmbedUrl({
-      channel: activeStream.channel,
-      parentHosts: parentHostsForAttempt,
-      autoplay: true,
-      muted: true,
-    });
-  }, [activeStream, parentHostsForAttempt]);
+  const activeVariant = twitchEmbedVariants[embedVariantIndex] ?? null;
+  const twitchEmbedUrl = activeVariant?.url ?? '';
+  const twitchChannelUrl = activeStream
+    ? `https://www.twitch.tv/${activeStream.channel}`
+    : 'https://www.twitch.tv/';
+
+  const moveToNextVariant = useCallback(
+    (reason: string) => {
+      if (isDev()) {
+        console.warn('[Radar IA] Twitch variante falhou, tentando próxima...', {
+          reason,
+          currentVariantIndex: embedVariantIndex,
+          totalVariants: twitchEmbedVariants.length,
+          channel: activeStream?.channel,
+        });
+      }
+
+      setIframeLoaded(false);
+      setCopyFeedback('');
+
+      if (embedVariantIndex + 1 < twitchEmbedVariants.length) {
+        setEmbedVariantIndex((prev) => prev + 1);
+        return;
+      }
+
+      setShowTwitchFallback(true);
+    },
+    [activeStream?.channel, embedVariantIndex, twitchEmbedVariants.length]
+  );
 
   useEffect(() => {
     setIframeLoaded(false);
-    if (!activeStream || !parentHostsForAttempt.length) {
+    setShowTwitchFallback(false);
+    setEmbedVariantIndex(0);
+    setCopyFeedback('');
+
+    if (!activeStream || !twitchEmbedVariants.length) {
       setShowTwitchFallback(true);
       return;
     }
-    setShowTwitchFallback(false);
-  }, [activeStream, parentHostsForAttempt]);
+  }, [activeStream, twitchEmbedVariants.length]);
 
   useEffect(() => {
     if (!isDev()) return;
     // Diagnostic logs only in development.
-    console.info('[Radar IA] Twitch parent hosts:', parentHostsForAttempt);
+    console.info('[Radar IA] Twitch parent hosts:', parentHosts);
     console.info('[Radar IA] Twitch embed URL:', twitchEmbedUrl);
-  }, [parentHostsForAttempt, twitchEmbedUrl]);
+  }, [parentHosts, twitchEmbedUrl]);
 
   useEffect(() => {
     if (activeTab !== 'twitch' || showTwitchFallback || iframeLoaded) return;
     const timer = window.setTimeout(() => {
       if (!iframeLoaded) {
-        if (isDev()) {
-          console.warn(
-            '[Radar IA] Twitch iframe timeout. Switching to fallback.',
-            {
-              channel: activeStream?.channel,
-              parents: parentHostsForAttempt,
-            }
-          );
-        }
-        setShowTwitchFallback(true);
+        moveToNextVariant('watchdog_timeout');
       }
     }, EMBED_TIMEOUT_MS);
 
@@ -136,8 +204,7 @@ export function RadarIaSection({
     activeTab,
     iframeLoaded,
     showTwitchFallback,
-    activeStream?.channel,
-    parentHostsForAttempt,
+    moveToNextVariant,
   ]);
 
   const handleOpenUrl = (url: string) => {
@@ -146,23 +213,49 @@ export function RadarIaSection({
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
-  const handleTryAlternativePlayer = () => {
-    setEmbedAttempt((prev) => prev + 1);
-    setIframeLoaded(false);
-    setShowTwitchFallback(false);
+  const handleCopyTwitchLink = async () => {
+    try {
+      await navigator.clipboard.writeText(twitchChannelUrl);
+      setCopyFeedback('Link copiado.');
+    } catch {
+      setCopyFeedback('Não foi possível copiar agora.');
+    }
   };
 
   const handleIframeError = () => {
     if (isDev()) {
       console.error('[Radar IA] Twitch iframe error event fired.', {
         channel: activeStream?.channel,
-        parents: parentHostsForAttempt,
+        variant: activeVariant,
       });
     }
-    setShowTwitchFallback(true);
+    moveToNextVariant('iframe_error');
   };
 
   const handleIframeLoad = () => {
+    const frame = iframeRef.current;
+    if (!frame) {
+      moveToNextVariant('missing_iframe_ref');
+      return;
+    }
+
+    const srcFromAttribute = frame.getAttribute('src') ?? '';
+    if (isInvalidIframeDocumentUrl(srcFromAttribute)) {
+      moveToNextVariant('invalid_src_attribute');
+      return;
+    }
+
+    // onLoad alone is not enough; validate if browser redirected iframe to a local error page.
+    try {
+      const currentHref = frame.contentWindow?.location?.href ?? '';
+      if (isInvalidIframeDocumentUrl(currentHref)) {
+        moveToNextVariant('invalid_current_href');
+        return;
+      }
+    } catch {
+      // Cross-origin access is expected on success.
+    }
+
     setIframeLoaded(true);
   };
 
@@ -227,8 +320,10 @@ export function RadarIaSection({
                 type='button'
                 onClick={() => {
                   setActiveStreamIndex(index);
-                  setEmbedAttempt(0);
+                  setEmbedVariantIndex(0);
+                  setIframeLoaded(false);
                   setShowTwitchFallback(false);
+                  setCopyFeedback('');
                 }}
                 className={`rounded-md px-3 py-2 text-sm ${
                   index === activeStreamIndex
@@ -241,35 +336,36 @@ export function RadarIaSection({
             ))}
           </div>
 
-          {!parentHostsForAttempt.length || showTwitchFallback ? (
+          {!twitchEmbedVariants.length || showTwitchFallback ? (
             <div className='rounded-xl border border-violet-300/30 bg-violet-950/30 p-4 text-sm text-violet-100'>
               <p className='mb-3'>
-                Não foi possível carregar a live da Twitch neste embed. Isso pode acontecer
-                quando o domínio atual não está permitido no parâmetro <code>parent</code>.
+                Não foi possível abrir esta live no player interno neste ambiente.
               </p>
               <div className='flex flex-wrap gap-2'>
                 <button
                   type='button'
-                  onClick={handleTryAlternativePlayer}
+                  onClick={() => handleOpenUrl(twitchChannelUrl)}
                   className='rounded-md border border-violet-300/40 bg-violet-500/20 px-3 py-2 text-sm font-medium'
                 >
-                  Tentar player alternativo
+                  Abrir na Twitch
                 </button>
                 <button
                   type='button'
-                  onClick={() =>
-                    handleOpenUrl(`https://www.twitch.tv/${activeStream.channel}`)
-                  }
+                  onClick={handleCopyTwitchLink}
                   className='rounded-md border border-white/30 bg-white/10 px-3 py-2 text-sm font-medium'
                 >
-                  Abrir canal na Twitch
+                  Copiar link da live
                 </button>
               </div>
+              {copyFeedback ? (
+                <p className='mt-2 text-xs text-violet-200/90'>{copyFeedback}</p>
+              ) : null}
             </div>
           ) : (
             <div className='overflow-hidden rounded-xl border border-white/15'>
               <iframe
-                key={`${activeStream.channel}-${embedAttempt}`}
+                key={`${activeStream.channel}-${embedVariantIndex}`}
+                ref={iframeRef}
                 src={twitchEmbedUrl}
                 title={`Live Twitch - ${activeStream.title}`}
                 allow='autoplay; fullscreen'

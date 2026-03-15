@@ -5,10 +5,16 @@ export type TwitchEmbedBuildOptions = {
   muted?: boolean;
 };
 
+export type TwitchEmbedVariant = {
+  url: string;
+  parentHosts: string[];
+  strategy: "multi-parent" | "single-parent";
+};
+
 const HOSTNAME_REGEX =
   /^(?=.{1,253}$)(?!-)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)*[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])$/i;
 
-function normalizeHostnameCandidate(value: string): string | null {
+export function normalizeHostnameCandidate(value: string): string | null {
   const raw = value.trim().toLowerCase();
   if (!raw) return null;
 
@@ -42,6 +48,25 @@ function getHostsFromEnvCsv(): string[] {
   if (!rawCsv.trim()) return [];
   return rawCsv
     .split(",")
+    .map((item) => normalizeHostnameCandidate(item))
+    .filter((item): item is string => Boolean(item));
+}
+
+function getHostsFromQueryParams(): string[] {
+  if (typeof window === "undefined") return [];
+  const url = new URL(window.location.href);
+  const params = url.searchParams;
+  const queryKeys = ["embed_parent", "parent", "twitch_parent"];
+  const rawValues: string[] = [];
+
+  for (const key of queryKeys) {
+    const values = params.getAll(key);
+    for (const value of values) {
+      rawValues.push(...value.split(","));
+    }
+  }
+
+  return rawValues
     .map((item) => normalizeHostnameCandidate(item))
     .filter((item): item is string => Boolean(item));
 }
@@ -81,6 +106,9 @@ export function getTwitchParentHosts(): string[] {
   for (const hostFromEnv of getHostsFromEnvCsv()) {
     pushHost(hostFromEnv);
   }
+  for (const hostFromQuery of getHostsFromQueryParams()) {
+    pushHost(hostFromQuery);
+  }
 
   return Array.from(uniqueHosts);
 }
@@ -102,6 +130,37 @@ export function buildTwitchEmbedUrl({
   }
 
   return url.toString();
+}
+
+export function buildTwitchEmbedVariants(
+  options: TwitchEmbedBuildOptions
+): TwitchEmbedVariant[] {
+  const baseHosts = options.parentHosts.filter(Boolean);
+  if (!baseHosts.length) return [];
+
+  const variants: TwitchEmbedVariant[] = [
+    {
+      url: buildTwitchEmbedUrl({
+        ...options,
+        parentHosts: baseHosts,
+      }),
+      parentHosts: baseHosts,
+      strategy: "multi-parent",
+    },
+  ];
+
+  for (const host of baseHosts) {
+    variants.push({
+      url: buildTwitchEmbedUrl({
+        ...options,
+        parentHosts: [host],
+      }),
+      parentHosts: [host],
+      strategy: "single-parent",
+    });
+  }
+
+  return variants;
 }
 
 export function rotateHosts(hosts: string[], step: number): string[] {
