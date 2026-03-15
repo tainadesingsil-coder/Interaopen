@@ -958,18 +958,6 @@ function RadarViewer({
                     </p>
                   </div>
                 )}
-                {!tikTokEmbedFailed && tikTokEmbedUrls.length > 1 ? (
-                  <button
-                    type='button'
-                    onClick={() => {
-                      setTikTokEmbedIndex((prev) => (prev + 1) % tikTokEmbedUrls.length);
-                    }}
-                    className='self-start rounded-lg border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs text-[#9ca3af] transition hover:border-[#C6FF2E]/45 hover:text-[#C6FF2E]'
-                  >
-                    Tentar player alternativo
-                  </button>
-                ) : null}
-
                 {relatedTikTokItems.length > 0 ? (
                   <div className='rounded-xl border border-white/10 bg-white/[0.02] p-3'>
                     <p className='text-[11px] uppercase tracking-[0.12em] text-[#9ca3af]'>
@@ -1042,18 +1030,6 @@ function RadarViewer({
                   </div>
                 )}
 
-                {!twitchEmbedFailed && twitchEmbedUrls.length > 1 ? (
-                  <button
-                    type='button'
-                    onClick={() => {
-                      setTwitchEmbedLoaded(false);
-                      setTwitchEmbedIndex((prev) => (prev + 1) % twitchEmbedUrls.length);
-                    }}
-                    className='self-start rounded-lg border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs text-[#9ca3af] transition hover:border-[#C6FF2E]/45 hover:text-[#C6FF2E]'
-                  >
-                    Tentar player alternativo
-                  </button>
-                ) : null}
               </div>
             ) : isCommunityNews ? (
               <div className='flex h-full min-h-[320px] flex-col gap-3 overflow-auto rounded-xl border border-white/10 bg-[#0b0b0f] p-3 sm:min-h-[460px] sm:p-5'>
