@@ -31,6 +31,12 @@ const FALLBACK_TIKTOK_LIVE_URLS = [
   'https://www.tiktok.com/live/gaming/Elden_Ring:_Nightreign',
   'https://www.tiktok.com/@julianaalexandria/live',
 ];
+const TIKTOK_LIVE_VIDEO_FALLBACK = {
+  'https://www.tiktok.com/live/gaming/elden_ring:_nightreign':
+    'https://www.tiktok.com/@jornadatop/video/7232292097313770757',
+  'https://www.tiktok.com/@julianaalexandria/live':
+    'https://www.tiktok.com/@izabela.anholett/video/7611634628490710293',
+};
 const TWITCH_TOPIC_QUERIES = [
   'inteligencia artificial',
   'marketing digital',
@@ -383,9 +389,27 @@ const fetchTwitchDecapiFallback = async (env = {}) => {
 };
 
 const fetchTwitchItems = async (env = {}) => {
-  const helix = await fetchTwitchHelixItems(env);
-  if (helix.length > 0) return helix;
-  return fetchTwitchDecapiFallback(env);
+  const [helix, monitored] = await Promise.all([
+    fetchTwitchHelixItems(env),
+    fetchTwitchDecapiFallback(env),
+  ]);
+  if (helix.length === 0) return monitored;
+
+  const byChannel = new Map();
+  monitored.forEach((item) => {
+    const key = String(item?.channel || '').toLowerCase();
+    if (key) byChannel.set(key, item);
+  });
+  helix.forEach((item) => {
+    const key = String(item?.channel || '').toLowerCase();
+    if (!key || !byChannel.has(key)) {
+      byChannel.set(key || `helix-${item.id}`, item);
+    }
+  });
+
+  return [...byChannel.values()]
+    .sort((a, b) => Number(Boolean(b?.isLive)) - Number(Boolean(a?.isLive)))
+    .slice(0, 12);
 };
 
 const parseTikTokLiveUrls = (env = {}) => {
@@ -422,13 +446,15 @@ const buildTikTokLiveSummary = (url = '') => {
 const fetchTikTokLiveItems = async (env = {}) => {
   const liveUrls = parseTikTokLiveUrls(env);
   return liveUrls.map((url, index) => {
+    const normalized = normalizeTikTokUrl(url);
+    const mappedPlayableUrl = TIKTOK_LIVE_VIDEO_FALLBACK[normalized.toLowerCase()] || normalized;
     const handleMatch = url.match(/\/@([a-z0-9._]+)\/live/i);
     const channel = handleMatch?.[1] ? `@${handleMatch[1].toLowerCase()}` : '@tiktoklive';
     return {
-      id: `tiktok-live-${url}`.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 90),
+      id: `tiktok-live-${normalized}`.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 90),
       title: buildTikTokLiveTitle(url),
       summary: buildTikTokLiveSummary(url),
-      url,
+      url: mappedPlayableUrl,
       thumbnail: null,
       tags: ['TikTok', 'Live', /shop|vendas/i.test(url) ? 'Shop' : 'Gaming'],
       category: /shop|vendas/i.test(url) ? 'Marketing' : 'IA',

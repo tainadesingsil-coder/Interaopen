@@ -9,6 +9,9 @@ const FALLBACK_TWITTER_ACCESS_SECRET = 'EPCfx3xbrenbyIK0IT3JjROIWY3YKBJ7tpMhshQL
 const TWITTER_SEARCH_ENDPOINT = 'https://api.x.com/2/tweets/search/recent';
 const TWITTER_MAX_RESULTS = 20;
 const FALLBACK_TWITCH_CHANNELS = [
+  'bisteconee',
+  'baiano',
+  'gabepeixe',
   'lucas_montano',
   'linuxtips',
   'glaucia_lemos86',
