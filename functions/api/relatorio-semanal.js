@@ -454,7 +454,8 @@ function collectConsumedContentNames(interacoes, local) {
     .map((item) => String(item?.titulo_conteudo || "").trim())
     .filter(Boolean);
   const fromLocal = parseContentList(local?.conteudos || "");
-  const fromTimeline = splitMultilineList(local?.timeline || "")
+  const fromTimeline = String(local?.timeline || "")
+    .split(/\r?\n/)
     .map((line) =>
       line
         .replace(/^\d{1,2}:\d{2}\s*[·\-\u2013]\s*/u, "")
