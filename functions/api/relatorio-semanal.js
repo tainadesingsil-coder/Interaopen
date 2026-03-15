@@ -325,8 +325,18 @@ function inferMainGame(consumedNames, timeline) {
   return "Jogo não identificado com precisão";
 }
 
+function normalizeTimelineEntry(line) {
+  return String(line || "")
+    .replace(/^[\s\-•]*\d{1,2}:\d{2}\s*[·\-\u2013]\s*/u, "")
+    .replace(/^(live_play|video_play|abriu_conteudo)\s*:\s*/i, "")
+    .trim();
+}
+
 function inferLiveMoment(timeline, gameName) {
-  const list = splitMultilineList(timeline || "");
+  const list = String(timeline || "")
+    .split(/\r?\n/)
+    .map((line) => normalizeTimelineEntry(line))
+    .filter(Boolean);
   const intenseTokens = ["clutch", "virada", "overtime", "x1", "ace", "final"];
   const intense = list.find((line) =>
     intenseTokens.some((token) => normalizeForCompare(line).includes(token))
@@ -456,12 +466,7 @@ function collectConsumedContentNames(interacoes, local) {
   const fromLocal = parseContentList(local?.conteudos || "");
   const fromTimeline = String(local?.timeline || "")
     .split(/\r?\n/)
-    .map((line) =>
-      line
-        .replace(/^[\s\-•]*\d{1,2}:\d{2}\s*[·\-\u2013]\s*/u, "")
-        .replace(/^(live_play|video_play|abriu_conteudo)\s*:\s*/i, "")
-        .trim()
-    )
+    .map((line) => normalizeTimelineEntry(line))
     .filter((line) => line.length > 2);
   return uniqueIgnoreCase(fromInteractions.concat(fromLocal, fromTimeline));
 }
