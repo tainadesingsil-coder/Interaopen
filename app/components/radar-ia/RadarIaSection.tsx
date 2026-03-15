@@ -9,7 +9,7 @@ import {
   type RadarType,
 } from '@/app/lib/radar-ia/types';
 import { Bot, Code2, ExternalLink, Megaphone, Mic2, Newspaper, PauseCircle, PlayCircle, X } from 'lucide-react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 const KIND_LABEL: Record<RadarType | 'podcast', string> = {
   all: 'Tudo',
@@ -129,32 +129,90 @@ const extractTwitchChannelFromUrl = (url: string) => {
   }
 };
 
+const DEFAULT_TWITCH_PARENT_HOSTS = ['codexionai.pages.dev', 'www.codexionai.pages.dev', 'localhost'];
+const ENV_TWITCH_PARENT_HOSTS = String(process.env.NEXT_PUBLIC_TWITCH_EMBED_PARENTS || '').trim();
+
+const normalizeHostCandidate = (value: string) => {
+  const raw = String(value || '').trim().toLowerCase();
+  if (!raw) return '';
+
+  const tryParse = (candidate: string) => {
+    try {
+      const withProtocol = /^[a-z]+:\/\//i.test(candidate) ? candidate : `https://${candidate}`;
+      const host = new URL(withProtocol).hostname.trim().toLowerCase();
+      if (!host) return '';
+      if (!/^[a-z0-9.-]+$/.test(host)) return '';
+      if (host.startsWith('.') || host.endsWith('.')) return '';
+      return host;
+    } catch {
+      return '';
+    }
+  };
+
+  const withoutPath = raw.split('/')[0] || raw;
+  return tryParse(raw) || tryParse(withoutPath);
+};
+
 const deriveTwitchParentHosts = () => {
-  if (typeof window === 'undefined') return ['localhost'];
-  const hostname = String(window.location.hostname || '').trim().toLowerCase();
-  const hostNoPort = String(window.location.host || '')
-    .trim()
-    .toLowerCase()
-    .split(':')[0];
-  const base = [hostname, hostNoPort].filter(Boolean);
-  const expanded = base.flatMap((host) => {
+  if (typeof window === 'undefined') return DEFAULT_TWITCH_PARENT_HOSTS;
+
+  const locationHosts = [
+    window.location.hostname,
+    String(window.location.host || '')
+      .trim()
+      .split(':')[0],
+  ];
+  const referrerHost = normalizeHostCandidate(document.referrer || '');
+  const ancestorHosts: string[] = [];
+  const ancestors = window.location.ancestorOrigins;
+  if (ancestors && typeof ancestors.length === 'number') {
+    for (let i = 0; i < ancestors.length; i += 1) {
+      const host = normalizeHostCandidate(ancestors[i] || '');
+      if (host) ancestorHosts.push(host);
+    }
+  }
+
+  const envHosts = ENV_TWITCH_PARENT_HOSTS
+    ? ENV_TWITCH_PARENT_HOSTS.split(/[,\n; ]/).map((part) => normalizeHostCandidate(part))
+    : [];
+
+  const baseHosts = [...locationHosts, referrerHost, ...ancestorHosts, ...envHosts, ...DEFAULT_TWITCH_PARENT_HOSTS]
+    .map((value) => normalizeHostCandidate(value || ''))
+    .filter(Boolean);
+
+  const expanded = baseHosts.flatMap((host) => {
     if (host === 'localhost' || host === '127.0.0.1') return [host];
     if (!host.includes('.')) return [host];
     if (host.startsWith('www.')) return [host, host.slice(4)];
     return [host, `www.${host}`];
   });
-  return [...new Set(expanded)].slice(0, 5);
+
+  return [...new Set(expanded)].slice(0, 12);
 };
 
 const buildTwitchEmbedUrls = (channel: string, parents: string[]) => {
   if (!channel) return [] as string[];
-  const parentList = parents.length > 0 ? parents : ['localhost'];
-  return parentList.map(
-    (parent) =>
-      `https://player.twitch.tv/?channel=${encodeURIComponent(channel)}&parent=${encodeURIComponent(
-        parent
-      )}&autoplay=true&muted=true`
-  );
+  const parentList = [...new Set((parents.length > 0 ? parents : DEFAULT_TWITCH_PARENT_HOSTS).filter(Boolean))];
+  if (parentList.length === 0) return [] as string[];
+
+  const createUrl = (subset: string[]) => {
+    const url = new URL('https://player.twitch.tv/');
+    url.searchParams.set('channel', channel);
+    url.searchParams.set('autoplay', 'true');
+    url.searchParams.set('muted', 'true');
+    subset.forEach((parent) => {
+      url.searchParams.append('parent', parent);
+    });
+    return url.toString();
+  };
+
+  const variants = [
+    createUrl(parentList),
+    ...parentList.slice(0, 8).map((parent) => createUrl([parent])),
+    ...(parentList.length > 1 ? [createUrl(parentList.slice(0, 2))] : []),
+  ];
+
+  return [...new Set(variants)];
 };
 
 const buildInstagramEmbedUrl = (code: string, kind: string) => {
@@ -448,6 +506,7 @@ function RadarViewer({
   const isPodcastPlayingRef = useRef(false);
   const lastLiveCaptionRef = useRef('');
   const liveCaptionWatchdogRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const twitchLoadWatchdogRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isPodcastPlaying, setIsPodcastPlaying] = useState(false);
   const [captionLineIndex, setCaptionLineIndex] = useState(0);
   const [liveCaptionText, setLiveCaptionText] = useState('');
@@ -474,6 +533,7 @@ function RadarViewer({
   const [twitchParentHosts, setTwitchParentHosts] = useState<string[]>(['localhost']);
   const [twitchEmbedIndex, setTwitchEmbedIndex] = useState(0);
   const [twitchEmbedFailed, setTwitchEmbedFailed] = useState(false);
+  const [twitchEmbedLoaded, setTwitchEmbedLoaded] = useState(false);
   const twitchChannel = isTwitchNews ? extractTwitchChannelFromUrl(item.url) : '';
   const twitchEmbedUrls = isTwitchNews ? buildTwitchEmbedUrls(twitchChannel, twitchParentHosts) : [];
   const twitchEmbedUrl = twitchEmbedUrls[twitchEmbedIndex] || '';
@@ -510,12 +570,27 @@ function RadarViewer({
     item.source
   )}`;
 
+  const tryNextTwitchEmbed = useCallback(() => {
+    setTwitchEmbedLoaded(false);
+    setTwitchEmbedIndex((prev) => {
+      const next = prev + 1;
+      if (next < twitchEmbedUrls.length) return next;
+      setTwitchEmbedFailed(true);
+      return prev;
+    });
+  }, [twitchEmbedUrls.length]);
+
   useEffect(() => {
     setTikTokEmbedFailed(false);
     setTikTokEmbedIndex(0);
     setAutoFallbackDone(false);
     setTwitchEmbedFailed(false);
+    setTwitchEmbedLoaded(false);
     setTwitchEmbedIndex(0);
+    if (twitchLoadWatchdogRef.current) {
+      clearTimeout(twitchLoadWatchdogRef.current);
+      twitchLoadWatchdogRef.current = null;
+    }
   }, [item.id]);
 
   useEffect(() => {
@@ -536,6 +611,26 @@ function RadarViewer({
   useEffect(() => {
     setTwitchParentHosts(deriveTwitchParentHosts());
   }, []);
+
+  useEffect(() => {
+    if (!isTwitchNews || twitchEmbedFailed || !twitchEmbedUrl) return;
+    if (twitchLoadWatchdogRef.current) {
+      clearTimeout(twitchLoadWatchdogRef.current);
+      twitchLoadWatchdogRef.current = null;
+    }
+    twitchLoadWatchdogRef.current = setTimeout(() => {
+      if (!twitchEmbedLoaded) {
+        tryNextTwitchEmbed();
+      }
+    }, 7000);
+
+    return () => {
+      if (twitchLoadWatchdogRef.current) {
+        clearTimeout(twitchLoadWatchdogRef.current);
+        twitchLoadWatchdogRef.current = null;
+      }
+    };
+  }, [isTwitchNews, tryNextTwitchEmbed, twitchEmbedFailed, twitchEmbedLoaded, twitchEmbedUrl]);
 
   useEffect(() => {
     const handleEsc = (event: KeyboardEvent) => {
@@ -603,6 +698,10 @@ function RadarViewer({
 
   useEffect(() => {
     return () => {
+      if (twitchLoadWatchdogRef.current) {
+        clearTimeout(twitchLoadWatchdogRef.current);
+        twitchLoadWatchdogRef.current = null;
+      }
       destroySpeechGraph();
     };
   }, [item.id]);
@@ -918,12 +1017,15 @@ function RadarViewer({
                     title={`Twitch player - ${item.title}`}
                     allow='autoplay; fullscreen; picture-in-picture'
                     allowFullScreen
-                    onError={() => {
-                      if (twitchEmbedIndex < twitchEmbedUrls.length - 1) {
-                        setTwitchEmbedIndex((prev) => prev + 1);
-                      } else {
-                        setTwitchEmbedFailed(true);
+                    onLoad={() => {
+                      setTwitchEmbedLoaded(true);
+                      if (twitchLoadWatchdogRef.current) {
+                        clearTimeout(twitchLoadWatchdogRef.current);
+                        twitchLoadWatchdogRef.current = null;
                       }
+                    }}
+                    onError={() => {
+                      tryNextTwitchEmbed();
                     }}
                     className='h-[54vh] min-h-[300px] w-full rounded-xl border border-white/10 bg-black sm:h-[64vh] sm:min-h-[420px]'
                   />
@@ -933,6 +1035,9 @@ function RadarViewer({
                     <h5 className='mt-1 text-sm font-semibold text-white sm:text-base'>{item.title}</h5>
                     <p className='mt-2 text-sm leading-relaxed text-[#d1d5db]'>
                       O player interno foi bloqueado neste domínio. Use o botão abaixo para abrir o canal da Twitch.
+                    </p>
+                    <p className='mt-2 text-xs text-[#9ca3af]'>
+                      Domínios testados no player: {twitchParentHosts.slice(0, 4).join(', ') || 'n/a'}
                     </p>
                     <a
                       href={item.url}
@@ -949,6 +1054,7 @@ function RadarViewer({
                   <button
                     type='button'
                     onClick={() => {
+                      setTwitchEmbedLoaded(false);
                       setTwitchEmbedIndex((prev) => (prev + 1) % twitchEmbedUrls.length);
                     }}
                     className='self-start rounded-lg border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs text-[#9ca3af] transition hover:border-[#C6FF2E]/45 hover:text-[#C6FF2E]'
