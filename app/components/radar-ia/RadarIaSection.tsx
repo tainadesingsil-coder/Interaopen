@@ -740,12 +740,6 @@ function RadarViewer({
   }, []);
 
   useEffect(() => {
-    if (!isTwitchNews) return;
-    if (!isRestrictedInAppBrowser) return;
-    setTwitchEmbedFailed(true);
-  }, [isRestrictedInAppBrowser, isTwitchNews]);
-
-  useEffect(() => {
     if (!isTwitchNews || twitchEmbedFailed || !twitchEmbedUrl || twitchStabilizedRef.current) return;
     if (twitchLoadWatchdogRef.current) {
       clearTimeout(twitchLoadWatchdogRef.current);
