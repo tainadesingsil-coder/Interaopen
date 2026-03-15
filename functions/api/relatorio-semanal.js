@@ -1582,7 +1582,7 @@ async function buildWeeklyReportPdfAttachment(nome, relatorioTexto, reportDate) 
     filename,
     content,
     content_type: "application/pdf",
-    disposition: "attachment",
+    content_disposition: "attachment",
   };
 }
 
@@ -1763,8 +1763,10 @@ export async function onRequestPost(context) {
         : "Seu relatório personalizado da semana",
       subtitle: isWelcomeFlow
         ? "Você já pode navegar na área exclusiva e receber recomendações mais inteligentes a cada interação."
-        : "Este resumo foi gerado com base no que você consumiu na Área Exclusiva.",
-      relatorioTexto: relatorio,
+        : "Seu resumo completo foi enviado em PDF no anexo para você baixar e consultar quando quiser.",
+      relatorioTexto: isWelcomeFlow
+        ? relatorio
+        : "Seu relatório semanal está disponível no PDF em anexo.\n\n- Abra o arquivo PDF para ver a análise completa.\n- Você pode salvar o arquivo e consultar quando quiser.",
       ctaLabel: "Acessar minha área exclusiva",
       ctaUrl: "https://codexionai.pages.dev/",
     });
