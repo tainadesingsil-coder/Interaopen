@@ -119,6 +119,34 @@ const extractTwitchChannelFromUrl = (url: string) => {
   }
 };
 
+const deriveTwitchParentHosts = () => {
+  if (typeof window === 'undefined') return ['localhost'];
+  const hostname = String(window.location.hostname || '').trim().toLowerCase();
+  const hostNoPort = String(window.location.host || '')
+    .trim()
+    .toLowerCase()
+    .split(':')[0];
+  const base = [hostname, hostNoPort].filter(Boolean);
+  const expanded = base.flatMap((host) => {
+    if (host === 'localhost' || host === '127.0.0.1') return [host];
+    if (!host.includes('.')) return [host];
+    if (host.startsWith('www.')) return [host, host.slice(4)];
+    return [host, `www.${host}`];
+  });
+  return [...new Set(expanded)].slice(0, 5);
+};
+
+const buildTwitchEmbedUrls = (channel: string, parents: string[]) => {
+  if (!channel) return [] as string[];
+  const parentList = parents.length > 0 ? parents : ['localhost'];
+  return parentList.map(
+    (parent) =>
+      `https://player.twitch.tv/?channel=${encodeURIComponent(channel)}&parent=${encodeURIComponent(
+        parent
+      )}&autoplay=true&muted=true`
+  );
+};
+
 const buildInstagramEmbedUrl = (code: string, kind: string) => {
   if (!code) return '';
   const base = kind === 'reel' ? `https://www.instagram.com/p/${code}/embed/captioned/` : `https://www.instagram.com/p/${code}/embed/captioned/`;
@@ -433,14 +461,12 @@ function RadarViewer({
   const isCommunityNews =
     item.kind === 'news' && (isCommunityUrl(item.url) || /tabnews|comunidade br/i.test(item.source));
   const tikTokEmbedUrls = isTikTokNews ? buildTikTokEmbedUrls(item.url) : [];
-  const [twitchParentHost, setTwitchParentHost] = useState('localhost');
+  const [twitchParentHosts, setTwitchParentHosts] = useState<string[]>(['localhost']);
+  const [twitchEmbedIndex, setTwitchEmbedIndex] = useState(0);
+  const [twitchEmbedFailed, setTwitchEmbedFailed] = useState(false);
   const twitchChannel = isTwitchNews ? extractTwitchChannelFromUrl(item.url) : '';
-  const twitchEmbedUrl =
-    isTwitchNews && twitchChannel
-      ? `https://player.twitch.tv/?channel=${encodeURIComponent(twitchChannel)}&parent=${encodeURIComponent(
-          twitchParentHost
-        )}&autoplay=true`
-      : '';
+  const twitchEmbedUrls = isTwitchNews ? buildTwitchEmbedUrls(twitchChannel, twitchParentHosts) : [];
+  const twitchEmbedUrl = twitchEmbedUrls[twitchEmbedIndex] || '';
   const youtubeNewsId = isYouTubeNews ? extractYoutubeId(item.url, '') : '';
   const [tikTokEmbedFailed, setTikTokEmbedFailed] = useState(false);
   const [tikTokEmbedIndex, setTikTokEmbedIndex] = useState(0);
@@ -478,6 +504,8 @@ function RadarViewer({
     setTikTokEmbedFailed(false);
     setTikTokEmbedIndex(0);
     setAutoFallbackDone(false);
+    setTwitchEmbedFailed(false);
+    setTwitchEmbedIndex(0);
   }, [item.id]);
 
   useEffect(() => {
@@ -496,9 +524,7 @@ function RadarViewer({
   ]);
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.location?.hostname) {
-      setTwitchParentHost(window.location.hostname);
-    }
+    setTwitchParentHosts(deriveTwitchParentHosts());
   }, []);
 
   useEffect(() => {
@@ -874,14 +900,53 @@ function RadarViewer({
                 allowFullScreen
                 className='h-full min-h-[320px] w-full rounded-xl border border-white/10 bg-black sm:min-h-[460px]'
               />
-            ) : isTwitchNews && twitchEmbedUrl ? (
-              <iframe
-                src={twitchEmbedUrl}
-                title={`Twitch player - ${item.title}`}
-                allow='autoplay; fullscreen; picture-in-picture'
-                allowFullScreen
-                className='h-full min-h-[320px] w-full rounded-xl border border-white/10 bg-black sm:min-h-[460px]'
-              />
+            ) : isTwitchNews ? (
+              <div className='flex h-full min-h-[320px] flex-col gap-3 overflow-auto rounded-xl border border-white/10 bg-[#0b0b0f] p-3 sm:min-h-[460px] sm:p-4'>
+                {!twitchEmbedFailed && twitchEmbedUrl ? (
+                  <iframe
+                    src={twitchEmbedUrl}
+                    title={`Twitch player - ${item.title}`}
+                    allow='autoplay; fullscreen; picture-in-picture'
+                    allowFullScreen
+                    onError={() => {
+                      if (twitchEmbedIndex < twitchEmbedUrls.length - 1) {
+                        setTwitchEmbedIndex((prev) => prev + 1);
+                      } else {
+                        setTwitchEmbedFailed(true);
+                      }
+                    }}
+                    className='h-[54vh] min-h-[300px] w-full rounded-xl border border-white/10 bg-black sm:h-[64vh] sm:min-h-[420px]'
+                  />
+                ) : (
+                  <div className='rounded-xl border border-white/10 bg-white/[0.02] p-4'>
+                    <p className='text-[11px] uppercase tracking-[0.12em] text-[#9ca3af]'>Twitch</p>
+                    <h5 className='mt-1 text-sm font-semibold text-white sm:text-base'>{item.title}</h5>
+                    <p className='mt-2 text-sm leading-relaxed text-[#d1d5db]'>
+                      O player interno foi bloqueado neste domínio. Use o botão abaixo para abrir o canal da Twitch.
+                    </p>
+                    <a
+                      href={item.url}
+                      target='_blank'
+                      rel='noopener noreferrer'
+                      className='mt-3 inline-flex items-center rounded-lg border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs font-semibold text-[#c9d1d9] transition hover:border-[#C6FF2E]/45 hover:text-[#C6FF2E]'
+                    >
+                      Abrir canal na Twitch
+                    </a>
+                  </div>
+                )}
+
+                {!twitchEmbedFailed && twitchEmbedUrls.length > 1 ? (
+                  <button
+                    type='button'
+                    onClick={() => {
+                      setTwitchEmbedIndex((prev) => (prev + 1) % twitchEmbedUrls.length);
+                    }}
+                    className='self-start rounded-lg border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs text-[#9ca3af] transition hover:border-[#C6FF2E]/45 hover:text-[#C6FF2E]'
+                  >
+                    Tentar player alternativo
+                  </button>
+                ) : null}
+              </div>
             ) : isCommunityNews ? (
               <div className='flex h-full min-h-[320px] flex-col gap-3 overflow-auto rounded-xl border border-white/10 bg-[#0b0b0f] p-3 sm:min-h-[460px] sm:p-5'>
                 <div className='rounded-xl border border-white/10 bg-white/[0.02] p-4'>
