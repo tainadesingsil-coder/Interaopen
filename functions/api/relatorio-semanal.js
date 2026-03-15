@@ -1,5 +1,16 @@
-const GEMINI_SYSTEM_PROMPT =
-  "Você é o assistente de aprendizado da Codexion. Analise o conteúdo consumido pelo cliente e gere um relatório semanal personalizado em português com: saudação com o nome do cliente, resumo do que ele consumiu por categoria, 3 insights práticos aplicáveis ao negócio dele, evolução comparada à semana anterior, recomendação de conteúdo para a próxima semana e um parágrafo motivacional final. Seja direto, caloroso e 100% personalizado.";
+const GEMINI_SYSTEM_PROMPT = [
+  "Você é o estrategista de aprendizado da Codexion.",
+  "Escreva em português-BR com tom humano, claro e objetivo.",
+  "NUNCA repita frases ou ideias.",
+  "Monte exatamente nesta estrutura:",
+  "1) Saudação curta com nome.",
+  "2) Resumo do consumo por categoria e tipo.",
+  "3) 3 insights acionáveis para o negócio do cliente.",
+  "4) Evolução versus semana anterior (se não houver base, diga isso com clareza).",
+  "5) Plano da próxima semana em 3 passos numerados.",
+  "6) Encerramento motivacional de até 2 frases.",
+  "Use frases curtas, sem jargão técnico desnecessário.",
+].join(" ");
 
 function getEnv(context) {
   return context?.env ?? {};
@@ -90,7 +101,88 @@ function aggregateByType(interacoes) {
   }, {});
 }
 
-function buildGeminiInput(nome, atual, anterior) {
+function summarizeMap(map, limit) {
+  const entries = Object.entries(map || {});
+  if (!entries.length) return "Sem dados suficientes ainda.";
+  return entries
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, typeof limit === "number" ? limit : 4)
+    .map(([name, count]) => `${name}: ${count}`)
+    .join(" | ");
+}
+
+function buildDeterministicReport(nome, atual, anterior) {
+  const byCategory = aggregateByCategory(atual);
+  const byType = aggregateByType(atual);
+  const topCategory = summarizeMap(byCategory, 4);
+  const topType = summarizeMap(byType, 4);
+  const diff = atual.length - anterior.length;
+  const evolutionLabel =
+    anterior.length === 0
+      ? "Ainda sem base anterior para comparação."
+      : diff === 0
+      ? "Consumo estável em relação à semana passada."
+      : diff > 0
+      ? `Você evoluiu: +${diff} ações em relação à semana passada.`
+      : `Ritmo menor: ${Math.abs(diff)} ações a menos que na semana passada.`;
+
+  const recentes = atual
+    .slice(0, 5)
+    .map(
+      (item) =>
+        `- ${item?.categoria || "Conteúdo"}: ${item?.titulo_conteudo || "Interação na área exclusiva"}`
+    )
+    .join("\n");
+
+  return [
+    `Olá, ${nome}!`,
+    ``,
+    `Resumo da sua semana na Área Exclusiva:`,
+    `- Total de ações: ${atual.length}`,
+    `- Categorias com mais consumo: ${topCategory}`,
+    `- Tipos de ação mais frequentes: ${topType}`,
+    ``,
+    `Ações recentes:`,
+    recentes || "- Sem ações recentes registradas.",
+    ``,
+    `Insights práticos:`,
+    `- Escolha o tema mais recorrente e transforme em uma ação de negócio nesta semana.`,
+    `- Defina 1 métrica simples para medir resultado (ex.: leads, reuniões ou taxa de resposta).`,
+    `- Agende um bloco fixo de execução para manter consistência (30 a 45 min por dia).`,
+    ``,
+    `Evolução:`,
+    `- ${evolutionLabel}`,
+    ``,
+    `Próximos passos (7 dias):`,
+    `1) Priorize 1 tema principal.`,
+    `2) Execute uma ação ainda hoje.`,
+    `3) Volte à área exclusiva para comparar evolução.`,
+    ``,
+    `Mensagem final: você já está construindo ritmo. A consistência semanal é o que transforma conteúdo em resultado real.`,
+  ].join("\n");
+}
+
+function buildWelcomeReport(nome) {
+  return [
+    `Olá, ${nome}! Seja muito bem-vindo(a) à Área Exclusiva da Codexion.`,
+    ``,
+    `Seu cadastro foi ativado com sucesso e, a partir de agora, seus relatórios serão personalizados com base no que você realmente consumir.`,
+    ``,
+    `Como funciona:`,
+    `- Você navega pela área exclusiva (conteúdos, vídeos e lives).`,
+    `- A IA identifica os temas que mais fazem sentido para seu momento.`,
+    `- Você recebe um resumo claro com insights práticos para aplicar no negócio.`,
+    ``,
+    `Próximos passos recomendados:`,
+    `1) Assista 1 conteúdo completo hoje.`,
+    `2) Salve os pontos principais para execução.`,
+    `3) Volte amanhã para manter o ritmo semanal.`,
+    ``,
+    `Conte com a Codexion para transformar aprendizado em crescimento.`,
+  ].join("\n");
+}
+
+function buildGeminiInput(nome, atual, anterior, resumoLocal) {
   const categoriasAtual = aggregateByCategory(atual);
   const tiposAtual = aggregateByType(atual);
   const categoriasAnterior = aggregateByCategory(anterior);
@@ -105,13 +197,14 @@ function buildGeminiInput(nome, atual, anterior) {
 
   return [
     `Nome do cliente: ${nome}`,
-    `Consumo últimos 7 dias (quantidade total): ${atual.length}`,
-    `Consumo semana anterior (quantidade total): ${anterior.length}`,
+    `Consumo últimos 7 dias (total): ${atual.length}`,
+    `Consumo semana anterior (total): ${anterior.length}`,
     `Categorias semana atual: ${JSON.stringify(categoriasAtual)}`,
     `Categorias semana anterior: ${JSON.stringify(categoriasAnterior)}`,
     `Tipos semana atual: ${JSON.stringify(tiposAtual)}`,
     `Conteúdos recentes: ${JSON.stringify(recentes)}`,
-    "Gere o relatório com seções curtas e objetivas, em português-BR.",
+    `Resumo local opcional do frontend: ${JSON.stringify(resumoLocal || {})}`,
+    "Reforço: não repetir frases. Clareza e objetividade acima de tudo.",
   ].join("\n");
 }
 
@@ -123,7 +216,13 @@ function extractGeminiText(payload) {
     .trim();
 }
 
-async function generateReportWithGemini(context, nome, atual, anterior) {
+async function generateReportWithGemini(
+  context,
+  nome,
+  atual,
+  anterior,
+  resumoLocal
+) {
   const geminiApiKey = getGeminiApiKey(context);
   if (!geminiApiKey) {
     throw new Error("GEMINI_API_KEY não configurada.");
@@ -141,12 +240,12 @@ async function generateReportWithGemini(context, nome, atual, anterior) {
         contents: [
           {
             role: "user",
-            parts: [{ text: buildGeminiInput(nome, atual, anterior) }],
+            parts: [{ text: buildGeminiInput(nome, atual, anterior, resumoLocal) }],
           },
         ],
         generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 1500,
+          temperature: 0.45,
+          maxOutputTokens: 1400,
         },
       }),
     }
@@ -225,40 +324,134 @@ async function resolveUserProfile(
   };
 }
 
-function buildEmailTemplate(nome, relatorioTexto) {
-  const safeText = relatorioTexto
-    .split("\n")
+function escapeHtml(text) {
+  return String(text ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function inlineFormat(text) {
+  return escapeHtml(text)
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/`([^`]+)`/g, "<code style=\"background:rgba(255,255,255,.08);padding:1px 6px;border-radius:6px;\">$1</code>");
+}
+
+function textReportToHtml(relatorioTexto) {
+  const lines = String(relatorioTexto || "")
+    .split(/\r?\n/)
     .map((line) => line.trim())
-    .filter(Boolean)
-    .map(
-      (line) =>
-        `<p style="margin:0 0 10px 0;line-height:1.6;color:#d1d5db;">${line}</p>`
-    )
-    .join("");
+    .filter(Boolean);
+
+  if (!lines.length) {
+    return `<p style="margin:0;color:#d1d5db;line-height:1.7;">Sem conteúdo para exibir.</p>`;
+  }
+
+  let html = "";
+  let bullets = [];
+  let ordered = [];
+
+  const flushBullets = () => {
+    if (!bullets.length) return;
+    html += `<ul style="margin:0 0 14px 20px;padding:0;color:#d1d5db;">${bullets
+      .map((item) => `<li style="margin:0 0 8px 0;line-height:1.65;">${inlineFormat(item)}</li>`)
+      .join("")}</ul>`;
+    bullets = [];
+  };
+
+  const flushOrdered = () => {
+    if (!ordered.length) return;
+    html += `<ol style="margin:0 0 14px 20px;padding:0;color:#d1d5db;">${ordered
+      .map((item) => `<li style="margin:0 0 8px 0;line-height:1.65;">${inlineFormat(item)}</li>`)
+      .join("")}</ol>`;
+    ordered = [];
+  };
+
+  for (const line of lines) {
+    if (/^[-•]\s+/.test(line)) {
+      flushOrdered();
+      bullets.push(line.replace(/^[-•]\s+/, ""));
+      continue;
+    }
+
+    if (/^\d+[\)\.]\s+/.test(line)) {
+      flushBullets();
+      ordered.push(line.replace(/^\d+[\)\.]\s+/, ""));
+      continue;
+    }
+
+    flushBullets();
+    flushOrdered();
+
+    if (/^[A-ZÀ-Ýa-zà-ÿ0-9\s]+:$/.test(line)) {
+      html += `<h3 style="margin:16px 0 8px 0;font-size:16px;line-height:1.4;color:#ffffff;">${inlineFormat(
+        line.replace(/:$/, "")
+      )}</h3>`;
+      continue;
+    }
+
+    html += `<p style="margin:0 0 12px 0;line-height:1.7;color:#d1d5db;">${inlineFormat(
+      line
+    )}</p>`;
+  }
+
+  flushBullets();
+  flushOrdered();
+  return html;
+}
+
+function buildEmailTemplate({
+  nome,
+  kicker,
+  title,
+  subtitle,
+  relatorioTexto,
+  ctaLabel,
+  ctaUrl,
+}) {
+  const reportHtml = textReportToHtml(relatorioTexto);
 
   return `
 <!DOCTYPE html>
 <html lang="pt-BR">
-  <body style="margin:0;padding:0;background:#050607;font-family:Arial,Helvetica,sans-serif;">
+  <body style="margin:0;padding:0;background:#050607;font-family:Inter,Segoe UI,Arial,Helvetica,sans-serif;">
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="padding:28px 14px;background:#050607;">
       <tr>
         <td align="center">
-          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:640px;border:1px solid rgba(180,255,0,.25);border-radius:14px;overflow:hidden;background:#0a0d11;">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:680px;border:1px solid rgba(180,255,0,.22);border-radius:16px;overflow:hidden;background:#0a0d11;">
             <tr>
-              <td style="padding:24px 24px 8px 24px;">
-                <p style="margin:0;font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:#B4FF00;">Relatório semanal</p>
-                <h1 style="margin:10px 0 8px 0;font-size:28px;line-height:1.2;color:#ffffff;">Olá, ${nome}</h1>
-                <p style="margin:0;color:#9ca3af;line-height:1.6;">Seu resumo personalizado da semana já está pronto.</p>
+              <td style="padding:20px 24px 0 24px;">
+                <div style="display:inline-block;background:rgba(180,255,0,.12);border:1px solid rgba(180,255,0,.26);color:#B4FF00;font-size:11px;letter-spacing:.16em;text-transform:uppercase;padding:7px 10px;border-radius:999px;">
+                  ${escapeHtml(kicker)}
+                </div>
               </td>
             </tr>
             <tr>
-              <td style="padding:16px 24px 8px 24px;">
-                ${safeText}
+              <td style="padding:12px 24px 0 24px;">
+                <h1 style="margin:0 0 8px 0;font-size:30px;line-height:1.15;color:#ffffff;">${escapeHtml(
+                  title
+                )}</h1>
+                <p style="margin:0;color:#9ca3af;line-height:1.65;">Olá, ${escapeHtml(
+                  nome
+                )}. ${escapeHtml(subtitle)}</p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:20px 24px 8px 24px;">
+                <div style="border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.02);border-radius:12px;padding:18px 16px;">
+                  ${reportHtml}
+                </div>
               </td>
             </tr>
             <tr>
               <td style="padding:18px 24px 26px 24px;">
-                <a href="https://codexionai.pages.dev/" style="display:inline-block;background:#B4FF00;color:#000;text-decoration:none;font-weight:700;padding:12px 18px;border-radius:10px;">Acessar minha área exclusiva</a>
+                <a href="${escapeHtml(
+                  ctaUrl
+                )}" style="display:inline-block;background:#B4FF00;color:#000;text-decoration:none;font-weight:700;padding:12px 18px;border-radius:10px;">
+                  ${escapeHtml(ctaLabel)}
+                </a>
               </td>
             </tr>
           </table>
@@ -269,7 +462,7 @@ function buildEmailTemplate(nome, relatorioTexto) {
 </html>`;
 }
 
-async function sendEmailByResend(context, nome, email, relatorioTexto) {
+async function sendEmailByResend(context, toEmail, subject, html) {
   const { resendApiKey, resendFromEmail } = getResendConfig(context);
   if (!resendApiKey) {
     throw new Error("RESEND_API_KEY não configurada.");
@@ -283,9 +476,9 @@ async function sendEmailByResend(context, nome, email, relatorioTexto) {
     },
     body: JSON.stringify({
       from: resendFromEmail,
-      to: [email],
-      subject: `Seu relatório semanal chegou, ${nome} ⚡`,
-      html: buildEmailTemplate(nome, relatorioTexto),
+      to: [toEmail],
+      subject,
+      html,
     }),
   });
 
@@ -324,6 +517,9 @@ export async function onRequestPost(context) {
       { status: 400 }
     );
   }
+
+  const trigger =
+    typeof body?.trigger === "string" ? body.trigger.trim().toLowerCase() : "weekly";
 
   try {
     const nowIso = new Date().toISOString();
@@ -366,20 +562,60 @@ export async function onRequestPost(context) {
       );
     }
 
-    const relatorio = await generateReportWithGemini(
-      context,
-      nomeCliente,
-      interacoesSemanaAtual,
-      interacoesSemanaAnterior
-    );
+    const resumoLocal =
+      body?.resumo_local && typeof body.resumo_local === "object"
+        ? body.resumo_local
+        : undefined;
 
-    await sendEmailByResend(context, nomeCliente, perfil.email, relatorio);
+    const isWelcomeFlow = trigger === "welcome" || trigger === "subscription";
+    let relatorio = "";
+
+    if (isWelcomeFlow && interacoesSemanaAtual.length === 0) {
+      relatorio = buildWelcomeReport(nomeCliente);
+    } else {
+      try {
+        relatorio = await generateReportWithGemini(
+          context,
+          nomeCliente,
+          interacoesSemanaAtual,
+          interacoesSemanaAnterior,
+          resumoLocal
+        );
+      } catch (_) {
+        relatorio = buildDeterministicReport(
+          nomeCliente,
+          interacoesSemanaAtual,
+          interacoesSemanaAnterior
+        );
+      }
+    }
+
+    const subject = isWelcomeFlow
+      ? `Bem-vindo(a) à Área Exclusiva, ${nomeCliente} ⚡`
+      : `Seu relatório semanal chegou, ${nomeCliente} ⚡`;
+
+    const html = buildEmailTemplate({
+      nome: nomeCliente,
+      kicker: isWelcomeFlow ? "Boas-vindas" : "Relatório IA",
+      title: isWelcomeFlow
+        ? "Acesso ativado com sucesso"
+        : "Seu relatório personalizado da semana",
+      subtitle: isWelcomeFlow
+        ? "Você já pode navegar na área exclusiva e receber recomendações mais inteligentes a cada interação."
+        : "Este resumo foi gerado com base no que você consumiu na Área Exclusiva.",
+      relatorioTexto: relatorio,
+      ctaLabel: "Acessar minha área exclusiva",
+      ctaUrl: "https://codexionai.pages.dev/",
+    });
+
+    await sendEmailByResend(context, perfil.email, subject, html);
 
     return Response.json({
       ok: true,
       user_id: userId,
       email_enviado_para: perfil.email,
       relatorio,
+      trigger,
     });
   } catch (error) {
     const message =
