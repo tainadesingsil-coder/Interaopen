@@ -14,6 +14,8 @@ const FALLBACK_TWITCH_CHANNELS = [
   'bisteconee',
   'baiano',
   'gabepeixe',
+  'nicolediretora',
+  'tftoddy',
   'lucas_montano',
   'linuxtips',
   'glaucia_lemos86',
@@ -2379,7 +2381,7 @@ export async function onRequestGet(context) {
   }
 
   const cache = getCache();
-  const cacheKey = `v5:${type}:${range}:${query.toLowerCase()}`;
+  const cacheKey = `v6:${type}:${range}:${query.toLowerCase()}`;
   const now = Date.now();
   const cached = cache.get(cacheKey);
 

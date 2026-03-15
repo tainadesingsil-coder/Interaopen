@@ -4,6 +4,8 @@ const FALLBACK_TWITCH_CHANNELS = [
   'bisteconee',
   'baiano',
   'gabepeixe',
+  'nicolediretora',
+  'tftoddy',
   'lucas_montano',
   'linuxtips',
   'glaucia_lemos86',
@@ -20,7 +22,7 @@ const FALLBACK_TWITCH_CHANNELS = [
   'lowlevellearning',
 ];
 const PRIORITY_TWITCH_CHANNELS = ['baiano', 'bisteconee', 'gabepeixe'];
-const REQUIRED_TWITCH_CHANNELS = ['bisteconee', 'gabepeixe'];
+const REQUIRED_TWITCH_CHANNELS = ['bisteconee', 'gabepeixe', 'nicolediretora', 'tftoddy'];
 const FALLBACK_TIKTOK_VIDEO_URLS = [
   'https://www.tiktok.com/@gabrieladamuchi/video/7601907452212235540',
   'https://www.tiktok.com/@izabela.anholett/video/7611634628490710293',
@@ -467,7 +469,7 @@ const aggregateChannelFeeds = async (env = {}) => {
 
 export async function onRequestGet(context) {
   const cache = getCache();
-  const cacheKey = 'channel-feeds:v5';
+  const cacheKey = 'channel-feeds:v6';
   const now = Date.now();
   const cached = cache.get(cacheKey);
 
