@@ -92,6 +92,12 @@ const isLikelyMobileDevice = () => {
   return /android|iphone|ipad|ipod|mobile|webview|wv/.test(ua);
 };
 
+const isLikelyRestrictedInAppBrowser = () => {
+  if (typeof navigator === 'undefined') return false;
+  const ua = String(navigator.userAgent || '').toLowerCase();
+  return /instagram|fb_iab|fban|fbav|line\/|snapchat|tiktok/.test(ua);
+};
+
 const extractTikTokVideoId = (url: string) => {
   const normalized = String(url || '');
   const direct = normalized.match(/\/video\/(\d+)/i);
@@ -550,6 +556,7 @@ function RadarViewer({
   const isCommunityNews =
     item.kind === 'news' && (isCommunityUrl(item.url) || /tabnews|comunidade br/i.test(item.source));
   const prefersMobileTikTokPlayer = useMemo(() => isLikelyMobileDevice(), []);
+  const isRestrictedInAppBrowser = useMemo(() => isLikelyRestrictedInAppBrowser(), []);
   const tikTokEmbedUrls = isTikTokNews ? buildTikTokEmbedUrls(item.url, prefersMobileTikTokPlayer) : [];
   const [twitchParentHosts, setTwitchParentHosts] = useState<string[]>(['localhost']);
   const [twitchEmbedIndex, setTwitchEmbedIndex] = useState(0);
@@ -731,6 +738,12 @@ function RadarViewer({
   useEffect(() => {
     setTwitchParentHosts(deriveTwitchParentHosts());
   }, []);
+
+  useEffect(() => {
+    if (!isTwitchNews) return;
+    if (!isRestrictedInAppBrowser) return;
+    setTwitchEmbedFailed(true);
+  }, [isRestrictedInAppBrowser, isTwitchNews]);
 
   useEffect(() => {
     if (!isTwitchNews || twitchEmbedFailed || !twitchEmbedUrl || twitchStabilizedRef.current) return;
@@ -1170,19 +1183,33 @@ function RadarViewer({
                     <p className='text-[11px] uppercase tracking-[0.12em] text-[#9ca3af]'>Twitch</p>
                     <h5 className='mt-1 text-sm font-semibold text-white sm:text-base'>{item.title}</h5>
                     <p className='mt-2 text-sm leading-relaxed text-[#d1d5db]'>
-                      O player interno foi bloqueado neste domínio. Use o botão abaixo para abrir o canal da Twitch.
+                      {isRestrictedInAppBrowser
+                        ? 'O navegador embutido do app bloqueou o player da Twitch. Abra direto na Twitch para assistir sem travar.'
+                        : 'O player interno foi bloqueado neste domínio. Use o botão abaixo para abrir o canal da Twitch.'}
                     </p>
                     <p className='mt-2 text-xs text-[#9ca3af]'>
                       Domínios testados no player: {twitchParentHosts.slice(0, 4).join(', ') || 'n/a'}
                     </p>
-                    <a
-                      href={item.url}
-                      target='_blank'
-                      rel='noopener noreferrer'
-                      className='mt-3 inline-flex items-center rounded-lg border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs font-semibold text-[#c9d1d9] transition hover:border-[#C6FF2E]/45 hover:text-[#C6FF2E]'
-                    >
-                      Abrir canal na Twitch
-                    </a>
+                    <div className='mt-3 flex flex-wrap gap-2'>
+                      <a
+                        href={item.url}
+                        target='_blank'
+                        rel='noopener noreferrer'
+                        className='inline-flex items-center rounded-lg border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs font-semibold text-[#c9d1d9] transition hover:border-[#C6FF2E]/45 hover:text-[#C6FF2E]'
+                      >
+                        Abrir canal na Twitch
+                      </a>
+                      {twitchChannel ? (
+                        <a
+                          href={`https://m.twitch.tv/${encodeURIComponent(twitchChannel)}`}
+                          target='_blank'
+                          rel='noopener noreferrer'
+                          className='inline-flex items-center rounded-lg border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs font-semibold text-[#c9d1d9] transition hover:border-[#C6FF2E]/45 hover:text-[#C6FF2E]'
+                        >
+                          Abrir versão mobile
+                        </a>
+                      ) : null}
+                    </div>
                   </div>
                 )}
 
