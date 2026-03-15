@@ -2,6 +2,10 @@ const GEMINI_SYSTEM_PROMPT = [
   "Você é o estrategista de aprendizado da Codexion.",
   "Escreva em português-BR com tom humano, claro e objetivo.",
   "NUNCA repita frases ou ideias.",
+  "Se houver dados de criadores do Radar IA, cite nomes exatos e diferencie criadores vistos vs não vistos.",
+  "Os insights precisam ser práticos e conectados ao conteúdo realmente consumido pelo cliente.",
+  "A seção de evolução deve identificar claramente quando for o primeiro relatório do cliente.",
+  "Os próximos passos devem ser adaptativos por perfil (iniciante, foco em live, foco em vídeo/notícia, alta consistência).",
   "Monte exatamente nesta estrutura:",
   "1) Saudação curta com nome.",
   "2) Resumo do consumo por categoria e tipo.",
@@ -125,6 +129,74 @@ function summarizeMap(map, limit) {
     .join(" | ");
 }
 
+const RADAR_CREATORS_DEFAULT = [
+  "gaules",
+  "alanzoka",
+  "OpenAI",
+  "Google AI",
+  "OpenAI Newsroom",
+  "Google DeepMind",
+];
+
+function splitMultilineList(value) {
+  return String(value || "")
+    .split(/\r?\n|\|/)
+    .map((item) => item.replace(/^[\s\-•\d\)\.]+/, "").trim())
+    .filter(Boolean);
+}
+
+function uniqueIgnoreCase(values) {
+  const seen = new Set();
+  const result = [];
+  for (const raw of values || []) {
+    const value = String(raw || "").trim();
+    if (!value) continue;
+    const key = value.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    result.push(value);
+  }
+  return result;
+}
+
+function extractCreatorFromInteraction(item) {
+  const title = String(item?.titulo_conteudo || "").trim();
+  const url = String(item?.url_conteudo || "").trim();
+
+  const fromLiveTitle = title.match(/live(?: twitch)?\s*:\s*([a-z0-9_\.]+)/i);
+  if (fromLiveTitle?.[1]) return fromLiveTitle[1];
+
+  const fromCanalTitle = title.match(/(?:canal|criador)\s*:\s*([^|,-]+)/i);
+  if (fromCanalTitle?.[1]) return fromCanalTitle[1].trim();
+
+  if (url) {
+    try {
+      const parsed = new URL(url);
+      const host = parsed.hostname.replace(/^www\./i, "").toLowerCase();
+      if (host.includes("twitch.tv")) {
+        const parts = parsed.pathname.split("/").filter(Boolean);
+        if (parts[0]) return parts[0];
+      }
+      if (host.includes("youtube.com") || host.includes("youtu.be")) {
+        return "YouTube";
+      }
+      if (host.includes("tiktok.com")) {
+        return "TikTok";
+      }
+      if (host.includes("openai.com")) {
+        return "OpenAI";
+      }
+      if (host.includes("deepmind.google")) {
+        return "Google DeepMind";
+      }
+    } catch {
+      // ignore invalid urls
+    }
+  }
+
+  return "";
+}
+
 function normalizeResumoLocal(resumoLocal) {
   const totalRaw = Number(resumoLocal?.total ?? 0);
   const total = Number.isFinite(totalRaw) && totalRaw > 0 ? Math.round(totalRaw) : 0;
@@ -149,6 +221,18 @@ function normalizeResumoLocal(resumoLocal) {
     typeof resumoLocal?.conteudos === "string" ? resumoLocal.conteudos.trim() : "";
   const timeline =
     typeof resumoLocal?.timeline === "string" ? resumoLocal.timeline.trim() : "";
+  const creatorsSeenRaw =
+    typeof resumoLocal?.creators_seen === "string"
+      ? resumoLocal.creators_seen
+      : "";
+  const radarCreatorsRaw =
+    typeof resumoLocal?.radar_creators === "string"
+      ? resumoLocal.radar_creators
+      : "";
+  const creatorsSeen = uniqueIgnoreCase(splitMultilineList(creatorsSeenRaw));
+  const radarCreators = uniqueIgnoreCase(
+    splitMultilineList(radarCreatorsRaw).concat(RADAR_CREATORS_DEFAULT)
+  );
   return {
     total,
     todayTotal,
@@ -158,6 +242,8 @@ function normalizeResumoLocal(resumoLocal) {
     ultimos,
     conteudos,
     timeline,
+    creatorsSeen,
+    radarCreators,
   };
 }
 
@@ -180,10 +266,25 @@ function buildDeterministicReport(nome, atual, anterior, resumoLocal) {
   const liveCount =
     (byType.live_play ?? 0) + (byType.live_open ?? 0) + local.liveCount;
   const videoCount = (byType.video_play ?? 0) + local.videoCount;
+  const creatorsFromInteractions = uniqueIgnoreCase(
+    atual.map((item) => extractCreatorFromInteraction(item)).filter(Boolean)
+  );
+  const creatorsSeen = uniqueIgnoreCase(
+    creatorsFromInteractions.concat(local.creatorsSeen)
+  );
+  const radarCreators = uniqueIgnoreCase(local.radarCreators);
+  const pendingCreators = radarCreators.filter(
+    (creator) =>
+      !creatorsSeen.some((seen) => seen.toLowerCase() === creator.toLowerCase())
+  );
+  const dominantType =
+    Object.entries(byType).sort((a, b) => b[1] - a[1])[0]?.[0] ||
+    (liveCount > videoCount ? "live_play" : "video_play");
   const diff = currentTotal - anterior.length;
+  const isFirstReport = anterior.length === 0;
   const evolutionLabel =
-    anterior.length === 0
-      ? "Ainda sem base anterior para comparação."
+    isFirstReport
+      ? "Este é o primeiro relatório deste usuário. A partir do próximo ciclo teremos comparação de evolução."
       : diff === 0
       ? "Consumo estável em relação à semana passada."
       : diff > 0
@@ -204,6 +305,74 @@ function buildDeterministicReport(nome, atual, anterior, resumoLocal) {
       : local.ultimos;
   const timeline = local.timeline || local.ultimos;
   const conteudosEspecificos = local.conteudos;
+  const insights = [];
+  if (creatorsSeen.length) {
+    insights.push(
+      `Você focou em criadores específicos hoje: ${creatorsSeen.slice(0, 3).join(", ")}. Use isso para aprofundar um único tema de negócio por vez.`
+    );
+  }
+  if (liveCount > 0) {
+    insights.push(
+      `Seu consumo de lives foi relevante (${liveCount}). Lives indicam busca por timing e contexto; transforme 1 insight em ação nas próximas 24h.`
+    );
+  }
+  if (videoCount > 0) {
+    insights.push(
+      `Você assistiu ${videoCount} vídeo(s). Vídeo sugere aprendizado técnico; documente 3 pontos-chave e aplique 1 melhoria imediata.`
+    );
+  }
+  if (dominantType.includes("noticia")) {
+    insights.push(
+      "Seu padrão está orientado a notícias/tendências. Priorize filtrar sinal vs ruído e definir só uma aposta principal para a semana."
+    );
+  }
+  if (currentTotal >= 12) {
+    insights.push(
+      `Seu volume de interação (${currentTotal}) mostra consistência. O próximo ganho vem de execução disciplinada, não de consumir mais conteúdo.`
+    );
+  } else {
+    insights.push(
+      "Seu volume de interação ainda está baixo para diagnóstico profundo. Aumente a cadência diária com sessões curtas e objetivas."
+    );
+  }
+  while (insights.length < 3) {
+    insights.push(
+      "Converta cada sessão em uma ação prática mensurável para aumentar clareza e resultado semanal."
+    );
+  }
+
+  const nextSteps = [];
+  if (isFirstReport) {
+    nextSteps.push(
+      "1) Defina 2 criadores do Radar para acompanhar de forma intencional nesta semana."
+    );
+    nextSteps.push(
+      "2) Assista 1 live + 1 vídeo e registre 3 decisões de negócio baseadas no conteúdo."
+    );
+    nextSteps.push(
+      "3) Volte amanhã para gerar base comparativa e ativar evolução semanal personalizada."
+    );
+  } else if (dominantType.includes("live")) {
+    nextSteps.push(
+      "1) Escolha a live com maior aderência ao seu negócio e extraia 2 oportunidades acionáveis."
+    );
+    nextSteps.push(
+      "2) Teste uma ação nas próximas 24h (oferta, criativo ou abordagem comercial)."
+    );
+    nextSteps.push(
+      "3) Compare resultado no próximo relatório para validar evolução real."
+    );
+  } else {
+    nextSteps.push(
+      "1) Selecione um conteúdo prioritário e transforme em um plano com início/fim nesta semana."
+    );
+    nextSteps.push(
+      "2) Defina métrica de sucesso simples (leads, reuniões, conversão ou retenção)."
+    );
+    nextSteps.push(
+      "3) Reavalie no próximo relatório e ajuste com base no que funcionou."
+    );
+  }
 
   return [
     `Olá, ${nome}!`,
@@ -215,6 +384,14 @@ function buildDeterministicReport(nome, atual, anterior, resumoLocal) {
     `- Categorias com mais consumo: ${topCategory}`,
     `- Tipos de ação mais frequentes: ${topType}`,
     ``,
+    `Criadores monitorados no Radar:`,
+    `- Já acompanhados: ${
+      creatorsSeen.length ? creatorsSeen.join(", ") : "Nenhum identificado ainda"
+    }`,
+    `- Ainda para acompanhar: ${
+      pendingCreators.length ? pendingCreators.slice(0, 6).join(", ") : "Cobertura completa dos criadores atuais"
+    }`,
+    ``,
     `Conteúdos específicos identificados:`,
     conteudosEspecificos || "- Sem conteúdo nominal identificado ainda.",
     ``,
@@ -222,17 +399,15 @@ function buildDeterministicReport(nome, atual, anterior, resumoLocal) {
     recentes || timeline || "- Sem ações recentes registradas.",
     ``,
     `Insights práticos:`,
-    `- Escolha o tema mais recorrente e transforme em uma ação de negócio nesta semana.`,
-    `- Defina 1 métrica simples para medir resultado (ex.: leads, reuniões ou taxa de resposta).`,
-    `- Agende um bloco fixo de execução para manter consistência (30 a 45 min por dia).`,
+    `- ${insights[0]}`,
+    `- ${insights[1]}`,
+    `- ${insights[2]}`,
     ``,
     `Evolução:`,
     `- ${evolutionLabel}`,
     ``,
     `Próximos passos (7 dias):`,
-    `1) Priorize 1 tema principal.`,
-    `2) Execute uma ação ainda hoje.`,
-    `3) Volte à área exclusiva para comparar evolução.`,
+    ...nextSteps,
     ``,
     `Mensagem final: você já está construindo ritmo. A consistência semanal é o que transforma conteúdo em resultado real.`,
   ].join("\n");
@@ -259,6 +434,7 @@ function buildWelcomeReport(nome) {
 }
 
 function buildGeminiInput(nome, atual, anterior, resumoLocal) {
+  const local = normalizeResumoLocal(resumoLocal);
   const categoriasAtual = aggregateByCategory(atual);
   const tiposAtual = aggregateByType(atual);
   const categoriasAnterior = aggregateByCategory(anterior);
@@ -275,13 +451,19 @@ function buildGeminiInput(nome, atual, anterior, resumoLocal) {
     `Nome do cliente: ${nome}`,
     `Consumo últimos 7 dias (total): ${atual.length}`,
     `Consumo semana anterior (total): ${anterior.length}`,
+    `Primeiro relatório do cliente?: ${anterior.length === 0 ? "sim" : "não"}`,
     `Categorias semana atual: ${JSON.stringify(categoriasAtual)}`,
     `Categorias semana anterior: ${JSON.stringify(categoriasAnterior)}`,
     `Tipos semana atual: ${JSON.stringify(tiposAtual)}`,
     `Conteúdos recentes: ${JSON.stringify(recentes)}`,
     `Resumo local opcional do frontend: ${JSON.stringify(resumoLocal || {})}`,
+    `Criadores vistos no Radar (local): ${JSON.stringify(local.creatorsSeen)}`,
+    `Criadores monitorados no Radar (local): ${JSON.stringify(local.radarCreators)}`,
+    `Conteúdos específicos (local): ${local.conteudos || "não informado"}`,
+    `Timeline local: ${local.timeline || "não informado"}`,
     "Reforço obrigatório: cite conteúdos/lives/vídeos por nome quando existirem no input. Evite termos genéricos.",
     "Se faltarem títulos exatos, diga isso explicitamente em 1 linha e use os itens de timeline disponíveis.",
+    "Nos próximos passos, adapte por perfil observado do usuário e explique a lógica em ações concretas.",
     "Não repetir frases. Clareza e objetividade acima de tudo.",
   ].join("\n");
 }
