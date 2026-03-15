@@ -526,6 +526,7 @@ function RadarViewer({
   const tikTokIframeRef = useRef<HTMLIFrameElement | null>(null);
   const twitchLoadWatchdogRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const twitchIframeRef = useRef<HTMLIFrameElement | null>(null);
+  const twitchStabilizedRef = useRef(false);
   const [isPodcastPlaying, setIsPodcastPlaying] = useState(false);
   const [captionLineIndex, setCaptionLineIndex] = useState(0);
   const [liveCaptionText, setLiveCaptionText] = useState('');
@@ -623,6 +624,7 @@ function RadarViewer({
   }, [tryNextTikTokEmbed]);
 
   const tryNextTwitchEmbed = useCallback(() => {
+    if (twitchStabilizedRef.current) return;
     setTwitchEmbedLoaded(false);
     setTwitchEmbedIndex((prev) => {
       const next = prev + 1;
@@ -633,6 +635,15 @@ function RadarViewer({
   }, [twitchEmbedUrls.length]);
 
   const handleTwitchIframeLoad = useCallback(() => {
+    if (twitchStabilizedRef.current) {
+      setTwitchEmbedLoaded(true);
+      if (twitchLoadWatchdogRef.current) {
+        clearTimeout(twitchLoadWatchdogRef.current);
+        twitchLoadWatchdogRef.current = null;
+      }
+      return;
+    }
+
     const frame = twitchIframeRef.current;
     if (frame) {
       try {
@@ -648,6 +659,7 @@ function RadarViewer({
     }
 
     setTwitchEmbedLoaded(true);
+    twitchStabilizedRef.current = true;
     if (twitchLoadWatchdogRef.current) {
       clearTimeout(twitchLoadWatchdogRef.current);
       twitchLoadWatchdogRef.current = null;
@@ -662,6 +674,7 @@ function RadarViewer({
     setTwitchEmbedFailed(false);
     setTwitchEmbedLoaded(false);
     setTwitchEmbedIndex(0);
+    twitchStabilizedRef.current = false;
     if (tikTokLoadWatchdogRef.current) {
       clearTimeout(tikTokLoadWatchdogRef.current);
       tikTokLoadWatchdogRef.current = null;
@@ -720,7 +733,7 @@ function RadarViewer({
   }, []);
 
   useEffect(() => {
-    if (!isTwitchNews || twitchEmbedFailed || !twitchEmbedUrl) return;
+    if (!isTwitchNews || twitchEmbedFailed || !twitchEmbedUrl || twitchStabilizedRef.current) return;
     if (twitchLoadWatchdogRef.current) {
       clearTimeout(twitchLoadWatchdogRef.current);
       twitchLoadWatchdogRef.current = null;
@@ -1147,6 +1160,7 @@ function RadarViewer({
                     allowFullScreen
                     onLoad={handleTwitchIframeLoad}
                     onError={() => {
+                      if (twitchStabilizedRef.current) return;
                       tryNextTwitchEmbed();
                     }}
                     className='h-[54vh] min-h-[300px] w-full rounded-xl border border-white/10 bg-black sm:h-[64vh] sm:min-h-[420px]'
@@ -1373,9 +1387,11 @@ export function RadarIaSection() {
 
   useEffect(() => {
     const refreshTimer = window.setInterval(() => {
+      if (viewerItem) return;
       setRadarRefreshTick((prev) => prev + 1);
     }, RADAR_REFRESH_MS);
     const podcastTimer = window.setInterval(() => {
+      if (viewerItem) return;
       setPodcastRefreshTick((prev) => prev + 1);
     }, PODCAST_REFRESH_MS);
 
@@ -1383,7 +1399,7 @@ export function RadarIaSection() {
       window.clearInterval(refreshTimer);
       window.clearInterval(podcastTimer);
     };
-  }, []);
+  }, [viewerItem]);
 
   useEffect(() => {
     const syncFromLocation = () => {
