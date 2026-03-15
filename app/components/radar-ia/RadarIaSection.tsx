@@ -158,11 +158,13 @@ const deriveTwitchParentHosts = () => {
   if (typeof window === 'undefined') return DEFAULT_TWITCH_PARENT_HOSTS;
 
   const locationHosts = [
-    window.location.hostname,
-    String(window.location.host || '')
-      .trim()
-      .split(':')[0],
-  ];
+    normalizeHostCandidate(window.location.hostname),
+    normalizeHostCandidate(
+      String(window.location.host || '')
+        .trim()
+        .split(':')[0]
+    ),
+  ].filter(Boolean);
   const referrerHost = normalizeHostCandidate(document.referrer || '');
   const ancestorHosts: string[] = [];
   const ancestors = window.location.ancestorOrigins;
@@ -202,7 +204,10 @@ const deriveTwitchParentHosts = () => {
     return [host, `www.${host}`];
   });
 
-  return [...new Set(expanded)].slice(0, 12);
+  const unique = [...new Set(expanded)].filter(Boolean);
+  const primary = normalizeHostCandidate(window.location.hostname || '');
+  if (!primary) return unique.slice(0, 12);
+  return [primary, ...unique.filter((host) => host !== primary)].slice(0, 12);
 };
 
 const buildTwitchEmbedUrls = (channel: string, parents: string[]) => {
@@ -222,10 +227,12 @@ const buildTwitchEmbedUrls = (channel: string, parents: string[]) => {
     return url.toString();
   };
 
+  const primary = parentList[0];
+  const extras = parentList.slice(1);
   const variants = [
     createUrl(parentList),
-    ...parentList.slice(0, 8).map((parent) => createUrl([parent])),
-    ...(parentList.length > 1 ? [createUrl(parentList.slice(0, 2))] : []),
+    createUrl([primary]),
+    ...extras.slice(0, 3).map((extra) => createUrl([primary, extra])),
   ];
 
   return [...new Set(variants)];
