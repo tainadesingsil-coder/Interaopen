@@ -27,10 +27,18 @@ cp .env.example .env.local
 
 ### Twitch embed (`RadarIaSection`)
 
-Para melhorar compatibilidade do player Twitch em produção e em páginas embutidas, defina:
+Importante para funcionar no cenário embutido:
+
+No Cloudflare (Preview e Production), configure:
 
 ```bash
 NEXT_PUBLIC_TWITCH_EMBED_PARENTS=codexionai.pages.dev,www.codexionai.pages.dev,<host-que-embute>
+```
+
+Exemplo se o site estiver embutido em `app.seudominio.com`:
+
+```bash
+NEXT_PUBLIC_TWITCH_EMBED_PARENTS=codexionai.pages.dev,www.codexionai.pages.dev,app.seudominio.com
 ```
 
 Importante:
