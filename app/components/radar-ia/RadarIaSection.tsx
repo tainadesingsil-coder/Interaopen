@@ -40,13 +40,45 @@ const DEFAULT_YOUTUBE: RadarLink[] = [
 ];
 
 const DEFAULT_TIKTOK: RadarLink[] = [
-  { title: 'Tendências de IA no TikTok', url: 'https://www.tiktok.com/tag/ai' },
+  {
+    title: 'Instagram Codexion',
+    url: 'https://www.instagram.com/codexionai?igsh=MXJyeXhlbmF0dDluOA==',
+  },
 ];
 
 const DEFAULT_NEWS: RadarLink[] = [
   { title: 'OpenAI Newsroom', url: 'https://openai.com/news/' },
   { title: 'Google DeepMind', url: 'https://deepmind.google/discover/blog/' },
 ];
+
+function inferPlatformFromUrl(url: string, fallback: RadarTab): string {
+  const lower = String(url || '').toLowerCase();
+  if (lower.includes('instagram.com')) return 'instagram';
+  if (lower.includes('tiktok.com')) return 'tiktok';
+  if (lower.includes('youtube.com') || lower.includes('youtu.be')) return 'youtube';
+  if (fallback === 'news') return 'news';
+  return fallback;
+}
+
+function normalizeRadarItemTitle(item: RadarLink, tab: RadarTab): string {
+  const rawTitle = String(item?.title || '').trim();
+  const url = String(item?.url || '');
+  const lowerUrl = url.toLowerCase();
+  const lowerTitle = rawTitle.toLowerCase();
+
+  if (tab === 'tiktok' && lowerUrl.includes('instagram.com')) {
+    if (!rawTitle || lowerTitle.includes('tiktok')) return 'Instagram Codexion';
+    return rawTitle;
+  }
+
+  if (tab === 'news') {
+    if (lowerUrl.includes('openai.com/news')) return rawTitle || 'OpenAI Newsroom';
+    if (lowerUrl.includes('deepmind.google')) return rawTitle || 'Google DeepMind';
+    if (!rawTitle) return 'Notícia de IA';
+  }
+
+  return rawTitle || 'Conteúdo Radar IA';
+}
 
 function emitRadarOpenUrl(url: string) {
   if (typeof window === 'undefined') return;
@@ -339,7 +371,7 @@ export function RadarIaSection({
                 : 'bg-white/10 text-white/80'
             }`}
           >
-            TikTok
+            Instagram
           </button>
           <button
             type='button'
@@ -439,25 +471,44 @@ export function RadarIaSection({
               ? tiktokLinks
               : newsLinks
           ).map((item) => (
+            (() => {
+              const displayTitle = normalizeRadarItemTitle(item, activeTab);
+              const platform = inferPlatformFromUrl(item.url, activeTab);
+              const platformLabel =
+                platform === 'instagram'
+                  ? 'Instagram'
+                  : platform === 'news'
+                    ? 'Notícia'
+                    : platform === 'youtube'
+                      ? 'YouTube'
+                      : platform === 'tiktok'
+                        ? 'TikTok'
+                        : 'Radar';
+              return (
             <button
               key={item.url}
               type='button'
               onClick={() =>
                 handleOpenUrl(
                   item.url,
-                  item.title,
+                  displayTitle,
                   activeTab === 'news'
                     ? 'noticia'
                     : activeTab === 'youtube' || activeTab === 'tiktok'
                       ? 'video'
                       : 'conteudo_exclusivo',
-                  activeTab
+                  platform
                 )
               }
-              className='block w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-left text-sm text-white/90 transition hover:border-white/20 hover:bg-white/10'
+              className='flex w-full items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-left text-sm text-white/90 transition hover:border-white/20 hover:bg-white/10'
             >
-              {item.title}
+              <span className='flex-1 leading-relaxed'>{displayTitle}</span>
+              <span className='rounded-full border border-white/20 bg-white/5 px-2 py-0.5 text-[11px] uppercase tracking-wide text-white/65'>
+                {platformLabel}
+              </span>
             </button>
+              );
+            })()
           ))}
         </div>
       ) : null}
