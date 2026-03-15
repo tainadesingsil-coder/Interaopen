@@ -1,3 +1,5 @@
+import { jsPDF } from "jspdf";
+
 const GEMINI_SYSTEM_PROMPT = [
   "Você é o estrategista de aprendizado da Codexion.",
   "Escreva em português-BR com tom humano, claro e objetivo.",
@@ -1323,7 +1325,272 @@ function buildEmailTemplate({
 </html>`;
 }
 
-async function sendEmailByResend(context, toEmail, subject, html) {
+const CODEXION_LOGO_PDF_URL =
+  "https://i.postimg.cc/KjFrCpzg/Codexion-2026-02-27T195557-566-removebg-preview(1).png";
+const SYNE_REGULAR_TTF_URL =
+  "https://raw.githubusercontent.com/google/fonts/main/ofl/syne/Syne-Regular.ttf";
+const SYNE_BOLD_TTF_URL =
+  "https://raw.githubusercontent.com/google/fonts/main/ofl/syne/Syne-Bold.ttf";
+
+function formatDatePtBr(date) {
+  return new Intl.DateTimeFormat("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(date);
+}
+
+function formatDateIso(date) {
+  const year = String(date.getUTCFullYear());
+  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(date.getUTCDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function sanitizeFilenamePart(value) {
+  const normalized = normalizeForCompare(value).replace(/[^a-z0-9]+/g, "-");
+  const cleaned = normalized.replace(/^-+|-+$/g, "");
+  return cleaned || "cliente";
+}
+
+function arrayBufferToBase64(buffer) {
+  const bytes = new Uint8Array(buffer);
+  let binary = "";
+  for (let index = 0; index < bytes.length; index += 1) {
+    binary += String.fromCharCode(bytes[index]);
+  }
+  if (typeof btoa === "function") {
+    return btoa(binary);
+  }
+  if (typeof Buffer !== "undefined") {
+    return Buffer.from(buffer).toString("base64");
+  }
+  throw new Error("Ambiente sem encoder base64 disponível.");
+}
+
+async function fetchAsBase64(url) {
+  const response = await fetch(url, { cache: "no-store" });
+  if (!response.ok) {
+    throw new Error(`Falha ao baixar recurso: ${url}`);
+  }
+  const contentType = response.headers.get("content-type") || "";
+  const arrayBuffer = await response.arrayBuffer();
+  return {
+    base64: arrayBufferToBase64(arrayBuffer),
+    contentType,
+  };
+}
+
+async function tryRegisterSyneFont(pdf) {
+  try {
+    const [regular, bold] = await Promise.all([
+      fetchAsBase64(SYNE_REGULAR_TTF_URL),
+      fetchAsBase64(SYNE_BOLD_TTF_URL),
+    ]);
+    pdf.addFileToVFS("Syne-Regular.ttf", regular.base64);
+    pdf.addFileToVFS("Syne-Bold.ttf", bold.base64);
+    pdf.addFont("Syne-Regular.ttf", "Syne", "normal");
+    pdf.addFont("Syne-Bold.ttf", "Syne", "bold");
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function tryLoadLogoDataUrl() {
+  try {
+    const { base64, contentType } = await fetchAsBase64(CODEXION_LOGO_PDF_URL);
+    const mimeType =
+      contentType && /^image\//i.test(contentType) ? contentType : "image/png";
+    return `data:${mimeType};base64,${base64}`;
+  } catch {
+    return "";
+  }
+}
+
+async function buildWeeklyReportPdfAttachment(nome, relatorioTexto, reportDate) {
+  const pdf = new jsPDF({
+    unit: "mm",
+    format: "a4",
+    compress: true,
+  });
+  const hasSyne = await tryRegisterSyneFont(pdf);
+  const logoDataUrl = await tryLoadLogoDataUrl();
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
+  const marginX = 18;
+  const contentWidth = pageWidth - marginX * 2;
+  const lineHeight = 5.4;
+  const maxContentY = pageHeight - 18;
+  const reportDatePtBr = formatDatePtBr(reportDate);
+  const reportDateIso = formatDateIso(reportDate);
+  const filename = `relatorio-codexion-${sanitizeFilenamePart(
+    nome
+  )}-${reportDateIso}.pdf`;
+  let y = 56;
+  let pageNumber = 1;
+
+  const setBrandFont = (weight) => {
+    if (hasSyne) {
+      pdf.setFont("Syne", weight);
+    } else {
+      pdf.setFont("helvetica", weight);
+    }
+  };
+
+  const drawFooter = () => {
+    setBrandFont("normal");
+    pdf.setFontSize(9);
+    pdf.setTextColor(140, 140, 140);
+    pdf.text(
+      `@codexionai • ${reportDatePtBr}`,
+      pageWidth / 2,
+      pageHeight - 8,
+      { align: "center" }
+    );
+  };
+
+  const drawPageBase = () => {
+    pdf.setFillColor(0, 0, 0);
+    pdf.rect(0, 0, pageWidth, pageHeight, "F");
+
+    if (logoDataUrl) {
+      try {
+        pdf.addImage(logoDataUrl, "PNG", pageWidth / 2 - 10, 10, 20, 20);
+      } catch {
+        // fallback para texto caso a imagem falhe
+      }
+    }
+
+    setBrandFont("bold");
+    pdf.setFontSize(20);
+    pdf.setTextColor(255, 255, 255);
+    pdf.text("CODEXION", pageWidth / 2, 35, { align: "center" });
+
+    pdf.setDrawColor(180, 255, 0);
+    pdf.setLineWidth(0.8);
+    pdf.line(marginX, 42, pageWidth - marginX, 42);
+  };
+
+  const ensureSpace = (heightNeeded) => {
+    if (y + heightNeeded <= maxContentY) return;
+    drawFooter();
+    pdf.addPage();
+    pageNumber += 1;
+    drawPageBase();
+    y = 52;
+  };
+
+  const writeWrapped = (text, options = {}) => {
+    const fontWeight = options.fontWeight || "normal";
+    const color = options.color || [178, 178, 178];
+    const fontSize = options.fontSize || 11;
+    const left = options.left ?? marginX;
+    const width = options.width ?? contentWidth;
+    const before = options.before || 0;
+    const after = options.after || 0;
+    const lines = pdf.splitTextToSize(String(text || ""), width);
+
+    y += before;
+    ensureSpace(lines.length * lineHeight + after);
+    setBrandFont(fontWeight);
+    pdf.setFontSize(fontSize);
+    pdf.setTextColor(color[0], color[1], color[2]);
+    pdf.text(lines, left, y);
+    y += lines.length * lineHeight + after;
+  };
+
+  drawPageBase();
+
+  writeWrapped("Relatório Semanal", {
+    fontWeight: "bold",
+    fontSize: 16,
+    color: [180, 255, 0],
+    after: 1.5,
+  });
+  writeWrapped(`Cliente: ${nome}`, {
+    fontWeight: "bold",
+    fontSize: 12,
+    color: [255, 255, 255],
+    after: 1.2,
+  });
+  writeWrapped(`Data do relatório: ${reportDatePtBr}`, {
+    fontSize: 10.5,
+    color: [178, 178, 178],
+    after: 4,
+  });
+
+  const lines = String(relatorioTexto || "")
+    .split(/\r?\n/)
+    .map((line) => line.trim());
+
+  for (const line of lines) {
+    if (!line) {
+      y += 2;
+      continue;
+    }
+
+    if (/^[A-ZÀ-Ýa-zà-ÿ0-9\s\/]+:$/.test(line)) {
+      writeWrapped(line.replace(/:$/, ""), {
+        fontWeight: "bold",
+        fontSize: 12.2,
+        color: [180, 255, 0],
+        before: 1,
+        after: 1.5,
+      });
+      continue;
+    }
+
+    if (/^[-•]\s+/.test(line)) {
+      const bulletText = line.replace(/^[-•]\s+/, "");
+      writeWrapped(`• ${bulletText}`, {
+        fontSize: 10.7,
+        color: [178, 178, 178],
+        left: marginX + 2,
+        width: contentWidth - 2,
+        after: 0.6,
+      });
+      continue;
+    }
+
+    if (/^\d+[\)\.]\s+/.test(line)) {
+      writeWrapped(line, {
+        fontSize: 10.7,
+        color: [178, 178, 178],
+        left: marginX + 2,
+        width: contentWidth - 2,
+        after: 0.6,
+      });
+      continue;
+    }
+
+    writeWrapped(line, {
+      fontSize: 10.9,
+      color: [178, 178, 178],
+      after: 1,
+    });
+  }
+
+  drawFooter();
+  const dataUri = pdf.output("datauristring");
+  const content = String(dataUri).split(",")[1] || "";
+  if (!content) {
+    throw new Error("Falha ao gerar conteúdo base64 do PDF.");
+  }
+
+  return {
+    filename,
+    content,
+  };
+}
+
+async function sendEmailByResend(
+  context,
+  toEmail,
+  subject,
+  html,
+  attachments = []
+) {
   const { resendApiKey, resendFromEmail, resendReplyTo } = getResendConfig(context);
   if (!resendApiKey) {
     throw new Error("RESEND_API_KEY não configurada.");
@@ -1337,6 +1604,9 @@ async function sendEmailByResend(context, toEmail, subject, html) {
   };
   if (resendReplyTo) {
     payload.reply_to = resendReplyTo;
+  }
+  if (Array.isArray(attachments) && attachments.length > 0) {
+    payload.attachments = attachments;
   }
 
   const response = await fetch("https://api.resend.com/emails", {
@@ -1475,7 +1745,13 @@ export async function onRequestPost(context) {
 
     const subject = isWelcomeFlow
       ? `Bem-vindo(a) à Área Exclusiva, ${nomeCliente} ⚡`
-      : `Seu relatório semanal chegou, ${nomeCliente} ⚡`;
+      : `Seu relatório semanal chegou, ${nomeCliente} ⚡ — PDF em anexo.`;
+
+    const pdfAttachment = await buildWeeklyReportPdfAttachment(
+      nomeCliente,
+      relatorio,
+      new Date()
+    );
 
     const html = buildEmailTemplate({
       nome: nomeCliente,
@@ -1491,7 +1767,7 @@ export async function onRequestPost(context) {
       ctaUrl: "https://codexionai.pages.dev/",
     });
 
-    await sendEmailByResend(context, perfil.email, subject, html);
+    await sendEmailByResend(context, perfil.email, subject, html, [pdfAttachment]);
 
     return Response.json({
       ok: true,
