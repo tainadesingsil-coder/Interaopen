@@ -19,6 +19,7 @@ const FALLBACK_TWITCH_CHANNELS = [
   'codeaesthetic',
   'lowlevellearning',
 ];
+const PRIORITY_TWITCH_CHANNELS = ['baiano', 'bisteconee', 'gabepeixe'];
 const FALLBACK_TIKTOK_VIDEO_URLS = [
   'https://www.tiktok.com/@gabrieladamuchi/video/7601907452212235540',
   'https://www.tiktok.com/@izabela.anholett/video/7611634628490710293',
@@ -395,23 +396,36 @@ const fetchTwitchItems = async (env = {}) => {
     fetchTwitchHelixItems(env),
     fetchTwitchDecapiFallback(env),
   ]);
-  if (helix.length === 0) return monitored;
+
+  const normalizeChannelKey = (value = '') =>
+    String(value || '')
+      .trim()
+      .toLowerCase()
+      .replace(/^@/, '');
 
   const byChannel = new Map();
   monitored.forEach((item) => {
-    const key = String(item?.channel || '').toLowerCase();
+    const key = normalizeChannelKey(item?.channel);
     if (key) byChannel.set(key, item);
   });
   helix.forEach((item) => {
-    const key = String(item?.channel || '').toLowerCase();
+    const key = normalizeChannelKey(item?.channel);
     if (!key || !byChannel.has(key)) {
       byChannel.set(key || `helix-${item.id}`, item);
     }
   });
 
-  return [...byChannel.values()]
-    .sort((a, b) => Number(Boolean(b?.isLive)) - Number(Boolean(a?.isLive)))
-    .slice(0, 12);
+  const allItems = [...byChannel.values()];
+  const pinned = PRIORITY_TWITCH_CHANNELS.map((channel) =>
+    allItems.find((item) => normalizeChannelKey(item?.channel) === channel)
+  ).filter(Boolean);
+  const pinnedKeys = new Set(pinned.map((item) => normalizeChannelKey(item?.channel)));
+
+  const rest = allItems
+    .filter((item) => !pinnedKeys.has(normalizeChannelKey(item?.channel)))
+    .sort((a, b) => Number(Boolean(b?.isLive)) - Number(Boolean(a?.isLive)));
+
+  return [...pinned, ...rest].slice(0, 12);
 };
 
 const aggregateChannelFeeds = async (env = {}) => {
