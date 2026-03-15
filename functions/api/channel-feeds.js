@@ -1,6 +1,9 @@
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const SOURCE_TIMEOUT_MS = 8000;
 const FALLBACK_TWITCH_CHANNELS = [
+  'bisteconee',
+  'baiano',
+  'gabepeixe',
   'lucas_montano',
   'linuxtips',
   'glaucia_lemos86',
@@ -24,11 +27,9 @@ const FALLBACK_TIKTOK_VIDEO_URLS = [
   'https://www.tiktok.com/@islamsousa/video/7613833799423528199',
   'https://www.tiktok.com/@jornadatop/video/7232292097313770757',
 ];
-const FALLBACK_YOUTUBE_DATA_API_KEY = 'AIzaSyDmRPaN4CvD2OI04Jz8Y8APqktXggkTFAw';
-const FALLBACK_YOUTUBE_LIVE_IDS = [
-  '5qap5aO4i9A',
-  'jfKfPfyJRdk',
-  'lTRiuFIWV54',
+const FALLBACK_TIKTOK_LIVE_URLS = [
+  'https://www.tiktok.com/live/gaming/Elden_Ring:_Nightreign',
+  'https://www.tiktok.com/@julianaalexandria/live',
 ];
 const TWITCH_TOPIC_QUERIES = [
   'inteligencia artificial',
@@ -387,113 +388,77 @@ const fetchTwitchItems = async (env = {}) => {
   return fetchTwitchDecapiFallback(env);
 };
 
-const fetchYoutubeLiveItems = async (env = {}) => {
-  const apiKey = String(env?.YOUTUBE_DATA_API_KEY || FALLBACK_YOUTUBE_DATA_API_KEY || '').trim();
-  if (!apiKey) {
-    return FALLBACK_YOUTUBE_LIVE_IDS.map((videoId, index) => ({
-      id: `youtube-live-fallback-${videoId}`,
-      title: 'YouTube · Live em destaque',
-      summary: 'Transmissão ao vivo de tecnologia.',
-      url: `https://www.youtube.com/watch?v=${videoId}`,
-      thumbnail: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
-      tags: ['YouTube', 'Live', 'Tech'],
-      category: 'Software',
-      isLive: true,
-      metricLabel: 'Ao vivo',
-      caseLabel: 'Ver no Radar',
-      channel: '@youtube',
-      rank: index,
-    }));
-  }
-
-  const queries = ['programação ao vivo brasil', 'ia ao vivo brasil', 'tecnologia ao vivo'];
-  const settled = await Promise.allSettled(
-    queries.map(async (query, queryIndex) => {
-      const endpoint = new URL('https://www.googleapis.com/youtube/v3/search');
-      endpoint.searchParams.set('part', 'snippet');
-      endpoint.searchParams.set('key', apiKey);
-      endpoint.searchParams.set('type', 'video');
-      endpoint.searchParams.set('eventType', 'live');
-      endpoint.searchParams.set('maxResults', '6');
-      endpoint.searchParams.set('q', query);
-      endpoint.searchParams.set('regionCode', 'BR');
-      endpoint.searchParams.set('relevanceLanguage', 'pt');
-      const response = await fetchWithTimeout(endpoint.toString(), undefined, 7000);
-      if (!response.ok) return [];
-      const payload = await response.json();
-      const items = Array.isArray(payload?.items) ? payload.items : [];
-      return items.map((item, index) => {
-        const videoId = String(item?.id?.videoId || '').trim();
-        const title = safeText(item?.snippet?.title || '', 180);
-        if (!videoId || !title) return null;
-        const channel = safeText(item?.snippet?.channelTitle || '', 80) || '@youtube';
-        return {
-          id: `youtube-live-${videoId}`,
-          title: 'YouTube · Live em destaque',
-          summary: title,
-          url: `https://www.youtube.com/watch?v=${videoId}`,
-          thumbnail:
-            item?.snippet?.thumbnails?.high?.url ||
-            item?.snippet?.thumbnails?.medium?.url ||
-            item?.snippet?.thumbnails?.default?.url ||
-            `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
-          tags: ['YouTube', 'Live', 'Tech'],
-          category: 'Software',
-          isLive: true,
-          metricLabel: 'Ao vivo agora',
-          caseLabel: 'Ver no Radar',
-          channel,
-          rank: queryIndex * 100 + index,
-        };
-      });
-    })
+const parseTikTokLiveUrls = (env = {}) => {
+  const raw = String(env?.TIKTOK_LIVE_URLS || env?.TIKTOK_LIVES || '').trim();
+  const envUrls = raw ? parseCommaSeparated(raw) : [];
+  return toUniqueList(
+    [...envUrls, ...FALLBACK_TIKTOK_LIVE_URLS]
+      .map((url) => normalizeTikTokUrl(url))
+      .filter((url) => /^https?:\/\/(www\.)?tiktok\.com\/.+/i.test(url)),
+    8
   );
+};
 
-  const dynamic = settled
-    .flatMap((result) => (result.status === 'fulfilled' ? result.value : []))
-    .filter(Boolean);
-
-  if (dynamic.length === 0) {
-    return FALLBACK_YOUTUBE_LIVE_IDS.map((videoId, index) => ({
-      id: `youtube-live-fallback-${videoId}`,
-      title: 'YouTube · Live em destaque',
-      summary: 'Transmissão ao vivo de tecnologia.',
-      url: `https://www.youtube.com/watch?v=${videoId}`,
-      thumbnail: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
-      tags: ['YouTube', 'Live', 'Tech'],
-      category: 'Software',
-      isLive: true,
-      metricLabel: 'Ao vivo',
-      caseLabel: 'Ver no Radar',
-      channel: '@youtube',
-      rank: index,
-    }));
+const buildTikTokLiveTitle = (url = '') => {
+  if (/\/live\/gaming\//i.test(url)) return 'TikTok Live · Gaming em alta';
+  if (/\/@julianaalexandria\/live/i.test(url)) return 'TikTok Live · Vendas e TikTok Shop';
+  if (/\/@([a-z0-9._]+)\/live/i.test(url)) {
+    const handle = url.match(/\/@([a-z0-9._]+)\/live/i)?.[1] || 'creator';
+    return `TikTok Live · @${handle}`;
   }
+  return 'TikTok Live · Ao vivo';
+};
 
-  return dynamic
-    .sort((a, b) => Number(a.rank || 0) - Number(b.rank || 0))
-    .map(({ rank, ...item }) => item)
-    .slice(0, 12);
+const buildTikTokLiveSummary = (url = '') => {
+  if (/\/live\/gaming\//i.test(url)) {
+    return 'Hub de lives de game no TikTok para acompanhar canais em alta.';
+  }
+  if (/\/@julianaalexandria\/live/i.test(url)) {
+    return 'Live de vendas para conhecer estratégias práticas no TikTok Shop.';
+  }
+  return 'Live ao vivo no TikTok com atualização contínua.';
+};
+
+const fetchTikTokLiveItems = async (env = {}) => {
+  const liveUrls = parseTikTokLiveUrls(env);
+  return liveUrls.map((url, index) => {
+    const handleMatch = url.match(/\/@([a-z0-9._]+)\/live/i);
+    const channel = handleMatch?.[1] ? `@${handleMatch[1].toLowerCase()}` : '@tiktoklive';
+    return {
+      id: `tiktok-live-${url}`.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 90),
+      title: buildTikTokLiveTitle(url),
+      summary: buildTikTokLiveSummary(url),
+      url,
+      thumbnail: null,
+      tags: ['TikTok', 'Live', /shop|vendas/i.test(url) ? 'Shop' : 'Gaming'],
+      category: /shop|vendas/i.test(url) ? 'Marketing' : 'IA',
+      isLive: true,
+      metricLabel: /shop|vendas/i.test(url) ? 'Live de vendas' : 'Live de games',
+      caseLabel: 'Ver no Radar',
+      channel,
+      rank: index,
+    };
+  });
 };
 
 const aggregateChannelFeeds = async (env = {}) => {
-  const [tiktok, twitch, youtubeLive] = await Promise.all([
+  const [tiktok, twitch, tiktokLive] = await Promise.all([
     fetchTiktokItems(env),
     fetchTwitchItems(env),
-    fetchYoutubeLiveItems(env),
+    fetchTikTokLiveItems(env),
   ]);
 
   return {
     generatedAt: new Date().toISOString(),
     tiktok,
     twitch,
-    youtubeLive,
+    tiktokLive,
   };
 };
 
 export async function onRequestGet(context) {
   const cache = getCache();
-  const cacheKey = 'channel-feeds:v2';
+  const cacheKey = 'channel-feeds:v3';
   const now = Date.now();
   const cached = cache.get(cacheKey);
 

@@ -776,27 +776,37 @@ function RadarViewer({
               </div>
             )
           ) : item.kind === 'news' ? (
-            isTikTokNews && tikTokEmbedUrls.length > 0 ? (
+            isTikTokNews ? (
               <div className='flex h-full min-h-[320px] flex-col gap-3 overflow-auto rounded-xl border border-white/10 bg-[#0b0b0f] p-3 sm:min-h-[460px] sm:p-4'>
-                {!tikTokEmbedFailed ? (
-                  <iframe
-                    src={tikTokEmbedUrls[tikTokEmbedIndex] || tikTokEmbedUrls[0]}
-                    title={`TikTok player - ${item.title}`}
-                    allow='autoplay; encrypted-media; picture-in-picture; web-share'
-                    allowFullScreen
-                    onError={() => {
-                      if (tikTokEmbedIndex < tikTokEmbedUrls.length - 1) {
-                        setTikTokEmbedIndex((prev) => prev + 1);
-                      } else {
-                        setTikTokEmbedFailed(true);
-                      }
-                    }}
-                    className='h-[54vh] min-h-[300px] w-full rounded-xl border border-white/10 bg-black sm:h-[64vh] sm:min-h-[420px]'
-                  />
+                {tikTokEmbedUrls.length > 0 ? (
+                  !tikTokEmbedFailed ? (
+                    <iframe
+                      src={tikTokEmbedUrls[tikTokEmbedIndex] || tikTokEmbedUrls[0]}
+                      title={`TikTok player - ${item.title}`}
+                      allow='autoplay; encrypted-media; picture-in-picture; web-share'
+                      allowFullScreen
+                      onError={() => {
+                        if (tikTokEmbedIndex < tikTokEmbedUrls.length - 1) {
+                          setTikTokEmbedIndex((prev) => prev + 1);
+                        } else {
+                          setTikTokEmbedFailed(true);
+                        }
+                      }}
+                      className='h-[54vh] min-h-[300px] w-full rounded-xl border border-white/10 bg-black sm:h-[64vh] sm:min-h-[420px]'
+                    />
+                  ) : (
+                    <div className='flex min-h-[300px] items-center justify-center rounded-xl border border-white/10 bg-black/30 p-5 text-center sm:min-h-[420px]'>
+                      <p className='text-sm text-[#c9d1d9]'>
+                        Este vídeo não abriu no player interno. Clique em outro vídeo do criador abaixo.
+                      </p>
+                    </div>
+                  )
                 ) : (
-                  <div className='flex min-h-[300px] items-center justify-center rounded-xl border border-white/10 bg-black/30 p-5 text-center sm:min-h-[420px]'>
-                    <p className='text-sm text-[#c9d1d9]'>
-                      Este vídeo não abriu no player interno. Clique em outro vídeo do criador abaixo.
+                  <div className='rounded-xl border border-white/10 bg-white/[0.02] p-4'>
+                    <p className='text-[11px] uppercase tracking-[0.12em] text-[#9ca3af]'>TikTok Live</p>
+                    <h5 className='mt-1 text-sm font-semibold text-white sm:text-base'>{item.title}</h5>
+                    <p className='mt-2 text-sm leading-relaxed text-[#d1d5db]'>
+                      Esta live usa formato que nem sempre libera player embutido. Selecione outra live/vídeo do TikTok abaixo para assistir no Radar.
                     </p>
                   </div>
                 )}
