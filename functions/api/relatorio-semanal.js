@@ -125,12 +125,32 @@ function summarizeMap(map, limit) {
     .join(" | ");
 }
 
-function buildDeterministicReport(nome, atual, anterior) {
+function normalizeResumoLocal(resumoLocal) {
+  const totalRaw = Number(resumoLocal?.total ?? 0);
+  const total = Number.isFinite(totalRaw) && totalRaw > 0 ? Math.round(totalRaw) : 0;
+  const categorias =
+    typeof resumoLocal?.categorias === "string" ? resumoLocal.categorias.trim() : "";
+  const ultimos =
+    typeof resumoLocal?.ultimos === "string" ? resumoLocal.ultimos.trim() : "";
+  return { total, categorias, ultimos };
+}
+
+function buildDeterministicReport(nome, atual, anterior, resumoLocal) {
+  const local = normalizeResumoLocal(resumoLocal);
   const byCategory = aggregateByCategory(atual);
   const byType = aggregateByType(atual);
-  const topCategory = summarizeMap(byCategory, 4);
-  const topType = summarizeMap(byType, 4);
-  const diff = atual.length - anterior.length;
+  const currentTotal = atual.length > 0 ? atual.length : local.total;
+  const topCategory =
+    atual.length > 0
+      ? summarizeMap(byCategory, 4)
+      : local.categorias || summarizeMap(byCategory, 4);
+  const topType =
+    Object.keys(byType).length > 0
+      ? summarizeMap(byType, 4)
+      : local.ultimos
+      ? "live_play, abriu_conteudo, video_play, tempo_na_area"
+      : summarizeMap(byType, 4);
+  const diff = currentTotal - anterior.length;
   const evolutionLabel =
     anterior.length === 0
       ? "Ainda sem base anterior para comparação."
@@ -140,19 +160,24 @@ function buildDeterministicReport(nome, atual, anterior) {
       ? `Você evoluiu: +${diff} ações em relação à semana passada.`
       : `Ritmo menor: ${Math.abs(diff)} ações a menos que na semana passada.`;
 
-  const recentes = atual
-    .slice(0, 5)
-    .map(
-      (item) =>
-        `- ${item?.categoria || "Conteúdo"}: ${item?.titulo_conteudo || "Interação na área exclusiva"}`
-    )
-    .join("\n");
+  const recentes =
+    atual.length > 0
+      ? atual
+          .slice(0, 5)
+          .map(
+            (item) =>
+              `- ${item?.categoria || "Conteúdo"}: ${
+                item?.titulo_conteudo || "Interação na área exclusiva"
+              }`
+          )
+          .join("\n")
+      : local.ultimos;
 
   return [
     `Olá, ${nome}!`,
     ``,
     `Resumo da sua semana na Área Exclusiva:`,
-    `- Total de ações: ${atual.length}`,
+    `- Total de ações: ${currentTotal}`,
     `- Categorias com mais consumo: ${topCategory}`,
     `- Tipos de ação mais frequentes: ${topType}`,
     ``,
@@ -607,7 +632,8 @@ export async function onRequestPost(context) {
         relatorio = buildDeterministicReport(
           nomeCliente,
           interacoesSemanaAtual,
-          interacoesSemanaAnterior
+          interacoesSemanaAnterior,
+          resumoLocal
         );
       }
     }
