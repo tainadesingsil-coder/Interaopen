@@ -500,15 +500,7 @@ async function sendEmailByResend(context, toEmail, subject, html) {
 
 export async function onRequestPost(context) {
   const { supabaseUrl, supabaseKey } = getSupabaseConfig(context);
-  if (!supabaseUrl || !supabaseKey) {
-    return Response.json(
-      {
-        error:
-          "SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY são obrigatórias para esta rota.",
-      },
-      { status: 500 }
-    );
-  }
+  const hasSupabase = Boolean(supabaseUrl && supabaseKey);
 
   let body;
   try {
@@ -530,36 +522,47 @@ export async function onRequestPost(context) {
 
   const trigger =
     typeof body?.trigger === "string" ? body.trigger.trim().toLowerCase() : "weekly";
+  const providedNome = typeof body?.nome === "string" ? body.nome.trim() : "";
+  const providedEmail = typeof body?.email === "string" ? body.email.trim() : "";
 
   try {
-    const nowIso = new Date().toISOString();
-    const last7DaysIso = formatDateIsoDaysAgo(7);
-    const last14DaysIso = formatDateIsoDaysAgo(14);
+    let interacoesSemanaAtual = [];
+    let interacoesSemanaAnterior = [];
+    let perfil = {
+      nome: providedNome || "Cliente",
+      email: providedEmail || "",
+    };
 
-    const [interacoesSemanaAtual, interacoesSemanaAnterior] = await Promise.all([
-      fetchInteracoesIntervalo(
+    if (hasSupabase) {
+      const nowIso = new Date().toISOString();
+      const last7DaysIso = formatDateIsoDaysAgo(7);
+      const last14DaysIso = formatDateIsoDaysAgo(14);
+
+      [interacoesSemanaAtual, interacoesSemanaAnterior] = await Promise.all([
+        fetchInteracoesIntervalo(
+          supabaseUrl,
+          supabaseKey,
+          userId,
+          last7DaysIso,
+          nowIso
+        ),
+        fetchInteracoesIntervalo(
+          supabaseUrl,
+          supabaseKey,
+          userId,
+          last14DaysIso,
+          last7DaysIso
+        ),
+      ]);
+
+      perfil = await resolveUserProfile(
         supabaseUrl,
         supabaseKey,
         userId,
-        last7DaysIso,
-        nowIso
-      ),
-      fetchInteracoesIntervalo(
-        supabaseUrl,
-        supabaseKey,
-        userId,
-        last14DaysIso,
-        last7DaysIso
-      ),
-    ]);
-
-    const perfil = await resolveUserProfile(
-      supabaseUrl,
-      supabaseKey,
-      userId,
-      typeof body?.nome === "string" ? body.nome.trim() : undefined,
-      typeof body?.email === "string" ? body.email.trim() : undefined
-    );
+        providedNome || undefined,
+        providedEmail || undefined
+      );
+    }
 
     const nomeCliente = perfil.nome || "Cliente";
     if (!perfil.email) {
