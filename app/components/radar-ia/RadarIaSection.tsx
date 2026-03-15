@@ -529,7 +529,6 @@ function RadarViewer({
   const twitchLoadWatchdogRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const twitchIframeRef = useRef<HTMLIFrameElement | null>(null);
   const twitchStabilizedRef = useRef(false);
-  const twitchRuntimeRetryCountRef = useRef(0);
   const [isPodcastPlaying, setIsPodcastPlaying] = useState(false);
   const [captionLineIndex, setCaptionLineIndex] = useState(0);
   const [liveCaptionText, setLiveCaptionText] = useState('');
@@ -558,7 +557,6 @@ function RadarViewer({
   const [twitchEmbedIndex, setTwitchEmbedIndex] = useState(0);
   const [twitchEmbedFailed, setTwitchEmbedFailed] = useState(false);
   const [twitchEmbedLoaded, setTwitchEmbedLoaded] = useState(false);
-  const [twitchEmbedRevision, setTwitchEmbedRevision] = useState(0);
   const twitchChannel = isTwitchNews ? extractTwitchChannelFromUrl(item.url) : '';
   const twitchEmbedUrls = isTwitchNews ? buildTwitchEmbedUrls(twitchChannel, twitchParentHosts) : [];
   const twitchEmbedUrl = twitchEmbedUrls[twitchEmbedIndex] || '';
@@ -664,7 +662,6 @@ function RadarViewer({
 
     setTwitchEmbedLoaded(true);
     twitchStabilizedRef.current = true;
-    twitchRuntimeRetryCountRef.current = 0;
     if (twitchLoadWatchdogRef.current) {
       clearTimeout(twitchLoadWatchdogRef.current);
       twitchLoadWatchdogRef.current = null;
@@ -679,9 +676,7 @@ function RadarViewer({
     setTwitchEmbedFailed(false);
     setTwitchEmbedLoaded(false);
     setTwitchEmbedIndex(0);
-    setTwitchEmbedRevision(0);
     twitchStabilizedRef.current = false;
-    twitchRuntimeRetryCountRef.current = 0;
     if (tikTokLoadWatchdogRef.current) {
       clearTimeout(tikTokLoadWatchdogRef.current);
       tikTokLoadWatchdogRef.current = null;
@@ -758,41 +753,6 @@ function RadarViewer({
       }
     };
   }, [isTwitchNews, tryNextTwitchEmbed, twitchEmbedFailed, twitchEmbedLoaded, twitchEmbedUrl]);
-
-  useEffect(() => {
-    if (!isTwitchNews || !twitchEmbedUrl || twitchEmbedFailed) return;
-    if (!twitchEmbedLoaded) return;
-
-    const interval = window.setInterval(() => {
-      const frame = twitchIframeRef.current;
-      if (!frame) return;
-      try {
-        const href = String(frame.contentWindow?.location?.href || '').toLowerCase();
-        const dropped =
-          !href || href === 'about:blank' || href.startsWith('chrome-error://') || href.startsWith('about:srcdoc');
-        if (!dropped) return;
-
-        if (twitchRuntimeRetryCountRef.current < 2) {
-          twitchRuntimeRetryCountRef.current += 1;
-          twitchStabilizedRef.current = false;
-          setTwitchEmbedLoaded(false);
-          setTwitchEmbedRevision((prev) => prev + 1);
-          return;
-        }
-
-        twitchRuntimeRetryCountRef.current = 0;
-        twitchStabilizedRef.current = false;
-        setTwitchEmbedLoaded(false);
-        tryNextTwitchEmbed();
-      } catch {
-        // Cross-origin access is expected when stream is healthy.
-      }
-    }, 15000);
-
-    return () => {
-      window.clearInterval(interval);
-    };
-  }, [isTwitchNews, tryNextTwitchEmbed, twitchEmbedFailed, twitchEmbedLoaded, twitchEmbedUrl, twitchEmbedRevision]);
 
   useEffect(() => {
     const handleEsc = (event: KeyboardEvent) => {
@@ -1195,7 +1155,6 @@ function RadarViewer({
               <div className='flex h-full min-h-[320px] flex-col gap-3 overflow-auto rounded-xl border border-white/10 bg-[#0b0b0f] p-3 sm:min-h-[460px] sm:p-4'>
                 {!twitchEmbedFailed && twitchEmbedUrl ? (
                   <iframe
-                    key={`${twitchEmbedUrl}-${twitchEmbedRevision}`}
                     ref={twitchIframeRef}
                     src={twitchEmbedUrl}
                     title={`Twitch player - ${item.title}`}
