@@ -9,7 +9,7 @@ import {
   type RadarType,
 } from '@/app/lib/radar-ia/types';
 import { Bot, Code2, ExternalLink, Megaphone, Mic2, Newspaper, PauseCircle, PlayCircle, X } from 'lucide-react';
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 const KIND_LABEL: Record<RadarType | 'podcast', string> = {
   all: 'Tudo',
@@ -90,12 +90,6 @@ const isLikelyMobileDevice = () => {
   if (typeof navigator === 'undefined') return false;
   const ua = String(navigator.userAgent || '').toLowerCase();
   return /android|iphone|ipad|ipod|mobile|webview|wv/.test(ua);
-};
-
-const isLikelyRestrictedInAppBrowser = () => {
-  if (typeof navigator === 'undefined') return false;
-  const ua = String(navigator.userAgent || '').toLowerCase();
-  return /instagram|fb_iab|fban|fbav|line\/|snapchat|tiktok/.test(ua);
 };
 
 const extractTikTokVideoId = (url: string) => {
@@ -556,7 +550,6 @@ function RadarViewer({
   const isCommunityNews =
     item.kind === 'news' && (isCommunityUrl(item.url) || /tabnews|comunidade br/i.test(item.source));
   const prefersMobileTikTokPlayer = useMemo(() => isLikelyMobileDevice(), []);
-  const isRestrictedInAppBrowser = useMemo(() => isLikelyRestrictedInAppBrowser(), []);
   const tikTokEmbedUrls = isTikTokNews ? buildTikTokEmbedUrls(item.url, prefersMobileTikTokPlayer) : [];
   const [twitchParentHosts, setTwitchParentHosts] = useState<string[]>(['localhost']);
   const [twitchEmbedIndex, setTwitchEmbedIndex] = useState(0);
@@ -1177,9 +1170,7 @@ function RadarViewer({
                     <p className='text-[11px] uppercase tracking-[0.12em] text-[#9ca3af]'>Twitch</p>
                     <h5 className='mt-1 text-sm font-semibold text-white sm:text-base'>{item.title}</h5>
                     <p className='mt-2 text-sm leading-relaxed text-[#d1d5db]'>
-                      {isRestrictedInAppBrowser
-                        ? 'O navegador embutido do app bloqueou o player da Twitch. Abra direto na Twitch para assistir sem travar.'
-                        : 'O player interno foi bloqueado neste domínio. Use o botão abaixo para abrir o canal da Twitch.'}
+                      O player interno foi bloqueado neste domínio. Use o botão abaixo para abrir o canal da Twitch.
                     </p>
                     <p className='mt-2 text-xs text-[#9ca3af]'>
                       Domínios testados no player: {twitchParentHosts.slice(0, 4).join(', ') || 'n/a'}
@@ -1381,7 +1372,7 @@ function RadarViewer({
   );
 }
 
-export const RadarIaSection = memo(function RadarIaSection() {
+export function RadarIaSection() {
   const submittedQuery = DEFAULT_QUERY;
   const [activeTab, setActiveTab] = useState<RadarType>('all');
   const [activeRange, setActiveRange] = useState<RadarRange>('7d');
@@ -1399,18 +1390,6 @@ export const RadarIaSection = memo(function RadarIaSection() {
   const [lastRadarUpdateAt, setLastRadarUpdateAt] = useState('');
   const handleCloseViewer = useCallback(() => {
     setViewerItem(null);
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    window.dispatchEvent(new CustomEvent('radar:viewer-state', { detail: !!viewerItem }));
-  }, [viewerItem]);
-
-  useEffect(() => {
-    return () => {
-      if (typeof window === 'undefined') return;
-      window.dispatchEvent(new CustomEvent('radar:viewer-state', { detail: false }));
-    };
   }, []);
 
   useEffect(() => {
@@ -1775,6 +1754,4 @@ export const RadarIaSection = memo(function RadarIaSection() {
       ) : null}
     </article>
   );
-});
-
-RadarIaSection.displayName = 'RadarIaSection';
+}
