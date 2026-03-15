@@ -40,6 +40,7 @@ const portfolioLinks = [
 const CHANNEL_FEEDS_REFRESH_MS = 60 * 1000;
 const CHANNEL_ROTATION_MS = 10 * 1000;
 const CHANNEL_VISIBLE_LIMIT = 8;
+const PRIORITY_TWITCH_CHANNELS = ['@bisteconee', '@gabepeixe', '@baiano'];
 
 const rotateItems = <T,>(items: T[], steps: number) => {
   if (items.length <= 1) return items;
@@ -55,6 +56,10 @@ const takeWindow = <T,>(items: T[], size: number) => {
 
 const isTwitchProject = (project: FeaturedProject) => /twitch\.tv/i.test(project.caseHref);
 const isTikTokProject = (project: FeaturedProject) => /tiktok\.com/i.test(project.caseHref);
+const normalizeChannel = (value?: string | null) =>
+  String(value || '')
+    .trim()
+    .toLowerCase();
 
 export default function HomePage() {
   const [open, setOpen] = useState(false);
@@ -167,9 +172,14 @@ export default function HomePage() {
     const others = channelProjects.filter((project) => !isTikTokProject(project) && !isTwitchProject(project));
 
     const rotatedTikTok = rotateItems(tiktok, channelRotationTick);
-    const rotatedTwitch = rotateItems(twitch, channelRotationTick);
+    const pinnedTwitch = PRIORITY_TWITCH_CHANNELS.map((channel) =>
+      twitch.find((project) => normalizeChannel(project.channel) === channel)
+    ).filter(Boolean) as FeaturedProject[];
+    const pinnedIds = new Set(pinnedTwitch.map((project) => project.id));
+    const rotatingTwitchPool = twitch.filter((project) => !pinnedIds.has(project.id));
+    const rotatedTwitch = rotateItems(rotatingTwitchPool, channelRotationTick);
     const visibleTikTok = takeWindow(rotatedTikTok, 4);
-    const visibleTwitch = takeWindow(rotatedTwitch, 3);
+    const visibleTwitch = [...pinnedTwitch, ...takeWindow(rotatedTwitch, 3)].slice(0, 4);
     const visibleOthers = takeWindow(others, 2);
 
     return [...visibleTikTok, ...visibleTwitch, ...visibleOthers].slice(0, CHANNEL_VISIBLE_LIMIT);
