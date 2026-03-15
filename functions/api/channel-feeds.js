@@ -1,4 +1,4 @@
-const CACHE_TTL_MS = 60 * 1000;
+const CACHE_TTL_MS = 30 * 1000;
 const SOURCE_TIMEOUT_MS = 8000;
 const FALLBACK_TWITCH_CHANNELS = [
   'bisteconee',
@@ -20,6 +20,7 @@ const FALLBACK_TWITCH_CHANNELS = [
   'lowlevellearning',
 ];
 const PRIORITY_TWITCH_CHANNELS = ['baiano', 'bisteconee', 'gabepeixe'];
+const REQUIRED_TWITCH_CHANNELS = ['bisteconee', 'gabepeixe'];
 const FALLBACK_TIKTOK_VIDEO_URLS = [
   'https://www.tiktok.com/@gabrieladamuchi/video/7601907452212235540',
   'https://www.tiktok.com/@izabela.anholett/video/7611634628490710293',
@@ -238,7 +239,7 @@ const parseTwitchChannels = (env = {}) => {
     : [];
   const cleanedProvided = provided.map(extractTwitchChannelCandidate).filter(Boolean);
   const fallback = FALLBACK_TWITCH_CHANNELS.map(extractTwitchChannelCandidate).filter(Boolean);
-  return toUniqueList([...cleanedProvided, ...fallback], 14);
+  return toUniqueList([...REQUIRED_TWITCH_CHANNELS, ...cleanedProvided, ...fallback], 14);
 };
 
 const getTwitchCredentials = (env = {}) => {
@@ -344,6 +345,8 @@ const fetchTwitchHelixItems = async (env = {}) => {
         title: title || 'Live na Twitch',
         summary: `${safeText(stream?.game_name || 'Categoria em destaque', 90)} · ${viewers} espectadores ao vivo`,
         url: channel ? `https://www.twitch.tv/${channel}` : 'https://www.twitch.tv/directory',
+        source: 'Twitch Live',
+        publishedAt: new Date().toISOString(),
         thumbnail: thumbnail || null,
         tags: ['Twitch', 'LIVE', safeText(stream?.game_name || 'Tech', 24)],
         category: 'Software',
@@ -375,6 +378,8 @@ const fetchTwitchDecapiFallback = async (env = {}) => {
           isLive ? `${viewerCount} espectadores ao vivo` : 'Offline agora'
         }`,
         url: `https://www.twitch.tv/${channel}`,
+        source: isLive ? 'Twitch Live' : 'Twitch Monitor',
+        publishedAt: isLive ? new Date().toISOString() : null,
         thumbnail: `https://static-cdn.jtvnw.net/previews-ttv/live_user_${channel}-640x360.jpg?t=${Date.now()}`,
         tags: ['Twitch', isLive ? 'LIVE' : 'Monitor', 'Tech'],
         category: 'Software',
@@ -415,6 +420,25 @@ const fetchTwitchItems = async (env = {}) => {
     }
   });
 
+  REQUIRED_TWITCH_CHANNELS.forEach((channel) => {
+    if (byChannel.has(channel)) return;
+    byChannel.set(channel, {
+      id: `twitch-required-${channel}`,
+      title: `Twitch · ${channel}`,
+      summary: 'Canal monitorado em tempo real no Radar para detectar lives e manter atualização contínua.',
+      url: `https://www.twitch.tv/${channel}`,
+      source: 'Twitch Monitor',
+      publishedAt: null,
+      thumbnail: `https://static-cdn.jtvnw.net/previews-ttv/live_user_${channel}-640x360.jpg?t=${Date.now()}`,
+      tags: ['Twitch', 'Monitor', 'Tech'],
+      category: 'Software',
+      isLive: false,
+      metricLabel: 'Monitor ativo',
+      caseLabel: 'Ver canal',
+      channel: `@${channel}`,
+    });
+  });
+
   const allItems = [...byChannel.values()];
   const pinned = PRIORITY_TWITCH_CHANNELS.map((channel) =>
     allItems.find((item) => normalizeChannelKey(item?.channel) === channel)
@@ -451,7 +475,7 @@ export async function onRequestGet(context) {
     return Response.json(cached.data, {
       headers: {
         'x-channel-cache': 'hit',
-        'cache-control': 'public, max-age=30',
+        'cache-control': 'public, max-age=15',
       },
     });
   }
@@ -465,7 +489,7 @@ export async function onRequestGet(context) {
   return Response.json(data, {
     headers: {
       'x-channel-cache': 'miss',
-      'cache-control': 'public, max-age=30',
+      'cache-control': 'public, max-age=15',
     },
   });
 }
