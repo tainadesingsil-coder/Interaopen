@@ -1233,24 +1233,26 @@ const fetchTwitterNewsItems = async (query, range, env = {}) => {
   }
 };
 
+const extractTwitchChannelCandidate = (value = '') => {
+  const raw = String(value || '').trim().toLowerCase();
+  if (!raw) return '';
+  const fromUrl = raw.match(/twitch\.tv\/([a-z0-9_]{2,25})/i)?.[1];
+  if (fromUrl) return fromUrl.toLowerCase();
+  const cleaned = raw.replace(/^@/, '');
+  return /^[a-z0-9_]{2,25}$/i.test(cleaned) ? cleaned.toLowerCase() : '';
+};
+
 const parseTwitchChannels = (env = {}) => {
   const raw = String(env?.TWITCH_CHANNELS || env?.TWITCH_CHANNEL || '').trim();
   const provided = raw
     ? raw
         .split(/[,\n; ]/)
-        .map((item) => item.trim().toLowerCase())
+        .map((item) => item.trim())
         .filter(Boolean)
     : [];
-  const cleanedProvided = provided
-    .map((channel) => channel.replace(/^@/, ''))
-    .filter((channel) => /^[a-z0-9_]{2,25}$/i.test(channel))
-    .filter((channel, index, arr) => arr.indexOf(channel) === index);
-
-  const fallback = FALLBACK_TWITCH_CHANNELS.map((channel) => channel.replace(/^@/, ''))
-    .filter((channel) => /^[a-z0-9_]{2,25}$/i.test(channel))
-    .filter((channel, index, arr) => arr.indexOf(channel) === index);
-
-  return (cleanedProvided.length > 0 ? cleanedProvided : fallback).slice(0, 12);
+  const cleanedProvided = provided.map(extractTwitchChannelCandidate).filter(Boolean);
+  const fallback = FALLBACK_TWITCH_CHANNELS.map(extractTwitchChannelCandidate).filter(Boolean);
+  return toUniqueList([...cleanedProvided, ...fallback], 12);
 };
 
 const fetchTwitchLiveItems = async (query, env = {}) => {
