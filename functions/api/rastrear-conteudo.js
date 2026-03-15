@@ -2,15 +2,23 @@ function getEnv(context) {
   return context?.env ?? {};
 }
 
+function getProcessEnv() {
+  if (typeof process !== "undefined" && process?.env) {
+    return process.env;
+  }
+  return {};
+}
+
 function getSupabaseConfig(context) {
   const env = getEnv(context);
+  const processEnv = getProcessEnv();
   const supabaseUrl =
     env.SUPABASE_URL ??
     env.NEXT_PUBLIC_SUPABASE_URL ??
-    process.env.SUPABASE_URL ??
-    process.env.NEXT_PUBLIC_SUPABASE_URL;
+    processEnv.SUPABASE_URL ??
+    processEnv.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey =
-    env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY;
+    env.SUPABASE_SERVICE_ROLE_KEY ?? processEnv.SUPABASE_SERVICE_ROLE_KEY;
   return { supabaseUrl, supabaseKey };
 }
 
