@@ -9,10 +9,13 @@ const GEMINI_SYSTEM_PROMPT = [
   "Monte exatamente nesta estrutura:",
   "1) Saudação curta com nome.",
   "2) Resumo do consumo por categoria e tipo.",
-  "3) 3 insights acionáveis para o negócio do cliente.",
-  "4) Evolução versus semana anterior (se não houver base, diga isso com clareza).",
-  "5) Plano da próxima semana em 3 passos numerados.",
-  "6) Encerramento motivacional de até 2 frases.",
+  "3) Criadores do Radar: vistos x ainda não vistos.",
+  "4) 3 insights acionáveis para o negócio do cliente.",
+  "5) Conexões inteligentes cruzando 2+ conteúdos consumidos.",
+  "6) Evolução versus semana anterior (se não houver base, diga que é o primeiro relatório).",
+  "7) Plano da próxima semana em 3 passos numerados e adaptados ao perfil.",
+  "8) Pergunta da semana provocadora e prática.",
+  "9) Encerramento motivacional de até 2 frases.",
   "Use frases curtas, sem jargão técnico desnecessário.",
 ].join(" ");
 
@@ -159,6 +162,103 @@ function uniqueIgnoreCase(values) {
   return result;
 }
 
+function normalizeForCompare(value) {
+  return String(value || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+}
+
+function parseContentList(text) {
+  return splitMultilineList(text).map((item) => item.trim()).filter(Boolean);
+}
+
+function collectConsumedContentNames(interacoes, local) {
+  const fromInteractions = (interacoes || [])
+    .map((item) => String(item?.titulo_conteudo || "").trim())
+    .filter(Boolean);
+  const fromLocal = parseContentList(local?.conteudos || "");
+  const fromTimeline = parseContentList(local?.timeline || "");
+  return uniqueIgnoreCase(fromInteractions.concat(fromLocal, fromTimeline));
+}
+
+function detectRadarSignals(consumedNames) {
+  const normalized = (consumedNames || []).map((item) => ({
+    raw: item,
+    norm: normalizeForCompare(item),
+  }));
+
+  const hasGaules = normalized.some(
+    (item) => item.norm.includes("gaules") || item.norm.includes("gaule")
+  );
+  const hasAlanzoka = normalized.some((item) => item.norm.includes("alanzoka"));
+
+  const hasOpenAI = normalized.some((item) => item.norm.includes("openai"));
+  const hasGoogleAI = normalized.some(
+    (item) => item.norm.includes("google ai") || item.norm.includes("googleai")
+  );
+  const hasDeepMind = normalized.some((item) =>
+    item.norm.includes("deepmind")
+  );
+
+  const hasHistoryAI = normalized.some(
+    (item) =>
+      item.norm.includes("historia da ia") ||
+      item.norm.includes("historia ia") ||
+      item.norm.includes("history of ai")
+  );
+
+  const launchKeywords = [
+    "gpt",
+    "modelo",
+    "agent",
+    "agente",
+    "multimodal",
+    "automation",
+    "automacao",
+    "api",
+    "tool",
+    "ferramenta",
+    "gemini",
+    "deep research",
+    "assistants",
+  ];
+  const launchMentions = normalized
+    .map((item) => item.raw)
+    .filter((raw) =>
+      launchKeywords.some((keyword) =>
+        normalizeForCompare(raw).includes(normalizeForCompare(keyword))
+      )
+    );
+
+  const creatorsConsumed = uniqueIgnoreCase(
+    normalized
+      .filter(
+        (item) =>
+          item.norm.includes("gaules") ||
+          item.norm.includes("alanzoka") ||
+          item.norm.includes("openai") ||
+          item.norm.includes("google ai") ||
+          item.norm.includes("deepmind")
+      )
+      .map((item) => item.raw)
+  );
+
+  return {
+    hasGaules,
+    hasAlanzoka,
+    hasOpenAI,
+    hasGoogleAI,
+    hasDeepMind,
+    hasHistoryAI,
+    hasAnyCreatorContent:
+      hasGaules || hasAlanzoka || hasOpenAI || hasGoogleAI || hasDeepMind,
+    launchMentions: uniqueIgnoreCase(launchMentions),
+    creatorsConsumed,
+  };
+}
+
 function extractCreatorFromInteraction(item) {
   const title = String(item?.titulo_conteudo || "").trim();
   const url = String(item?.url_conteudo || "").trim();
@@ -247,6 +347,131 @@ function normalizeResumoLocal(resumoLocal) {
   };
 }
 
+function buildContextualInsights(signals, context) {
+  const insights = [];
+  const creatorsLabel = context.creatorsSeen.slice(0, 3).join(", ");
+  const launchLabel = context.launchHints.length
+    ? context.launchHints.slice(0, 2).join(" | ")
+    : "novas automações, agentes e fluxos multimodais";
+
+  if (signals.hasGaules || signals.hasAlanzoka) {
+    const creatorNames = [];
+    if (signals.hasGaules) creatorNames.push("gaules");
+    if (signals.hasAlanzoka) creatorNames.push("alanzoka");
+    insights.push(
+      `Você consumiu ${creatorNames.join(
+        " e "
+      )}. O diferencial desses criadores é disciplina diária + gestão de comunidade em tempo real; replique isso criando um calendário fixo (mínimo 5 dias/semana) com quadro recorrente e CTA claro para o seu negócio.`
+    );
+  }
+
+  if (signals.hasOpenAI || signals.hasGoogleAI || signals.hasDeepMind) {
+    const aiSources = [];
+    if (signals.hasOpenAI) aiSources.push("OpenAI");
+    if (signals.hasGoogleAI) aiSources.push("Google AI");
+    if (signals.hasDeepMind) aiSources.push("Google DeepMind");
+    insights.push(
+      `Você acompanhou ${aiSources.join(
+        ", "
+      )}. O sinal tecnológico da semana aponta para ${launchLabel}; aplique isso automatizando 1 processo crítico (ex.: qualificação de leads, suporte inicial ou produção de conteúdo) com meta de reduzir tempo operacional já nesta semana.`
+    );
+  }
+
+  if (signals.hasHistoryAI) {
+    insights.push(
+      "Ao revisar História da IA, o padrão fica claro: quem transforma mudança tecnológica em rotina operacional vence. Traduza isso hoje em um playbook simples de 1 página para seu time executar IA no dia a dia."
+    );
+  }
+
+  if (context.currentTotal >= 14) {
+    insights.push(
+      `Seu volume de interação (${context.currentTotal}) mostra consistência acima da média. O próximo nível agora é execução orientada a KPI: escolha 1 métrica principal e conecte cada conteúdo consumido a uma decisão prática.`
+    );
+  } else if (context.currentTotal > 0) {
+    insights.push(
+      `Você já iniciou bem (${context.currentTotal} ações), mas ainda falta densidade para máxima precisão. Foque em sessões mais profundas (30–40 min) e finalize cada sessão com 1 ação executável.`
+    );
+  }
+
+  while (insights.length < 3) {
+    insights.push(
+      "Use o conteúdo consumido como matéria-prima de execução: uma decisão por sessão, uma ação por dia, uma revisão por semana."
+    );
+  }
+
+  return insights.slice(0, 3);
+}
+
+function buildIntelligentConnections(signals, context) {
+  const connections = [];
+  const hasCreatorPerformance = signals.hasGaules || signals.hasAlanzoka;
+  const hasAiTech = signals.hasOpenAI || signals.hasGoogleAI || signals.hasDeepMind;
+
+  if (hasCreatorPerformance && hasAiTech) {
+    const creator = signals.hasGaules
+      ? "gaules"
+      : signals.hasAlanzoka
+      ? "alanzoka"
+      : "criadores de alta performance";
+    const aiSource = signals.hasOpenAI
+      ? "OpenAI"
+      : signals.hasGoogleAI
+      ? "Google AI"
+      : "Google DeepMind";
+    connections.push(
+      `${creator} aplica consistência extrema + ${aiSource} acelera automação = oportunidade de escalar frequência de conteúdo sem perder qualidade.`
+    );
+  }
+
+  if (signals.hasHistoryAI && hasAiTech) {
+    connections.push(
+      `História da IA mostra ciclos de adoção rápidos + tecnologias atuais indicam janela de vantagem competitiva agora; quem operacionalizar primeiro captura atenção e mercado.`
+    );
+  }
+
+  if (context.pendingCreators.length > 0 && context.creatorsSeen.length > 0) {
+    connections.push(
+      `Você já validou ${context.creatorsSeen.slice(
+        0,
+        2
+      ).join(", ")}; ao adicionar ${context.pendingCreators
+        .slice(0, 2)
+        .join(", ")} você amplia repertório sem perder foco.`
+    );
+  }
+
+  if (!connections.length) {
+    connections.push(
+      "Conectar conteúdo + execução é o multiplicador principal: para cada tema consumido, defina imediatamente uma aplicação prática no funil do negócio."
+    );
+  }
+
+  return connections.slice(0, 2);
+}
+
+function buildWeekQuestion(signals, context) {
+  const hasCreatorPerformance = signals.hasGaules || signals.hasAlanzoka;
+  const hasAiTech = signals.hasOpenAI || signals.hasGoogleAI || signals.hasDeepMind;
+
+  if (context.isFirstReport) {
+    return "Qual processo do seu negócio mais drena tempo hoje e poderia ser o primeiro a ser automatizado com IA ainda esta semana?";
+  }
+
+  if (hasCreatorPerformance && hasAiTech) {
+    return "Se você tivesse que unir a consistência dos criadores do Radar com uma automação de IA em um único plano de 7 dias, qual rotina começaria amanhã às 9h?";
+  }
+
+  if (signals.hasHistoryAI) {
+    return "Qual decisão você está adiando por medo de mudança tecnológica, mesmo sabendo que a janela de vantagem acontece agora?";
+  }
+
+  if (context.pendingCreators.length > 0) {
+    return `Qual criador pendente (${context.pendingCreators[0]}) pode destravar um insight novo para seu negócio nesta semana?`;
+  }
+
+  return "Qual ação concreta você vai executar nas próximas 24h para transformar este relatório em resultado real?";
+}
+
 function buildDeterministicReport(nome, atual, anterior, resumoLocal) {
   const local = normalizeResumoLocal(resumoLocal);
   const byCategory = aggregateByCategory(atual);
@@ -277,6 +502,9 @@ function buildDeterministicReport(nome, atual, anterior, resumoLocal) {
     (creator) =>
       !creatorsSeen.some((seen) => seen.toLowerCase() === creator.toLowerCase())
   );
+  const consumedNames = collectConsumedContentNames(atual, local);
+  const signals = detectRadarSignals(consumedNames);
+  const launchHints = uniqueIgnoreCase(signals.launchMentions);
   const dominantType =
     Object.entries(byType).sort((a, b) => b[1] - a[1])[0]?.[0] ||
     (liveCount > videoCount ? "live_play" : "video_play");
@@ -305,41 +533,21 @@ function buildDeterministicReport(nome, atual, anterior, resumoLocal) {
       : local.ultimos;
   const timeline = local.timeline || local.ultimos;
   const conteudosEspecificos = local.conteudos;
-  const insights = [];
-  if (creatorsSeen.length) {
-    insights.push(
-      `Você focou em criadores específicos hoje: ${creatorsSeen.slice(0, 3).join(", ")}. Use isso para aprofundar um único tema de negócio por vez.`
-    );
-  }
-  if (liveCount > 0) {
-    insights.push(
-      `Seu consumo de lives foi relevante (${liveCount}). Lives indicam busca por timing e contexto; transforme 1 insight em ação nas próximas 24h.`
-    );
-  }
-  if (videoCount > 0) {
-    insights.push(
-      `Você assistiu ${videoCount} vídeo(s). Vídeo sugere aprendizado técnico; documente 3 pontos-chave e aplique 1 melhoria imediata.`
-    );
-  }
-  if (dominantType.includes("noticia")) {
-    insights.push(
-      "Seu padrão está orientado a notícias/tendências. Priorize filtrar sinal vs ruído e definir só uma aposta principal para a semana."
-    );
-  }
-  if (currentTotal >= 12) {
-    insights.push(
-      `Seu volume de interação (${currentTotal}) mostra consistência. O próximo ganho vem de execução disciplinada, não de consumir mais conteúdo.`
-    );
-  } else {
-    insights.push(
-      "Seu volume de interação ainda está baixo para diagnóstico profundo. Aumente a cadência diária com sessões curtas e objetivas."
-    );
-  }
-  while (insights.length < 3) {
-    insights.push(
-      "Converta cada sessão em uma ação prática mensurável para aumentar clareza e resultado semanal."
-    );
-  }
+  const insights = buildContextualInsights(signals, {
+    creatorsSeen,
+    launchHints,
+    currentTotal,
+    liveCount,
+    videoCount,
+  });
+  const intelligentConnections = buildIntelligentConnections(signals, {
+    creatorsSeen,
+    pendingCreators,
+  });
+  const weekQuestion = buildWeekQuestion(signals, {
+    isFirstReport,
+    pendingCreators,
+  });
 
   const nextSteps = [];
   if (isFirstReport) {
@@ -351,6 +559,19 @@ function buildDeterministicReport(nome, atual, anterior, resumoLocal) {
     );
     nextSteps.push(
       "3) Volte amanhã para gerar base comparativa e ativar evolução semanal personalizada."
+    );
+  } else if (
+    (signals.hasGaules || signals.hasAlanzoka) &&
+    (signals.hasOpenAI || signals.hasGoogleAI || signals.hasDeepMind)
+  ) {
+    nextSteps.push(
+      "1) Escolha um formato recorrente inspirado nos criadores que você viu e padronize uma rotina semanal de publicação."
+    );
+    nextSteps.push(
+      "2) Automatize a etapa mais repetitiva desse formato com IA (roteiro, clipping, distribuição ou atendimento)."
+    );
+    nextSteps.push(
+      "3) Mensure impacto em audiência ou conversão e ajuste no próximo relatório com base nos números."
     );
   } else if (dominantType.includes("live")) {
     nextSteps.push(
@@ -403,11 +624,17 @@ function buildDeterministicReport(nome, atual, anterior, resumoLocal) {
     `- ${insights[1]}`,
     `- ${insights[2]}`,
     ``,
+    `Conexões inteligentes:`,
+    ...intelligentConnections.map((item) => `- ${item}`),
+    ``,
     `Evolução:`,
     `- ${evolutionLabel}`,
     ``,
     `Próximos passos (7 dias):`,
     ...nextSteps,
+    ``,
+    `Pergunta da semana:`,
+    `- ${weekQuestion}`,
     ``,
     `Mensagem final: você já está construindo ritmo. A consistência semanal é o que transforma conteúdo em resultado real.`,
   ].join("\n");
@@ -461,6 +688,10 @@ function buildGeminiInput(nome, atual, anterior, resumoLocal) {
     `Criadores monitorados no Radar (local): ${JSON.stringify(local.radarCreators)}`,
     `Conteúdos específicos (local): ${local.conteudos || "não informado"}`,
     `Timeline local: ${local.timeline || "não informado"}`,
+    "Regra de interpretação contextual:",
+    "- gaules/alanzoka => extrair mentalidade de alta performance, gestão de comunidade, crescimento de audiência, disciplina e consistência aplicável ao negócio do cliente.",
+    "- OpenAI/Google AI/Google DeepMind => identificar tecnologia discutida/lançada e sugerir aplicação específica no contexto do cliente.",
+    "- História da IA => conectar contexto histórico com oportunidade prática imediata.",
     "Reforço obrigatório: cite conteúdos/lives/vídeos por nome quando existirem no input. Evite termos genéricos.",
     "Se faltarem títulos exatos, diga isso explicitamente em 1 linha e use os itens de timeline disponíveis.",
     "Nos próximos passos, adapte por perfil observado do usuário e explique a lógica em ações concretas.",
