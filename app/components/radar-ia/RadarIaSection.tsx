@@ -444,6 +444,7 @@ function RadarViewer({
   const youtubeNewsId = isYouTubeNews ? extractYoutubeId(item.url, '') : '';
   const [tikTokEmbedFailed, setTikTokEmbedFailed] = useState(false);
   const [tikTokEmbedIndex, setTikTokEmbedIndex] = useState(0);
+  const [autoFallbackDone, setAutoFallbackDone] = useState(false);
   const relatedTikTokItems = useMemo(() => {
     if (!isTikTokNews) return [] as RadarItem[];
     const creatorMatches = allItems.filter((candidate) => {
@@ -463,6 +464,10 @@ function RadarViewer({
       )
       .slice(0, 8);
   }, [allItems, isTikTokNews, item.channel, item.id]);
+  const firstPlayableRelatedTikTokItem = useMemo(
+    () => relatedTikTokItems.find((candidate) => extractTikTokVideoId(candidate.url)),
+    [relatedTikTokItems]
+  );
   const readerUrl = `/api/radar-reader?url=${encodeURIComponent(item.url)}&fallbackTitle=${encodeURIComponent(
     item.title
   )}&fallbackDescription=${encodeURIComponent(item.description)}&fallbackSource=${encodeURIComponent(
@@ -472,7 +477,23 @@ function RadarViewer({
   useEffect(() => {
     setTikTokEmbedFailed(false);
     setTikTokEmbedIndex(0);
+    setAutoFallbackDone(false);
   }, [item.id]);
+
+  useEffect(() => {
+    if (!isTikTokNews) return;
+    if (tikTokEmbedUrls.length > 0) return;
+    if (autoFallbackDone) return;
+    if (!firstPlayableRelatedTikTokItem) return;
+    setAutoFallbackDone(true);
+    onSelectItem(firstPlayableRelatedTikTokItem);
+  }, [
+    autoFallbackDone,
+    firstPlayableRelatedTikTokItem,
+    isTikTokNews,
+    onSelectItem,
+    tikTokEmbedUrls.length,
+  ]);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && window.location?.hostname) {
