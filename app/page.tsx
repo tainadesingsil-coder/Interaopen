@@ -17,7 +17,7 @@ import {
   Home,
   RadioTower,
 } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 const portfolioLinks = [
   {
@@ -67,6 +67,19 @@ export default function HomePage() {
   const [feedsLoaded, setFeedsLoaded] = useState(false);
   const [channelRotationTick, setChannelRotationTick] = useState(0);
   const [lastChannelsUpdateAt, setLastChannelsUpdateAt] = useState('');
+  const isRadarViewerOpenRef = useRef(false);
+
+  useEffect(() => {
+    const handleViewerState = (event: Event) => {
+      const customEvent = event as CustomEvent<boolean>;
+      isRadarViewerOpenRef.current = !!customEvent.detail;
+    };
+
+    window.addEventListener('radar:viewer-state', handleViewerState as EventListener);
+    return () => {
+      window.removeEventListener('radar:viewer-state', handleViewerState as EventListener);
+    };
+  }, []);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -102,6 +115,7 @@ export default function HomePage() {
     });
 
     const loadFeeds = async () => {
+      if (isRadarViewerOpenRef.current) return;
       try {
         const response = await fetch('/api/channel-feeds', {
           method: 'GET',
@@ -148,6 +162,7 @@ export default function HomePage() {
 
     void loadFeeds();
     const timer = window.setInterval(() => {
+      if (isRadarViewerOpenRef.current) return;
       void loadFeeds();
     }, CHANNEL_FEEDS_REFRESH_MS);
 
@@ -159,6 +174,7 @@ export default function HomePage() {
 
   useEffect(() => {
     const timer = window.setInterval(() => {
+      if (isRadarViewerOpenRef.current) return;
       setChannelRotationTick((prev) => prev + 1);
     }, CHANNEL_ROTATION_MS);
     return () => {

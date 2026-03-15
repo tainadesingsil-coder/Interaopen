@@ -9,7 +9,7 @@ import {
   type RadarType,
 } from '@/app/lib/radar-ia/types';
 import { Bot, Code2, ExternalLink, Megaphone, Mic2, Newspaper, PauseCircle, PlayCircle, X } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 const KIND_LABEL: Record<RadarType | 'podcast', string> = {
   all: 'Tudo',
@@ -1033,7 +1033,7 @@ function RadarViewer({
   };
 
   return (
-    <div className='fixed inset-0 z-50 bg-black/80 p-2 backdrop-blur-[2px] sm:p-5'>
+    <div className='fixed inset-0 z-50 bg-black/80 p-2 sm:p-5 sm:backdrop-blur-[2px]'>
       <div className='mx-auto flex h-full w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#060608]'>
         <header className='flex items-start justify-between gap-3 border-b border-white/10 p-3 sm:p-4'>
           <div>
@@ -1381,7 +1381,7 @@ function RadarViewer({
   );
 }
 
-export function RadarIaSection() {
+export const RadarIaSection = memo(function RadarIaSection() {
   const submittedQuery = DEFAULT_QUERY;
   const [activeTab, setActiveTab] = useState<RadarType>('all');
   const [activeRange, setActiveRange] = useState<RadarRange>('7d');
@@ -1399,6 +1399,18 @@ export function RadarIaSection() {
   const [lastRadarUpdateAt, setLastRadarUpdateAt] = useState('');
   const handleCloseViewer = useCallback(() => {
     setViewerItem(null);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    window.dispatchEvent(new CustomEvent('radar:viewer-state', { detail: !!viewerItem }));
+  }, [viewerItem]);
+
+  useEffect(() => {
+    return () => {
+      if (typeof window === 'undefined') return;
+      window.dispatchEvent(new CustomEvent('radar:viewer-state', { detail: false }));
+    };
   }, []);
 
   useEffect(() => {
@@ -1763,4 +1775,6 @@ export function RadarIaSection() {
       ) : null}
     </article>
   );
-}
+});
+
+RadarIaSection.displayName = 'RadarIaSection';
