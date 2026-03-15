@@ -60,6 +60,29 @@ function emitRadarOpenUrl(url: string) {
   );
 }
 
+function emitRadarTrack(payload: {
+  tipo: string;
+  titulo: string;
+  categoria: string;
+  url: string;
+  platform?: string;
+}) {
+  if (typeof window === 'undefined') return;
+  try {
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage(
+        {
+          source: 'codexion-radar',
+          ...payload,
+        },
+        '*'
+      );
+    }
+  } catch {
+    // no-op
+  }
+}
+
 function isDev() {
   return process.env.NODE_ENV !== 'production';
 }
@@ -207,7 +230,19 @@ export function RadarIaSection({
     moveToNextVariant,
   ]);
 
-  const handleOpenUrl = (url: string) => {
+  const handleOpenUrl = (
+    url: string,
+    title?: string,
+    categoria?: string,
+    platform?: string
+  ) => {
+    emitRadarTrack({
+      tipo: 'abriu_conteudo',
+      titulo: title || 'Abriu conteúdo no Radar IA',
+      categoria: categoria || 'conteudo_exclusivo',
+      url,
+      platform,
+    });
     emitRadarOpenUrl(url);
     onOpenUrl?.(url);
     window.open(url, '_blank', 'noopener,noreferrer');
@@ -257,6 +292,15 @@ export function RadarIaSection({
     }
 
     setIframeLoaded(true);
+    if (activeStream) {
+      emitRadarTrack({
+        tipo: 'live_play',
+        titulo: activeStream.title || `Live Twitch: ${activeStream.channel}`,
+        categoria: 'live',
+        url: twitchChannelUrl,
+        platform: 'twitch',
+      });
+    }
   };
 
   return (
@@ -344,7 +388,14 @@ export function RadarIaSection({
               <div className='flex flex-wrap gap-2'>
                 <button
                   type='button'
-                  onClick={() => handleOpenUrl(twitchChannelUrl)}
+                  onClick={() =>
+                    handleOpenUrl(
+                      twitchChannelUrl,
+                      activeStream?.title || `Live Twitch: ${activeStream?.channel || ''}`,
+                      'live',
+                      'twitch'
+                    )
+                  }
                   className='rounded-md border border-violet-300/40 bg-violet-500/20 px-3 py-2 text-sm font-medium'
                 >
                   Abrir na Twitch
@@ -391,7 +442,18 @@ export function RadarIaSection({
             <button
               key={item.url}
               type='button'
-              onClick={() => handleOpenUrl(item.url)}
+              onClick={() =>
+                handleOpenUrl(
+                  item.url,
+                  item.title,
+                  activeTab === 'news'
+                    ? 'noticia'
+                    : activeTab === 'youtube' || activeTab === 'tiktok'
+                      ? 'video'
+                      : 'conteudo_exclusivo',
+                  activeTab
+                )
+              }
               className='block w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-left text-sm text-white/90 transition hover:border-white/20 hover:bg-white/10'
             >
               {item.title}

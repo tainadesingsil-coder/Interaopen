@@ -128,18 +128,45 @@ function summarizeMap(map, limit) {
 function normalizeResumoLocal(resumoLocal) {
   const totalRaw = Number(resumoLocal?.total ?? 0);
   const total = Number.isFinite(totalRaw) && totalRaw > 0 ? Math.round(totalRaw) : 0;
+  const todayTotalRaw = Number(resumoLocal?.today_total ?? 0);
+  const todayTotal =
+    Number.isFinite(todayTotalRaw) && todayTotalRaw > 0
+      ? Math.round(todayTotalRaw)
+      : 0;
+  const liveCountRaw = Number(resumoLocal?.live_count ?? 0);
+  const liveCount =
+    Number.isFinite(liveCountRaw) && liveCountRaw > 0 ? Math.round(liveCountRaw) : 0;
+  const videoCountRaw = Number(resumoLocal?.video_count ?? 0);
+  const videoCount =
+    Number.isFinite(videoCountRaw) && videoCountRaw > 0
+      ? Math.round(videoCountRaw)
+      : 0;
   const categorias =
     typeof resumoLocal?.categorias === "string" ? resumoLocal.categorias.trim() : "";
   const ultimos =
     typeof resumoLocal?.ultimos === "string" ? resumoLocal.ultimos.trim() : "";
-  return { total, categorias, ultimos };
+  const conteudos =
+    typeof resumoLocal?.conteudos === "string" ? resumoLocal.conteudos.trim() : "";
+  const timeline =
+    typeof resumoLocal?.timeline === "string" ? resumoLocal.timeline.trim() : "";
+  return {
+    total,
+    todayTotal,
+    liveCount,
+    videoCount,
+    categorias,
+    ultimos,
+    conteudos,
+    timeline,
+  };
 }
 
 function buildDeterministicReport(nome, atual, anterior, resumoLocal) {
   const local = normalizeResumoLocal(resumoLocal);
   const byCategory = aggregateByCategory(atual);
   const byType = aggregateByType(atual);
-  const currentTotal = atual.length > 0 ? atual.length : local.total;
+  const currentTotal =
+    atual.length > 0 ? atual.length : local.todayTotal || local.total;
   const topCategory =
     atual.length > 0
       ? summarizeMap(byCategory, 4)
@@ -150,6 +177,9 @@ function buildDeterministicReport(nome, atual, anterior, resumoLocal) {
       : local.ultimos
       ? "live_play, abriu_conteudo, video_play, tempo_na_area"
       : summarizeMap(byType, 4);
+  const liveCount =
+    (byType.live_play ?? 0) + (byType.live_open ?? 0) + local.liveCount;
+  const videoCount = (byType.video_play ?? 0) + local.videoCount;
   const diff = currentTotal - anterior.length;
   const evolutionLabel =
     anterior.length === 0
@@ -172,17 +202,24 @@ function buildDeterministicReport(nome, atual, anterior, resumoLocal) {
           )
           .join("\n")
       : local.ultimos;
+  const timeline = local.timeline || local.ultimos;
+  const conteudosEspecificos = local.conteudos;
 
   return [
     `Olá, ${nome}!`,
     ``,
-    `Resumo da sua semana na Área Exclusiva:`,
+    `Resumo do seu dia na Área Exclusiva:`,
     `- Total de ações: ${currentTotal}`,
+    `- Lives assistidas: ${liveCount || 0}`,
+    `- Vídeos assistidos: ${videoCount || 0}`,
     `- Categorias com mais consumo: ${topCategory}`,
     `- Tipos de ação mais frequentes: ${topType}`,
     ``,
+    `Conteúdos específicos identificados:`,
+    conteudosEspecificos || "- Sem conteúdo nominal identificado ainda.",
+    ``,
     `Ações recentes:`,
-    recentes || "- Sem ações recentes registradas.",
+    recentes || timeline || "- Sem ações recentes registradas.",
     ``,
     `Insights práticos:`,
     `- Escolha o tema mais recorrente e transforme em uma ação de negócio nesta semana.`,
@@ -243,7 +280,9 @@ function buildGeminiInput(nome, atual, anterior, resumoLocal) {
     `Tipos semana atual: ${JSON.stringify(tiposAtual)}`,
     `Conteúdos recentes: ${JSON.stringify(recentes)}`,
     `Resumo local opcional do frontend: ${JSON.stringify(resumoLocal || {})}`,
-    "Reforço: não repetir frases. Clareza e objetividade acima de tudo.",
+    "Reforço obrigatório: cite conteúdos/lives/vídeos por nome quando existirem no input. Evite termos genéricos.",
+    "Se faltarem títulos exatos, diga isso explicitamente em 1 linha e use os itens de timeline disponíveis.",
+    "Não repetir frases. Clareza e objetividade acima de tudo.",
   ].join("\n");
 }
 
@@ -615,10 +654,23 @@ export async function onRequestPost(context) {
         : undefined;
 
     const isWelcomeFlow = trigger === "welcome" || trigger === "subscription";
+    const hasRichLocalSummary = Boolean(
+      resumoLocal &&
+        (typeof resumoLocal.conteudos === "string" ||
+          typeof resumoLocal.ultimos === "string" ||
+          typeof resumoLocal.timeline === "string")
+    );
     let relatorio = "";
 
     if (isWelcomeFlow && interacoesSemanaAtual.length === 0) {
       relatorio = buildWelcomeReport(nomeCliente);
+    } else if (interacoesSemanaAtual.length === 0 && hasRichLocalSummary) {
+      relatorio = buildDeterministicReport(
+        nomeCliente,
+        interacoesSemanaAtual,
+        interacoesSemanaAnterior,
+        resumoLocal
+      );
     } else {
       try {
         relatorio = await generateReportWithGemini(
