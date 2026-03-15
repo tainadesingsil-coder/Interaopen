@@ -525,6 +525,7 @@ function RadarViewer({
   const tikTokLoadWatchdogRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const tikTokIframeRef = useRef<HTMLIFrameElement | null>(null);
   const twitchLoadWatchdogRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const twitchProbeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const twitchIframeRef = useRef<HTMLIFrameElement | null>(null);
   const twitchStabilizedRef = useRef(false);
   const [isPodcastPlaying, setIsPodcastPlaying] = useState(false);
@@ -644,26 +645,33 @@ function RadarViewer({
       return;
     }
 
-    const frame = twitchIframeRef.current;
-    if (frame) {
-      try {
-        const href = String(frame.contentWindow?.location?.href || '').toLowerCase();
-        // If browser blocked the remote frame, it often stays in local blank/error URL.
-        if (!href || href === 'about:blank' || href.startsWith('chrome-error://') || href.startsWith('about:srcdoc')) {
-          tryNextTwitchEmbed();
-          return;
+    if (twitchProbeTimerRef.current) {
+      clearTimeout(twitchProbeTimerRef.current);
+      twitchProbeTimerRef.current = null;
+    }
+    // Delay probe a bit: some mobile/webview browsers replace iframe with
+    // chrome-error page shortly after the initial load event.
+    twitchProbeTimerRef.current = setTimeout(() => {
+      const frame = twitchIframeRef.current;
+      if (frame) {
+        try {
+          const href = String(frame.contentWindow?.location?.href || '').toLowerCase();
+          if (!href || href === 'about:blank' || href.startsWith('chrome-error://') || href.startsWith('about:srcdoc')) {
+            tryNextTwitchEmbed();
+            return;
+          }
+        } catch {
+          // Cross-origin access error usually means Twitch actually loaded.
         }
-      } catch {
-        // Cross-origin access error usually means Twitch actually loaded.
       }
-    }
 
-    setTwitchEmbedLoaded(true);
-    twitchStabilizedRef.current = true;
-    if (twitchLoadWatchdogRef.current) {
-      clearTimeout(twitchLoadWatchdogRef.current);
-      twitchLoadWatchdogRef.current = null;
-    }
+      setTwitchEmbedLoaded(true);
+      twitchStabilizedRef.current = true;
+      if (twitchLoadWatchdogRef.current) {
+        clearTimeout(twitchLoadWatchdogRef.current);
+        twitchLoadWatchdogRef.current = null;
+      }
+    }, 900);
   }, [tryNextTwitchEmbed]);
 
   useEffect(() => {
@@ -682,6 +690,10 @@ function RadarViewer({
     if (twitchLoadWatchdogRef.current) {
       clearTimeout(twitchLoadWatchdogRef.current);
       twitchLoadWatchdogRef.current = null;
+    }
+    if (twitchProbeTimerRef.current) {
+      clearTimeout(twitchProbeTimerRef.current);
+      twitchProbeTimerRef.current = null;
     }
   }, [item.id]);
 
@@ -742,12 +754,16 @@ function RadarViewer({
       if (!twitchEmbedLoaded) {
         tryNextTwitchEmbed();
       }
-    }, 7000);
+    }, 4500);
 
     return () => {
       if (twitchLoadWatchdogRef.current) {
         clearTimeout(twitchLoadWatchdogRef.current);
         twitchLoadWatchdogRef.current = null;
+      }
+      if (twitchProbeTimerRef.current) {
+        clearTimeout(twitchProbeTimerRef.current);
+        twitchProbeTimerRef.current = null;
       }
     };
   }, [isTwitchNews, tryNextTwitchEmbed, twitchEmbedFailed, twitchEmbedLoaded, twitchEmbedUrl]);
@@ -844,6 +860,10 @@ function RadarViewer({
       if (twitchLoadWatchdogRef.current) {
         clearTimeout(twitchLoadWatchdogRef.current);
         twitchLoadWatchdogRef.current = null;
+      }
+      if (twitchProbeTimerRef.current) {
+        clearTimeout(twitchProbeTimerRef.current);
+        twitchProbeTimerRef.current = null;
       }
       destroySpeechGraph();
     };
