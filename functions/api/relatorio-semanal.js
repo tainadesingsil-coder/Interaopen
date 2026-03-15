@@ -1572,8 +1572,8 @@ async function buildWeeklyReportPdfAttachment(nome, relatorioTexto, reportDate) 
   }
 
   drawFooter();
-  const dataUri = pdf.output("datauristring");
-  const content = String(dataUri).split(",")[1] || "";
+  const pdfArrayBuffer = pdf.output("arraybuffer");
+  const content = arrayBufferToBase64(pdfArrayBuffer);
   if (!content) {
     throw new Error("Falha ao gerar conteúdo base64 do PDF.");
   }
@@ -1581,6 +1581,8 @@ async function buildWeeklyReportPdfAttachment(nome, relatorioTexto, reportDate) 
   return {
     filename,
     content,
+    content_type: "application/pdf",
+    disposition: "attachment",
   };
 }
 
