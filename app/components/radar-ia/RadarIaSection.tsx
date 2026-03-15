@@ -130,7 +130,7 @@ const extractTwitchChannelFromUrl = (url: string) => {
   }
 };
 
-const DEFAULT_TWITCH_PARENT_HOSTS = ['codexionai.pages.dev', 'www.codexionai.pages.dev'];
+const DEFAULT_TWITCH_PARENT_HOSTS = ['codexionai.pages.dev', 'www.codexionai.pages.dev', 'localhost'];
 const ENV_TWITCH_PARENT_HOSTS = String(process.env.NEXT_PUBLIC_TWITCH_EMBED_PARENTS || '').trim();
 
 const normalizeHostCandidate = (value: string) => {
@@ -157,14 +157,12 @@ const normalizeHostCandidate = (value: string) => {
 const deriveTwitchParentHosts = () => {
   if (typeof window === 'undefined') return DEFAULT_TWITCH_PARENT_HOSTS;
 
-  const locationHost = normalizeHostCandidate(window.location.hostname || '');
-  const locationHostNoPort = normalizeHostCandidate(
+  const locationHosts = [
+    window.location.hostname,
     String(window.location.host || '')
       .trim()
-      .split(':')[0]
-  );
-  const locationHosts = [locationHost, locationHostNoPort].filter(Boolean);
-
+      .split(':')[0],
+  ];
   const referrerHost = normalizeHostCandidate(document.referrer || '');
   const ancestorHosts: string[] = [];
   const ancestors = window.location.ancestorOrigins;
@@ -204,12 +202,7 @@ const deriveTwitchParentHosts = () => {
     return [host, `www.${host}`];
   });
 
-  const unique = [...new Set(expanded)];
-  const primary = normalizeHostCandidate(window.location.hostname || '');
-  if (!primary) return unique.slice(0, 12);
-
-  const prioritized = [primary, ...unique.filter((host) => host !== primary)];
-  return prioritized.slice(0, 12);
+  return [...new Set(expanded)].slice(0, 12);
 };
 
 const buildTwitchEmbedUrls = (channel: string, parents: string[]) => {
@@ -229,13 +222,10 @@ const buildTwitchEmbedUrls = (channel: string, parents: string[]) => {
     return url.toString();
   };
 
-  const primary = parentList[0];
-  const extras = parentList.slice(1);
-
   const variants = [
     createUrl(parentList),
-    ...extras.slice(0, 3).map((extra) => createUrl([primary, extra])),
-    createUrl([primary]),
+    ...parentList.slice(0, 8).map((parent) => createUrl([parent])),
+    ...(parentList.length > 1 ? [createUrl(parentList.slice(0, 2))] : []),
   ];
 
   return [...new Set(variants)];
@@ -535,7 +525,6 @@ function RadarViewer({
   const tikTokLoadWatchdogRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const tikTokIframeRef = useRef<HTMLIFrameElement | null>(null);
   const twitchLoadWatchdogRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const twitchProbeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const twitchIframeRef = useRef<HTMLIFrameElement | null>(null);
   const twitchStabilizedRef = useRef(false);
   const [isPodcastPlaying, setIsPodcastPlaying] = useState(false);
@@ -655,33 +644,26 @@ function RadarViewer({
       return;
     }
 
-    if (twitchProbeTimerRef.current) {
-      clearTimeout(twitchProbeTimerRef.current);
-      twitchProbeTimerRef.current = null;
-    }
-    // Delay probe a bit: some mobile/webview browsers replace iframe with
-    // chrome-error page shortly after the initial load event.
-    twitchProbeTimerRef.current = setTimeout(() => {
-      const frame = twitchIframeRef.current;
-      if (frame) {
-        try {
-          const href = String(frame.contentWindow?.location?.href || '').toLowerCase();
-          if (!href || href === 'about:blank' || href.startsWith('chrome-error://') || href.startsWith('about:srcdoc')) {
-            tryNextTwitchEmbed();
-            return;
-          }
-        } catch {
-          // Cross-origin access error usually means Twitch actually loaded.
+    const frame = twitchIframeRef.current;
+    if (frame) {
+      try {
+        const href = String(frame.contentWindow?.location?.href || '').toLowerCase();
+        // If browser blocked the remote frame, it often stays in local blank/error URL.
+        if (!href || href === 'about:blank' || href.startsWith('chrome-error://') || href.startsWith('about:srcdoc')) {
+          tryNextTwitchEmbed();
+          return;
         }
+      } catch {
+        // Cross-origin access error usually means Twitch actually loaded.
       }
+    }
 
-      setTwitchEmbedLoaded(true);
-      twitchStabilizedRef.current = true;
-      if (twitchLoadWatchdogRef.current) {
-        clearTimeout(twitchLoadWatchdogRef.current);
-        twitchLoadWatchdogRef.current = null;
-      }
-    }, 900);
+    setTwitchEmbedLoaded(true);
+    twitchStabilizedRef.current = true;
+    if (twitchLoadWatchdogRef.current) {
+      clearTimeout(twitchLoadWatchdogRef.current);
+      twitchLoadWatchdogRef.current = null;
+    }
   }, [tryNextTwitchEmbed]);
 
   useEffect(() => {
@@ -700,10 +682,6 @@ function RadarViewer({
     if (twitchLoadWatchdogRef.current) {
       clearTimeout(twitchLoadWatchdogRef.current);
       twitchLoadWatchdogRef.current = null;
-    }
-    if (twitchProbeTimerRef.current) {
-      clearTimeout(twitchProbeTimerRef.current);
-      twitchProbeTimerRef.current = null;
     }
   }, [item.id]);
 
@@ -764,16 +742,12 @@ function RadarViewer({
       if (!twitchEmbedLoaded) {
         tryNextTwitchEmbed();
       }
-    }, 4500);
+    }, 7000);
 
     return () => {
       if (twitchLoadWatchdogRef.current) {
         clearTimeout(twitchLoadWatchdogRef.current);
         twitchLoadWatchdogRef.current = null;
-      }
-      if (twitchProbeTimerRef.current) {
-        clearTimeout(twitchProbeTimerRef.current);
-        twitchProbeTimerRef.current = null;
       }
     };
   }, [isTwitchNews, tryNextTwitchEmbed, twitchEmbedFailed, twitchEmbedLoaded, twitchEmbedUrl]);
@@ -870,10 +844,6 @@ function RadarViewer({
       if (twitchLoadWatchdogRef.current) {
         clearTimeout(twitchLoadWatchdogRef.current);
         twitchLoadWatchdogRef.current = null;
-      }
-      if (twitchProbeTimerRef.current) {
-        clearTimeout(twitchProbeTimerRef.current);
-        twitchProbeTimerRef.current = null;
       }
       destroySpeechGraph();
     };
@@ -1056,7 +1026,7 @@ function RadarViewer({
   };
 
   return (
-    <div className='fixed inset-0 z-50 bg-black/80 p-2 sm:p-5 sm:backdrop-blur-[2px]'>
+    <div className='fixed inset-0 z-50 bg-black/80 p-2 backdrop-blur-[2px] sm:p-5'>
       <div className='mx-auto flex h-full w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#060608]'>
         <header className='flex items-start justify-between gap-3 border-b border-white/10 p-3 sm:p-4'>
           <div>
@@ -1205,26 +1175,14 @@ function RadarViewer({
                     <p className='mt-2 text-xs text-[#9ca3af]'>
                       Domínios testados no player: {twitchParentHosts.slice(0, 4).join(', ') || 'n/a'}
                     </p>
-                    <div className='mt-3 flex flex-wrap gap-2'>
-                      <a
-                        href={item.url}
-                        target='_blank'
-                        rel='noopener noreferrer'
-                        className='inline-flex items-center rounded-lg border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs font-semibold text-[#c9d1d9] transition hover:border-[#C6FF2E]/45 hover:text-[#C6FF2E]'
-                      >
-                        Abrir canal na Twitch
-                      </a>
-                      {twitchChannel ? (
-                        <a
-                          href={`https://m.twitch.tv/${encodeURIComponent(twitchChannel)}`}
-                          target='_blank'
-                          rel='noopener noreferrer'
-                          className='inline-flex items-center rounded-lg border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs font-semibold text-[#c9d1d9] transition hover:border-[#C6FF2E]/45 hover:text-[#C6FF2E]'
-                        >
-                          Abrir versão mobile
-                        </a>
-                      ) : null}
-                    </div>
+                    <a
+                      href={item.url}
+                      target='_blank'
+                      rel='noopener noreferrer'
+                      className='mt-3 inline-flex items-center rounded-lg border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs font-semibold text-[#c9d1d9] transition hover:border-[#C6FF2E]/45 hover:text-[#C6FF2E]'
+                    >
+                      Abrir canal na Twitch
+                    </a>
                   </div>
                 )}
 
