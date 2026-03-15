@@ -454,7 +454,14 @@ function collectConsumedContentNames(interacoes, local) {
     .map((item) => String(item?.titulo_conteudo || "").trim())
     .filter(Boolean);
   const fromLocal = parseContentList(local?.conteudos || "");
-  const fromTimeline = parseContentList(local?.timeline || "");
+  const fromTimeline = splitMultilineList(local?.timeline || "")
+    .map((line) =>
+      line
+        .replace(/^\d{1,2}:\d{2}\s*[·\-\u2013]\s*/u, "")
+        .replace(/^(live_play|video_play|abriu_conteudo)\s*:\s*/i, "")
+        .trim()
+    )
+    .filter((line) => line.length > 2);
   return uniqueIgnoreCase(fromInteractions.concat(fromLocal, fromTimeline));
 }
 
