@@ -751,9 +751,12 @@ async function twitchHelixGet(context, endpointPath) {
 }
 
 async function fetchDeepTwitchLiveAnalysis(context, liveDetails, consumedNames) {
-  const devLive = (liveDetails || []).find((item) =>
+  const developmentLives = (liveDetails || []).filter((item) =>
     isDevelopmentOrTechnologyLive(item)
   );
+  const devLive =
+    developmentLives.find((item) => String(item?.channel || "").trim()) ||
+    developmentLives[0];
   if (!devLive) return null;
 
   const creatorHandle = String(devLive.channel || "")
