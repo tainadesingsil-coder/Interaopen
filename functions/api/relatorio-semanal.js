@@ -181,25 +181,38 @@ async function saveHistoricoRelatorio(
   userId,
   nome,
   email,
-  relatorio
+  relatorio,
+  options = {}
 ) {
-  const payload = {
+  const basePayload = {
     user_id: userId,
     nome,
     email,
     relatorio,
     gerado_em: new Date().toISOString(),
   };
+  const firstPayload = options?.tipo
+    ? { ...basePayload, tipo: options.tipo }
+    : basePayload;
+  const headers = {
+    apikey: supabaseKey,
+    Authorization: `Bearer ${supabaseKey}`,
+    "Content-Type": "application/json",
+    Prefer: "return=minimal",
+  };
   try {
+    const firstAttempt = await fetch(`${supabaseUrl}/rest/v1/historico_relatorios`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(firstPayload),
+    });
+    if (firstAttempt.ok || !options?.tipo) return;
+
+    // fallback for schemas sem coluna "tipo"
     await fetch(`${supabaseUrl}/rest/v1/historico_relatorios`, {
       method: "POST",
-      headers: {
-        apikey: supabaseKey,
-        Authorization: `Bearer ${supabaseKey}`,
-        "Content-Type": "application/json",
-        Prefer: "return=minimal",
-      },
-      body: JSON.stringify(payload),
+      headers,
+      body: JSON.stringify(basePayload),
     });
   } catch {
     // best effort only
@@ -748,6 +761,168 @@ async function twitchHelixGet(context, endpointPath) {
   });
   if (!response.ok) return null;
   return await response.json();
+}
+
+const LIVE_NOW_SYSTEM_PROMPT = [
+  "Você é um assistente que está assistindo esta live junto com o usuário agora.",
+  "Analise os dados desta live e escreva uma mensagem curta e direta como se fosse um amigo que entende do assunto dizendo:",
+  "o que está acontecendo agora nesta live,",
+  "o que o criador está desenvolvendo ou ensinando neste momento,",
+  "qual o conceito técnico principal desta sessão,",
+  "uma coisa específica para o usuário prestar atenção ainda nesta live,",
+  "e uma pergunta para o usuário refletir enquanto assiste.",
+  "Seja específico, surpreendente e nunca genérico.",
+  "Máximo 200 palavras.",
+].join(" ");
+
+function formatLiveDurationFromStartedAt(startedAt) {
+  if (!startedAt) return "";
+  const start = new Date(startedAt);
+  if (Number.isNaN(start.getTime())) return "";
+  const elapsedMs = Date.now() - start.getTime();
+  if (elapsedMs <= 0) return "";
+  const totalMinutes = Math.floor(elapsedMs / 60000);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  if (hours <= 0) return `${minutes}m`;
+  return `${hours}h ${minutes}m`;
+}
+
+async function fetchLiveNowContextFromTwitch(context, channel) {
+  const normalizedChannel = String(channel || "")
+    .replace(/^@/, "")
+    .trim()
+    .toLowerCase();
+  if (!normalizedChannel) {
+    throw new Error("Canal da Twitch não informado.");
+  }
+
+  const userData = await twitchHelixGet(
+    context,
+    `/users?login=${encodeURIComponent(normalizedChannel)}`
+  );
+  const user = userData?.data?.[0];
+  if (!user?.id) {
+    throw new Error(`Canal @${normalizedChannel} não encontrado na Twitch.`);
+  }
+
+  const [streamData, videosData] = await Promise.all([
+    twitchHelixGet(context, `/streams?user_id=${encodeURIComponent(user.id)}`),
+    twitchHelixGet(
+      context,
+      `/videos?user_id=${encodeURIComponent(user.id)}&type=archive&first=8`
+    ),
+  ]);
+
+  const stream = streamData?.data?.[0] || null;
+  const now = new Date();
+  const sixHoursAgo = new Date(now.getTime() - 6 * 60 * 60 * 1000);
+  const clipsData = await twitchHelixGet(
+    context,
+    `/clips?broadcaster_id=${encodeURIComponent(
+      user.id
+    )}&started_at=${encodeURIComponent(sixHoursAgo.toISOString())}&ended_at=${encodeURIComponent(
+      now.toISOString()
+    )}&first=8`
+  );
+  const clips = Array.isArray(clipsData?.data) ? clipsData.data : [];
+  const vods = Array.isArray(videosData?.data) ? videosData.data : [];
+
+  return {
+    channel: normalizedChannel,
+    broadcasterId: user.id,
+    displayName: user.display_name || normalizedChannel,
+    stream: stream
+      ? {
+          title: stream.title || "",
+          category: stream.game_name || "",
+          viewers: Number(stream.viewer_count || 0),
+          tags: Array.isArray(stream.tags) ? stream.tags : [],
+          startedAt: stream.started_at || "",
+          duration: formatLiveDurationFromStartedAt(stream.started_at || ""),
+          language: stream.language || "",
+        }
+      : null,
+    clips: clips.slice(0, 5).map((clip) => ({
+      title: clip?.title || "Clip da live",
+      url: clip?.url || "",
+      views: Number(clip?.view_count || 0),
+      createdAt: clip?.created_at || "",
+      creator: clip?.creator_name || "",
+    })),
+    vods: vods.slice(0, 5).map((video) => ({
+      title: video?.title || "VOD recente",
+      duration: video?.duration || "",
+      url: video?.url || "",
+      createdAt: video?.created_at || "",
+      views: Number(video?.view_count || 0),
+    })),
+  };
+}
+
+function buildLiveNowGeminiInput(liveContext) {
+  return [
+    `Canal: @${liveContext.channel}`,
+    `Nome de exibição: ${liveContext.displayName}`,
+    `Status da live: ${liveContext.stream ? "ao vivo" : "offline"}`,
+    `Dados da live em tempo real: ${JSON.stringify(liveContext.stream || {})}`,
+    `Clipes das últimas 6h: ${JSON.stringify(liveContext.clips || [])}`,
+    `VODs recentes do canal: ${JSON.stringify(liveContext.vods || [])}`,
+    "Entregue uma análise curta (até 200 palavras), específica, técnica e acionável.",
+  ].join("\n");
+}
+
+async function generateLiveNowAnalysisWithGemini(context, liveContext) {
+  const geminiApiKey = getGeminiApiKey(context);
+  if (!geminiApiKey) {
+    throw new Error("GEMINI_API_KEY não configurada.");
+  }
+
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        system_instruction: {
+          parts: [{ text: LIVE_NOW_SYSTEM_PROMPT }],
+        },
+        contents: [
+          {
+            role: "user",
+            parts: [{ text: buildLiveNowGeminiInput(liveContext) }],
+          },
+        ],
+        generationConfig: {
+          temperature: 0.45,
+          maxOutputTokens: 420,
+        },
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Falha no Gemini (live): ${errorText}`);
+  }
+  const data = await response.json();
+  const text = extractGeminiText(data);
+  if (!text) {
+    throw new Error("Gemini não retornou análise da live.");
+  }
+  return text;
+}
+
+async function analisarLiveAgoraForReportAssistant(context, channel) {
+  const liveContext = await fetchLiveNowContextFromTwitch(context, channel);
+  const analysis = await generateLiveNowAnalysisWithGemini(context, liveContext);
+  return {
+    channel: liveContext.channel,
+    live: liveContext.stream,
+    clips: liveContext.clips,
+    vods: liveContext.vods,
+    analysis,
+  };
 }
 
 async function fetchDeepTwitchLiveAnalysis(context, liveDetails, consumedNames) {
@@ -1569,6 +1744,44 @@ function buildWelcomeReport(nome) {
   ].join("\n");
 }
 
+function buildLiveAlertReportText(channel, liveNow) {
+  const live = liveNow?.live || {};
+  const clips = Array.isArray(liveNow?.clips) ? liveNow.clips : [];
+  const vods = Array.isArray(liveNow?.vods) ? liveNow.vods : [];
+  const tags = Array.isArray(live?.tags) ? live.tags : [];
+  const topClips = clips.slice(0, 3);
+  const topVods = vods.slice(0, 3);
+
+  return [
+    `Alerta de live em tempo real: @${channel}`,
+    "",
+    String(liveNow?.analysis || "").trim(),
+    "",
+    "Contexto da live agora:",
+    `- Título: ${live?.title || "não informado"}`,
+    `- Categoria: ${live?.category || "não informado"}`,
+    `- Espectadores: ${
+      typeof live?.viewers === "number" ? live.viewers : "não informado"
+    }`,
+    `- Duração ao vivo: ${live?.duration || "não informado"}`,
+    `- Tags: ${tags.length ? tags.join(", ") : "não informado"}`,
+    "",
+    "Clipes mais relevantes (últimas 6h):",
+    ...(topClips.length
+      ? topClips.map(
+          (clip) => `- ${clip.title} (${clip.views} views) ${clip.url || ""}`
+        )
+      : ["- Sem clipes recentes retornados na janela de 6h."]),
+    "",
+    "Padrão recente do criador (VODs):",
+    ...(topVods.length
+      ? topVods.map(
+          (vod) => `- ${vod.title} (${vod.duration}) ${vod.url || ""}`
+        )
+      : ["- Sem VODs recentes retornados."]),
+  ].join("\n");
+}
+
 function buildGeminiInput(
   nome,
   atual,
@@ -2293,15 +2506,7 @@ export async function onRequestPost(context) {
     }
 
     const nomeCliente = perfil.nome || "Cliente";
-    if (!perfil.email) {
-      return Response.json(
-        {
-          error:
-            "Não foi possível identificar e-mail do cliente para envio do relatório.",
-        },
-        { status: 400 }
-      );
-    }
+    const emailCliente = perfil.email || "";
 
     const resumoLocal =
       body?.resumo_local && typeof body.resumo_local === "object"
@@ -2324,6 +2529,59 @@ export async function onRequestPost(context) {
     const previousReports = hasSupabase
       ? await fetchHistoricoRelatorios(supabaseUrl, supabaseKey, userId)
       : [];
+
+    const channel =
+      typeof body?.canal === "string"
+        ? body.canal.replace(/^@/, "").trim().toLowerCase()
+        : "";
+    const isLiveAlertFlow =
+      trigger === "live_alert" || trigger === "live_notify" || trigger === "live_now";
+    if (isLiveAlertFlow) {
+      if (!channel) {
+        return Response.json(
+          { error: "Campo obrigatório ausente: canal." },
+          { status: 400 }
+        );
+      }
+      const liveNow = await analisarLiveAgoraForReportAssistant(context, channel);
+      const liveAlertText = buildLiveAlertReportText(channel, liveNow);
+      if (emailCliente) {
+        const liveHtml = buildEmailTemplate({
+          nome: nomeCliente,
+          kicker: "Alerta de live",
+          title: `@${channel} ao vivo agora`,
+          subtitle:
+            "Análise em tempo real para você não perder os pontos mais importantes da sessão.",
+          relatorioTexto: liveAlertText,
+          ctaLabel: "Abrir live agora",
+          ctaUrl: `https://www.twitch.tv/${channel}`,
+        });
+        const liveSubject = `🔴 Você está assistindo @${channel} agora — veja o que não pode perder`;
+        await sendEmailByResend(context, emailCliente, liveSubject, liveHtml);
+      }
+      if (hasSupabase) {
+        await saveHistoricoRelatorio(
+          supabaseUrl,
+          supabaseKey,
+          userId,
+          nomeCliente,
+          emailCliente,
+          liveAlertText,
+          { tipo: "alerta_live" }
+        );
+      }
+      return Response.json({
+        ok: true,
+        tipo: "alerta_live",
+        user_id: userId,
+        canal: channel,
+        email_enviado_para: emailCliente || null,
+        analise: liveNow.analysis,
+        live: liveNow.live,
+        clips: liveNow.clips,
+        vods: liveNow.vods,
+      });
+    }
 
     const isWelcomeFlow = trigger === "welcome" || trigger === "subscription";
     const hasRichLocalSummary = Boolean(
@@ -2372,6 +2630,16 @@ export async function onRequestPost(context) {
       ? `Bem-vindo(a) à Área Exclusiva, ${nomeCliente} ⚡`
       : `Seu relatório semanal chegou, ${nomeCliente} ⚡ — PDF em anexo.`;
 
+    if (!emailCliente) {
+      return Response.json(
+        {
+          error:
+            "Não foi possível identificar e-mail do cliente para envio do relatório.",
+        },
+        { status: 400 }
+      );
+    }
+
     const pdfAttachment = await buildWeeklyReportPdfAttachment(
       nomeCliente,
       relatorio,
@@ -2394,22 +2662,23 @@ export async function onRequestPost(context) {
       ctaUrl: "https://codexionai.pages.dev/",
     });
 
-    await sendEmailByResend(context, perfil.email, subject, html, [pdfAttachment]);
+    await sendEmailByResend(context, emailCliente, subject, html, [pdfAttachment]);
     if (hasSupabase && !isWelcomeFlow) {
       await saveHistoricoRelatorio(
         supabaseUrl,
         supabaseKey,
         userId,
         nomeCliente,
-        perfil.email,
-        relatorio
+        emailCliente,
+        relatorio,
+        { tipo: "relatorio_semanal" }
       );
     }
 
     return Response.json({
       ok: true,
       user_id: userId,
-      email_enviado_para: perfil.email,
+      email_enviado_para: emailCliente,
       relatorio,
       trigger,
     });
