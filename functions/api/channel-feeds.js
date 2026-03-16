@@ -1,4 +1,5 @@
 const CACHE_TTL_MS = 30 * 1000;
+const CREATOR_BASE_TTL_MS = 24 * 60 * 60 * 1000;
 const SOURCE_TIMEOUT_MS = 8000;
 const GOOGLE_TRANSLATE_PUBLIC_ENDPOINT =
   'https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=pt&dt=t&q=';
@@ -34,6 +35,14 @@ const FALLBACK_TIKTOK_VIDEO_URLS = [
   'https://www.tiktok.com/@islamsousa/video/7613833799423528199',
   'https://www.tiktok.com/@jornadatop/video/7232292097313770757',
 ];
+const FALLBACK_TIKTOK_CREATOR_HANDLES = [
+  'gabrieladamuchi',
+  'izabela.anholett',
+  'jotalinharesdesign',
+  'jefdicastech',
+  'islamsousa',
+  'jornadatop',
+];
 const TWITCH_TOPIC_QUERIES = [
   'inteligencia artificial',
   'marketing digital',
@@ -59,6 +68,44 @@ const getTokenCache = () => {
     globalThis[key] = { token: '', expiresAt: 0 };
   }
   return globalThis[key];
+};
+
+const getCreatorBaseCache = () => {
+  const key = '__CHANNEL_FEEDS_CREATOR_BASE_CACHE__';
+  if (!globalThis[key]) {
+    globalThis[key] = new Map();
+  }
+  return globalThis[key];
+};
+
+const readCreatorBase = (bucket) => {
+  const cache = getCreatorBaseCache();
+  const entry = cache.get(bucket);
+  if (!entry) return [];
+  if (Number(entry?.expiresAt || 0) < Date.now()) {
+    cache.delete(bucket);
+    return [];
+  }
+  return Array.isArray(entry?.items) ? entry.items : [];
+};
+
+const mergeCreatorBase = (bucket, items = [], max = 80) => {
+  const normalized = toUniqueList(
+    items
+      .map((item) => String(item || '').trim())
+      .filter(Boolean),
+    max
+  );
+  if (normalized.length === 0) return [];
+
+  const existing = readCreatorBase(bucket);
+  const merged = toUniqueList([...normalized, ...existing], max);
+  const cache = getCreatorBaseCache();
+  cache.set(bucket, {
+    items: merged,
+    expiresAt: Date.now() + CREATOR_BASE_TTL_MS,
+  });
+  return merged;
 };
 
 const fetchWithTimeout = async (url, init = {}, timeoutMs = SOURCE_TIMEOUT_MS) => {
@@ -186,12 +233,17 @@ const normalizeTikTokUrl = (url = '') => {
   }
 };
 
+const extractTikTokVideoId = (url = '') => {
+  const match = String(url || '').match(/\/video\/(\d+)/i);
+  return match?.[1] || '';
+};
+
 const extractTiktokHandleFromUrl = (url = '') => {
   const match = String(url || '').match(/tiktok\.com\/@([a-z0-9._]{2,40})/i);
   return match?.[1] ? `@${match[1].toLowerCase()}` : '@tiktok';
 };
 
-const parseTiktokVideoUrls = (env = {}) => {
+const parseTiktokSeedVideoUrls = (env = {}) => {
   const raw = String(
     env?.TIKTOK_VIDEO_URLS || env?.TIKTOK_CREATOR_URLS || env?.TIKTOK_SEED_URLS || ''
   ).trim();
@@ -202,6 +254,79 @@ const parseTiktokVideoUrls = (env = {}) => {
       .map((url) => normalizeTikTokUrl(url)),
     14
   );
+};
+
+const parseTiktokCreatorHandles = (env = {}) => {
+  const raw = String(env?.TIKTOK_CREATOR_HANDLES || env?.TIKTOK_CREATORS || '').trim();
+  const fromEnv = raw
+    ? parseCommaSeparated(raw)
+        .map((value) => value.replace(/^@+/, '').toLowerCase())
+        .filter((value) => /^[a-z0-9._]{2,40}$/i.test(value))
+    : [];
+  const fromSeeds = parseTiktokSeedVideoUrls(env)
+    .map((url) => extractTiktokHandleFromUrl(url).replace(/^@/, '').toLowerCase())
+    .filter((value) => /^[a-z0-9._]{2,40}$/i.test(value));
+  const fromBase = readCreatorBase('tiktok_handles').filter((value) =>
+    /^[a-z0-9._]{2,40}$/i.test(String(value || ''))
+  );
+  return toUniqueList([...fromEnv, ...fromSeeds, ...fromBase, ...FALLBACK_TIKTOK_CREATOR_HANDLES], 24);
+};
+
+const parseFeedItems = (xml = '') =>
+  parseEntries(xml)
+    .map((block) => {
+      const title = extractTagValue(block, ['title']);
+      const description = extractTagValue(block, ['description', 'summary', 'content']);
+      const link = extractTagValue(block, ['link', 'id']);
+      const publishedAt = extractTagValue(block, ['pubDate', 'updated', 'published']);
+      return {
+        title,
+        description,
+        link,
+        publishedAt,
+        image: extractImageFromBlock(block),
+      };
+    })
+    .filter((item) => item.link);
+
+const fetchTiktokCreatorFeedEntries = async (handle = '') => {
+  const cleanHandle = String(handle || '').replace(/^@+/, '').trim().toLowerCase();
+  if (!cleanHandle) return [];
+  const candidates = [
+    `https://rsshub.app/tiktok/user/${encodeURIComponent(cleanHandle)}`,
+    `https://rsshub.app/tiktok/user/${encodeURIComponent(cleanHandle)}/video`,
+  ];
+  for (const endpoint of candidates) {
+    try {
+      const response = await fetchWithTimeout(endpoint, undefined, 5500);
+      if (!response.ok) continue;
+      const xml = await response.text();
+      const parsed = parseFeedItems(xml);
+      if (parsed.length > 0) return parsed;
+    } catch {
+      // Try next feed candidate.
+    }
+  }
+  return [];
+};
+
+const fetchTiktokVideoUrls = async (env = {}) => {
+  const seedUrls = parseTiktokSeedVideoUrls(env);
+  const handles = parseTiktokCreatorHandles(env);
+  mergeCreatorBase('tiktok_handles', handles, 60);
+
+  const settled = await Promise.allSettled(
+    handles.slice(0, 14).map(async (handle) => {
+      const entries = await fetchTiktokCreatorFeedEntries(handle);
+      return entries
+        .slice(0, 5)
+        .map((entry) => normalizeTikTokUrl(String(entry?.link || '').trim()))
+        .filter((url) => extractTikTokVideoId(url));
+    })
+  );
+
+  const dynamicUrls = settled.flatMap((result) => (result.status === 'fulfilled' ? result.value : []));
+  return toUniqueList([...dynamicUrls, ...seedUrls], 18);
 };
 
 const resolveTiktokOEmbed = async (videoUrl = '') => {
@@ -230,7 +355,7 @@ const resolveTiktokOEmbed = async (videoUrl = '') => {
 };
 
 const fetchTiktokItems = async (env = {}) => {
-  const videoUrls = parseTiktokVideoUrls(env);
+  const videoUrls = await fetchTiktokVideoUrls(env);
   const settled = await Promise.allSettled(
     videoUrls.map(async (videoUrl, index) => {
       const oEmbed = await resolveTiktokOEmbed(videoUrl);
@@ -499,16 +624,73 @@ const fetchTwitchItems = async (env = {}) => {
   });
 
   const allItems = [...byChannel.values()];
+  const profileMap = await fetchTwitchProfileImages([...byChannel.keys()], env);
+  const hydratedItems = allItems.map((item) => {
+    const channelKey = normalizeChannelKey(item?.channel);
+    if (!channelKey) return item;
+    const profileImage = profileMap.get(channelKey) || null;
+    if (!profileImage) return item;
+    if (item?.isLive) return item;
+    return {
+      ...item,
+      thumbnail: profileImage,
+    };
+  });
   const pinned = PRIORITY_TWITCH_CHANNELS.map((channel) =>
-    allItems.find((item) => normalizeChannelKey(item?.channel) === channel)
+    hydratedItems.find((item) => normalizeChannelKey(item?.channel) === channel)
   ).filter(Boolean);
   const pinnedKeys = new Set(pinned.map((item) => normalizeChannelKey(item?.channel)));
 
-  const rest = allItems
+  const rest = hydratedItems
     .filter((item) => !pinnedKeys.has(normalizeChannelKey(item?.channel)))
     .sort((a, b) => Number(Boolean(b?.isLive)) - Number(Boolean(a?.isLive)));
 
   return [...pinned, ...rest].slice(0, 12);
+};
+
+const fetchTwitchProfileImages = async (channelKeys = [], env = {}) => {
+  const channels = toUniqueList(
+    channelKeys
+      .map((value) => String(value || '').trim().toLowerCase())
+      .filter(Boolean),
+    40
+  );
+  if (channels.length === 0) return new Map();
+
+  const { clientId, token } = await getTwitchAppToken(env);
+  if (!clientId || !token) return new Map();
+
+  const endpoint = new URL('https://api.twitch.tv/helix/users');
+  channels.forEach((channel) => endpoint.searchParams.append('login', channel));
+
+  try {
+    const response = await fetchWithTimeout(
+      endpoint.toString(),
+      {
+        headers: {
+          'client-id': clientId,
+          authorization: `Bearer ${token}`,
+          accept: 'application/json',
+        },
+      },
+      7000
+    );
+    if (!response.ok) return new Map();
+    const payload = await response.json();
+    const users = Array.isArray(payload?.data) ? payload.data : [];
+    return new Map(
+      users
+        .map((user) => {
+          const login = String(user?.login || '').trim().toLowerCase();
+          const image = String(user?.profile_image_url || '').trim();
+          if (!login || !image) return null;
+          return [login, image];
+        })
+        .filter(Boolean)
+    );
+  } catch {
+    return new Map();
+  }
 };
 
 const aggregateChannelFeeds = async (env = {}) => {

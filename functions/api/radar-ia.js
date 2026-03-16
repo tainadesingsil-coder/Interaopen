@@ -167,6 +167,18 @@ const ALLOWED_RANGES = ['24h', '7d', '30d'];
 const YOUTUBE_CHANNEL_LIMIT = 5;
 const YOUTUBE_VIDEOS_PER_CHANNEL = 4;
 const YOUTUBE_CREATOR_ITEMS_PER_CHANNEL = 5;
+const BRAZILIAN_YOUTUBE_CHANNEL_HINTS = [
+  'brasil',
+  'portugal',
+  'português',
+  'portugues',
+  'me ensina',
+  'picinini',
+  'nocode',
+  'lazarotto',
+  'panarotto',
+  'canal',
+];
 const CURATED_YOUTUBE_VIDEOS = [
   {
     id: 'flIPXJljv5g',
@@ -969,6 +981,50 @@ const resolveInstagramHandleFromSeedUrl = async (seedUrl = '') => {
   return extractInstagramHandleFromProfileUrl(seedUrl);
 };
 
+const fetchInstagramCreatorEntriesFromBridge = async (handle = '', env = {}) => {
+  const cleanHandle = String(handle || '').replace(/^@+/, '').trim().toLowerCase();
+  if (!cleanHandle) return [];
+  const base =
+    String(env?.RSS_BRIDGE_BASE_URL || env?.INSTAGRAM_RSS_BRIDGE_URL || 'https://rss-bridge.org/bridge01/')
+      .trim()
+      .replace(/\/+$/, '');
+  if (!base) return [];
+
+  try {
+    const endpoint = new URL(`${base}/`);
+    endpoint.searchParams.set('action', 'display');
+    endpoint.searchParams.set('bridge', 'InstagramBridge');
+    endpoint.searchParams.set('username', cleanHandle);
+    endpoint.searchParams.set('format', 'Json');
+    const response = await fetchWithTimeout(
+      endpoint.toString(),
+      {
+        headers: {
+          accept: 'application/json',
+        },
+      },
+      6500
+    );
+    if (!response.ok) return [];
+    const payload = await response.json();
+    const items = Array.isArray(payload?.items) ? payload.items : [];
+    return items
+      .map((item) => {
+        const link = String(item?.url || item?.link || '').trim();
+        if (!/^https?:\/\/(www\.)?instagram\.com\//i.test(link)) return null;
+        return {
+          link,
+          title: stripHtml(item?.title || ''),
+          description: stripHtml(item?.content || item?.description || ''),
+          publishedAt: safeIsoDate(item?.timestamp || item?.date || item?.created || ''),
+        };
+      })
+      .filter(Boolean);
+  } catch {
+    return [];
+  }
+};
+
 const resolveTiktokOEmbed = async (videoUrl = '') => {
   try {
     const endpoint = new URL('https://www.tiktok.com/oembed');
@@ -1518,6 +1574,13 @@ const parseYoutubeCreatorChannelIds = (env = {}) => {
   return toUniqueList([...fromEnv, ...fromBase], 24);
 };
 
+const isLikelyBrazilianYouTubeChannel = (value = '') => {
+  const normalized = stripHtml(String(value || '')).toLowerCase();
+  if (!normalized) return false;
+  if (isLikelyPortuguese(normalized)) return true;
+  return BRAZILIAN_YOUTUBE_CHANNEL_HINTS.some((hint) => normalized.includes(hint));
+};
+
 const fetchYoutubeVideoDetailsByIds = async (apiKey, videoIds = []) => {
   const ids = toUniqueList(videoIds, 100);
   if (!apiKey || ids.length === 0) return [];
@@ -1572,6 +1635,11 @@ const normalizeYoutubeItem = (item, query) => {
     item?.snippet?.thumbnails?.default?.url ||
     null;
   const channelTitle = item?.snippet?.channelTitle || null;
+  const isPortugueseCandidate = isLikelyPortuguese(`${title} ${description} ${channelTitle || ''}`);
+  const isBrazilianChannel = isLikelyBrazilianYouTubeChannel(channelTitle || '');
+  if (!isPortugueseCandidate && !isBrazilianChannel) {
+    return null;
+  }
   const aiChannelBoost = isAiRelated(channelTitle || '') ? 6 : 0;
   const aiTopicBoost = isAiRelated(`${title} ${description}`) ? 4 : 0;
 
@@ -1704,32 +1772,7 @@ const takeTop = (items, count) => sortByScoreAndDate(items).slice(0, count);
 
 const buildBalancedAll = (results) => {
   const topYoutube = takeTop(results.youtube, 3);
-  const tiktokNews = takeTop(
-    results.news.filter((item) => /tiktok/i.test(String(item?.source || '')) || /tiktok\.com/i.test(String(item?.url || ''))),
-    2
-  );
-  const twitchNews = takeTop(
-    results.news.filter((item) => /twitch/i.test(String(item?.source || '')) || /twitch\.tv/i.test(String(item?.url || ''))),
-    1
-  );
-  const youtubeLiveNews = takeTop(
-    results.news.filter(
-      (item) =>
-        /youtube live/i.test(String(item?.source || '')) || /youtube\.com|youtu\.be/i.test(String(item?.url || ''))
-    ),
-    1
-  );
-  const pickedSocial = dedupeByUrl([...tiktokNews, ...twitchNews, ...youtubeLiveNews]).slice(0, 4);
-  const editorialNews = takeTop(
-    results.news.filter(
-      (item) =>
-        !pickedSocial.some(
-          (socialItem) => normalizeUrlForDedupe(socialItem.url) === normalizeUrlForDedupe(item.url)
-        )
-    ),
-    3
-  );
-  const topNews = dedupeByUrl([...pickedSocial, ...editorialNews]).slice(0, 4);
+  const topNews = takeTop(results.news, 4);
   const topInstagram = takeTop(results.instagram, 3);
   return [...topYoutube, ...topNews, ...topInstagram];
 };
@@ -1997,17 +2040,11 @@ const fetchNewsItems = async (query, range, env = {}) => {
     })
   );
   const twitterPromise = fetchTwitterNewsItems(query, range, env);
-  const twitchPromise = fetchTwitchLiveItems(query, env);
-  const tiktokPromise = fetchTiktokCreatorItems(query, range, env);
-  const youtubeLivePromise = fetchYoutubeLiveNewsItems(query, range, env);
   const tabNewsPromise = fetchTabNewsItems(query, range, env);
 
-  const [settled, twitterItems, twitchItems, tiktokItems, youtubeLiveItems, tabNewsItems] = await Promise.all([
+  const [settled, twitterItems, tabNewsItems] = await Promise.all([
     rssSettledPromise,
     twitterPromise,
-    twitchPromise,
-    tiktokPromise,
-    youtubeLivePromise,
     tabNewsPromise,
   ]);
   const items = settled.flatMap((result) => (result.status === 'fulfilled' ? result.value : []));
@@ -2022,7 +2059,7 @@ const fetchNewsItems = async (query, range, env = {}) => {
   });
 
   const dynamicItems = sortByScoreAndDate(
-    dedupeByUrl([...filtered, ...twitterItems, ...twitchItems, ...tiktokItems, ...youtubeLiveItems, ...tabNewsItems])
+    dedupeByUrl([...filtered, ...twitterItems, ...tabNewsItems])
   );
   const dynamicUrls = new Set(dynamicItems.map((item) => normalizeUrlForDedupe(item.url)));
   const curatedRemainder = curatedItems.filter((item) => !dynamicUrls.has(normalizeUrlForDedupe(item.url)));
@@ -2270,7 +2307,7 @@ const fetchInstagramItemsFromCreatorProfiles = async (query, env = {}) => {
   const discoveredHandles = settledHandles.flatMap((result) =>
     result.status === 'fulfilled' && result.value ? [result.value] : []
   );
-  const handles = toUniqueList([...explicitHandles, ...discoveredHandles], 10);
+  const handles = toUniqueList([...explicitHandles, ...discoveredHandles], 16);
   mergeCreatorBase('instagram_handles', handles, 40);
   if (handles.length === 0) return [];
 
@@ -2295,6 +2332,10 @@ const fetchInstagramItemsFromCreatorProfiles = async (query, env = {}) => {
         } catch {
           // Try next RSS candidate.
         }
+      }
+
+      if (parsed.length === 0) {
+        parsed = await fetchInstagramCreatorEntriesFromBridge(handle, env);
       }
 
       return parsed.slice(0, INSTAGRAM_CREATOR_ITEMS_PER_PROFILE).map((entry, index) => {
