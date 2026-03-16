@@ -25,6 +25,27 @@ Crie o arquivo `.env.local` com base no `.env.example`:
 cp .env.example .env.local
 ```
 
+### Twitch embed (`RadarIaSection`)
+
+Importante para funcionar no cenário embutido:
+
+No Cloudflare (Preview e Production), configure:
+
+```bash
+NEXT_PUBLIC_TWITCH_EMBED_PARENTS=codexionai.pages.dev,www.codexionai.pages.dev,<host-que-embute>
+```
+
+Exemplo se o site estiver embutido em `app.seudominio.com`:
+
+```bash
+NEXT_PUBLIC_TWITCH_EMBED_PARENTS=codexionai.pages.dev,www.codexionai.pages.dev,app.seudominio.com
+```
+
+Importante:
+- A Twitch exige `parent` **exato** no embed (sem wildcard).
+- Se o site estiver embutido em outro host, esse host também precisa estar na lista.
+- Em cenários bloqueados pela Twitch/políticas de embed, o componente cai para fallback com botão **“Abrir canal na Twitch”**.
+
 ## ✅ Imagens locais
 
 As imagens foram migradas para `/public/images`. Para baixar os arquivos do CDN e gerar WebP/redimensionamentos:

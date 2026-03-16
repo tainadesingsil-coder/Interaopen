@@ -273,6 +273,19 @@
 }
 
 @media (max-width: 768px) {
+  .grain::after {
+    opacity: 0.04;
+  }
+
+  .section-glow::before {
+    filter: blur(8px);
+    opacity: 0.45;
+  }
+
+  .hero-media {
+    filter: saturate(1.02) contrast(1.03) brightness(1.02);
+  }
+
   .split-grid {
     grid-template-columns: 1fr;
   }
@@ -289,6 +302,12 @@
 
   .glass-panel {
     padding: 20px;
+    backdrop-filter: blur(6px);
+  }
+
+  .panel-strong,
+  .glass-map {
+    backdrop-filter: blur(6px);
   }
 
   a.inline-flex,

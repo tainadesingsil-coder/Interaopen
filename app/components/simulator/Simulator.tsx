@@ -32,7 +32,7 @@ export const Simulator = ({ locale, copy, pdfCopy, whatsappLink }: Props) => {
   return (
     <section
       id='perfil'
-      className='section-shell section-base section-glow section-divider scroll-mt-24'
+      className='section-shell section-base section-divider scroll-mt-24'
     >
       <div className='section-inner'>
         <div className='grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-start'>
@@ -44,17 +44,6 @@ export const Simulator = ({ locale, copy, pdfCopy, whatsappLink }: Props) => {
             <p className='text-base text-[var(--muted)] md:text-lg lg:max-w-[42ch]'>
               {copy.subtitle}
             </p>
-            <ul className='space-y-3 text-sm text-white/70'>
-              {copy.bullets.map((item) => (
-                <li
-                  key={item}
-                  className='flex items-center justify-center gap-3 text-left lg:justify-start'
-                >
-                  <span className='h-1.5 w-1.5 rounded-full bg-[var(--gold)]' />
-                  {item}
-                </li>
-              ))}
-            </ul>
             <SimulatorPresets
               presets={simulatorPresets}
               labels={copy.presets}
@@ -150,7 +139,7 @@ export const Simulator = ({ locale, copy, pdfCopy, whatsappLink }: Props) => {
                 <a
                   href={whatsappLink}
                   target='_blank'
-                  rel='noreferrer'
+                  rel='noopener noreferrer'
                   className='inline-flex flex-1 items-center justify-center rounded-full bg-[var(--gold)] px-6 py-3 text-xs font-semibold text-[#0c1116] shadow-[0_12px_30px_rgba(201,164,106,0.25)] transition hover:brightness-110'
                 >
                   {copy.ctaPrimary}

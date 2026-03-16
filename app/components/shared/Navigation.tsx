@@ -63,7 +63,7 @@ export const Navigation = ({
           <a
             href={whatsappLink}
             target='_blank'
-            rel='noreferrer'
+            rel='noopener noreferrer'
             className='transition hover:text-[#B7925A] hover:drop-shadow-[0_0_10px_rgba(183,146,90,0.55)]'
           >
             {labels.contact}
@@ -123,7 +123,7 @@ export const Navigation = ({
             <a
               href={whatsappLink}
               target='_blank'
-              rel='noreferrer'
+              rel='noopener noreferrer'
               className='transition hover:text-[#B7925A] hover:drop-shadow-[0_0_10px_rgba(183,146,90,0.55)]'
               onClick={() => setMenuOpen(false)}
             >

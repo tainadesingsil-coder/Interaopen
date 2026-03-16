@@ -20,7 +20,7 @@ export const ContactInfo = ({ copy, whatsappLink }: Props) => (
         <a
           href={whatsappLink}
           target='_blank'
-          rel='noreferrer'
+          rel='noopener noreferrer'
           className='mt-1 block text-sm font-semibold text-white'
         >
           {copy.whatsappValue}
@@ -54,7 +54,7 @@ export const ContactInfo = ({ copy, whatsappLink }: Props) => (
         <a
           href={mapLocationUrl}
           target='_blank'
-          rel='noreferrer'
+          rel='noopener noreferrer'
           className='mt-1 inline-flex text-sm font-semibold text-white transition hover:text-[var(--gold)]'
         >
           {copy.location}

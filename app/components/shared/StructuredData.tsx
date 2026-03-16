@@ -1,4 +1,4 @@
-import { baseWhatsAppUrl } from '@/app/lib/constants';
+import { whatsappNumber } from '@/app/lib/constants';
 
 const propertySchema = {
   '@context': 'https://schema.org',
@@ -18,7 +18,7 @@ const propertySchema = {
     latitude: '-16.2833',
     longitude: '-39.0333',
   },
-  telephone: baseWhatsAppUrl.replace('https://wa.me/', '+'),
+  telephone: `+${whatsappNumber}`,
 };
 
 export const StructuredData = () => (

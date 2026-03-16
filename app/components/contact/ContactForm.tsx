@@ -10,7 +10,17 @@ export const ContactForm = ({ copy }: Props) => (
     className='glass-panel mt-6 space-y-4 p-6 md:p-8'
     action={`https://formspree.io/f/${formspreeId}`}
     method='POST'
+    acceptCharset='UTF-8'
   >
+    <input
+      type='text'
+      name='_gotcha'
+      tabIndex={-1}
+      autoComplete='off'
+      aria-hidden='true'
+      className='hidden'
+    />
+    <input type='hidden' name='_subject' value='Novo contato do site Bella Vista' />
     <div className='grid gap-4 sm:grid-cols-2'>
       <label className='space-y-2 text-sm text-white/70'>
         <span>{copy.nameLabel}</span>
@@ -19,6 +29,9 @@ export const ContactForm = ({ copy }: Props) => (
           name='name'
           placeholder={copy.namePlaceholder}
           required
+          minLength={2}
+          maxLength={80}
+          autoComplete='name'
           className='w-full rounded-xl border border-white/12 bg-[var(--panel)] px-4 py-3 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/40'
         />
       </label>
@@ -29,6 +42,9 @@ export const ContactForm = ({ copy }: Props) => (
           name='email'
           placeholder={copy.emailPlaceholder}
           required
+          maxLength={120}
+          autoComplete='email'
+          inputMode='email'
           className='w-full rounded-xl border border-white/12 bg-[var(--panel)] px-4 py-3 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/40'
         />
       </label>
@@ -40,6 +56,9 @@ export const ContactForm = ({ copy }: Props) => (
         name='message'
         placeholder={copy.messagePlaceholder}
         required
+        minLength={10}
+        maxLength={1500}
+        autoComplete='off'
         className='w-full resize-none rounded-xl border border-white/12 bg-[var(--panel)] px-4 py-3 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/40'
       />
     </label>
