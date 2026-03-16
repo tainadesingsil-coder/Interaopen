@@ -137,6 +137,16 @@ const fetchTextWithTimeout = async (url, init = {}, timeoutMs = SOURCE_TIMEOUT_M
   }
 };
 
+const fetchJsonWithTimeout = async (url, init = {}, timeoutMs = SOURCE_TIMEOUT_MS) => {
+  try {
+    const response = await fetchWithTimeout(url, init, timeoutMs);
+    if (!response.ok) return null;
+    return await response.json();
+  } catch {
+    return null;
+  }
+};
+
 const safeText = (value = '', max = 320) =>
   String(value || '')
     .replace(/<[^>]+>/g, ' ')
@@ -303,6 +313,84 @@ const parseFeedItems = (xml = '') =>
     })
     .filter((item) => item.link);
 
+const extractTikApiItems = (payload = null) => {
+  if (Array.isArray(payload)) return payload;
+  if (!payload || typeof payload !== 'object') return [];
+  const root = payload;
+  const candidates = [root.items, root.itemList, root.aweme_list, root.data, root.posts];
+  for (const candidate of candidates) {
+    if (Array.isArray(candidate)) return candidate;
+    if (candidate && typeof candidate === 'object' && Array.isArray(candidate.items)) return candidate.items;
+  }
+  return [];
+};
+
+const fetchTikApiEntriesByHandle = async (handle = '', env = {}) => {
+  const apiKey = String(env?.TIKAPI_KEY || '').trim();
+  const cleanHandle = String(handle || '').replace(/^@+/, '').trim().toLowerCase();
+  if (!apiKey || !cleanHandle) return [];
+
+  const headers = {
+    accept: 'application/json',
+    'x-api-key': apiKey,
+    authorization: `Bearer ${apiKey}`,
+  };
+  const endpoints = [
+    `https://api.tikapi.io/public/posts?username=${encodeURIComponent(cleanHandle)}`,
+    `https://api.tikapi.io/public/user/posts?username=${encodeURIComponent(cleanHandle)}`,
+    `https://api.tikapi.io/public/posts/${encodeURIComponent(cleanHandle)}`,
+  ];
+
+  for (const endpoint of endpoints) {
+    const payload = await fetchJsonWithTimeout(endpoint, { headers }, 7000);
+    const items = extractTikApiItems(payload);
+    if (items.length === 0) continue;
+    return items
+      .slice(0, 8)
+      .map((item, index) => {
+        const shareUrl = normalizeTikTokUrl(
+          String(
+            item?.share_url ||
+              item?.url ||
+              item?.video_url ||
+              item?.shareInfo?.share_url ||
+              item?.share_info?.share_url ||
+              ''
+          ).trim()
+        );
+        const awemeId = String(item?.aweme_id || item?.id || item?.video_id || '').trim();
+        const url = shareUrl || (awemeId ? `https://www.tiktok.com/@${cleanHandle}/video/${awemeId}` : '');
+        const videoId = extractTikTokVideoId(url);
+        if (!videoId) return null;
+        const cover = item?.video?.cover || item?.cover || item?.thumbnail || {};
+        const thumbnail =
+          String(
+            item?.thumbnail_url ||
+              item?.cover_url ||
+              item?.video?.cover_url ||
+              cover?.url ||
+              (Array.isArray(cover?.url_list) ? cover.url_list[0] : '')
+          ).trim() || null;
+        const title = safeText(String(item?.title || item?.desc || item?.caption || '').trim(), 180);
+        const created = Number(item?.create_time || item?.createTime || item?.published_at || 0);
+        const publishedAt =
+          Number.isFinite(created) && created > 0
+            ? new Date((created > 9_999_999_999 ? created : created * 1000)).toISOString()
+            : '';
+        return {
+          url: normalizeTikTokUrl(url),
+          title,
+          thumbnail,
+          publishedAt,
+          channel: `@${cleanHandle}`,
+          rank: index,
+        };
+      })
+      .filter(Boolean);
+  }
+  return [];
+};
+
 const fetchTiktokCreatorFeedEntries = async (handle = '') => {
   const cleanHandle = String(handle || '').replace(/^@+/, '').trim().toLowerCase();
   if (!cleanHandle) return [];
@@ -331,6 +419,11 @@ const fetchTiktokVideoCandidates = async (env = {}) => {
 
   const settled = await Promise.allSettled(
     handles.slice(0, 14).map(async (handle) => {
+      const apiEntries = await fetchTikApiEntriesByHandle(handle, env);
+      if (apiEntries.length > 0) {
+        return apiEntries.slice(0, 6);
+      }
+
       const entries = await fetchTiktokCreatorFeedEntries(handle);
       return entries
         .slice(0, 6)
@@ -411,6 +504,40 @@ const resolveTiktokOEmbed = async (videoUrl = '') => {
   }
 };
 
+const resolveTikTokPageMeta = async (videoUrl = '') => {
+  try {
+    const response = await fetchWithTimeout(
+      videoUrl,
+      {
+        headers: {
+          accept: 'text/html,application/xhtml+xml',
+        },
+      },
+      5500
+    );
+    if (!response.ok) return null;
+    const html = await response.text();
+    const extractMeta = (key) => {
+      const byProperty = html.match(
+        new RegExp(`<meta[^>]+property=["']${key}["'][^>]+content=["']([^"']+)["'][^>]*>`, 'i')
+      )?.[1];
+      if (byProperty) return safeText(byProperty, 280);
+      const byName = html.match(
+        new RegExp(`<meta[^>]+name=["']${key}["'][^>]+content=["']([^"']+)["'][^>]*>`, 'i')
+      )?.[1];
+      return byName ? safeText(byName, 280) : '';
+    };
+    const title = extractMeta('og:title') || extractMeta('twitter:title') || '';
+    const thumbnail = extractMeta('og:image') || extractMeta('twitter:image') || '';
+    return {
+      title: title || '',
+      thumbnail: thumbnail || null,
+    };
+  } catch {
+    return null;
+  }
+};
+
 const fetchTiktokItems = async (env = {}) => {
   const candidates = await fetchTiktokVideoCandidates(env);
   const settled = await Promise.allSettled(
@@ -418,9 +545,10 @@ const fetchTiktokItems = async (env = {}) => {
       const videoUrl = String(candidate?.url || '').trim();
       if (!videoUrl) return null;
       const oEmbed = await resolveTiktokOEmbed(videoUrl);
+      const pageMeta = !oEmbed?.thumbnail || !oEmbed?.title ? await resolveTikTokPageMeta(videoUrl) : null;
       const channel = String(candidate?.channel || extractTiktokHandleFromUrl(videoUrl));
       const fallbackTitle = safeText(candidate?.title || '', 180);
-      const title = oEmbed?.title || fallbackTitle || `TikTok · ${channel}`;
+      const title = oEmbed?.title || pageMeta?.title || fallbackTitle || `TikTok · ${channel}`;
       return {
         id: `tiktok-video-${videoUrl}`.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 80),
         title,
@@ -429,7 +557,7 @@ const fetchTiktokItems = async (env = {}) => {
             ? `Vídeo recente de ${oEmbed.authorName} na sua base de criadores.`
             : 'Vídeo recente da sua base de criadores no TikTok.',
         url: videoUrl,
-        thumbnail: oEmbed?.thumbnail || candidate?.thumbnail || null,
+        thumbnail: oEmbed?.thumbnail || pageMeta?.thumbnail || candidate?.thumbnail || null,
         tags: ['TikTok', 'Vídeo', 'Creator'],
         category: /marketing|conteudo|social/i.test(title) ? 'Marketing' : 'IA',
         isLive: true,

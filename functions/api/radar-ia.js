@@ -175,6 +175,14 @@ const BRAZILIAN_YOUTUBE_HANDLE_FALLBACK = [
   'alura',
   'linuxtips',
 ];
+const FALLBACK_INSTAGRAM_CREATOR_HANDLES = [
+  'hollyfield.ia',
+  'adrianocouto',
+  'renatoasse',
+  'giullya.becker',
+  'ramonsiqueira',
+  'rafaelriedel',
+];
 const BRAZILIAN_YOUTUBE_CHANNEL_HINTS = [
   'brasil',
   'portugal',
@@ -972,7 +980,7 @@ const parseInstagramCreatorHandles = (env = {}) => {
         .filter((value) => /^[a-z0-9._]{2,40}$/i.test(value))
     : [];
   const fromBase = readCreatorBase('instagram_handles');
-  return toUniqueList([...fromEnv, ...fromBase], 20);
+  return toUniqueList([...fromEnv, ...fromBase, ...FALLBACK_INSTAGRAM_CREATOR_HANDLES], 24);
 };
 
 const resolveInstagramHandleFromSeedUrl = async (seedUrl = '') => {
@@ -2487,12 +2495,16 @@ const fetchInstagramItemsFromCreatorProfiles = async (query, env = {}) => {
   const discoveredHandles = settledHandles.flatMap((result) =>
     result.status === 'fulfilled' && result.value ? [result.value] : []
   );
-  const handles = toUniqueList([...explicitHandles, ...discoveredHandles], 16);
+  const handles = toUniqueList([...explicitHandles, ...discoveredHandles], 24);
   mergeCreatorBase('instagram_handles', handles, 40);
   if (handles.length === 0) return [];
+  const rotatedHandles = rotateList(
+    handles,
+    getRotationOffset(handles.length, tinyHash(`instagram-handles:${query}`))
+  ).slice(0, 12);
 
   const settled = await Promise.allSettled(
-    handles.map(async (handle) => {
+    rotatedHandles.map(async (handle) => {
       const feedCandidates = [
         `https://rsshub.app/instagram/user/${encodeURIComponent(handle)}`,
         `https://rsshub.app/instagram/u/${encodeURIComponent(handle)}`,

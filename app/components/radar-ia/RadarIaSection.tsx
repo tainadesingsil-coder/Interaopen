@@ -642,8 +642,7 @@ function RadarViewer({
   const isTikTokNews = item.kind === 'news' && (isTikTokUrl(item.url) || /tiktok/i.test(item.source));
   const isTwitchNews = item.kind === 'news' && (isTwitchUrl(item.url) || /twitch/i.test(item.source));
   const isYouTubeNews = item.kind === 'news' && (isYouTubeUrl(item.url) || /youtube live/i.test(item.source));
-  const isCommunityNews =
-    item.kind === 'news' && (isCommunityUrl(item.url) || /tabnews|comunidade br/i.test(item.source));
+  const isCommunityNews = item.kind === 'news' && /comunidade br interno/i.test(item.source);
   const prefersMobileTikTokPlayer = useMemo(() => isLikelyMobileDevice(), []);
   const tikTokEmbedUrls = isTikTokNews ? buildTikTokEmbedUrls(item.url, prefersMobileTikTokPlayer) : [];
   const [twitchParentHosts, setTwitchParentHosts] = useState<string[]>(['localhost']);
