@@ -144,6 +144,43 @@ const pickParagraphs = (html) => {
     .slice(0, 18);
 };
 
+const pickParagraphsFromText = (value = '') =>
+  String(value || '')
+    .split(/\n{2,}/)
+    .map((line) => stripHtml(line))
+    .map((line) => line.replace(/\s+/g, ' ').trim())
+    .filter((line) => line.length >= 70 && !isBoilerplateParagraph(line))
+    .slice(0, 18);
+
+const fetchViaJinaReader = async (sourceUrl = '') => {
+  const raw = String(sourceUrl || '').trim();
+  if (!raw) return { title: '', paragraphs: [] };
+  const withoutProtocol = raw.replace(/^https?:\/\//i, '');
+  const endpoint = `https://r.jina.ai/http://${withoutProtocol}`;
+  try {
+    const response = await fetchWithTimeout(
+      endpoint,
+      {
+        headers: {
+          accept: 'text/plain',
+        },
+      },
+      7000
+    );
+    if (!response.ok) return { title: '', paragraphs: [] };
+    const payload = await response.text();
+    const lines = payload.split('\n').map((line) => line.trim()).filter(Boolean);
+    const titleLine = lines.find((line) => line.toLowerCase().startsWith('title:')) || '';
+    const extractedTitle = titleLine ? stripHtml(titleLine.replace(/^title:\s*/i, '')) : '';
+    return {
+      title: extractedTitle,
+      paragraphs: pickParagraphsFromText(payload),
+    };
+  } catch {
+    return { title: '', paragraphs: [] };
+  }
+};
+
 const normalizeSourceLabel = (sourceUrl, fallbackSource = '') => {
   const fromFallback = (fallbackSource || '').trim();
   if (fromFallback) return fromFallback;
@@ -279,6 +316,24 @@ export async function onRequestGet(context) {
   try {
     const response = await fetchWithTimeout(parsed.toString());
     if (!response.ok) {
+      const jinaFallback = await fetchViaJinaReader(parsed.toString());
+      if (jinaFallback.paragraphs.length > 0) {
+        return new Response(
+          buildReaderHtml({
+            title: jinaFallback.title || fallbackTitle || 'Leitura interna',
+            sourceUrl: parsed.toString(),
+            sourceLabel: normalizeSourceLabel(parsed.toString(), fallbackSource),
+            description: fallbackDescription,
+            paragraphs: jinaFallback.paragraphs,
+          }),
+          {
+            headers: {
+              'content-type': 'text/html; charset=utf-8',
+              'cache-control': 'public, max-age=120',
+            },
+          }
+        );
+      }
       return new Response(
         buildFallbackHtml(parsed.toString(), fallbackTitle, fallbackDescription, fallbackSource),
         {
@@ -299,13 +354,20 @@ export async function onRequestGet(context) {
         : fallbackTitle || extractedTitle || 'Leitura interna';
     const description = extractMeta(html, 'og:description') || extractMeta(html, 'description');
     const paragraphs = pickParagraphs(html);
-
-    const finalParagraphs = paragraphs.length > 0 ? paragraphs : fallbackDescription ? [fallbackDescription] : [];
+    const jinaFallback = paragraphs.length === 0 ? await fetchViaJinaReader(parsed.toString()) : { title: '', paragraphs: [] };
+    const finalParagraphs =
+      paragraphs.length > 0
+        ? paragraphs
+        : jinaFallback.paragraphs.length > 0
+          ? jinaFallback.paragraphs
+          : fallbackDescription
+            ? [fallbackDescription]
+            : [];
     const finalDescription = description || fallbackDescription;
 
     return new Response(
       buildReaderHtml({
-        title,
+        title: title || jinaFallback.title || fallbackTitle || 'Leitura interna',
         sourceUrl: parsed.toString(),
         sourceLabel: normalizeSourceLabel(parsed.toString(), fallbackSource),
         description: finalDescription,
@@ -319,6 +381,24 @@ export async function onRequestGet(context) {
       }
     );
   } catch {
+    const jinaFallback = await fetchViaJinaReader(parsed.toString());
+    if (jinaFallback.paragraphs.length > 0) {
+      return new Response(
+        buildReaderHtml({
+          title: jinaFallback.title || fallbackTitle || 'Leitura interna',
+          sourceUrl: parsed.toString(),
+          sourceLabel: normalizeSourceLabel(parsed.toString(), fallbackSource),
+          description: fallbackDescription,
+          paragraphs: jinaFallback.paragraphs,
+        }),
+        {
+          headers: {
+            'content-type': 'text/html; charset=utf-8',
+            'cache-control': 'public, max-age=120',
+          },
+        }
+      );
+    }
     return new Response(
       buildFallbackHtml(parsed.toString(), fallbackTitle, fallbackDescription, fallbackSource),
       {

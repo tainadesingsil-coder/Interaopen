@@ -1,5 +1,6 @@
 const CACHE_TTL_MS = 30 * 1000;
 const CREATOR_BASE_TTL_MS = 24 * 60 * 60 * 1000;
+const CONTENT_ROTATION_MS = 20 * 60 * 1000;
 const SOURCE_TIMEOUT_MS = 8000;
 const GOOGLE_TRANSLATE_PUBLIC_ENDPOINT =
   'https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=pt&dt=t&q=';
@@ -195,6 +196,19 @@ const parseCommaSeparated = (value = '') =>
 const toUniqueList = (items = [], max = 20) =>
   [...new Set(items.map((item) => String(item || '').trim()).filter(Boolean))].slice(0, max);
 
+const rotateList = (items = [], offset = 0) => {
+  if (!Array.isArray(items) || items.length <= 1) return Array.isArray(items) ? [...items] : [];
+  const normalizedOffset = Math.abs(Number(offset || 0)) % items.length;
+  if (normalizedOffset === 0) return [...items];
+  return items.map((_, index) => items[(index + normalizedOffset) % items.length]);
+};
+
+const getRotationOffset = (size, salt = 0) => {
+  if (!Number.isFinite(size) || size <= 1) return 0;
+  const bucket = Math.floor(Date.now() / CONTENT_ROTATION_MS);
+  return Math.abs((bucket + Number(salt || 0)) % size);
+};
+
 const parseEntries = (xml = '') => {
   const items = [...xml.matchAll(/<item[\s\S]*?<\/item>/gi)].map((match) => match[0]);
   if (items.length > 0) return items;
@@ -310,7 +324,7 @@ const fetchTiktokCreatorFeedEntries = async (handle = '') => {
   return [];
 };
 
-const fetchTiktokVideoUrls = async (env = {}) => {
+const fetchTiktokVideoCandidates = async (env = {}) => {
   const seedUrls = parseTiktokSeedVideoUrls(env);
   const handles = parseTiktokCreatorHandles(env);
   mergeCreatorBase('tiktok_handles', handles, 60);
@@ -319,14 +333,57 @@ const fetchTiktokVideoUrls = async (env = {}) => {
     handles.slice(0, 14).map(async (handle) => {
       const entries = await fetchTiktokCreatorFeedEntries(handle);
       return entries
-        .slice(0, 5)
-        .map((entry) => normalizeTikTokUrl(String(entry?.link || '').trim()))
-        .filter((url) => extractTikTokVideoId(url));
+        .slice(0, 6)
+        .map((entry, index) => {
+          const url = normalizeTikTokUrl(String(entry?.link || '').trim());
+          const videoId = extractTikTokVideoId(url);
+          if (!videoId) return null;
+          return {
+            url,
+            title: safeText(entry?.title || '', 180),
+            thumbnail: String(entry?.image || '').trim() || null,
+            publishedAt: String(entry?.publishedAt || '').trim() || null,
+            channel: `@${handle}`,
+            rank: index,
+          };
+        })
+        .filter(Boolean);
     })
   );
 
-  const dynamicUrls = settled.flatMap((result) => (result.status === 'fulfilled' ? result.value : []));
-  return toUniqueList([...dynamicUrls, ...seedUrls], 18);
+  const dynamicCandidates = settled.flatMap((result) => (result.status === 'fulfilled' ? result.value : []));
+  const seedCandidates = seedUrls
+    .map((url, index) => {
+      const normalized = normalizeTikTokUrl(url);
+      const videoId = extractTikTokVideoId(normalized);
+      if (!videoId) return null;
+      return {
+        url: normalized,
+        title: '',
+        thumbnail: null,
+        publishedAt: null,
+        channel: extractTiktokHandleFromUrl(normalized),
+        rank: 100 + index,
+      };
+    })
+    .filter(Boolean);
+
+  const map = new Map();
+  [...dynamicCandidates, ...seedCandidates].forEach((candidate) => {
+    const key = normalizeTikTokUrl(String(candidate?.url || ''));
+    if (!key || map.has(key)) return;
+    map.set(key, candidate);
+  });
+
+  const merged = [...map.values()];
+  const sorted = merged.sort((a, b) => {
+    const aTime = a?.publishedAt ? Date.parse(a.publishedAt) : 0;
+    const bTime = b?.publishedAt ? Date.parse(b.publishedAt) : 0;
+    if (!Number.isNaN(aTime) || !Number.isNaN(bTime)) return (Number.isNaN(bTime) ? 0 : bTime) - (Number.isNaN(aTime) ? 0 : aTime);
+    return Number(a?.rank || 0) - Number(b?.rank || 0);
+  });
+  const offset = getRotationOffset(sorted.length, 7);
+  return rotateList(sorted, offset).slice(0, 18);
 };
 
 const resolveTiktokOEmbed = async (videoUrl = '') => {
@@ -355,12 +412,15 @@ const resolveTiktokOEmbed = async (videoUrl = '') => {
 };
 
 const fetchTiktokItems = async (env = {}) => {
-  const videoUrls = await fetchTiktokVideoUrls(env);
+  const candidates = await fetchTiktokVideoCandidates(env);
   const settled = await Promise.allSettled(
-    videoUrls.map(async (videoUrl, index) => {
+    candidates.map(async (candidate, index) => {
+      const videoUrl = String(candidate?.url || '').trim();
+      if (!videoUrl) return null;
       const oEmbed = await resolveTiktokOEmbed(videoUrl);
-      const channel = extractTiktokHandleFromUrl(videoUrl);
-      const title = oEmbed?.title || `TikTok · ${channel}`;
+      const channel = String(candidate?.channel || extractTiktokHandleFromUrl(videoUrl));
+      const fallbackTitle = safeText(candidate?.title || '', 180);
+      const title = oEmbed?.title || fallbackTitle || `TikTok · ${channel}`;
       return {
         id: `tiktok-video-${videoUrl}`.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 80),
         title,
@@ -369,7 +429,7 @@ const fetchTiktokItems = async (env = {}) => {
             ? `Vídeo recente de ${oEmbed.authorName} na sua base de criadores.`
             : 'Vídeo recente da sua base de criadores no TikTok.',
         url: videoUrl,
-        thumbnail: oEmbed?.thumbnail || null,
+        thumbnail: oEmbed?.thumbnail || candidate?.thumbnail || null,
         tags: ['TikTok', 'Vídeo', 'Creator'],
         category: /marketing|conteudo|social/i.test(title) ? 'Marketing' : 'IA',
         isLive: true,
@@ -382,7 +442,7 @@ const fetchTiktokItems = async (env = {}) => {
   );
 
   return settled
-    .flatMap((result) => (result.status === 'fulfilled' ? [result.value] : []))
+    .flatMap((result) => (result.status === 'fulfilled' && result.value ? [result.value] : []))
     .sort((a, b) => Number(a.rank || 0) - Number(b.rank || 0))
     .map(({ rank, ...item }) => item)
     .slice(0, 10);

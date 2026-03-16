@@ -63,10 +63,10 @@ const FALLBACK_TABNEWS_KEYWORDS = [
 const NEWS_FEEDS = [
   { name: 'Olhar Digital IA', url: 'https://olhardigital.com.br/tag/inteligencia-artificial/feed/' },
   { name: 'Canaltech', url: 'https://feeds2.feedburner.com/canaltechbr' },
-  {
-    name: 'Google Notícias IA (PT-BR)',
-    url: 'https://news.google.com/rss/search?q=intelig%C3%AAncia+artificial&hl=pt-BR&gl=BR&ceid=BR:pt-419',
-  },
+  { name: 'G1 Tecnologia', url: 'https://g1.globo.com/rss/g1/tecnologia/' },
+  { name: 'G1 Economia Tecnologia', url: 'https://g1.globo.com/rss/g1/economia/tecnologia/' },
+  { name: 'Folha Tec', url: 'https://www1.folha.uol.com.br/tec/rss091.xml' },
+  { name: 'TecMundo', url: 'https://rss.tecmundo.com.br/feed' },
 ];
 const CURATED_NEWS_ARTICLES = [
   {
@@ -167,6 +167,14 @@ const ALLOWED_RANGES = ['24h', '7d', '30d'];
 const YOUTUBE_CHANNEL_LIMIT = 5;
 const YOUTUBE_VIDEOS_PER_CHANNEL = 4;
 const YOUTUBE_CREATOR_ITEMS_PER_CHANNEL = 5;
+const BRAZILIAN_YOUTUBE_HANDLE_FALLBACK = [
+  'brunopicinini',
+  'filipedeschamps',
+  'hashtagprogramacao',
+  'codigofontetv',
+  'alura',
+  'linuxtips',
+];
 const BRAZILIAN_YOUTUBE_CHANNEL_HINTS = [
   'brasil',
   'portugal',
@@ -932,6 +940,20 @@ const extractInstagramHandleFromProfileUrl = (value = '') => {
   return candidate;
 };
 
+const extractInstagramHandleFromHtml = (html = '') => {
+  const patterns = [
+    /"owner_username":"([a-z0-9._]{2,40})"/i,
+    /"username":"([a-z0-9._]{2,40})"/i,
+    /"alternateName":"@([a-z0-9._]{2,40})"/i,
+    /profilePage_([a-z0-9._]{2,40})/i,
+  ];
+  for (const pattern of patterns) {
+    const match = String(html || '').match(pattern);
+    if (match?.[1]) return String(match[1]).toLowerCase();
+  }
+  return '';
+};
+
 const parseInstagramSeedUrls = (env = {}) => {
   const raw = String(env?.INSTAGRAM_SEED_URLS || env?.INSTAGRAM_CREATOR_URLS || '').trim();
   const envUrls = raw ? parseCommaSeparated(raw) : [];
@@ -976,6 +998,27 @@ const resolveInstagramHandleFromSeedUrl = async (seedUrl = '') => {
     }
   } catch {
     // Fallback below.
+  }
+
+  try {
+    const response = await fetchWithTimeout(
+      seedUrl,
+      {
+        headers: {
+          'user-agent':
+            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36',
+          accept: 'text/html,application/xhtml+xml',
+        },
+      },
+      5500
+    );
+    if (response.ok) {
+      const html = await response.text();
+      const fromHtml = extractInstagramHandleFromHtml(html);
+      if (fromHtml) return fromHtml;
+    }
+  } catch {
+    // Ignore and use URL fallback.
   }
 
   return extractInstagramHandleFromProfileUrl(seedUrl);
@@ -1502,6 +1545,17 @@ const sortByScoreAndDate = (items) =>
     return bTime - aTime;
   });
 
+const extractSourceFromFeedBlock = (block = '') => {
+  const match = block.match(/<source[^>]*?(?:url="([^"]+)")?[^>]*>([\s\S]*?)<\/source>/i);
+  if (!match) {
+    return { name: '', url: '' };
+  }
+  return {
+    name: stripHtml(match[2] || '').slice(0, 140),
+    url: String(match[1] || '').trim(),
+  };
+};
+
 const parseFeedItems = (xml) =>
   extractEntries(xml)
     .map((block) => {
@@ -1509,11 +1563,16 @@ const parseFeedItems = (xml) =>
       const description = extractTagValue(block, ['description', 'summary', 'content']);
       const link = extractTagValue(block, ['link', 'id']);
       const publishedRaw = extractTagValue(block, ['pubDate', 'updated', 'published']);
+      const source = extractSourceFromFeedBlock(block);
       return {
         title,
         description,
         link,
         publishedAt: safeIsoDate(publishedRaw),
+        thumbnail: extractImageFromBlock(block),
+        image: extractImageFromBlock(block),
+        sourceName: source.name,
+        sourceUrl: source.url,
       };
     })
     .filter((item) => item.title && item.link);
@@ -1572,6 +1631,98 @@ const parseYoutubeCreatorChannelIds = (env = {}) => {
     /^UC[a-zA-Z0-9_-]{10,}$/i.test(String(value || ''))
   );
   return toUniqueList([...fromEnv, ...fromBase], 24);
+};
+
+const parseYoutubeCreatorHandles = (env = {}) => {
+  const raw = String(env?.YOUTUBE_CHANNEL_HANDLES || env?.YOUTUBE_HANDLES || '').trim();
+  const fromEnv = raw
+    ? parseCommaSeparated(raw)
+        .map((value) => String(value || '').trim().replace(/^@+/, '').toLowerCase())
+        .filter((value) => /^[a-z0-9._-]{2,60}$/i.test(value))
+    : [];
+  return toUniqueList([...fromEnv, ...BRAZILIAN_YOUTUBE_HANDLE_FALLBACK], 20);
+};
+
+const fetchYoutubeVideoIdsFromHandle = async (handle = '', limit = 6) => {
+  const cleanHandle = String(handle || '').trim().replace(/^@+/, '').toLowerCase();
+  if (!cleanHandle) return [];
+  const endpoint = `https://www.youtube.com/@${encodeURIComponent(cleanHandle)}/videos`;
+  try {
+    const response = await fetchWithTimeout(
+      endpoint,
+      {
+        headers: {
+          'user-agent':
+            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36',
+          accept: 'text/html,application/xhtml+xml',
+        },
+      },
+      6500
+    );
+    if (!response.ok) return [];
+    const html = await response.text();
+    const matches = [...html.matchAll(/"videoId":"([a-zA-Z0-9_-]{11})"/g)].map((match) => match[1]);
+    return toUniqueList(matches, limit);
+  } catch {
+    return [];
+  }
+};
+
+const fetchYoutubeOEmbedFallbackItem = async (videoId = '', query = '') => {
+  const cleanVideoId = String(videoId || '').trim();
+  if (!cleanVideoId) return null;
+  try {
+    const endpoint = new URL('https://www.youtube.com/oembed');
+    endpoint.searchParams.set('url', `https://www.youtube.com/watch?v=${cleanVideoId}`);
+    endpoint.searchParams.set('format', 'json');
+    const response = await fetchWithTimeout(endpoint.toString(), undefined, 5000);
+    if (!response.ok) return null;
+    const payload = await response.json();
+    const title = stripHtml(payload?.title || '').slice(0, 180);
+    const channel = stripHtml(payload?.author_name || '');
+    if (!title) return null;
+    if (!isLikelyPortuguese(`${title} ${channel}`) && !isLikelyBrazilianYouTubeChannel(channel)) return null;
+    return {
+      id: `yt-${cleanVideoId}`,
+      kind: 'youtube',
+      title,
+      description: 'Vídeo recente em português da base de canais brasileiros de tecnologia e IA.',
+      url: `https://www.youtube.com/watch?v=${cleanVideoId}`,
+      source: 'YouTube BR',
+      publishedAt: null,
+      thumbnail: `https://i.ytimg.com/vi/${cleanVideoId}/hqdefault.jpg`,
+      channel: channel || null,
+      score: 60 + computeScore(title, channel, null, query),
+      ctaLabel: 'Assistir',
+    };
+  } catch {
+    return null;
+  }
+};
+
+const fetchYoutubeHandleFallbackItems = async (query, range, env = {}) => {
+  const handles = parseYoutubeCreatorHandles(env);
+  if (handles.length === 0) return [];
+  const offset = getRotationOffset(handles.length, tinyHash(`yt-handle:${query}:${range}`));
+  const selectedHandles = rotateList(handles, offset).slice(0, 5);
+
+  const settledIds = await Promise.allSettled(
+    selectedHandles.map(async (handle) => fetchYoutubeVideoIdsFromHandle(handle, 5))
+  );
+  const allVideoIds = toUniqueList(
+    settledIds.flatMap((result) => (result.status === 'fulfilled' ? result.value : [])),
+    24
+  );
+  if (allVideoIds.length === 0) return [];
+
+  const settledItems = await Promise.allSettled(
+    allVideoIds.map(async (videoId) => fetchYoutubeOEmbedFallbackItem(videoId, query))
+  );
+  return sortByScoreAndDate(
+    settledItems
+      .flatMap((result) => (result.status === 'fulfilled' && result.value ? [result.value] : []))
+      .filter(Boolean)
+  ).slice(0, 24);
 };
 
 const isLikelyBrazilianYouTubeChannel = (value = '') => {
@@ -1736,6 +1887,15 @@ const normalizeUrlForDedupe = (value = '') => {
   }
 };
 
+const isGoogleNewsUrl = (value = '') => {
+  try {
+    const parsed = new URL(String(value || '').trim());
+    return parsed.hostname.includes('news.google.com');
+  } catch {
+    return /news\.google\.com/i.test(String(value || ''));
+  }
+};
+
 const extractInstagramCodeFromUrl = (url = '') => {
   const match = String(url).match(/\/(?:p|reel)\/([a-zA-Z0-9_-]+)/);
   return match?.[1] || '';
@@ -1810,9 +1970,19 @@ const buildCuratedYoutubeItems = (query, range) => {
 };
 
 const fetchYoutubeItems = async (query, range, env) => {
-  const apiKey = (env?.YOUTUBE_DATA_API_KEY || FALLBACK_YOUTUBE_DATA_API_KEY || '').trim();
+  const apiKey = (
+    env?.YOUTUBE_DATA_API_KEY ||
+    env?.YOUTUBE_API_KEY ||
+    env?.NEXT_PUBLIC_YOUTUBE_API_KEY ||
+    FALLBACK_YOUTUBE_DATA_API_KEY ||
+    ''
+  ).trim();
   const curatedItems = buildCuratedYoutubeItems(query, range);
-  if (!apiKey) return curatedItems;
+  const handleFallbackPromise = fetchYoutubeHandleFallbackItems(query, range, env).catch(() => []);
+  if (!apiKey) {
+    const handleFallbackItems = await handleFallbackPromise;
+    return sortByScoreAndDate(dedupeById([...handleFallbackItems, ...curatedItems])).slice(0, 30);
+  }
 
   try {
     const publishedAfter = new Date(rangeCutoffMs(range)).toISOString();
@@ -1923,7 +2093,10 @@ const fetchYoutubeItems = async (query, range, env) => {
       dedupeById(videoItems.map((item) => normalizeYoutubeItem(item, query)).filter(Boolean))
     );
     const creatorBaseItems = await creatorBasePromise;
-    const combinedDynamic = sortByScoreAndDate(dedupeById([...creatorBaseItems, ...dynamicItems]));
+    const handleFallbackItems = await handleFallbackPromise;
+    const combinedDynamic = sortByScoreAndDate(
+      dedupeById([...creatorBaseItems, ...dynamicItems, ...handleFallbackItems])
+    );
 
     if (combinedDynamic.length === 0) {
       return sortByScoreAndDate(curatedItems).slice(0, 30);
@@ -1934,7 +2107,8 @@ const fetchYoutubeItems = async (query, range, env) => {
     // Prioritize creator-base + fresh API videos and keep curated fallback at the end.
     return [...combinedDynamic, ...curatedRemainder].slice(0, 36);
   } catch (error) {
-    return sortByScoreAndDate(curatedItems).slice(0, 30);
+    const handleFallbackItems = await handleFallbackPromise;
+    return sortByScoreAndDate(dedupeById([...handleFallbackItems, ...curatedItems])).slice(0, 30);
   }
 };
 
@@ -2030,9 +2204,9 @@ const fetchNewsItems = async (query, range, env = {}) => {
         title: entry.title,
         description: entry.description,
         url: entry.link,
-        source: feed.name,
+        source: entry.sourceName || feed.name,
         publishedAt: entry.publishedAt,
-        thumbnail: null,
+        thumbnail: entry.thumbnail || entry.image || null,
         channel: null,
         score: computeScore(entry.title, entry.description, entry.publishedAt, query),
         ctaLabel: 'Ler matéria',
@@ -2049,6 +2223,7 @@ const fetchNewsItems = async (query, range, env = {}) => {
   ]);
   const items = settled.flatMap((result) => (result.status === 'fulfilled' ? result.value : []));
   const filtered = items.filter((item) => {
+    if (isGoogleNewsUrl(item.url)) return false;
     if (!isLikelyPortuguese(`${item.title} ${item.description}`)) {
       return false;
     }
@@ -2167,7 +2342,12 @@ const fetchCuratedInstagramItems = async (query) => {
     })
   );
 
-  return settled.flatMap((result) => (result.status === 'fulfilled' ? [result.value] : []));
+  const items = settled.flatMap((result) => (result.status === 'fulfilled' ? [result.value] : []));
+  const discoveredHandles = items
+    .map((item) => String(item?.channel || '').replace(/^@+/, '').toLowerCase())
+    .filter((value) => /^[a-z0-9._]{2,40}$/i.test(value));
+  mergeCreatorBase('instagram_handles', discoveredHandles, 40);
+  return items;
 };
 
 const getInstagramGraphCredentials = (env = {}) => {
