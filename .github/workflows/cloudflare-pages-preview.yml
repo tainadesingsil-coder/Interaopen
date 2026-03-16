@@ -1,16 +1,15 @@
-name: Cloudflare Pages
+name: Cloudflare Pages (INTERAOPEN Preview)
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
   push:
-    branches:
+    branches-ignore:
       - main
-      - '**'
 
 jobs:
-  deploy:
-    name: Deploy to Cloudflare Pages
+  preview:
+    name: Deploy INTERAOPEN preview
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -31,14 +30,16 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          NEXT_PUBLIC_GEMINI_API_KEY: ${{ secrets.NEXT_PUBLIC_GEMINI_API_KEY }}
 
-      - name: Publish to Cloudflare Pages
+      - name: Publish to Cloudflare Pages (preview)
         uses: cloudflare/pages-action@v1
         with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: solarenergy-5h5
+          apiToken: ${{ secrets.CF_ACCOUNTENIGMA }}
+          accountId: ${{ secrets.CF_ACCOUNT_IDENIGMA }}
+          projectName: interaopen
           directory: dist
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref == 'refs/heads/cursor/landing-page-bella-vista-7d69' && 'cursor-landing-page-bella-vi' || github.ref == 'refs/heads/main' && 'main' || github.ref_name }}
+          branch: ${{ github.head_ref || github.ref_name }}
           wranglerVersion: '3'

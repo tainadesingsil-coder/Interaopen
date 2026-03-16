@@ -1,5 +1,9 @@
 import type { Locale } from '@/app/types';
 
+export function cn(...classes: Array<string | undefined | null | false>) {
+  return classes.filter(Boolean).join(' ');
+}
+
 export const createCurrencyFormatter = (locale: Locale) =>
   new Intl.NumberFormat(
     locale === 'en' ? 'en-US' : locale === 'it' ? 'it-IT' : 'pt-BR',

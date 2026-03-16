@@ -1,0 +1,16 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/atualizar-conteudos",
+      "schedule": "*/30 * * * *"
+    },
+    {
+      "path": "/api/cron/atualizar-tudo",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/atualizar-twitch",
+      "schedule": "*/5 * * * *"
+    }
+  ]
+}

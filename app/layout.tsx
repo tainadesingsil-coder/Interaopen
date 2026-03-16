@@ -1,69 +1,33 @@
 import type { Metadata } from 'next';
-import { Inter, Sora } from 'next/font/google';
+import { Syne } from 'next/font/google';
 import './globals.css';
-import { StructuredData } from '@/app/components/shared/StructuredData';
-
-const inter = Inter({
+const syne = Syne({
   subsets: ['latin'],
-  variable: '--font-inter',
+  variable: '--font-syne',
+  weight: ['700', '800'],
   display: 'swap',
 });
-
-const sora = Sora({
-  subsets: ['latin'],
-  variable: '--font-display',
-  display: 'swap',
-});
-
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ?? 'https://bellavistaresidence.com.br';
 
 export const metadata: Metadata = {
-  title:
-    'Bella Vista Beach Residence | Investimento Imobiliário no Litoral Sul da Bahia',
-  description:
-    'Stúdios e apartamentos de 2 e 3 quartos com infraestrutura de resort em Coroa Vermelha. Alto potencial de valorização e rentabilidade garantida.',
-  keywords: [
-    'bella vista',
-    'coroa vermelha',
-    'investimento imobiliário',
-    'litoral bahia',
-    'apartamento praia',
-  ],
-  authors: [{ name: 'Bella Vista Beach Residence' }],
+  title: 'CODEXION | Portfolio',
+  description: 'Interface moderna de portfólio com sidebar animada e visual premium.',
+  keywords: ['codexion', 'portfolio', 'next.js', 'interface', 'design'],
+  authors: [{ name: 'CODEXION' }],
   openGraph: {
     type: 'website',
     locale: 'pt_BR',
-    url: siteUrl,
-    siteName: 'Bella Vista Beach Residence',
-    title: 'Bella Vista Beach Residence | Bahia',
-    description: 'Investimento imobiliário estratégico no Litoral Sul da Bahia',
-    images: [
-      {
-        url: `${siteUrl}/og-image.jpg`,
-        width: 1200,
-        height: 630,
-        alt: 'Bella Vista Beach Residence',
-      },
-    ],
+    siteName: 'CODEXION',
+    title: 'CODEXION | Portfolio',
+    description: 'Portfólio CODEXION com navegação lateral e apresentação de projetos.',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Bella Vista Beach Residence | Bahia',
-    description: 'Investimento imobiliário estratégico no Litoral Sul da Bahia',
-    images: [`${siteUrl}/twitter-image.jpg`],
+    title: 'CODEXION | Portfolio',
+    description: 'Nova interface de portfólio para a marca CODEXION.',
   },
   robots: {
     index: true,
     follow: true,
-  },
-  alternates: {
-    canonical: siteUrl,
-    languages: {
-      'pt-BR': siteUrl,
-      en: `${siteUrl}/en`,
-      it: `${siteUrl}/it`,
-    },
   },
 };
 
@@ -74,11 +38,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang='pt-BR'>
-      <body className={`${inter.className} ${sora.variable}`}>
-        <a href='#main-content' className='skip-link'>
-          Skip to content
-        </a>
-        <StructuredData />
+      <body className={`${syne.className} ${syne.variable}`}>
         {children}
       </body>
     </html>

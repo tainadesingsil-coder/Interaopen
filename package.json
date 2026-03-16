@@ -6,15 +6,17 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "postbuild": "rm -rf dist && cp -R out dist",
+    "postbuild": "rm -rf dist && cp -R out dist && if [ -d functions ]; then cp -R functions dist/functions; fi",
     "start": "next start",
     "lint": "next lint",
     "assets:download": "node scripts/download-images.js",
     "assets:optimize": "node scripts/optimize-images.mjs",
-    "deploy:cf": "wrangler pages deploy dist --project-name=solarenergy-5h5 --branch=production",
-    "deploy:cf:preview": "wrangler pages deploy dist --project-name=solarenergy-5h5 --branch=preview"
+    "deploy:cf": "wrangler pages deploy dist --project-name=interaopen --branch=main",
+    "deploy:cf:preview": "wrangler pages deploy dist --project-name=interaopen --branch=dev"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.99.1",
+    "d3": "^7.9.0",
     "framer-motion": "^12.23.12",
     "lucide-react": "^0.539.0",
     "next": "^16.1.4",
@@ -22,6 +24,7 @@
     "react-dom": "^19.1.1"
   },
   "devDependencies": {
+    "@types/d3": "^7.4.3",
     "@types/node": "^25.0.9",
     "@types/react": "^19.1.10",
     "@types/react-dom": "^19.1.7",
