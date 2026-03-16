@@ -452,14 +452,17 @@ function parseTwitchLiveDetail(text) {
     .split("·")
     .map((part) => part.trim())
     .filter(Boolean);
-  const titleSegment = (segments[0] || raw)
+  const titleSegmentRaw = (segments[0] || raw)
     .replace(/^twitch live\s*[·:\-]?\s*/i, "")
     .trim();
+  const titleSegment = titleSegmentRaw.replace(/^\d{1,2}:\d{2}\s*/, "").trim();
+  if (!titleSegment || /^:\d{2}$/.test(titleSegment)) return null;
   const categorySegment =
     segments.find(
       (segment) =>
         !/espectadores|ao vivo|hours|minutes|seconds|@/i.test(segment) &&
-        !/dia de/i.test(segment)
+        !/dia de/i.test(segment) &&
+        !/^twitch live$/i.test(segment.trim())
     ) || "";
   const channelMatch = raw.match(/@([a-z0-9_]+)/i);
   const viewersMatch = raw.match(/(\d[\d\.\,]*)\s*espectadores/i);
@@ -474,7 +477,10 @@ function parseTwitchLiveDetail(text) {
   }
 
   return {
-    title: titleSegment || "Live Twitch",
+    title:
+      /^live twitch$/i.test(titleSegment) && channelMatch?.[1]
+        ? `Live de @${channelMatch[1]}`
+        : titleSegment || "Live Twitch",
     category: categorySegment,
     channel: channelMatch?.[1] || "",
     viewers,
@@ -486,9 +492,19 @@ function parseTwitchLiveDetail(text) {
 function collectTwitchLiveDetails(consumedNames, local) {
   const sources = []
     .concat(consumedNames || [])
-    .concat(splitMultilineList(local?.timeline || ""))
-    .concat(splitMultilineList(local?.ultimos || ""))
-    .concat(splitMultilineList(local?.conteudos || ""));
+    .concat(
+      String(local?.timeline || "")
+        .split(/\r?\n/)
+        .map((line) => normalizeTimelineEntry(line))
+        .filter(Boolean)
+    )
+    .concat(
+      String(local?.ultimos || "")
+        .split(/\r?\n/)
+        .map((line) => normalizeTimelineEntry(line))
+        .filter(Boolean)
+    )
+    .concat(parseContentList(local?.conteudos || ""));
 
   const details = [];
   const seen = new Set();
