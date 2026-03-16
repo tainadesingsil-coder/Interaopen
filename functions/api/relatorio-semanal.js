@@ -478,7 +478,8 @@ function parseTwitchLiveDetail(text) {
 
   return {
     title:
-      /^live twitch$/i.test(titleSegment) && channelMatch?.[1]
+      (!titleSegment && channelMatch?.[1]) ||
+      (/^live twitch$/i.test(titleSegment) && channelMatch?.[1])
         ? `Live de @${channelMatch[1]}`
         : titleSegment || "Live Twitch",
     category: categorySegment,
