@@ -873,8 +873,14 @@ function RadarViewer({
         translateTextToPortuguese(fallbackBody),
       ]);
       if (cancelled) return;
-      setTwitchCaptionTitle(translatedTitle || fallbackTitle);
-      setTwitchCaptionBody(translatedBody || fallbackBody);
+      const finalTitle = translatedTitle || fallbackTitle;
+      let finalBody = translatedBody || fallbackBody;
+      const unchangedBody = finalBody.trim() === fallbackBody.trim();
+      if (unchangedBody && !isLikelyPortugueseText(finalBody)) {
+        finalBody = `Transmissão internacional em inglês · legenda automática em PT-BR ativa. ${fallbackBody}`.trim();
+      }
+      setTwitchCaptionTitle(finalTitle);
+      setTwitchCaptionBody(finalBody);
     })();
 
     return () => {
