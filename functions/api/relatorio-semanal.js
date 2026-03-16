@@ -456,7 +456,8 @@ function parseTwitchLiveDetail(text) {
     .replace(/^twitch live\s*[·:\-]?\s*/i, "")
     .trim();
   const titleSegment = titleSegmentRaw.replace(/^\d{1,2}:\d{2}\s*/, "").trim();
-  if (!titleSegment || /^:\d{2}$/.test(titleSegment)) return null;
+  const channelMatch = raw.match(/@([a-z0-9_]+)/i);
+  if ((!titleSegment && !channelMatch?.[1]) || /^:\d{2}$/.test(titleSegment)) return null;
   const categorySegment =
     segments.find(
       (segment) =>
@@ -464,7 +465,6 @@ function parseTwitchLiveDetail(text) {
         !/dia de/i.test(segment) &&
         !/^twitch live$/i.test(segment.trim())
     ) || "";
-  const channelMatch = raw.match(/@([a-z0-9_]+)/i);
   const viewersMatch = raw.match(/(\d[\d\.\,]*)\s*espectadores/i);
   const durationMatch =
     raw.match(/ao vivo h[áa]\s*([^·\n]+)/i) ||
