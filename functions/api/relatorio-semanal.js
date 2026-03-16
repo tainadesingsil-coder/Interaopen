@@ -146,6 +146,7 @@ function summarizeMap(map, limit) {
 const RADAR_CREATORS_DEFAULT = [
   "gaules",
   "alanzoka",
+  "teomewhy",
   "OpenAI",
   "Google AI",
   "OpenAI Newsroom",
@@ -225,6 +226,9 @@ const TECH_KEYWORDS = [
   "multimodal",
   "automacao",
   "automação",
+  "software development",
+  "game development",
+  "teomewhy",
 ];
 
 const BUSINESS_KEYWORDS = [
@@ -247,6 +251,7 @@ const BUSINESS_KEYWORDS = [
   "copys",
   "anuncio",
   "anúncio",
+  "projeto",
 ];
 
 function countKeywordHits(text, keywords) {
@@ -432,9 +437,100 @@ function classifyTechLaunchFromContent(name) {
   };
 }
 
-function buildSpecificContentSummaries(consumedNames) {
+function parseTwitchLiveDetail(text) {
+  const raw = String(text || "").trim();
+  if (!raw) return null;
+  const normalized = normalizeForCompare(raw);
+  const isLikelyTwitchLive =
+    normalized.includes("twitch live") ||
+    normalized.includes("ao vivo") ||
+    normalized.includes("espectadores") ||
+    /@[a-z0-9_]{3,}/i.test(raw);
+  if (!isLikelyTwitchLive) return null;
+
+  const segments = raw
+    .split("·")
+    .map((part) => part.trim())
+    .filter(Boolean);
+  const titleSegment = (segments[0] || raw)
+    .replace(/^twitch live\s*[·:\-]?\s*/i, "")
+    .trim();
+  const categorySegment =
+    segments.find(
+      (segment) =>
+        !/espectadores|ao vivo|hours|minutes|seconds|@/i.test(segment) &&
+        !/dia de/i.test(segment)
+    ) || "";
+  const channelMatch = raw.match(/@([a-z0-9_]+)/i);
+  const viewersMatch = raw.match(/(\d[\d\.\,]*)\s*espectadores/i);
+  const durationMatch =
+    raw.match(/ao vivo h[áa]\s*([^·\n]+)/i) ||
+    raw.match(/live h[áa]\s*([^·\n]+)/i);
+  const commands = uniqueIgnoreCase(raw.match(/![a-z0-9_]+/gi) || []);
+
+  let viewers = "";
+  if (viewersMatch?.[1]) {
+    viewers = viewersMatch[1].replace(/[^\d]/g, "");
+  }
+
+  return {
+    title: titleSegment || "Live Twitch",
+    category: categorySegment,
+    channel: channelMatch?.[1] || "",
+    viewers,
+    duration: durationMatch?.[1]?.trim() || "",
+    commands,
+  };
+}
+
+function collectTwitchLiveDetails(consumedNames, local) {
+  const sources = []
+    .concat(consumedNames || [])
+    .concat(splitMultilineList(local?.timeline || ""))
+    .concat(splitMultilineList(local?.ultimos || ""))
+    .concat(splitMultilineList(local?.conteudos || ""));
+
+  const details = [];
+  const seen = new Set();
+  for (const source of sources) {
+    const parsed = parseTwitchLiveDetail(source);
+    if (!parsed) continue;
+    const key = `${normalizeForCompare(parsed.title)}|${parsed.channel}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    details.push(parsed);
+  }
+  return details.slice(0, 4);
+}
+
+function buildSpecificContentSummaries(consumedNames, liveDetails) {
   const lines = [];
   const unique = uniqueIgnoreCase(consumedNames || []).slice(0, 10);
+
+  if ((liveDetails || []).length) {
+    for (const live of liveDetails) {
+      lines.push(`- Twitch Live detalhada: ${live.title}`);
+      if (live.channel) {
+        lines.push(`  • Criador identificado: @${live.channel}.`);
+      }
+      if (live.category) {
+        lines.push(`  • Categoria da live: ${live.category}.`);
+      }
+      if (live.viewers) {
+        lines.push(`  • Audiência registrada no momento: ${live.viewers} espectadores.`);
+      }
+      if (live.duration) {
+        lines.push(`  • Duração no momento da captura: ao vivo há ${live.duration}.`);
+      }
+      if (live.commands?.length) {
+        lines.push(`  • Comandos/intenções no chat/título: ${live.commands.join(" ")}.`);
+      }
+      lines.push(
+        "  • Leitura estratégica: consistência de transmissão + comunidade ativa + tema claro de sessão."
+      );
+    }
+  }
+
   for (const item of unique) {
     const norm = normalizeForCompare(item);
     if (norm.includes("openai") || norm.includes("google ai") || norm.includes("deepmind")) {
@@ -483,6 +579,7 @@ function detectRadarSignals(consumedNames) {
     (item) => item.norm.includes("gaules") || item.norm.includes("gaule")
   );
   const hasAlanzoka = normalized.some((item) => item.norm.includes("alanzoka"));
+  const hasTeomewhy = normalized.some((item) => item.norm.includes("teomewhy"));
 
   const hasOpenAI = normalized.some((item) => item.norm.includes("openai"));
   const hasGoogleAI = normalized.some(
@@ -528,6 +625,7 @@ function detectRadarSignals(consumedNames) {
         (item) =>
           item.norm.includes("gaules") ||
           item.norm.includes("alanzoka") ||
+          item.norm.includes("teomewhy") ||
           item.norm.includes("openai") ||
           item.norm.includes("google ai") ||
           item.norm.includes("deepmind")
@@ -538,12 +636,18 @@ function detectRadarSignals(consumedNames) {
   return {
     hasGaules,
     hasAlanzoka,
+    hasTeomewhy,
     hasOpenAI,
     hasGoogleAI,
     hasDeepMind,
     hasHistoryAI,
     hasAnyCreatorContent:
-      hasGaules || hasAlanzoka || hasOpenAI || hasGoogleAI || hasDeepMind,
+      hasGaules ||
+      hasAlanzoka ||
+      hasTeomewhy ||
+      hasOpenAI ||
+      hasGoogleAI ||
+      hasDeepMind,
     launchMentions: uniqueIgnoreCase(launchMentions),
     creatorsConsumed,
   };
@@ -552,6 +656,9 @@ function detectRadarSignals(consumedNames) {
 function extractCreatorFromInteraction(item) {
   const title = String(item?.titulo_conteudo || "").trim();
   const url = String(item?.url_conteudo || "").trim();
+
+  const fromAtHandle = title.match(/@([a-z0-9_]+)/i);
+  if (fromAtHandle?.[1]) return fromAtHandle[1];
 
   const fromLiveTitle = title.match(/live(?: twitch)?\s*:\s*([a-z0-9_\.]+)/i);
   if (fromLiveTitle?.[1]) return fromLiveTitle[1];
@@ -640,15 +747,23 @@ function normalizeResumoLocal(resumoLocal) {
 function buildContextualInsights(signals, context) {
   const profile = context.profile || "TECH";
   const insights = [];
+  const featuredLive = (context.liveDetails || [])[0];
+  const liveCreatorLabel = featuredLive?.channel ? `@${featuredLive.channel}` : "criador";
 
   if (profile === "GAMER") {
     insights.push(
       `${context.liveMoment} O foco aqui é leitura de situação e tomada de decisão sob pressão em ${context.gameName}.`
     );
     insights.push(
-      `Técnicas observadas no gameplay: ${context.gameTechniques
-        .slice(0, 3)
-        .join(", ")}. Treine isso em blocos curtos e repetíveis para ganhar consistência.`
+      featuredLive
+        ? `Live de ${liveCreatorLabel}: audiência de ${
+            featuredLive.viewers || "n/d"
+          } e tema "${
+            featuredLive.title
+          }" reforçam consistência de comunidade e clareza de pauta.`
+        : `Técnicas observadas no gameplay: ${context.gameTechniques
+            .slice(0, 3)
+            .join(", ")}. Treine isso em blocos curtos e repetíveis para ganhar consistência.`
     );
     insights.push(
       `Dica prática de jogo: escolha 1 fundamento de ${context.gameName} para dominar esta semana e mantenha rotina diária de revisão de partidas.`
@@ -684,9 +799,13 @@ function buildContextualInsights(signals, context) {
 
   // HÍBRIDO
   insights.push(
-    `Bloco Gamer: ${context.liveMoment} Em ${context.gameName}, as técnicas mais úteis foram ${context.gameTechniques
-      .slice(0, 2)
-      .join(" e ")}.`
+    featuredLive
+      ? `Bloco Gamer: ${context.liveMoment} Na live de ${liveCreatorLabel}, o padrão "${
+          featuredLive.title
+        }" mostra disciplina de agenda e construção de comunidade.`
+      : `Bloco Gamer: ${context.liveMoment} Em ${context.gameName}, as técnicas mais úteis foram ${context.gameTechniques
+          .slice(0, 2)
+          .join(" e ")}.`
   );
   insights.push(
     `Bloco Tech/Negócio: ${context.techSources.length ? context.techSources.join(", ") : "fontes de IA"} apontam para ${context.launchHints.length ? context.launchHints[0] : "automação imediata"}; aplique isso no fluxo de conteúdo e operação.`
@@ -700,6 +819,8 @@ function buildContextualInsights(signals, context) {
 function buildIntelligentConnections(signals, context) {
   const profile = context.profile || "TECH";
   const connections = [];
+  const featuredLive = (context.liveDetails || [])[0];
+  const liveCreator = featuredLive?.channel ? `@${featuredLive.channel}` : "criador";
 
   if (profile === "GAMER") {
     connections.push(
@@ -733,7 +854,7 @@ function buildIntelligentConnections(signals, context) {
 
   // HÍBRIDO
   connections.push(
-    `${context.primaryStreamer || "criador gamer"} usa consistência extrema + ${
+    `${context.primaryStreamer || liveCreator} usa consistência extrema + ${
       context.techSources[0] || "IA atual"
     } oferece automação = oportunidade de automatizar consistência de conteúdo.`
   );
@@ -803,7 +924,8 @@ function buildDeterministicReport(nome, atual, anterior, resumoLocal) {
   const gameName = inferMainGame(consumedNames, local.timeline);
   const liveMoment = inferLiveMoment(local.timeline, gameName);
   const gameTechniques = inferGameplayTechniques(gameName);
-  const contentSummaries = buildSpecificContentSummaries(consumedNames);
+  const liveDetails = collectTwitchLiveDetails(consumedNames, local);
+  const contentSummaries = buildSpecificContentSummaries(consumedNames, liveDetails);
   const techSources = uniqueIgnoreCase(
     consumedNames.filter((item) => {
       const norm = normalizeForCompare(item);
@@ -858,6 +980,7 @@ function buildDeterministicReport(nome, atual, anterior, resumoLocal) {
     liveMoment,
     gameTechniques,
     techSources,
+    liveDetails,
   });
   const intelligentConnections = buildIntelligentConnections(signals, {
     profile,
@@ -866,6 +989,7 @@ function buildDeterministicReport(nome, atual, anterior, resumoLocal) {
     gameName,
     techSources,
     primaryStreamer,
+    liveDetails,
   });
   const weekQuestion = buildWeekQuestion(signals, {
     profile,
@@ -1033,6 +1157,7 @@ function buildGeminiInput(nome, atual, anterior, resumoLocal) {
     `Timeline local: ${local.timeline || "não informado"}`,
     `Jogo principal detectado (local): ${gameName}`,
     `Momento intenso detectado da live (local): ${liveMoment}`,
+    `Detalhes estruturados de live Twitch (local): ${JSON.stringify(liveDetails)}`,
     `Técnicas de gameplay detectadas (local): ${JSON.stringify(gameTechniques)}`,
     "Regra de interpretação contextual:",
     "- gaules/alanzoka => extrair mentalidade de alta performance, gestão de comunidade, crescimento de audiência, disciplina e consistência aplicável ao negócio do cliente.",
