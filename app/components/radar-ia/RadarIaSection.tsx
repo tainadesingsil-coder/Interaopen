@@ -136,6 +136,15 @@ const translateTextToPortuguese = async (value: string) => {
   }
 };
 
+const resolvePortugueseCaptionText = (original: string, translated: string) => {
+  const source = String(original || '').trim();
+  const translatedText = String(translated || '').trim();
+  if (!source) return '';
+  if (isLikelyPortugueseText(source)) return source;
+  if (translatedText && isLikelyPortugueseText(translatedText)) return translatedText;
+  return '';
+};
+
 const extractTikTokVideoId = (url: string) => {
   const normalized = String(url || '');
   const direct = normalized.match(/\/video\/(\d+)/i);
@@ -1081,19 +1090,29 @@ function RadarViewer({
         return;
       }
 
-      // Show cleaned caption immediately while translated text is being fetched.
-      setTwitchAutoCaptionText(clean);
-      setTwitchAutoCaptionStatus('live');
-
       twitchChatTranslateInFlightRef.current = true;
       try {
         const translated = await translateTextToPortuguese(clean);
-        const translatedNormalized = normalizeCaptionText(translated || clean);
-        if (!translatedNormalized) return;
-        if (looksLikeNoisyCaption(translated || clean)) return;
-        if (translatedNormalized === lastTwitchChatCaptionRef.current) return;
-        lastTwitchChatCaptionRef.current = translatedNormalized;
-        setTwitchAutoCaptionText(translated || clean);
+        const finalCaption = resolvePortugueseCaptionText(clean, translated);
+        if (!finalCaption || looksLikeNoisyCaption(finalCaption)) return;
+
+        const finalNormalized = normalizeCaptionText(finalCaption);
+        if (!finalNormalized) return;
+
+        const previous = lastTwitchChatCaptionRef.current;
+        if (previous) {
+          if (finalNormalized === previous) return;
+          const looksContained =
+            previous.includes(finalNormalized) ||
+            finalNormalized.includes(previous) ||
+            captionSimilarity(previous, finalNormalized) > 0.9;
+          if (looksContained && !hasEnoughNewWords(previous, finalNormalized, 2)) {
+            return;
+          }
+        }
+
+        lastTwitchChatCaptionRef.current = finalNormalized;
+        setTwitchAutoCaptionText(finalCaption);
         setTwitchAutoCaptionStatus('live');
       } catch {
         // Keep stream resilient.
