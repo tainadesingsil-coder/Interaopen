@@ -28,6 +28,7 @@ const GEMINI_SYSTEM_PROMPT = [
   "9) Pergunta da semana provocadora e prática (no HÍBRIDO: opção gamer + opção tech).",
   "10) Encerramento motivacional de até 2 frases.",
   "Use frases curtas, sem jargão técnico desnecessário.",
+  "Você tem acesso ao histórico de relatórios anteriores deste usuário. Nunca repita insights já enviados. Sempre evolua o nível de profundidade. Se o usuário assistiu uma live de programação vá fundo no que foi desenvolvido, quais tecnologias foram usadas e o que o usuário pode construir a partir disso. Seja um mentor técnico real, não um resumidor genérico.",
 ].join(" ");
 
 function getEnv(context) {
@@ -76,6 +77,21 @@ function getGeminiApiKey(context) {
   return env.GEMINI_API_KEY ?? processEnv.GEMINI_API_KEY;
 }
 
+function getTwitchConfig(context) {
+  const env = getEnv(context);
+  const processEnv = getProcessEnv();
+  const twitchAccessToken =
+    env.TWITCH_ACCESS_TOKEN ?? processEnv.TWITCH_ACCESS_TOKEN ?? "";
+  const twitchClientId =
+    env.TWITCH_CLIENT_ID ??
+    env.TWITCH_APP_CLIENT_ID ??
+    processEnv.TWITCH_CLIENT_ID ??
+    processEnv.TWITCH_APP_CLIENT_ID ??
+    processEnv.NEXT_PUBLIC_TWITCH_CLIENT_ID ??
+    "";
+  return { twitchAccessToken, twitchClientId };
+}
+
 function formatDateIsoDaysAgo(daysAgo) {
   const date = new Date();
   date.setUTCDate(date.getUTCDate() - daysAgo);
@@ -115,6 +131,79 @@ async function fetchInteracoesIntervalo(
   }
 
   return await response.json();
+}
+
+function extractHistoryReportText(row) {
+  if (!row || typeof row !== "object") return "";
+  const candidates = [
+    row.relatorio,
+    row.relatorio_texto,
+    row.report_text,
+    row.report,
+    row.conteudo,
+    row.texto,
+    row.body,
+  ];
+  return String(candidates.find((value) => typeof value === "string" && value.trim()) || "").trim();
+}
+
+async function fetchHistoricoRelatorios(supabaseUrl, supabaseKey, userId) {
+  try {
+    const params = new URLSearchParams({
+      select: "*",
+      user_id: `eq.${userId}`,
+      limit: "8",
+    });
+    const response = await fetch(
+      `${supabaseUrl}/rest/v1/historico_relatorios?${params.toString()}`,
+      {
+        headers: {
+          apikey: supabaseKey,
+          Authorization: `Bearer ${supabaseKey}`,
+        },
+        cache: "no-store",
+      }
+    );
+    if (!response.ok) {
+      return [];
+    }
+    const rows = await response.json();
+    if (!Array.isArray(rows)) return [];
+    return rows.map((row) => extractHistoryReportText(row)).filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
+async function saveHistoricoRelatorio(
+  supabaseUrl,
+  supabaseKey,
+  userId,
+  nome,
+  email,
+  relatorio
+) {
+  const payload = {
+    user_id: userId,
+    nome,
+    email,
+    relatorio,
+    gerado_em: new Date().toISOString(),
+  };
+  try {
+    await fetch(`${supabaseUrl}/rest/v1/historico_relatorios`, {
+      method: "POST",
+      headers: {
+        apikey: supabaseKey,
+        Authorization: `Bearer ${supabaseKey}`,
+        "Content-Type": "application/json",
+        Prefer: "return=minimal",
+      },
+      body: JSON.stringify(payload),
+    });
+  } catch {
+    // best effort only
+  }
 }
 
 function aggregateByCategory(interacoes) {
@@ -520,6 +609,257 @@ function collectTwitchLiveDetails(consumedNames, local) {
   return details.slice(0, 4);
 }
 
+const KNOWN_CREATOR_PROFILES = {
+  teomewhy: "desenvolvedor de software brasileiro que ensina programação ao vivo",
+};
+
+const TECHNOLOGY_SIGNAL_MAP = [
+  { tech: "TypeScript", keys: ["typescript", "ts "] },
+  { tech: "JavaScript", keys: ["javascript", "js "] },
+  { tech: "Node.js", keys: ["node", "nodejs", "node.js"] },
+  { tech: "React", keys: ["react", "jsx"] },
+  { tech: "Next.js", keys: ["next.js", "nextjs", "app router"] },
+  { tech: "Python", keys: ["python", "fastapi", "django", "flask"] },
+  { tech: "Docker", keys: ["docker", "container"] },
+  { tech: "PostgreSQL", keys: ["postgres", "postgresql", "sql"] },
+  { tech: "Supabase", keys: ["supabase"] },
+  { tech: "Git/GitHub", keys: ["git", "github", "pull request", "commit"] },
+];
+
+const TECH_RESOURCE_LINKS = {
+  TypeScript: "https://www.typescriptlang.org/docs/",
+  JavaScript: "https://developer.mozilla.org/pt-BR/docs/Web/JavaScript",
+  "Node.js": "https://nodejs.org/docs/latest/api/",
+  React: "https://react.dev/learn",
+  "Next.js": "https://nextjs.org/docs",
+  Python: "https://docs.python.org/3/",
+  Docker: "https://docs.docker.com/",
+  PostgreSQL: "https://www.postgresql.org/docs/",
+  Supabase: "https://supabase.com/docs",
+  "Git/GitHub": "https://docs.github.com/pt",
+};
+
+function isDevelopmentOrTechnologyLive(detail) {
+  const text = normalizeForCompare(
+    `${detail?.title || ""} | ${detail?.category || ""}`
+  );
+  return (
+    text.includes("software") ||
+    text.includes("development") ||
+    text.includes("programacao") ||
+    text.includes("programação") ||
+    text.includes("dev") ||
+    text.includes("codigo") ||
+    text.includes("projeto") ||
+    text.includes("tech")
+  );
+}
+
+function inferLikelyDevelopment(detail) {
+  const title = normalizeForCompare(detail?.title || "");
+  if (title.includes("f1") || title.includes("projeto")) {
+    return "Construção prática de projeto ao vivo (iterações rápidas, ajustes e implementação guiada por comunidade).";
+  }
+  if (title.includes("debug") || title.includes("erro")) {
+    return "Sessão focada em depuração e estabilização de funcionalidades em ambiente real.";
+  }
+  return "Sessão de desenvolvimento aplicada com foco em implementação de funcionalidades e revisão técnica.";
+}
+
+function inferTechnologiesFromTexts(texts) {
+  const corpus = normalizeForCompare((texts || []).join(" | "));
+  const found = [];
+  for (const signal of TECHNOLOGY_SIGNAL_MAP) {
+    if (
+      signal.keys.some((key) =>
+        corpus.includes(normalizeForCompare(String(key)))
+      )
+    ) {
+      found.push(signal.tech);
+    }
+  }
+  if (!found.length) {
+    return ["TypeScript", "Node.js", "Git/GitHub"];
+  }
+  return found.slice(0, 6);
+}
+
+function buildTechConcepts(technologies, detail) {
+  const concepts = [];
+  if (technologies.includes("TypeScript")) {
+    concepts.push("tipagem avançada para reduzir bugs em produção");
+  }
+  if (technologies.includes("React") || technologies.includes("Next.js")) {
+    concepts.push("arquitetura de componentes e gerenciamento de estado orientado a performance");
+  }
+  if (technologies.includes("Node.js")) {
+    concepts.push("design de APIs e separação de camadas para escalar manutenção");
+  }
+  if (!concepts.length) {
+    concepts.push(
+      "quebra de problema em tarefas pequenas e entregáveis em ciclos curtos"
+    );
+    concepts.push("refatoração incremental com métricas de qualidade");
+    concepts.push("versionamento disciplinado com Git para rastrear evolução");
+  }
+  const unique = uniqueIgnoreCase(concepts);
+  if (unique.length >= 3) return unique.slice(0, 3);
+  while (unique.length < 3) {
+    unique.push(
+      detail?.commands?.length
+        ? `automatização de fluxo para comandos ${detail.commands.join(" ")}`
+        : "automação de rotina técnica para ganhar velocidade de entrega"
+    );
+  }
+  return unique.slice(0, 3);
+}
+
+function buildTechResourceLinks(technologies) {
+  const resources = [];
+  for (const tech of technologies || []) {
+    const link = TECH_RESOURCE_LINKS[tech];
+    if (!link) continue;
+    resources.push(`${tech}: ${link}`);
+  }
+  if (!resources.length) {
+    resources.push("Twitch Developers: https://dev.twitch.tv/docs");
+    resources.push("GitHub Docs: https://docs.github.com/pt");
+  }
+  return resources.slice(0, 4);
+}
+
+function buildTechnicalQuestion(detail, technologies) {
+  const topTech = technologies?.[0] || "TypeScript";
+  const creator = detail?.channel ? `@${detail.channel}` : "o criador";
+  return `Como você transformaria o que viu com ${creator} em um mini projeto de 7 dias usando ${topTech}, com escopo fechado e entrega publicável?`;
+}
+
+async function twitchHelixGet(context, endpointPath) {
+  const { twitchAccessToken, twitchClientId } = getTwitchConfig(context);
+  if (!twitchAccessToken || !twitchClientId) {
+    return null;
+  }
+  const response = await fetch(`https://api.twitch.tv/helix${endpointPath}`, {
+    headers: {
+      Authorization: `Bearer ${twitchAccessToken}`,
+      "Client-Id": twitchClientId,
+    },
+    cache: "no-store",
+  });
+  if (!response.ok) return null;
+  return await response.json();
+}
+
+async function fetchDeepTwitchLiveAnalysis(context, liveDetails, consumedNames) {
+  const devLive = (liveDetails || []).find((item) =>
+    isDevelopmentOrTechnologyLive(item)
+  );
+  if (!devLive) return null;
+
+  const creatorHandle = String(devLive.channel || "")
+    .replace(/^@/, "")
+    .trim()
+    .toLowerCase();
+  const creatorProfile = KNOWN_CREATOR_PROFILES[creatorHandle] || "";
+
+  const analysis = {
+    creatorHandle,
+    creatorProfile: creatorProfile || "criador técnico com foco em desenvolvimento ao vivo",
+    liveTitle: devLive.title || "Live de programação",
+    liveCategory: devLive.category || "Tecnologia",
+    viewers: devLive.viewers || "",
+    duration: devLive.duration || "",
+    likelyDevelopment: inferLikelyDevelopment(devLive),
+    technologies: [],
+    clips: [],
+    vod: null,
+    concepts: [],
+    resources: [],
+    technicalQuestion: "",
+  };
+
+  const sourceTexts = []
+    .concat(consumedNames || [])
+    .concat([devLive.title, devLive.category]);
+
+  if (creatorHandle) {
+    const userData = await twitchHelixGet(
+      context,
+      `/users?login=${encodeURIComponent(creatorHandle)}`
+    );
+    const user = userData?.data?.[0];
+    if (user?.id) {
+      const now = new Date();
+      const start = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+      const clipsData = await twitchHelixGet(
+        context,
+        `/clips?broadcaster_id=${encodeURIComponent(
+          user.id
+        )}&started_at=${encodeURIComponent(
+          start.toISOString()
+        )}&ended_at=${encodeURIComponent(now.toISOString())}&first=5`
+      );
+      const videosData = await twitchHelixGet(
+        context,
+        `/videos?user_id=${encodeURIComponent(user.id)}&type=archive&first=5`
+      );
+
+      const clips = Array.isArray(clipsData?.data) ? clipsData.data : [];
+      const vods = Array.isArray(videosData?.data) ? videosData.data : [];
+
+      analysis.clips = clips.slice(0, 3).map((clip) => ({
+        title: clip?.title || "Clip da live",
+        url: clip?.url || "",
+        views: clip?.view_count || 0,
+      }));
+      analysis.vod = vods[0]
+        ? {
+            title: vods[0]?.title || "VOD recente",
+            duration: vods[0]?.duration || "",
+            url: vods[0]?.url || "",
+          }
+        : null;
+
+      sourceTexts.push(
+        ...analysis.clips.map((item) => item.title),
+        ...vods.slice(0, 4).map((item) => item?.title || "")
+      );
+    }
+  }
+
+  analysis.technologies = inferTechnologiesFromTexts(sourceTexts);
+  analysis.concepts = buildTechConcepts(analysis.technologies, devLive);
+  analysis.resources = buildTechResourceLinks(analysis.technologies);
+  analysis.technicalQuestion = buildTechnicalQuestion(devLive, analysis.technologies);
+  return analysis;
+}
+
+function buildHistoryCorpus(previousReports) {
+  return normalizeForCompare((previousReports || []).join("\n\n"));
+}
+
+function evolveInsightsAgainstHistory(lines, previousReports, context) {
+  const historyCorpus = buildHistoryCorpus(previousReports);
+  if (!historyCorpus) return lines;
+  return (lines || []).map((line, index) => {
+    const normalized = normalizeForCompare(line);
+    if (!normalized) return line;
+    const anchor = normalized.slice(0, Math.min(120, normalized.length));
+    if (!historyCorpus.includes(anchor)) return line;
+    const tech = context?.deepLiveAnalysis?.technologies?.[0] || "TypeScript";
+    const creator = context?.deepLiveAnalysis?.creatorHandle
+      ? `@${context.deepLiveAnalysis.creatorHandle}`
+      : "criador técnico";
+    if (index === 0) {
+      return `Evolução desta semana: além do resumo anterior, aprofunde o fluxo ponta a ponta observado com ${creator}, detalhando arquitetura, implementação e validação técnica.`;
+    }
+    if (index === 1) {
+      return `Nível avançado: transforme o aprendizado em experimento real com ${tech}, com métrica de qualidade de código (erro, cobertura, tempo de entrega).`;
+    }
+    return "Próximo passo de maturidade: documente decisões técnicas, trade-offs e resultado da implementação para construir repertório reutilizável.";
+  });
+}
+
 function buildSpecificContentSummaries(consumedNames, liveDetails) {
   const lines = [];
   const unique = uniqueIgnoreCase(consumedNames || []).slice(0, 10);
@@ -903,7 +1243,14 @@ function buildWeekQuestion(signals, context) {
   ].join(" || ");
 }
 
-function buildDeterministicReport(nome, atual, anterior, resumoLocal) {
+function buildDeterministicReport(
+  nome,
+  atual,
+  anterior,
+  resumoLocal,
+  previousReports = [],
+  deepLiveAnalysis = null
+) {
   const local = normalizeResumoLocal(resumoLocal);
   const byCategory = aggregateByCategory(atual);
   const byType = aggregateByType(atual);
@@ -998,6 +1345,10 @@ function buildDeterministicReport(nome, atual, anterior, resumoLocal) {
     gameTechniques,
     techSources,
     liveDetails,
+    deepLiveAnalysis,
+  });
+  const evolvedInsights = evolveInsightsAgainstHistory(insights, previousReports, {
+    deepLiveAnalysis,
   });
   const intelligentConnections = buildIntelligentConnections(signals, {
     profile,
@@ -1066,6 +1417,62 @@ function buildDeterministicReport(nome, atual, anterior, resumoLocal) {
     );
   }
 
+  const liveDeepSection = [];
+  const technicalDeepeningSection = [];
+  if (deepLiveAnalysis) {
+    const creatorTag = deepLiveAnalysis.creatorHandle
+      ? `@${deepLiveAnalysis.creatorHandle}`
+      : "criador";
+    liveDeepSection.push(
+      `- Criador identificado: ${creatorTag} (${deepLiveAnalysis.creatorProfile}).`
+    );
+    liveDeepSection.push(
+      `- O que provavelmente foi desenvolvido: ${deepLiveAnalysis.likelyDevelopment}`
+    );
+    liveDeepSection.push(
+      `- Tecnologias observadas no histórico público do canal: ${deepLiveAnalysis.technologies.join(
+        ", "
+      )}.`
+    );
+    liveDeepSection.push(
+      `- 3 conceitos técnicos para aprofundar: ${deepLiveAnalysis.concepts
+        .map((concept, index) => `${index + 1}) ${concept}`)
+        .join(" | ")}.`
+    );
+    liveDeepSection.push(
+      `- Recursos e documentação: ${deepLiveAnalysis.resources.join(" | ")}.`
+    );
+    liveDeepSection.push(
+      `- Pergunta técnica da sessão: ${deepLiveAnalysis.technicalQuestion}`
+    );
+    liveDeepSection.push(
+      deepLiveAnalysis.clips.length
+        ? `- Clipes mais assistidos (24h): ${deepLiveAnalysis.clips
+            .map((clip) => `${clip.title} (${clip.views} views) ${clip.url}`)
+            .join(" | ")}`
+        : "- Clipes mais assistidos (24h): sem retorno de clipes via API neste ciclo, manter monitoramento no próximo relatório."
+    );
+    liveDeepSection.push(
+      deepLiveAnalysis.vod?.url
+        ? `- VOD recente: ${deepLiveAnalysis.vod.title} (${deepLiveAnalysis.vod.duration}) ${deepLiveAnalysis.vod.url}`
+        : "- VOD recente: sem VOD retornado via API neste ciclo."
+    );
+
+    technicalDeepeningSection.push(
+      `- Conceito principal da sessão: ${deepLiveAnalysis.concepts[0] || "arquitetura e execução técnica orientada a projeto"}.`
+    );
+    technicalDeepeningSection.push(
+      `- Próximo nível sugerido: implementar uma versão própria com ${deepLiveAnalysis.technologies
+        .slice(0, 2)
+        .join(" + ")} incluindo testes e documentação de decisão técnica.`
+    );
+    technicalDeepeningSection.push(
+      `- Recurso específico para esta semana: ${
+        deepLiveAnalysis.resources[0] || "https://docs.github.com/pt"
+      }`
+    );
+  }
+
   return [
     `Olá, ${nome}!`,
     ``,
@@ -1095,13 +1502,23 @@ function buildDeterministicReport(nome, atual, anterior, resumoLocal) {
     recentes || timeline || "- Sem ações recentes registradas.",
     ``,
     `Insights práticos:`,
-    profile === "HÍBRIDO" ? `- Seção Gamer: ${insights[0]}` : `- ${insights[0]}`,
-    profile === "HÍBRIDO" ? `- Seção Tech/Negócio: ${insights[1]}` : `- ${insights[1]}`,
-    `- ${insights[2]}`,
+    profile === "HÍBRIDO"
+      ? `- Seção Gamer: ${evolvedInsights[0]}`
+      : `- ${evolvedInsights[0]}`,
+    profile === "HÍBRIDO"
+      ? `- Seção Tech/Negócio: ${evolvedInsights[1]}`
+      : `- ${evolvedInsights[1]}`,
+    `- ${evolvedInsights[2]}`,
     ``,
+    ...(liveDeepSection.length
+      ? ["Análise profunda da live Twitch:", ...liveDeepSection, ""]
+      : []),
     `Conexões inteligentes:`,
     ...intelligentConnections.map((item) => `- ${item}`),
     ``,
+    ...(technicalDeepeningSection.length
+      ? ["Aprofundamento técnico:", ...technicalDeepeningSection, ""]
+      : []),
     `Evolução:`,
     `- ${evolutionLabel}`,
     ``,
@@ -1137,7 +1554,14 @@ function buildWelcomeReport(nome) {
   ].join("\n");
 }
 
-function buildGeminiInput(nome, atual, anterior, resumoLocal) {
+function buildGeminiInput(
+  nome,
+  atual,
+  anterior,
+  resumoLocal,
+  previousReports = [],
+  deepLiveAnalysis = null
+) {
   const local = normalizeResumoLocal(resumoLocal);
   const categoriasAtual = aggregateByCategory(atual);
   const tiposAtual = aggregateByType(atual);
@@ -1147,6 +1571,10 @@ function buildGeminiInput(nome, atual, anterior, resumoLocal) {
   const gameName = inferMainGame(consumedNames, local.timeline);
   const liveMoment = inferLiveMoment(local.timeline, gameName);
   const gameTechniques = inferGameplayTechniques(gameName);
+  const liveDetails = collectTwitchLiveDetails(consumedNames, local);
+  const previousSummaries = (previousReports || [])
+    .slice(0, 4)
+    .map((item, index) => `Relatório anterior ${index + 1}: ${String(item).slice(0, 900)}`);
 
   const recentes = atual.slice(0, 12).map((item) => ({
     tipo: item.tipo_conteudo,
@@ -1175,6 +1603,8 @@ function buildGeminiInput(nome, atual, anterior, resumoLocal) {
     `Jogo principal detectado (local): ${gameName}`,
     `Momento intenso detectado da live (local): ${liveMoment}`,
     `Detalhes estruturados de live Twitch (local): ${JSON.stringify(liveDetails)}`,
+    `Contexto profundo da live via API Twitch: ${JSON.stringify(deepLiveAnalysis || {})}`,
+    `Histórico de relatórios anteriores (evitar repetição): ${JSON.stringify(previousSummaries)}`,
     `Técnicas de gameplay detectadas (local): ${JSON.stringify(gameTechniques)}`,
     "Regra de interpretação contextual:",
     "- gaules/alanzoka => extrair mentalidade de alta performance, gestão de comunidade, crescimento de audiência, disciplina e consistência aplicável ao negócio do cliente.",
@@ -1223,7 +1653,9 @@ async function generateReportWithGemini(
   nome,
   atual,
   anterior,
-  resumoLocal
+  resumoLocal,
+  previousReports = [],
+  deepLiveAnalysis = null
 ) {
   const geminiApiKey = getGeminiApiKey(context);
   if (!geminiApiKey) {
@@ -1242,7 +1674,18 @@ async function generateReportWithGemini(
         contents: [
           {
             role: "user",
-            parts: [{ text: buildGeminiInput(nome, atual, anterior, resumoLocal) }],
+            parts: [
+              {
+                text: buildGeminiInput(
+                  nome,
+                  atual,
+                  anterior,
+                  resumoLocal,
+                  previousReports,
+                  deepLiveAnalysis
+                ),
+              },
+            ],
           },
         ],
         generationConfig: {
@@ -1849,6 +2292,23 @@ export async function onRequestPost(context) {
       body?.resumo_local && typeof body.resumo_local === "object"
         ? body.resumo_local
         : undefined;
+    const normalizedLocal = normalizeResumoLocal(resumoLocal);
+    const consumedNamesForDeepLive = collectConsumedContentNames(
+      interacoesSemanaAtual,
+      normalizedLocal
+    );
+    const liveDetailsForDeepLive = collectTwitchLiveDetails(
+      consumedNamesForDeepLive,
+      normalizedLocal
+    );
+    const deepLiveAnalysis = await fetchDeepTwitchLiveAnalysis(
+      context,
+      liveDetailsForDeepLive,
+      consumedNamesForDeepLive
+    );
+    const previousReports = hasSupabase
+      ? await fetchHistoricoRelatorios(supabaseUrl, supabaseKey, userId)
+      : [];
 
     const isWelcomeFlow = trigger === "welcome" || trigger === "subscription";
     const hasRichLocalSummary = Boolean(
@@ -1866,7 +2326,9 @@ export async function onRequestPost(context) {
         nomeCliente,
         interacoesSemanaAtual,
         interacoesSemanaAnterior,
-        resumoLocal
+        resumoLocal,
+        previousReports,
+        deepLiveAnalysis
       );
     } else {
       try {
@@ -1875,14 +2337,18 @@ export async function onRequestPost(context) {
           nomeCliente,
           interacoesSemanaAtual,
           interacoesSemanaAnterior,
-          resumoLocal
+          resumoLocal,
+          previousReports,
+          deepLiveAnalysis
         );
       } catch (_) {
         relatorio = buildDeterministicReport(
           nomeCliente,
           interacoesSemanaAtual,
           interacoesSemanaAnterior,
-          resumoLocal
+          resumoLocal,
+          previousReports,
+          deepLiveAnalysis
         );
       }
     }
@@ -1914,6 +2380,16 @@ export async function onRequestPost(context) {
     });
 
     await sendEmailByResend(context, perfil.email, subject, html, [pdfAttachment]);
+    if (hasSupabase && !isWelcomeFlow) {
+      await saveHistoricoRelatorio(
+        supabaseUrl,
+        supabaseKey,
+        userId,
+        nomeCliente,
+        perfil.email,
+        relatorio
+      );
+    }
 
     return Response.json({
       ok: true,
