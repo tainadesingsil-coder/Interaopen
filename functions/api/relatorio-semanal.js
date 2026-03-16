@@ -796,6 +796,18 @@ async function fetchLiveNowContextFromTwitch(context, channel) {
   if (!normalizedChannel) {
     throw new Error("Canal da Twitch não informado.");
   }
+  const { twitchAccessToken, twitchClientId } = getTwitchConfig(context);
+  if (!twitchAccessToken || !twitchClientId) {
+    return {
+      channel: normalizedChannel,
+      broadcasterId: "",
+      displayName: normalizedChannel,
+      stream: null,
+      clips: [],
+      vods: [],
+      warning: "Credenciais da Twitch ausentes (TWITCH_ACCESS_TOKEN/TWITCH_CLIENT_ID).",
+    };
+  }
 
   const userData = await twitchHelixGet(
     context,
@@ -803,7 +815,15 @@ async function fetchLiveNowContextFromTwitch(context, channel) {
   );
   const user = userData?.data?.[0];
   if (!user?.id) {
-    throw new Error(`Canal @${normalizedChannel} não encontrado na Twitch.`);
+    return {
+      channel: normalizedChannel,
+      broadcasterId: "",
+      displayName: normalizedChannel,
+      stream: null,
+      clips: [],
+      vods: [],
+      warning: `Canal @${normalizedChannel} não encontrado pela API da Twitch neste ciclo.`,
+    };
   }
 
   const [streamData, videosData] = await Promise.all([
@@ -921,6 +941,7 @@ async function analisarLiveAgoraForReportAssistant(context, channel) {
     live: liveContext.stream,
     clips: liveContext.clips,
     vods: liveContext.vods,
+    warning: liveContext.warning || "",
     analysis,
   };
 }
@@ -1755,6 +1776,7 @@ function buildLiveAlertReportText(channel, liveNow) {
   return [
     `Alerta de live em tempo real: @${channel}`,
     "",
+    ...(liveNow?.warning ? [`Aviso de coleta: ${liveNow.warning}`, ""] : []),
     String(liveNow?.analysis || "").trim(),
     "",
     "Contexto da live agora:",
@@ -2577,6 +2599,7 @@ export async function onRequestPost(context) {
         canal: channel,
         email_enviado_para: emailCliente || null,
         analise: liveNow.analysis,
+        warning: liveNow.warning || null,
         live: liveNow.live,
         clips: liveNow.clips,
         vods: liveNow.vods,
