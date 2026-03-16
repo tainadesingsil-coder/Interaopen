@@ -30,8 +30,6 @@ const LIVE_CAPTION_WORDS_PER_SECOND = 3.2;
 const LIVE_CAPTION_MIN_SECONDS_PER_LINE = 1.2;
 const LIVE_CAPTION_MAX_SECONDS_PER_LINE = 3.2;
 const LIVE_TRANSCRIPTION_WATCHDOG_MS = 12000;
-const GOOGLE_TRANSLATE_PUBLIC_ENDPOINT =
-  'https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=pt&dt=t&q=';
 
 const formatDate = (value: string | null) => {
   if (!value) {
@@ -92,47 +90,6 @@ const isLikelyMobileDevice = () => {
   if (typeof navigator === 'undefined') return false;
   const ua = String(navigator.userAgent || '').toLowerCase();
   return /android|iphone|ipad|ipod|mobile|webview|wv/.test(ua);
-};
-
-const PT_HINTS = [' de ', ' para ', ' com ', ' que ', ' não ', ' ao vivo ', ' espectadores '];
-
-const isLikelyPortugueseText = (value: string) => {
-  const normalized = ` ${String(value || '').toLowerCase()} `;
-  if (/[ãõáéíóúâêôç]/i.test(normalized)) return true;
-  return PT_HINTS.some((hint) => normalized.includes(hint));
-};
-
-const parseGoogleTranslatePayload = (payload: string) => {
-  try {
-    const parsed = JSON.parse(payload);
-    const chunks = Array.isArray(parsed?.[0]) ? parsed[0] : [];
-    const text = chunks
-      .map((chunk: unknown) => {
-        if (!Array.isArray(chunk)) return '';
-        return String(chunk?.[0] || '');
-      })
-      .join('')
-      .trim();
-    return text || '';
-  } catch {
-    return '';
-  }
-};
-
-const translateTextToPortuguese = async (value: string) => {
-  const input = String(value || '').trim();
-  if (!input) return input;
-  try {
-    const response = await fetch(`${GOOGLE_TRANSLATE_PUBLIC_ENDPOINT}${encodeURIComponent(input)}`, {
-      method: 'GET',
-      cache: 'no-store',
-    });
-    if (!response.ok) return input;
-    const payload = await response.text();
-    return parseGoogleTranslatePayload(payload) || input;
-  } catch {
-    return input;
-  }
 };
 
 const extractTikTokVideoId = (url: string) => {
@@ -608,8 +565,6 @@ function RadarViewer({
   const [twitchEmbedIndex, setTwitchEmbedIndex] = useState(0);
   const [twitchEmbedFailed, setTwitchEmbedFailed] = useState(false);
   const [twitchEmbedLoaded, setTwitchEmbedLoaded] = useState(false);
-  const [twitchCaptionTitle, setTwitchCaptionTitle] = useState('');
-  const [twitchCaptionBody, setTwitchCaptionBody] = useState('');
   const [isTwitchCaptionActive, setIsTwitchCaptionActive] = useState(false);
   const [isTwitchCaptionStarting, setIsTwitchCaptionStarting] = useState(false);
   const [twitchLiveCaptionText, setTwitchLiveCaptionText] = useState('');
@@ -995,44 +950,6 @@ function RadarViewer({
       }
     };
   }, [isTwitchNews, tryNextTwitchEmbed, twitchEmbedFailed, twitchEmbedLoaded, twitchEmbedUrl]);
-
-  useEffect(() => {
-    if (!isTwitchNews) {
-      setTwitchCaptionTitle('');
-      setTwitchCaptionBody('');
-      return;
-    }
-
-    const fallbackTitle = String(item.title || 'Live na Twitch').trim();
-    const fallbackBody = String(item.description || '').trim();
-    setTwitchCaptionTitle(fallbackTitle);
-    setTwitchCaptionBody(fallbackBody);
-
-    const sourceAlreadyTranslated = /traduzido/i.test(String(item.source || ''));
-    const seemsPortuguese = isLikelyPortugueseText(`${fallbackTitle} ${fallbackBody}`);
-    if (sourceAlreadyTranslated || seemsPortuguese) return;
-
-    let cancelled = false;
-    void (async () => {
-      const [translatedTitle, translatedBody] = await Promise.all([
-        translateTextToPortuguese(fallbackTitle),
-        translateTextToPortuguese(fallbackBody),
-      ]);
-      if (cancelled) return;
-      const finalTitle = translatedTitle || fallbackTitle;
-      let finalBody = translatedBody || fallbackBody;
-      const unchangedBody = finalBody.trim() === fallbackBody.trim();
-      if (unchangedBody && !isLikelyPortugueseText(finalBody)) {
-        finalBody = `Transmissão internacional em inglês · legenda automática em PT-BR ativa. ${fallbackBody}`.trim();
-      }
-      setTwitchCaptionTitle(finalTitle);
-      setTwitchCaptionBody(finalBody);
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [isTwitchNews, item.description, item.id, item.source, item.title]);
 
   useEffect(() => {
     if (isTwitchNews) return;
@@ -1466,21 +1383,18 @@ function RadarViewer({
                       }}
                       className='h-[54vh] min-h-[300px] w-full rounded-xl border border-white/10 bg-black sm:h-[64vh] sm:min-h-[420px]'
                     />
-                    {(twitchCaptionTitle || twitchCaptionBody) && (
-                      <div className='pointer-events-none absolute inset-x-2 bottom-2 rounded-lg border border-white/20 bg-black/70 p-2 backdrop-blur-[1px]'>
-                        <p className='text-[10px] font-semibold uppercase tracking-[0.12em] text-[#C6FF2E]'>
-                          Legenda PT-BR
-                        </p>
-                        <p className='mt-1 line-clamp-2 text-xs font-semibold text-white'>
-                          {twitchCaptionTitle || item.title}
-                        </p>
-                        {(twitchLiveCaptionText || twitchCaptionBody) ? (
-                          <p className='mt-0.5 line-clamp-2 text-[11px] text-[#d1d5db]'>
-                            {twitchLiveCaptionText || twitchCaptionBody}
+                    {isTwitchCaptionActive ? (
+                      <div className='pointer-events-none absolute inset-0 flex items-center justify-center px-4'>
+                        <div className='max-w-3xl rounded-xl border border-white/20 bg-black/75 px-3 py-2 text-center shadow-[0_8px_30px_rgba(0,0,0,0.45)] backdrop-blur-[1px]'>
+                          <p className='text-[10px] font-semibold uppercase tracking-[0.12em] text-[#C6FF2E]'>
+                            Legenda da fala · PT-BR
                           </p>
-                        ) : null}
+                          <p className='mt-1 text-sm font-semibold text-white sm:text-base'>
+                            {twitchLiveCaptionText || 'Captando fala do apresentador...'}
+                          </p>
+                        </div>
                       </div>
-                    )}
+                    ) : null}
                   </div>
                 ) : (
                   <div className='rounded-xl border border-white/10 bg-white/[0.02] p-4'>
@@ -1531,11 +1445,6 @@ function RadarViewer({
                   </div>
                   {twitchLiveCaptionError ? (
                     <p className='mt-2 text-[11px] text-[#fca5a5]'>{twitchLiveCaptionError}</p>
-                  ) : null}
-                  {twitchLiveCaptionText ? (
-                    <p className='mt-2 rounded-lg border border-white/10 bg-black/35 px-2.5 py-2 text-xs leading-relaxed text-[#d1d5db]'>
-                      {twitchLiveCaptionText}
-                    </p>
                   ) : null}
                 </div>
 
