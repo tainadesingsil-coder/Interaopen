@@ -576,6 +576,10 @@ function RadarViewer({
   const twitchLoadWatchdogRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const twitchIframeRef = useRef<HTMLIFrameElement | null>(null);
   const twitchStabilizedRef = useRef(false);
+  const twitchRecorderRef = useRef<MediaRecorder | null>(null);
+  const twitchRecorderStreamRef = useRef<MediaStream | null>(null);
+  const isTwitchCaptionRequestInFlightRef = useRef(false);
+  const lastTwitchLiveCaptionRef = useRef('');
   const [isPodcastPlaying, setIsPodcastPlaying] = useState(false);
   const [captionLineIndex, setCaptionLineIndex] = useState(0);
   const [liveCaptionText, setLiveCaptionText] = useState('');
@@ -606,6 +610,10 @@ function RadarViewer({
   const [twitchEmbedLoaded, setTwitchEmbedLoaded] = useState(false);
   const [twitchCaptionTitle, setTwitchCaptionTitle] = useState('');
   const [twitchCaptionBody, setTwitchCaptionBody] = useState('');
+  const [isTwitchCaptionActive, setIsTwitchCaptionActive] = useState(false);
+  const [isTwitchCaptionStarting, setIsTwitchCaptionStarting] = useState(false);
+  const [twitchLiveCaptionText, setTwitchLiveCaptionText] = useState('');
+  const [twitchLiveCaptionError, setTwitchLiveCaptionError] = useState('');
   const twitchChannel = isTwitchNews ? extractTwitchChannelFromUrl(item.url) : '';
   const twitchEmbedUrls = isTwitchNews ? buildTwitchEmbedUrls(twitchChannel, twitchParentHosts) : [];
   const twitchEmbedUrl = twitchEmbedUrls[twitchEmbedIndex] || '';
@@ -760,6 +768,139 @@ function RadarViewer({
     }, 900);
   }, [requestYouTubeQualityBoost]);
 
+  const stopTwitchSpeechCapture = useCallback(() => {
+    const recorder = twitchRecorderRef.current;
+    if (recorder) {
+      if (recorder.state !== 'inactive') {
+        recorder.stop();
+      }
+      twitchRecorderRef.current = null;
+    }
+    const stream = twitchRecorderStreamRef.current;
+    if (stream) {
+      stream.getTracks().forEach((track) => track.stop());
+      twitchRecorderStreamRef.current = null;
+    }
+    setIsTwitchCaptionActive(false);
+    setIsTwitchCaptionStarting(false);
+  }, []);
+
+  const sendTwitchChunkToTranscribe = useCallback(async (blob: Blob) => {
+    if (isTwitchCaptionRequestInFlightRef.current) return;
+    isTwitchCaptionRequestInFlightRef.current = true;
+
+    try {
+      const audioBase64 = await blobToBase64(blob);
+      if (!audioBase64 || audioBase64.length < 40) return;
+
+      const response = await fetch('/api/podcast-transcribe', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          audioBase64,
+          mimeType: blob.type || 'audio/webm;codecs=opus',
+          languageHint: 'en-US',
+        }),
+      });
+      if (!response.ok) return;
+
+      const payload = (await response.json()) as {
+        translatedText?: string;
+      };
+      const translated = String(payload?.translatedText || '').trim();
+      if (!translated) return;
+
+      const normalized = normalizeCaptionText(translated);
+      if (!normalized || normalized.length < 8) return;
+
+      const previous = lastTwitchLiveCaptionRef.current;
+      if (previous) {
+        if (normalized === previous) return;
+        const looksContained =
+          previous.includes(normalized) ||
+          normalized.includes(previous) ||
+          captionSimilarity(previous, normalized) > 0.9;
+        if (looksContained && !hasEnoughNewWords(previous, normalized, 2)) {
+          return;
+        }
+      }
+
+      lastTwitchLiveCaptionRef.current = normalized;
+      setTwitchLiveCaptionText(translated);
+      setTwitchLiveCaptionError('');
+    } catch {
+      setTwitchLiveCaptionError('Não foi possível traduzir o áudio ao vivo agora.');
+    } finally {
+      isTwitchCaptionRequestInFlightRef.current = false;
+    }
+  }, []);
+
+  const startTwitchSpeechCapture = useCallback(async () => {
+    if (!isTwitchNews) return;
+    if (isTwitchCaptionStarting) return;
+    if (typeof window === 'undefined' || typeof MediaRecorder === 'undefined') return;
+    if (!navigator.mediaDevices || typeof navigator.mediaDevices.getDisplayMedia !== 'function') {
+      setTwitchLiveCaptionError('Seu navegador não suporta captura de áudio da aba.');
+      return;
+    }
+
+    setIsTwitchCaptionStarting(true);
+    setTwitchLiveCaptionError('');
+    setTwitchLiveCaptionText('');
+    lastTwitchLiveCaptionRef.current = '';
+
+    try {
+      const captureStream = await navigator.mediaDevices.getDisplayMedia({
+        video: true,
+        audio: true,
+      });
+      const audioTracks = captureStream.getAudioTracks();
+      captureStream.getVideoTracks().forEach((track) => track.stop());
+
+      if (audioTracks.length === 0) {
+        captureStream.getTracks().forEach((track) => track.stop());
+        setTwitchLiveCaptionError('Ative o compartilhamento com áudio desta aba para gerar legenda.');
+        setIsTwitchCaptionStarting(false);
+        return;
+      }
+
+      const stream = new MediaStream(audioTracks);
+      const mimeType = pickRecorderMimeType();
+      const recorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
+
+      recorder.ondataavailable = (event) => {
+        if (!event.data || event.data.size < 3000) return;
+        if (!isTwitchCaptionActive) return;
+        void sendTwitchChunkToTranscribe(event.data);
+      };
+      recorder.onerror = () => {
+        setTwitchLiveCaptionError('Erro ao capturar áudio da live.');
+        stopTwitchSpeechCapture();
+      };
+      recorder.onstop = () => {
+        setIsTwitchCaptionActive(false);
+      };
+
+      stream.getTracks().forEach((track) => {
+        track.onended = () => {
+          stopTwitchSpeechCapture();
+        };
+      });
+
+      twitchRecorderStreamRef.current = stream;
+      twitchRecorderRef.current = recorder;
+      recorder.start(3200);
+      setIsTwitchCaptionActive(true);
+    } catch {
+      setTwitchLiveCaptionError('Permissão de áudio da aba negada ou indisponível.');
+      stopTwitchSpeechCapture();
+    } finally {
+      setIsTwitchCaptionStarting(false);
+    }
+  }, [isTwitchCaptionActive, isTwitchCaptionStarting, isTwitchNews, sendTwitchChunkToTranscribe, stopTwitchSpeechCapture]);
+
   useEffect(() => {
     setTikTokEmbedFailed(false);
     setTikTokEmbedIndex(0);
@@ -768,6 +909,11 @@ function RadarViewer({
     setTwitchEmbedFailed(false);
     setTwitchEmbedLoaded(false);
     setTwitchEmbedIndex(0);
+    setTwitchLiveCaptionText('');
+    setTwitchLiveCaptionError('');
+    lastTwitchLiveCaptionRef.current = '';
+    isTwitchCaptionRequestInFlightRef.current = false;
+    stopTwitchSpeechCapture();
     twitchStabilizedRef.current = false;
     if (tikTokLoadWatchdogRef.current) {
       clearTimeout(tikTokLoadWatchdogRef.current);
@@ -781,7 +927,7 @@ function RadarViewer({
       clearInterval(youtubeQualityIntervalRef.current);
       youtubeQualityIntervalRef.current = null;
     }
-  }, [item.id]);
+  }, [item.id, stopTwitchSpeechCapture]);
 
   useEffect(() => {
     if (!isTikTokNews) return;
@@ -889,6 +1035,15 @@ function RadarViewer({
   }, [isTwitchNews, item.description, item.id, item.source, item.title]);
 
   useEffect(() => {
+    if (isTwitchNews) return;
+    stopTwitchSpeechCapture();
+    setTwitchLiveCaptionText('');
+    setTwitchLiveCaptionError('');
+    lastTwitchLiveCaptionRef.current = '';
+    isTwitchCaptionRequestInFlightRef.current = false;
+  }, [isTwitchNews, stopTwitchSpeechCapture]);
+
+  useEffect(() => {
     const handleEsc = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onClose();
     };
@@ -985,9 +1140,10 @@ function RadarViewer({
         clearInterval(youtubeQualityIntervalRef.current);
         youtubeQualityIntervalRef.current = null;
       }
+      stopTwitchSpeechCapture();
       destroySpeechGraph();
     };
-  }, [item.id]);
+  }, [item.id, stopTwitchSpeechCapture]);
 
   const sendAudioChunkToTranscribe = async (blob: Blob) => {
     if (isCaptionRequestInFlightRef.current) return;
@@ -1318,8 +1474,10 @@ function RadarViewer({
                         <p className='mt-1 line-clamp-2 text-xs font-semibold text-white'>
                           {twitchCaptionTitle || item.title}
                         </p>
-                        {twitchCaptionBody ? (
-                          <p className='mt-0.5 line-clamp-2 text-[11px] text-[#d1d5db]'>{twitchCaptionBody}</p>
+                        {(twitchLiveCaptionText || twitchCaptionBody) ? (
+                          <p className='mt-0.5 line-clamp-2 text-[11px] text-[#d1d5db]'>
+                            {twitchLiveCaptionText || twitchCaptionBody}
+                          </p>
                         ) : null}
                       </div>
                     )}
@@ -1344,6 +1502,42 @@ function RadarViewer({
                     </a>
                   </div>
                 )}
+
+                <div className='rounded-xl border border-white/10 bg-white/[0.02] p-3'>
+                  <div className='flex flex-wrap items-center gap-2'>
+                    {isTwitchCaptionActive ? (
+                      <button
+                        type='button'
+                        onClick={stopTwitchSpeechCapture}
+                        className='inline-flex items-center rounded-lg border border-[#C6FF2E]/45 bg-[#C6FF2E]/10 px-3 py-1.5 text-xs font-semibold text-[#C6FF2E] transition hover:bg-[#C6FF2E]/15'
+                      >
+                        Parar legenda ao vivo
+                      </button>
+                    ) : (
+                      <button
+                        type='button'
+                        onClick={() => {
+                          void startTwitchSpeechCapture();
+                        }}
+                        disabled={isTwitchCaptionStarting}
+                        className='inline-flex items-center rounded-lg border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs font-semibold text-[#d1d5db] transition hover:border-[#C6FF2E]/45 hover:text-[#C6FF2E] disabled:cursor-not-allowed disabled:opacity-60'
+                      >
+                        {isTwitchCaptionStarting ? 'Ativando legenda...' : 'Ativar legenda da fala ao vivo'}
+                      </button>
+                    )}
+                    <p className='text-[11px] text-[#9ca3af]'>
+                      Selecione “Esta guia” e marque áudio para traduzir o que o apresentador fala.
+                    </p>
+                  </div>
+                  {twitchLiveCaptionError ? (
+                    <p className='mt-2 text-[11px] text-[#fca5a5]'>{twitchLiveCaptionError}</p>
+                  ) : null}
+                  {twitchLiveCaptionText ? (
+                    <p className='mt-2 rounded-lg border border-white/10 bg-black/35 px-2.5 py-2 text-xs leading-relaxed text-[#d1d5db]'>
+                      {twitchLiveCaptionText}
+                    </p>
+                  ) : null}
+                </div>
 
               </div>
             ) : isCommunityNews ? (
