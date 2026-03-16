@@ -399,6 +399,34 @@ const hasEnoughNewWords = (previous: string, next: string, minNewWords = 3) => {
   return false;
 };
 
+const VOWEL_PATTERN = /[aeiouáéíóúàãõâêô]/i;
+
+const looksLikeNoisyCaption = (value: string) => {
+  const normalized = normalizeCaptionText(value);
+  if (!normalized) return true;
+
+  const words = normalized
+    .split(' ')
+    .map((part) => part.trim())
+    .filter(Boolean);
+  if (words.length === 0) return true;
+
+  const repeatedPattern = /(.)\1{4,}/i.test(normalized);
+  if (repeatedPattern) return true;
+
+  const longNoiseWords = words.filter((word) => word.length >= 6 && !VOWEL_PATTERN.test(word));
+  if (longNoiseWords.length >= 2) return true;
+
+  const meaningfulWords = words.filter((word) => word.length >= 2 && VOWEL_PATTERN.test(word));
+  if (meaningfulWords.length === 0 && words.length >= 2) return true;
+
+  const letterCount = (normalized.match(/[a-zà-ÿ]/gi) || []).length;
+  const digitCount = (normalized.match(/\d/g) || []).length;
+  if (letterCount > 0 && digitCount / letterCount > 0.45) return true;
+
+  return false;
+};
+
 const blobToBase64 = (blob: Blob) =>
   new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
@@ -1045,6 +1073,7 @@ function RadarViewer({
       if (/^https?:\/\//i.test(clean)) return;
       const normalized = normalizeCaptionText(clean);
       if (!normalized || normalized.length < 6) return;
+      if (looksLikeNoisyCaption(clean)) return;
       if (normalized === lastTwitchChatCaptionRef.current) return;
 
       if (twitchChatTranslateInFlightRef.current) {
@@ -1052,11 +1081,16 @@ function RadarViewer({
         return;
       }
 
+      // Show cleaned caption immediately while translated text is being fetched.
+      setTwitchAutoCaptionText(clean);
+      setTwitchAutoCaptionStatus('live');
+
       twitchChatTranslateInFlightRef.current = true;
       try {
         const translated = await translateTextToPortuguese(clean);
         const translatedNormalized = normalizeCaptionText(translated || clean);
         if (!translatedNormalized) return;
+        if (looksLikeNoisyCaption(translated || clean)) return;
         if (translatedNormalized === lastTwitchChatCaptionRef.current) return;
         lastTwitchChatCaptionRef.current = translatedNormalized;
         setTwitchAutoCaptionText(translated || clean);
