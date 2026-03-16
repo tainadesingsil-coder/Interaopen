@@ -10,12 +10,15 @@ const FALLBACK_TWITTER_ACCESS_TOKEN = '2032831349879627776-y91ml7P3XjUWQgrkgKH4c
 const FALLBACK_TWITTER_ACCESS_SECRET = 'EPCfx3xbrenbyIK0IT3JjROIWY3YKBJ7tpMhshQLgmyCr';
 const TWITTER_SEARCH_ENDPOINT = 'https://api.x.com/2/tweets/search/recent';
 const TWITTER_MAX_RESULTS = 20;
+const GOOGLE_TRANSLATE_PUBLIC_ENDPOINT =
+  'https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=pt&dt=t&q=';
 const FALLBACK_TWITCH_CHANNELS = [
   'bisteconee',
   'baiano',
   'gabepeixe',
   'nicolediretora',
   'tftoddy',
+  'riotgames',
   'lucas_montano',
   'linuxtips',
   'glaucia_lemos86',
@@ -713,6 +716,36 @@ const fetchTextWithTimeout = async (url, init = {}, timeoutMs = SOURCE_TIMEOUT_M
   return (await response.text()).trim();
 };
 
+const parseTranslatedPayload = (payload = '') => {
+  try {
+    const parsed = JSON.parse(payload);
+    const chunks = Array.isArray(parsed?.[0]) ? parsed[0] : [];
+    const text = chunks
+      .map((chunk) => (Array.isArray(chunk) ? String(chunk?.[0] || '') : ''))
+      .join('')
+      .trim();
+    return text || '';
+  } catch {
+    return '';
+  }
+};
+
+const translateToPortuguese = async (value = '', force = false) => {
+  const input = stripHtml(String(value || '')).slice(0, 260);
+  if (!input) return input;
+  if (!force && isLikelyPortuguese(input)) return input;
+  try {
+    const endpoint = `${GOOGLE_TRANSLATE_PUBLIC_ENDPOINT}${encodeURIComponent(input)}`;
+    const response = await fetchWithTimeout(endpoint, undefined, 5000);
+    if (!response.ok) return input;
+    const payload = await response.text();
+    const translated = parseTranslatedPayload(payload);
+    return translated || input;
+  } catch {
+    return input;
+  }
+};
+
 const toUniqueList = (items = [], max = 20) =>
   [...new Set(items.map((item) => String(item || '').trim()).filter(Boolean))].slice(0, max);
 
@@ -1347,26 +1380,36 @@ const fetchTwitchLiveItems = async (query, env = {}) => {
       const isLive = !!uptime && !/offline/i.test(uptime);
       const cleanTitle = stripHtml(title || `Canal ${channel} na Twitch`);
       const cleanGame = stripHtml(game || '');
+      const shouldTranslate = isLive && !isLikelyPortuguese(`${cleanTitle} ${cleanGame}`);
+      const translatedTitle = shouldTranslate
+        ? await translateToPortuguese(cleanTitle, true)
+        : cleanTitle;
+      const translatedGame = shouldTranslate ? await translateToPortuguese(cleanGame, true) : cleanGame;
       const viewerLabel = viewers && !/offline/i.test(viewers) ? `${viewers} espectadores` : '';
       const liveOrOfflineLabel = isLive ? `Ao vivo há ${uptime}` : 'Offline agora';
-      const descriptionParts = [cleanTitle, cleanGame && cleanGame !== 'No game' ? cleanGame : '', viewerLabel, liveOrOfflineLabel]
+      const descriptionParts = [
+        translatedTitle,
+        translatedGame && translatedGame !== 'No game' ? translatedGame : '',
+        viewerLabel,
+        liveOrOfflineLabel,
+      ]
         .filter(Boolean);
       const description = descriptionParts.join(' · ').slice(0, 1200);
 
       return {
         id: `news-twitch-${channel}`,
         kind: 'news',
-        title: cleanTitle.slice(0, 180),
+        title: translatedTitle.slice(0, 180),
         description,
         url: `https://www.twitch.tv/${channel}`,
-        source: isLive ? 'Twitch Live' : 'Twitch Monitor',
+        source: isLive ? (shouldTranslate ? 'Twitch Live · traduzido' : 'Twitch Live') : 'Twitch Monitor',
         publishedAt: isLive ? nowIso : null,
         thumbnail: `https://static-cdn.jtvnw.net/previews-ttv/live_user_${channel}-640x360.jpg?t=${Date.now()}`,
         channel: `@${channel}`,
         score:
           (isLive ? 85 : 35) -
           index +
-          computeScore(cleanTitle, description, isLive ? nowIso : null, query),
+          computeScore(translatedTitle, description, isLive ? nowIso : null, query),
         ctaLabel: isLive ? 'Assistir live' : 'Ver canal',
       };
     })
@@ -2381,7 +2424,7 @@ export async function onRequestGet(context) {
   }
 
   const cache = getCache();
-  const cacheKey = `v6:${type}:${range}:${query.toLowerCase()}`;
+  const cacheKey = `v7:${type}:${range}:${query.toLowerCase()}`;
   const now = Date.now();
   const cached = cache.get(cacheKey);
 

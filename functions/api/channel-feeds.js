@@ -1,11 +1,14 @@
 const CACHE_TTL_MS = 30 * 1000;
 const SOURCE_TIMEOUT_MS = 8000;
+const GOOGLE_TRANSLATE_PUBLIC_ENDPOINT =
+  'https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=pt&dt=t&q=';
 const FALLBACK_TWITCH_CHANNELS = [
   'bisteconee',
   'baiano',
   'gabepeixe',
   'nicolediretora',
   'tftoddy',
+  'riotgames',
   'lucas_montano',
   'linuxtips',
   'glaucia_lemos86',
@@ -22,7 +25,7 @@ const FALLBACK_TWITCH_CHANNELS = [
   'lowlevellearning',
 ];
 const PRIORITY_TWITCH_CHANNELS = ['baiano', 'bisteconee', 'gabepeixe'];
-const REQUIRED_TWITCH_CHANNELS = ['bisteconee', 'gabepeixe', 'nicolediretora', 'tftoddy'];
+const REQUIRED_TWITCH_CHANNELS = ['bisteconee', 'gabepeixe', 'nicolediretora', 'tftoddy', 'riotgames'];
 const FALLBACK_TIKTOK_VIDEO_URLS = [
   'https://www.tiktok.com/@gabrieladamuchi/video/7601907452212235540',
   'https://www.tiktok.com/@izabela.anholett/video/7611634628490710293',
@@ -97,6 +100,44 @@ const safeText = (value = '', max = 320) =>
     .replace(/\s+/g, ' ')
     .trim()
     .slice(0, max);
+
+const PT_HINTS = [' de ', ' para ', ' com ', ' que ', ' não ', ' ao vivo ', ' espectadores '];
+
+const isLikelyPortuguese = (value = '') => {
+  const normalized = ` ${String(value || '').toLowerCase()} `;
+  if (/[ãõáéíóúâêôç]/i.test(normalized)) return true;
+  return PT_HINTS.some((hint) => normalized.includes(hint));
+};
+
+const parseTranslatedPayload = (payload = '') => {
+  try {
+    const parsed = JSON.parse(payload);
+    const chunks = Array.isArray(parsed?.[0]) ? parsed[0] : [];
+    const text = chunks
+      .map((chunk) => (Array.isArray(chunk) ? String(chunk?.[0] || '') : ''))
+      .join('')
+      .trim();
+    return text || '';
+  } catch {
+    return '';
+  }
+};
+
+const translateToPortuguese = async (value = '', force = false) => {
+  const input = safeText(value, 240);
+  if (!input) return input;
+  if (!force && isLikelyPortuguese(input)) return input;
+  try {
+    const endpoint = `${GOOGLE_TRANSLATE_PUBLIC_ENDPOINT}${encodeURIComponent(input)}`;
+    const response = await fetchWithTimeout(endpoint, undefined, 5000);
+    if (!response.ok) return input;
+    const payload = await response.text();
+    const translated = parseTranslatedPayload(payload);
+    return translated || input;
+  } catch {
+    return input;
+  }
+};
 
 const parseCommaSeparated = (value = '') =>
   String(value || '')
@@ -332,12 +373,20 @@ const fetchTwitchHelixItems = async (env = {}) => {
     }
   });
 
-  return [...byUser.values()]
+  const topStreams = [...byUser.values()]
     .sort((a, b) => Number(b?.viewer_count || 0) - Number(a?.viewer_count || 0))
-    .slice(0, 10)
-    .map((stream, index) => {
+    .slice(0, 10);
+
+  const translated = await Promise.all(
+    topStreams.map(async (stream, index) => {
       const channel = String(stream?.user_login || '').trim();
-      const title = safeText(stream?.title || 'Live na Twitch', 180);
+      const rawTitle = safeText(stream?.title || 'Live na Twitch', 180);
+      const rawGame = safeText(stream?.game_name || 'Categoria em destaque', 90);
+      const language = String(stream?.language || '').toLowerCase();
+      const mustTranslate = !!language && !language.startsWith('pt');
+      const title = await translateToPortuguese(rawTitle, mustTranslate);
+      const translatedGame = await translateToPortuguese(rawGame, mustTranslate);
+      const translated = title !== rawTitle || translatedGame !== rawGame;
       const viewers = Number(stream?.viewer_count || 0);
       const thumbnail = String(stream?.thumbnail_url || '')
         .replace('{width}', '640')
@@ -345,19 +394,22 @@ const fetchTwitchHelixItems = async (env = {}) => {
       return {
         id: `twitch-live-${stream?.id || channel || index}`,
         title: title || 'Live na Twitch',
-        summary: `${safeText(stream?.game_name || 'Categoria em destaque', 90)} · ${viewers} espectadores ao vivo`,
+        summary: `${translatedGame || rawGame} · ${viewers} espectadores ao vivo`,
         url: channel ? `https://www.twitch.tv/${channel}` : 'https://www.twitch.tv/directory',
-        source: 'Twitch Live',
+        source: translated ? 'Twitch Live · traduzido' : 'Twitch Live',
         publishedAt: new Date().toISOString(),
         thumbnail: thumbnail || null,
-        tags: ['Twitch', 'LIVE', safeText(stream?.game_name || 'Tech', 24)],
+        tags: ['Twitch', 'LIVE', safeText(translatedGame || rawGame || 'Tech', 24)],
         category: 'Software',
         isLive: true,
         metricLabel: `${viewers} espectadores`,
         caseLabel: 'Assistir',
         channel: channel ? `@${channel}` : '@twitch',
       };
-    });
+    })
+  );
+
+  return translated;
 };
 
 const fetchTwitchDecapiFallback = async (env = {}) => {
@@ -373,17 +425,22 @@ const fetchTwitchDecapiFallback = async (env = {}) => {
       ]);
       const isLive = !!uptime && !/offline/i.test(uptime);
       const viewerCount = viewers && !/offline/i.test(viewers) ? viewers : '0';
+      const rawTitle = safeText(title || `Canal ${channel} na Twitch`, 180);
+      const rawGame = safeText(game || 'Software and Game Development', 90);
+      const shouldTranslate = isLive && !isLikelyPortuguese(`${rawTitle} ${rawGame}`);
+      const translatedTitle = shouldTranslate ? await translateToPortuguese(rawTitle, true) : rawTitle;
+      const translatedGame = shouldTranslate ? await translateToPortuguese(rawGame, true) : rawGame;
       return {
         id: `twitch-fallback-${channel}`,
-        title: safeText(title || `Canal ${channel} na Twitch`, 180),
-        summary: `${safeText(game || 'Software and Game Development', 90)} · ${
+        title: translatedTitle,
+        summary: `${translatedGame} · ${
           isLive ? `${viewerCount} espectadores ao vivo` : 'Offline agora'
         }`,
         url: `https://www.twitch.tv/${channel}`,
-        source: isLive ? 'Twitch Live' : 'Twitch Monitor',
+        source: isLive ? (shouldTranslate ? 'Twitch Live · traduzido' : 'Twitch Live') : 'Twitch Monitor',
         publishedAt: isLive ? new Date().toISOString() : null,
         thumbnail: `https://static-cdn.jtvnw.net/previews-ttv/live_user_${channel}-640x360.jpg?t=${Date.now()}`,
-        tags: ['Twitch', isLive ? 'LIVE' : 'Monitor', 'Tech'],
+        tags: ['Twitch', isLive ? 'LIVE' : 'Monitor', safeText(translatedGame || 'Tech', 24)],
         category: 'Software',
         isLive,
         metricLabel: isLive ? `${viewerCount} espectadores` : 'Offline',
@@ -469,7 +526,7 @@ const aggregateChannelFeeds = async (env = {}) => {
 
 export async function onRequestGet(context) {
   const cache = getCache();
-  const cacheKey = 'channel-feeds:v6';
+  const cacheKey = 'channel-feeds:v7';
   const now = Date.now();
   const cached = cache.get(cacheKey);
 

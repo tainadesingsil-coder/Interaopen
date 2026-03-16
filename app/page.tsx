@@ -40,7 +40,7 @@ const portfolioLinks = [
 const CHANNEL_FEEDS_REFRESH_MS = 60 * 1000;
 const CHANNEL_ROTATION_MS = 10 * 1000;
 const CHANNEL_VISIBLE_LIMIT = 8;
-const PRIORITY_TWITCH_CHANNELS = ['@bisteconee', '@gabepeixe', '@baiano'];
+const PRIORITY_TWITCH_CHANNELS = ['@bisteconee', '@gabepeixe', '@baiano', '@riotgames'];
 
 const rotateItems = <T,>(items: T[], steps: number) => {
   if (items.length <= 1) return items;
