@@ -759,10 +759,19 @@ async function fetchDeepTwitchLiveAnalysis(context, liveDetails, consumedNames) 
     developmentLives[0];
   if (!devLive) return null;
 
-  const creatorHandle = String(devLive.channel || "")
+  let creatorHandle = String(devLive.channel || "")
     .replace(/^@/, "")
     .trim()
     .toLowerCase();
+  if (!creatorHandle) {
+    creatorHandle = String(
+      (liveDetails || []).find((item) => String(item?.channel || "").trim())
+        ?.channel || ""
+    )
+      .replace(/^@/, "")
+      .trim()
+      .toLowerCase();
+  }
   const creatorProfile = KNOWN_CREATOR_PROFILES[creatorHandle] || "";
 
   const analysis = {
@@ -833,7 +842,10 @@ async function fetchDeepTwitchLiveAnalysis(context, liveDetails, consumedNames) 
   analysis.technologies = inferTechnologiesFromTexts(sourceTexts);
   analysis.concepts = buildTechConcepts(analysis.technologies, devLive);
   analysis.resources = buildTechResourceLinks(analysis.technologies);
-  analysis.technicalQuestion = buildTechnicalQuestion(devLive, analysis.technologies);
+  analysis.technicalQuestion = buildTechnicalQuestion(
+    { ...devLive, channel: creatorHandle || devLive.channel },
+    analysis.technologies
+  );
   return analysis;
 }
 
