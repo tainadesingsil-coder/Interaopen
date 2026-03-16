@@ -24,7 +24,7 @@ const FALLBACK_TWITCH_CHANNELS = [
   'codeaesthetic',
   'lowlevellearning',
 ];
-const PRIORITY_TWITCH_CHANNELS = ['baiano', 'bisteconee', 'gabepeixe'];
+const PRIORITY_TWITCH_CHANNELS = ['baiano', 'bisteconee', 'gabepeixe', 'riotgames'];
 const REQUIRED_TWITCH_CHANNELS = ['bisteconee', 'gabepeixe', 'nicolediretora', 'tftoddy', 'riotgames'];
 const FALLBACK_TIKTOK_VIDEO_URLS = [
   'https://www.tiktok.com/@gabrieladamuchi/video/7601907452212235540',
@@ -452,7 +452,7 @@ const fetchTwitchDecapiFallback = async (env = {}) => {
 
   const merged = settled.flatMap((result) => (result.status === 'fulfilled' ? [result.value] : []));
   const liveFirst = merged.sort((a, b) => Number(b.isLive) - Number(a.isLive));
-  return liveFirst.slice(0, 10);
+  return liveFirst.slice(0, 12);
 };
 
 const fetchTwitchItems = async (env = {}) => {

@@ -30,6 +30,8 @@ const LIVE_CAPTION_WORDS_PER_SECOND = 3.2;
 const LIVE_CAPTION_MIN_SECONDS_PER_LINE = 1.2;
 const LIVE_CAPTION_MAX_SECONDS_PER_LINE = 3.2;
 const LIVE_TRANSCRIPTION_WATCHDOG_MS = 12000;
+const GOOGLE_TRANSLATE_PUBLIC_ENDPOINT =
+  'https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=pt&dt=t&q=';
 
 const formatDate = (value: string | null) => {
   if (!value) {
@@ -90,6 +92,47 @@ const isLikelyMobileDevice = () => {
   if (typeof navigator === 'undefined') return false;
   const ua = String(navigator.userAgent || '').toLowerCase();
   return /android|iphone|ipad|ipod|mobile|webview|wv/.test(ua);
+};
+
+const PT_HINTS = [' de ', ' para ', ' com ', ' que ', ' não ', ' ao vivo ', ' espectadores '];
+
+const isLikelyPortugueseText = (value: string) => {
+  const normalized = ` ${String(value || '').toLowerCase()} `;
+  if (/[ãõáéíóúâêôç]/i.test(normalized)) return true;
+  return PT_HINTS.some((hint) => normalized.includes(hint));
+};
+
+const parseGoogleTranslatePayload = (payload: string) => {
+  try {
+    const parsed = JSON.parse(payload);
+    const chunks = Array.isArray(parsed?.[0]) ? parsed[0] : [];
+    const text = chunks
+      .map((chunk: unknown) => {
+        if (!Array.isArray(chunk)) return '';
+        return String(chunk?.[0] || '');
+      })
+      .join('')
+      .trim();
+    return text || '';
+  } catch {
+    return '';
+  }
+};
+
+const translateTextToPortuguese = async (value: string) => {
+  const input = String(value || '').trim();
+  if (!input) return input;
+  try {
+    const response = await fetch(`${GOOGLE_TRANSLATE_PUBLIC_ENDPOINT}${encodeURIComponent(input)}`, {
+      method: 'GET',
+      cache: 'no-store',
+    });
+    if (!response.ok) return input;
+    const payload = await response.text();
+    return parseGoogleTranslatePayload(payload) || input;
+  } catch {
+    return input;
+  }
 };
 
 const extractTikTokVideoId = (url: string) => {
@@ -561,6 +604,8 @@ function RadarViewer({
   const [twitchEmbedIndex, setTwitchEmbedIndex] = useState(0);
   const [twitchEmbedFailed, setTwitchEmbedFailed] = useState(false);
   const [twitchEmbedLoaded, setTwitchEmbedLoaded] = useState(false);
+  const [twitchCaptionTitle, setTwitchCaptionTitle] = useState('');
+  const [twitchCaptionBody, setTwitchCaptionBody] = useState('');
   const twitchChannel = isTwitchNews ? extractTwitchChannelFromUrl(item.url) : '';
   const twitchEmbedUrls = isTwitchNews ? buildTwitchEmbedUrls(twitchChannel, twitchParentHosts) : [];
   const twitchEmbedUrl = twitchEmbedUrls[twitchEmbedIndex] || '';
@@ -804,6 +849,38 @@ function RadarViewer({
       }
     };
   }, [isTwitchNews, tryNextTwitchEmbed, twitchEmbedFailed, twitchEmbedLoaded, twitchEmbedUrl]);
+
+  useEffect(() => {
+    if (!isTwitchNews) {
+      setTwitchCaptionTitle('');
+      setTwitchCaptionBody('');
+      return;
+    }
+
+    const fallbackTitle = String(item.title || 'Live na Twitch').trim();
+    const fallbackBody = String(item.description || '').trim();
+    setTwitchCaptionTitle(fallbackTitle);
+    setTwitchCaptionBody(fallbackBody);
+
+    const sourceAlreadyTranslated = /traduzido/i.test(String(item.source || ''));
+    const seemsPortuguese = isLikelyPortugueseText(`${fallbackTitle} ${fallbackBody}`);
+    if (sourceAlreadyTranslated || seemsPortuguese) return;
+
+    let cancelled = false;
+    void (async () => {
+      const [translatedTitle, translatedBody] = await Promise.all([
+        translateTextToPortuguese(fallbackTitle),
+        translateTextToPortuguese(fallbackBody),
+      ]);
+      if (cancelled) return;
+      setTwitchCaptionTitle(translatedTitle || fallbackTitle);
+      setTwitchCaptionBody(translatedBody || fallbackBody);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isTwitchNews, item.description, item.id, item.source, item.title]);
 
   useEffect(() => {
     const handleEsc = (event: KeyboardEvent) => {
@@ -1213,19 +1290,34 @@ function RadarViewer({
             ) : isTwitchNews ? (
               <div className='flex h-full min-h-[320px] flex-col gap-3 overflow-auto rounded-xl border border-white/10 bg-[#0b0b0f] p-3 sm:min-h-[460px] sm:p-4'>
                 {!twitchEmbedFailed && twitchEmbedUrl ? (
-                  <iframe
-                    ref={twitchIframeRef}
-                    src={twitchEmbedUrl}
-                    title={`Twitch player - ${item.title}`}
-                    allow='autoplay; fullscreen; picture-in-picture'
-                    allowFullScreen
-                    onLoad={handleTwitchIframeLoad}
-                    onError={() => {
-                      if (twitchStabilizedRef.current) return;
-                      tryNextTwitchEmbed();
-                    }}
-                    className='h-[54vh] min-h-[300px] w-full rounded-xl border border-white/10 bg-black sm:h-[64vh] sm:min-h-[420px]'
-                  />
+                  <div className='relative'>
+                    <iframe
+                      ref={twitchIframeRef}
+                      src={twitchEmbedUrl}
+                      title={`Twitch player - ${item.title}`}
+                      allow='autoplay; fullscreen; picture-in-picture'
+                      allowFullScreen
+                      onLoad={handleTwitchIframeLoad}
+                      onError={() => {
+                        if (twitchStabilizedRef.current) return;
+                        tryNextTwitchEmbed();
+                      }}
+                      className='h-[54vh] min-h-[300px] w-full rounded-xl border border-white/10 bg-black sm:h-[64vh] sm:min-h-[420px]'
+                    />
+                    {(twitchCaptionTitle || twitchCaptionBody) && (
+                      <div className='pointer-events-none absolute inset-x-2 bottom-2 rounded-lg border border-white/20 bg-black/70 p-2 backdrop-blur-[1px]'>
+                        <p className='text-[10px] font-semibold uppercase tracking-[0.12em] text-[#C6FF2E]'>
+                          Legenda PT-BR
+                        </p>
+                        <p className='mt-1 line-clamp-2 text-xs font-semibold text-white'>
+                          {twitchCaptionTitle || item.title}
+                        </p>
+                        {twitchCaptionBody ? (
+                          <p className='mt-0.5 line-clamp-2 text-[11px] text-[#d1d5db]'>{twitchCaptionBody}</p>
+                        ) : null}
+                      </div>
+                    )}
+                  </div>
                 ) : (
                   <div className='rounded-xl border border-white/10 bg-white/[0.02] p-4'>
                     <p className='text-[11px] uppercase tracking-[0.12em] text-[#9ca3af]'>Twitch</p>
