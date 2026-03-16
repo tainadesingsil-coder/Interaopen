@@ -892,6 +892,36 @@ function buildLiveNowGeminiInput(liveContext) {
   ].join("\n");
 }
 
+function buildLiveNowFallbackAnalysis(liveContext) {
+  const live = liveContext?.stream || {};
+  const topClip = (liveContext?.clips || [])[0];
+  const topVod = (liveContext?.vods || [])[0];
+  const tags = Array.isArray(live?.tags) ? live.tags.filter(Boolean) : [];
+  const title = live?.title || `Live de @${liveContext?.channel || "canal"}`;
+  const category = live?.category || "categoria técnica";
+  const viewers =
+    typeof live?.viewers === "number" && Number.isFinite(live.viewers)
+      ? live.viewers
+      : "n/d";
+  const duration = live?.duration || "n/d";
+  const focusTag = tags[0] || "arquitetura";
+  return [
+    `Agora na live: "${title}" (${category}) com ${viewers} espectadores e ${duration} de duração.`,
+    `O criador está provavelmente construindo/explicando uma solução prática ligada a ${focusTag}.`,
+    `Conceito técnico principal da sessão: transformar problema em etapas pequenas e executáveis com validação contínua.`,
+    `Fique de olho no próximo bloco de implementação: como ele organiza decisão técnica + execução (isso acelera seu aprendizado).`,
+    `Pergunta para você: qual microprojeto de 1 hora você consegue replicar hoje com base no que está vendo?`,
+    topClip?.url
+      ? `Clip para revisar depois: ${topClip.title} ${topClip.url}`
+      : "",
+    topVod?.url
+      ? `VOD recente para contexto: ${topVod.title} ${topVod.url}`
+      : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
+
 async function generateLiveNowAnalysisWithGemini(context, liveContext) {
   const geminiApiKey = getGeminiApiKey(context);
   if (!geminiApiKey) {
@@ -935,7 +965,12 @@ async function generateLiveNowAnalysisWithGemini(context, liveContext) {
 
 async function analisarLiveAgoraForReportAssistant(context, channel) {
   const liveContext = await fetchLiveNowContextFromTwitch(context, channel);
-  const analysis = await generateLiveNowAnalysisWithGemini(context, liveContext);
+  let analysis = "";
+  try {
+    analysis = await generateLiveNowAnalysisWithGemini(context, liveContext);
+  } catch {
+    analysis = buildLiveNowFallbackAnalysis(liveContext);
+  }
   return {
     channel: liveContext.channel,
     live: liveContext.stream,
